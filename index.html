@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LF ERP</title>
+
+<style>
+body { margin:0; font-family:Arial; }
+
+.login {
+  display:flex; height:100vh;
+  justify-content:center; align-items:center;
+  background:#111827;
+}
+
+.login-box {
+  background:white;
+  padding:30px;
+  border-radius:10px;
+  width:300px;
+}
+
+.app { display:none; display:flex; }
+
+.sidebar {
+  width:220px;
+  min-height:100vh;
+  background:#111827;
+  color:white;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.sidebar button {
+  width:100%;
+  margin-bottom:10px;
+  padding:10px;
+  background:#1f2937;
+  border:none;
+  color:white;
+  cursor:pointer;
+}
+
+.main {
+  flex:1;
+  padding:20px;
+  background:#f3f4f6;
+  box-sizing:border-box;
+}
+
+.card {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+
+.cards {
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.card-box {
+  background:#1f2937;
+  color:white;
+  padding:20px;
+  border-radius:10px;
+  flex:1;
+  min-width:180px;
+}
+
+input, select {
+  padding:10px;
+  margin:5px 10px 10px 0;
+}
+
+button {
+  padding:10px;
+}
+
+#erro {
+  color:red;
+}
+
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width:100%;
+    min-height:auto;
+  }
+
+  .cards {
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="login" id="loginTela">
+  <div class="login-box">
+    <h2>LF ERP 🔐</h2>
+    <input id="usuario" placeholder="Usuário"><br>
+    <input id="senha" type="password" placeholder="Senha"><br>
+    <button onclick="logar()">Entrar</button>
+    <p id="erro"></p>
+  </div>
+</div>
+
+<div class="app" id="app">
+
+  <div class="sidebar">
+    <h2>LF ERP</h2>
+    <button onclick="mostrar('dashboard')">Dashboard</button>
+    <button onclick="mostrar('produtos')">Produtos</button>
+    <button onclick="mostrar('vendas')">Vendas</button>
+    <button onclick="mostrar('financeiro')">Financeiro</button>
+    <button onclick="logout()">Sair</button>
+  </div>
+
+  <div class="main">
+
+    <div class="card loja">
+      <h3>Selecionar Loja</h3>
+      <select id="empresa" onchange="atualizarTudo()">
+        <option value="variedades">Lucileide Variedades</option>
+        <option value="tech">LF Tech Solutions</option>
+      </select>
+    </div>
+
+    <div id="dashboard" class="card">
+      <div class="cards">
+        <div class="card-box">
+          <h3>Faturamento</h3>
+          <p id="faturamento"></p>
+        </div>
+        <div class="card-box">
+          <h3>Vendas</h3>
+          <p id="totalVendas"></p>
+        </div>
+        <div class="card-box">
+          <h3>Produtos</h3>
+          <p id="totalProdutos"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="produtos" class="card" style="display:none;">
+      <h3>Produtos</h3>
+      <input id="nome" placeholder="Nome">
+      <input id="preco" placeholder="Preço">
+      <input id="estoque" placeholder="Estoque">
+      <button onclick="cadastrar()">Cadastrar</button>
+      <ul id="lista"></ul>
+    </div>
+
+    <div id="vendas" class="card" style="display:none;">
+      <h3>Vendas</h3>
+      <select id="produtoVenda"></select>
+      <input id="quantidade" placeholder="Quantidade">
+      <button onclick="vender()">Vender</button>
+      <ul id="listaVendas"></ul>
+    </div>
+
+    <div id="financeiro" class="card" style="display:none;">
+      <h3>Financeiro</h3>
+      <p id="saldo"></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = "https://lf-erp-backend.onrender.com";
+let token = localStorage.getItem("token");
+
+async function logar() {
+  erro.innerText = "";
+
+  const res = await fetch(API + "/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      usuario: document.getElementById("usuario").value,
+      senha: document.getElementById("senha").value
+    })
+  });
+
+  if (res.status !== 200) {
+    erro.innerText = "Login inválido";
+    return;
+  }
+
+  const data = await res.json();
+  token = data.token;
+  localStorage.setItem("token", token);
+
+  document.getElementById("loginTela").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+
+  atualizarTudo();
+}
+
+if (token) {
+  document.getElementById("loginTela").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+  atualizarTudo();
+}
+
+function logout() {
+  localStorage.removeItem("token");
+  location.reload();
+}
+
+function mostrar(tela) {
+  document.querySelectorAll(".card").forEach(c => {
+    if (!c.classList.contains("loja")) c.style.display = "none";
+  });
+  document.getElementById(tela).style.display = "block";
+}
+
+async function atualizarTudo() {
+  await carregar();
+  await carregarProdutosVenda();
+  await carregarVendas();
+  await carregarFinanceiro();
+  await carregarDashboard();
+}
+
+async function cadastrar() {
+  await fetch(API + "/produtos", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({
+      empresa: document.getElementById("empresa").value,
+      nome: document.getElementById("nome").value,
+      preco: Number(document.getElementById("preco").value),
+      estoque: Number(document.getElementById("estoque").value)
+    })
+  });
+
+  document.getElementById("nome").value = "";
+  document.getElementById("preco").value = "";
+  document.getElementById("estoque").value = "";
+
+  atualizarTudo();
+}
+
+async function carregar() {
+  const res = await fetch(API + "/produtos/" + document.getElementById("empresa").value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+
+  document.getElementById("lista").innerHTML = data.map(p =>
+    `<li>${p.nome} (Estoque: ${p.estoque})</li>`
+  ).join("");
+}
+
+async function carregarProdutosVenda() {
+  const res = await fetch(API + "/produtos/" + document.getElementById("empresa").value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+
+  document.getElementById("produtoVenda").innerHTML = data.map(p =>
+    `<option value="${p.id}">${p.nome}</option>`
+  ).join("");
+}
+
+async function vender() {
+  await fetch(API + "/vendas", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({
+      empresa: document.getElementById("empresa").value,
+      produto_id: document.getElementById("produtoVenda").value,
+      quantidade: Number(document.getElementById("quantidade").value)
+    })
+  });
+
+  document.getElementById("quantidade").value = "";
+  atualizarTudo();
+}
+
+async function carregarVendas() {
+  const res = await fetch(API + "/vendas/" + document.getElementById("empresa").value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+
+  document.getElementById("listaVendas").innerHTML = data.map(v =>
+    `<li>${v.produto} - R$ ${v.total}</li>`
+  ).join("");
+}
+
+async function carregarFinanceiro() {
+  const res = await fetch(API + "/financeiro/" + document.getElementById("empresa").value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+  document.getElementById("saldo").innerText = "Saldo: R$ " + data.entrada;
+}
+
+async function carregarDashboard() {
+  const res = await fetch(API + "/dashboard/" + document.getElementById("empresa").value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+
+  document.getElementById("faturamento").innerText = "R$ " + data.faturamento;
+  document.getElementById("totalVendas").innerText = data.totalVendas;
+  document.getElementById("totalProdutos").innerText = data.totalProdutos;
+}
+</script>
+
+</body>
+</html>
