@@ -6,54 +6,72 @@
 <title>LF ERP</title>
 
 <style>
-body { margin:0; font-family:Arial; }
+body { margin:0; font-family:Arial, sans-serif; background:#f3f4f6; }
 
 .login {
-  display:flex; height:100vh;
-  justify-content:center; align-items:center;
+  display:flex;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
   background:#111827;
 }
 
 .login-box {
   background:white;
   padding:30px;
-  border-radius:10px;
-  width:300px;
+  border-radius:12px;
+  width:320px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
 
-.app { display:none; display:flex; }
+.app { display:none; }
+
+.layout {
+  display:flex;
+  min-height:100vh;
+}
 
 .sidebar {
-  width:220px;
-  min-height:100vh;
+  width:240px;
   background:#111827;
   color:white;
   padding:20px;
   box-sizing:border-box;
 }
 
+.sidebar h2 {
+  margin-top:0;
+  margin-bottom:20px;
+}
+
 .sidebar button {
   width:100%;
   margin-bottom:10px;
-  padding:10px;
+  padding:12px;
   background:#1f2937;
   border:none;
   color:white;
   cursor:pointer;
+  border-radius:8px;
+  text-align:left;
+}
+
+.sidebar button:hover {
+  background:#374151;
 }
 
 .main {
   flex:1;
   padding:20px;
-  background:#f3f4f6;
   box-sizing:border-box;
 }
 
 .card {
   background:white;
   padding:20px;
-  border-radius:10px;
+  border-radius:12px;
   margin-bottom:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
 }
 
 .cards {
@@ -66,113 +84,248 @@ body { margin:0; font-family:Arial; }
   background:#1f2937;
   color:white;
   padding:20px;
-  border-radius:10px;
-  flex:1;
+  border-radius:12px;
   min-width:180px;
+  flex:1;
 }
 
-input, select {
+input, select, button {
   padding:10px;
   margin:5px 10px 10px 0;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  box-sizing:border-box;
 }
 
 button {
-  padding:10px;
+  cursor:pointer;
+  border:none;
+  background:#111827;
+  color:white;
+}
+
+button:hover {
+  background:#374151;
+}
+
+.list-item {
+  border:1px solid #e5e7eb;
+  border-radius:8px;
+  padding:12px;
+  margin-bottom:10px;
+  background:#fafafa;
+}
+
+.section-title {
+  margin-top:0;
+}
+
+.grid-2 {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.grid-3 {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+}
+
+.grid-4 {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:12px;
+}
+
+.full {
+  width:100%;
+}
+
+.muted {
+  color:#6b7280;
 }
 
 #erro {
   color:red;
 }
 
-@media (max-width: 768px) {
-  .app {
-    flex-direction: column;
+@media (max-width: 900px) {
+  .layout {
+    flex-direction:column;
   }
 
   .sidebar {
     width:100%;
-    min-height:auto;
   }
 
-  .cards {
-    flex-direction:column;
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns:1fr;
   }
 }
 </style>
 </head>
-
 <body>
 
+<!-- LOGIN -->
 <div class="login" id="loginTela">
   <div class="login-box">
     <h2>LF ERP 🔐</h2>
-    <input id="usuario" placeholder="Usuário"><br>
-    <input id="senha" type="password" placeholder="Senha"><br>
-    <button onclick="logar()">Entrar</button>
+    <input id="usuario" class="full" placeholder="Usuário">
+    <input id="senha" class="full" type="password" placeholder="Senha">
+    <button class="full" onclick="logar()">Entrar</button>
     <p id="erro"></p>
   </div>
 </div>
 
+<!-- APP -->
 <div class="app" id="app">
-
-  <div class="sidebar">
-    <h2>LF ERP</h2>
-    <button onclick="mostrar('dashboard')">Dashboard</button>
-    <button onclick="mostrar('produtos')">Produtos</button>
-    <button onclick="mostrar('vendas')">Vendas</button>
-    <button onclick="mostrar('financeiro')">Financeiro</button>
-    <button onclick="logout()">Sair</button>
-  </div>
-
-  <div class="main">
-
-    <div class="card loja">
-      <h3>Selecionar Loja</h3>
-      <select id="empresa" onchange="atualizarTudo()">
-        <option value="variedades">Lucileide Variedades</option>
-        <option value="tech">LF Tech Solutions</option>
-      </select>
+  <div class="layout">
+    <div class="sidebar">
+      <h2>LF ERP</h2>
+      <button onclick="mostrar('dashboard')">Dashboard</button>
+      <button onclick="mostrar('produtos')">Produtos</button>
+      <button onclick="mostrar('clientes')">Clientes</button>
+      <button onclick="mostrar('vendas')">Vendas</button>
+      <button onclick="mostrar('financeiro')">Financeiro</button>
+      <button onclick="mostrar('relatorios')">Relatórios</button>
+      <button onclick="logout()">Sair</button>
     </div>
 
-    <div id="dashboard" class="card">
-      <div class="cards">
-        <div class="card-box">
-          <h3>Faturamento</h3>
-          <p id="faturamento"></p>
-        </div>
-        <div class="card-box">
-          <h3>Vendas</h3>
-          <p id="totalVendas"></p>
-        </div>
-        <div class="card-box">
-          <h3>Produtos</h3>
-          <p id="totalProdutos"></p>
+    <div class="main">
+
+      <div class="card loja">
+        <h3 class="section-title">Selecionar Loja</h3>
+        <select id="empresa" onchange="atualizarTudo()">
+          <option value="variedades">Lucileide Variedades</option>
+          <option value="tech">LF Tech Solutions</option>
+        </select>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="dashboard" class="card">
+        <h3 class="section-title">Dashboard</h3>
+        <div class="cards">
+          <div class="card-box">
+            <h4>Faturamento</h4>
+            <p id="faturamento">R$ 0</p>
+          </div>
+          <div class="card-box">
+            <h4>Vendas</h4>
+            <p id="totalVendas">0</p>
+          </div>
+          <div class="card-box">
+            <h4>Produtos</h4>
+            <p id="totalProdutos">0</p>
+          </div>
+          <div class="card-box">
+            <h4>Clientes</h4>
+            <p id="totalClientes">0</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="produtos" class="card" style="display:none;">
-      <h3>Produtos</h3>
-      <input id="nome" placeholder="Nome">
-      <input id="preco" placeholder="Preço">
-      <input id="estoque" placeholder="Estoque">
-      <button onclick="cadastrar()">Cadastrar</button>
-      <ul id="lista"></ul>
-    </div>
+      <!-- PRODUTOS -->
+      <div id="produtos" class="card" style="display:none;">
+        <h3 class="section-title">Produtos</h3>
 
-    <div id="vendas" class="card" style="display:none;">
-      <h3>Vendas</h3>
-      <select id="produtoVenda"></select>
-      <input id="quantidade" placeholder="Quantidade">
-      <button onclick="vender()">Vender</button>
-      <ul id="listaVendas"></ul>
-    </div>
+        <div class="grid-3">
+          <input id="nome" placeholder="Nome do produto">
+          <input id="preco" type="number" step="0.01" placeholder="Preço">
+          <input id="estoque" type="number" placeholder="Estoque">
+        </div>
 
-    <div id="financeiro" class="card" style="display:none;">
-      <h3>Financeiro</h3>
-      <p id="saldo"></p>
-    </div>
+        <button onclick="cadastrarProduto()">Cadastrar Produto</button>
 
+        <div id="listaProdutos"></div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div id="clientes" class="card" style="display:none;">
+        <h3 class="section-title">Clientes</h3>
+
+        <div class="grid-2">
+          <input id="clienteNome" placeholder="Nome do cliente">
+          <input id="clienteTelefone" placeholder="Telefone">
+          <input id="clienteEndereco" placeholder="Endereço">
+          <input id="clienteNascimento" type="date" placeholder="Data de nascimento">
+        </div>
+
+        <button onclick="cadastrarCliente()">Cadastrar Cliente</button>
+
+        <div id="listaClientes"></div>
+      </div>
+
+      <!-- VENDAS -->
+      <div id="vendas" class="card" style="display:none;">
+        <h3 class="section-title">Vendas</h3>
+
+        <div class="grid-4">
+          <select id="produtoVenda"></select>
+          <input id="quantidade" type="number" placeholder="Quantidade">
+          <select id="clienteVenda">
+            <option value="">Consumidor Final</option>
+          </select>
+          <select id="pagamento">
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Pix">Pix</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Promissória">Promissória</option>
+          </select>
+        </div>
+
+        <button onclick="vender()">Registrar Venda</button>
+
+        <hr>
+
+        <h4>Cadastro rápido de cliente na venda</h4>
+        <div class="grid-2">
+          <input id="clienteRapidoNome" placeholder="Nome do cliente">
+          <input id="clienteRapidoTelefone" placeholder="Telefone">
+          <input id="clienteRapidoEndereco" placeholder="Endereço">
+          <input id="clienteRapidoNascimento" type="date">
+        </div>
+
+        <button onclick="cadastrarClienteRapido()">Cadastrar Cliente Rápido</button>
+
+        <hr>
+
+        <div id="listaVendas"></div>
+      </div>
+
+      <!-- FINANCEIRO -->
+      <div id="financeiro" class="card" style="display:none;">
+        <h3 class="section-title">Financeiro</h3>
+        <p id="saldo">Saldo: R$ 0</p>
+      </div>
+
+      <!-- RELATÓRIOS -->
+      <div id="relatorios" class="card" style="display:none;">
+        <h3 class="section-title">Relatório Diário</h3>
+
+        <input id="dataRelatorio" type="date">
+        <button onclick="carregarRelatorioDiario()">Buscar Relatório</button>
+
+        <div class="cards">
+          <div class="card-box">
+            <h4>Data</h4>
+            <p id="relData">-</p>
+          </div>
+          <div class="card-box">
+            <h4>Quantidade de Vendas</h4>
+            <p id="relQuantidade">0</p>
+          </div>
+          <div class="card-box">
+            <h4>Faturamento do Dia</h4>
+            <p id="relFaturamento">R$ 0</p>
+          </div>
+        </div>
+
+        <div id="listaRelatorio"></div>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -180,6 +333,7 @@ button {
 const API = "https://lf-erp-backend.onrender.com";
 let token = localStorage.getItem("token");
 
+// ================= LOGIN =================
 async function logar() {
   erro.innerText = "";
 
@@ -202,61 +356,102 @@ async function logar() {
   localStorage.setItem("token", token);
 
   document.getElementById("loginTela").style.display = "none";
-  document.getElementById("app").style.display = "flex";
+  document.getElementById("app").style.display = "block";
 
+  definirDataHojeNoRelatorio();
   atualizarTudo();
 }
 
+// ================= AUTO LOGIN =================
 if (token) {
   document.getElementById("loginTela").style.display = "none";
-  document.getElementById("app").style.display = "flex";
+  document.getElementById("app").style.display = "block";
+  definirDataHojeNoRelatorio();
   atualizarTudo();
 }
 
+// ================= LOGOUT =================
 function logout() {
   localStorage.removeItem("token");
   location.reload();
 }
 
+// ================= NAVEGAÇÃO =================
 function mostrar(tela) {
-  document.querySelectorAll(".card").forEach(c => {
-    if (!c.classList.contains("loja")) c.style.display = "none";
+  document.querySelectorAll(".main > .card").forEach(c => {
+    if (!c.classList.contains("loja")) {
+      c.style.display = "none";
+    }
   });
+
   document.getElementById(tela).style.display = "block";
+
+  if (tela === "relatorios") {
+    carregarRelatorioDiario();
+  }
 }
 
+// ================= AUX =================
+function headersAuth() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": token
+  };
+}
+
+function definirDataHojeNoRelatorio() {
+  const hoje = new Date().toISOString().slice(0, 10);
+  document.getElementById("dataRelatorio").value = hoje;
+}
+
+// ================= ATUALIZAR TUDO =================
 async function atualizarTudo() {
-  await carregar();
+  await carregarDashboard();
+  await carregarProdutos();
+  await carregarClientes();
+  await carregarClientesVenda();
   await carregarProdutosVenda();
   await carregarVendas();
   await carregarFinanceiro();
-  await carregarDashboard();
 }
 
-async function cadastrar() {
+// ================= DASHBOARD =================
+async function carregarDashboard() {
+  const res = await fetch(API + "/dashboard/" + empresa.value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+  faturamento.innerText = "R$ " + Number(data.faturamento || 0).toFixed(2);
+  totalVendas.innerText = data.totalVendas || 0;
+  totalProdutos.innerText = data.totalProdutos || 0;
+  totalClientes.innerText = data.totalClientes || 0;
+}
+
+// ================= PRODUTOS =================
+async function cadastrarProduto() {
   await fetch(API + "/produtos", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    },
+    headers: headersAuth(),
     body: JSON.stringify({
-      empresa: document.getElementById("empresa").value,
-      nome: document.getElementById("nome").value,
-      preco: Number(document.getElementById("preco").value),
-      estoque: Number(document.getElementById("estoque").value)
+      empresa: empresa.value,
+      nome: nome.value,
+      preco: Number(preco.value),
+      estoque: Number(estoque.value)
     })
   });
 
-  document.getElementById("nome").value = "";
-  document.getElementById("preco").value = "";
-  document.getElementById("estoque").value = "";
+  nome.value = "";
+  preco.value = "";
+  estoque.value = "";
 
   atualizarTudo();
 }
 
-async function carregar() {
-  const res = await fetch(API + "/produtos/" + document.getElementById("empresa").value, {
+async function carregarProdutos() {
+  const res = await fetch(API + "/produtos/" + empresa.value, {
     headers: { "Authorization": token }
   });
 
@@ -264,13 +459,18 @@ async function carregar() {
 
   const data = await res.json();
 
-  document.getElementById("lista").innerHTML = data.map(p =>
-    `<li>${p.nome} (Estoque: ${p.estoque})</li>`
-  ).join("");
+  listaProdutos.innerHTML = data.map(p => `
+    <div class="list-item">
+      <strong>ID:</strong> ${p.id}<br>
+      <strong>Produto:</strong> ${p.nome}<br>
+      <strong>Preço:</strong> R$ ${Number(p.preco || 0).toFixed(2)}<br>
+      <strong>Estoque:</strong> ${p.estoque}
+    </div>
+  `).join("");
 }
 
 async function carregarProdutosVenda() {
-  const res = await fetch(API + "/produtos/" + document.getElementById("empresa").value, {
+  const res = await fetch(API + "/produtos/" + empresa.value, {
     headers: { "Authorization": token }
   });
 
@@ -278,31 +478,125 @@ async function carregarProdutosVenda() {
 
   const data = await res.json();
 
-  document.getElementById("produtoVenda").innerHTML = data.map(p =>
-    `<option value="${p.id}">${p.nome}</option>`
-  ).join("");
+  produtoVenda.innerHTML = data.map(p => `
+    <option value="${p.id}">
+      ID ${p.id} - ${p.nome} | Estoque: ${p.estoque} | R$ ${Number(p.preco || 0).toFixed(2)}
+    </option>
+  `).join("");
 }
 
-async function vender() {
-  await fetch(API + "/vendas", {
+// ================= CLIENTES =================
+async function cadastrarCliente() {
+  await fetch(API + "/clientes", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": token
-    },
+    headers: headersAuth(),
     body: JSON.stringify({
-      empresa: document.getElementById("empresa").value,
-      produto_id: document.getElementById("produtoVenda").value,
-      quantidade: Number(document.getElementById("quantidade").value)
+      empresa: empresa.value,
+      nome: clienteNome.value,
+      endereco: clienteEndereco.value,
+      telefone: clienteTelefone.value,
+      nascimento: clienteNascimento.value
     })
   });
 
-  document.getElementById("quantidade").value = "";
+  clienteNome.value = "";
+  clienteEndereco.value = "";
+  clienteTelefone.value = "";
+  clienteNascimento.value = "";
+
   atualizarTudo();
 }
 
+async function cadastrarClienteRapido() {
+  await fetch(API + "/clientes", {
+    method: "POST",
+    headers: headersAuth(),
+    body: JSON.stringify({
+      empresa: empresa.value,
+      nome: clienteRapidoNome.value,
+      endereco: clienteRapidoEndereco.value,
+      telefone: clienteRapidoTelefone.value,
+      nascimento: clienteRapidoNascimento.value
+    })
+  });
+
+  clienteRapidoNome.value = "";
+  clienteRapidoEndereco.value = "";
+  clienteRapidoTelefone.value = "";
+  clienteRapidoNascimento.value = "";
+
+  await carregarClientes();
+  await carregarClientesVenda();
+  await carregarDashboard();
+}
+
+async function carregarClientes() {
+  const res = await fetch(API + "/clientes/" + empresa.value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+
+  listaClientes.innerHTML = data.map(c => `
+    <div class="list-item">
+      <strong>ID:</strong> ${c.id}<br>
+      <strong>Nome:</strong> ${c.nome}<br>
+      <strong>Endereço:</strong> ${c.endereco || "-"}<br>
+      <strong>Telefone:</strong> ${c.telefone || "-"}<br>
+      <strong>Nascimento:</strong> ${c.nascimento || "-"}
+    </div>
+  `).join("");
+}
+
+async function carregarClientesVenda() {
+  const res = await fetch(API + "/clientes/" + empresa.value, {
+    headers: { "Authorization": token }
+  });
+
+  if (res.status !== 200) return;
+
+  const data = await res.json();
+
+  clienteVenda.innerHTML = `
+    <option value="">Consumidor Final</option>
+    ${data.map(c => `<option value="${c.id}">${c.nome}</option>`).join("")}
+  `;
+}
+
+// ================= VENDAS =================
+async function vender() {
+  const body = {
+    empresa: empresa.value,
+    produto_id: produtoVenda.value,
+    quantidade: Number(quantidade.value),
+    cliente_id: clienteVenda.value || null,
+    pagamento: pagamento.value
+  };
+
+  const res = await fetch(API + "/vendas", {
+    method: "POST",
+    headers: headersAuth(),
+    body: JSON.stringify(body)
+  });
+
+  if (res.status !== 200) {
+    const msg = await res.text();
+    alert(msg);
+    return;
+  }
+
+  quantidade.value = "";
+  clienteVenda.value = "";
+  pagamento.value = "Dinheiro";
+
+  atualizarTudo();
+  carregarRelatorioDiario();
+}
+
 async function carregarVendas() {
-  const res = await fetch(API + "/vendas/" + document.getElementById("empresa").value, {
+  const res = await fetch(API + "/vendas/" + empresa.value, {
     headers: { "Authorization": token }
   });
 
@@ -310,34 +604,57 @@ async function carregarVendas() {
 
   const data = await res.json();
 
-  document.getElementById("listaVendas").innerHTML = data.map(v =>
-    `<li>${v.produto} - R$ ${v.total}</li>`
-  ).join("");
+  listaVendas.innerHTML = data.map(v => `
+    <div class="list-item">
+      <strong>Venda #${v.id}</strong><br>
+      <strong>Cliente:</strong> ${v.cliente_nome || "Consumidor Final"}<br>
+      <strong>Produto:</strong> ${v.produto}<br>
+      <strong>Quantidade:</strong> ${v.quantidade}<br>
+      <strong>Total:</strong> R$ ${Number(v.total || 0).toFixed(2)}<br>
+      <strong>Pagamento:</strong> ${v.pagamento || "-"}<br>
+      <strong>Data:</strong> ${v.data_hora || "-"}
+    </div>
+  `).join("");
 }
 
+// ================= FINANCEIRO =================
 async function carregarFinanceiro() {
-  const res = await fetch(API + "/financeiro/" + document.getElementById("empresa").value, {
+  const res = await fetch(API + "/financeiro/" + empresa.value, {
     headers: { "Authorization": token }
   });
 
   if (res.status !== 200) return;
 
   const data = await res.json();
-  document.getElementById("saldo").innerText = "Saldo: R$ " + data.entrada;
+  saldo.innerText = "Saldo: R$ " + Number(data.entrada || 0).toFixed(2);
 }
 
-async function carregarDashboard() {
-  const res = await fetch(API + "/dashboard/" + document.getElementById("empresa").value, {
+// ================= RELATÓRIO DIÁRIO =================
+async function carregarRelatorioDiario() {
+  const data = document.getElementById("dataRelatorio").value || new Date().toISOString().slice(0, 10);
+
+  const res = await fetch(API + "/relatorios/diario/" + empresa.value + "?data=" + data, {
     headers: { "Authorization": token }
   });
 
   if (res.status !== 200) return;
 
-  const data = await res.json();
+  const rel = await res.json();
 
-  document.getElementById("faturamento").innerText = "R$ " + data.faturamento;
-  document.getElementById("totalVendas").innerText = data.totalVendas;
-  document.getElementById("totalProdutos").innerText = data.totalProdutos;
+  relData.innerText = rel.data || "-";
+  relQuantidade.innerText = rel.quantidadeVendas || 0;
+  relFaturamento.innerText = "R$ " + Number(rel.faturamento || 0).toFixed(2);
+
+  listaRelatorio.innerHTML = rel.vendas.map(v => `
+    <div class="list-item">
+      <strong>Cliente:</strong> ${v.cliente_nome || "Consumidor Final"}<br>
+      <strong>Produto:</strong> ${v.produto}<br>
+      <strong>Quantidade:</strong> ${v.quantidade}<br>
+      <strong>Pagamento:</strong> ${v.pagamento || "-"}<br>
+      <strong>Total:</strong> R$ ${Number(v.total || 0).toFixed(2)}<br>
+      <strong>Hora:</strong> ${v.data_hora || "-"}
+    </div>
+  `).join("");
 }
 </script>
 
