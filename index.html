@@ -121,6 +121,14 @@
       background: #374151;
     }
 
+    .btn-alt {
+      background: #2563eb;
+    }
+
+    .btn-alt:hover {
+      background: #1d4ed8;
+    }
+
     .list-item {
       border: 1px solid #e5e7eb;
       border-radius: 8px;
@@ -153,6 +161,10 @@
 
     .full {
       width: 100%;
+    }
+
+    .acoes {
+      margin-top: 10px;
     }
 
     #erro {
@@ -370,12 +382,8 @@
 
     function aplicarPermissaoUsuarios() {
       if (!usuarioAtual) return;
-
-      if (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente") {
-        btnUsuarios.style.display = "block";
-      } else {
-        btnUsuarios.style.display = "none";
-      }
+      btnUsuarios.style.display =
+        (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente") ? "block" : "none";
     }
 
     function ajustarTipoUsuario() {
@@ -388,6 +396,8 @@
         empresaUsuario.disabled = true;
         return;
       }
+
+      tipoUsuario.disabled = false;
 
       if (tipoUsuario.value === "admin") {
         empresaUsuario.disabled = true;
@@ -454,16 +464,12 @@
 
     function mostrar(tela) {
       document.querySelectorAll(".main > .card").forEach(c => {
-        if (!c.classList.contains("loja")) {
-          c.style.display = "none";
-        }
+        if (!c.classList.contains("loja")) c.style.display = "none";
       });
 
       document.getElementById(tela).style.display = "block";
 
-      if (tela === "usuarios") {
-        carregarUsuarios();
-      }
+      if (tela === "usuarios") carregarUsuarios();
     }
 
     function headersAuth() {
@@ -490,7 +496,6 @@
       const res = await fetch(API + "/dashboard/" + empresa.value, {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -523,11 +528,41 @@
       atualizarTudo();
     }
 
+    async function editarProduto(id, nomeAtual, precoAtual, estoqueAtual) {
+      const novoNome = prompt("Nome do produto:", nomeAtual);
+      if (novoNome === null) return;
+
+      const novoPreco = prompt("Preço:", precoAtual);
+      if (novoPreco === null) return;
+
+      const novoEstoque = prompt("Estoque:", estoqueAtual);
+      if (novoEstoque === null) return;
+
+      const res = await fetch(API + "/produtos/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          nome: novoNome,
+          preco: Number(novoPreco),
+          estoque: Number(novoEstoque)
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarProdutos();
+      carregarProdutosVenda();
+      carregarDashboard();
+    }
+
     async function carregarProdutos() {
       const res = await fetch(API + "/produtos/" + empresa.value, {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -538,6 +573,9 @@
           <strong>Produto:</strong> ${p.nome}<br>
           <strong>Preço:</strong> R$ ${Number(p.preco || 0).toFixed(2)}<br>
           <strong>Estoque:</strong> ${p.estoque}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarProduto('${p.id}', '${String(p.nome).replace(/'/g, "\\'")}', '${p.preco}', '${p.estoque}')">Editar</button>
+          </div>
         </div>
       `).join("");
     }
@@ -569,11 +607,49 @@
       atualizarTudo();
     }
 
+    async function editarCliente(id, nomeAtual, enderecoAtual, telefoneAtual, nascimentoAtual, cpfAtual) {
+      const novoNome = prompt("Nome do cliente:", nomeAtual);
+      if (novoNome === null) return;
+
+      const novoEndereco = prompt("Endereço:", enderecoAtual || "");
+      if (novoEndereco === null) return;
+
+      const novoTelefone = prompt("Telefone:", telefoneAtual || "");
+      if (novoTelefone === null) return;
+
+      const novoNascimento = prompt("Data de nascimento (YYYY-MM-DD):", nascimentoAtual || "");
+      if (novoNascimento === null) return;
+
+      const novoCpf = prompt("CPF:", cpfAtual || "");
+      if (novoCpf === null) return;
+
+      const res = await fetch(API + "/clientes/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          nome: novoNome,
+          endereco: novoEndereco,
+          telefone: novoTelefone,
+          nascimento: novoNascimento,
+          cpf: novoCpf
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarClientes();
+      carregarClientesVenda();
+      carregarDashboard();
+    }
+
     async function carregarClientes() {
       const res = await fetch(API + "/clientes/" + empresa.value, {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -586,6 +662,9 @@
           <strong>Endereço:</strong> ${c.endereco || "-"}<br>
           <strong>Telefone:</strong> ${c.telefone || "-"}<br>
           <strong>Nascimento:</strong> ${c.nascimento || "-"}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarCliente('${c.id}', '${String(c.nome).replace(/'/g, "\\'")}', '${String(c.endereco || '').replace(/'/g, "\\'")}', '${String(c.telefone || '').replace(/'/g, "\\'")}', '${String(c.nascimento || '').replace(/'/g, "\\'")}', '${String(c.cpf || '').replace(/'/g, "\\'")}')">Editar</button>
+          </div>
         </div>
       `).join("");
     }
@@ -594,7 +673,6 @@
       const res = await fetch(API + "/clientes/" + empresa.value, {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -609,7 +687,6 @@
       const res = await fetch(API + "/produtos/" + empresa.value, {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -645,11 +722,53 @@
       atualizarTudo();
     }
 
+    async function editarVenda(id, produtoAtual, quantidadeAtual, totalAtual, clienteAtual, pagamentoAtual, dataAtual) {
+      const novoProduto = prompt("Produto:", produtoAtual);
+      if (novoProduto === null) return;
+
+      const novaQuantidade = prompt("Quantidade:", quantidadeAtual);
+      if (novaQuantidade === null) return;
+
+      const novoTotal = prompt("Total:", totalAtual);
+      if (novoTotal === null) return;
+
+      const novoCliente = prompt("Cliente:", clienteAtual);
+      if (novoCliente === null) return;
+
+      const novoPagamento = prompt("Pagamento:", pagamentoAtual);
+      if (novoPagamento === null) return;
+
+      const novaData = prompt("Data (YYYY-MM-DD):", dataAtual);
+      if (novaData === null) return;
+
+      const res = await fetch(API + "/vendas/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          produto: novoProduto,
+          quantidade: Number(novaQuantidade),
+          total: Number(novoTotal),
+          cliente_nome: novoCliente,
+          pagamento: novoPagamento,
+          data: novaData
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarVendas();
+      carregarFinanceiro();
+      carregarDashboard();
+    }
+
     async function carregarVendas() {
       const res = await fetch(API + "/vendas/" + empresa.value, {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -663,6 +782,9 @@
           <strong>Total:</strong> R$ ${Number(v.total || 0).toFixed(2)}<br>
           <strong>Pagamento:</strong> ${v.pagamento || "-"}<br>
           <strong>Data:</strong> ${v.data || "-"}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarVenda('${v.id}', '${String(v.produto).replace(/'/g, "\\'")}', '${v.quantidade}', '${v.total}', '${String(v.cliente_nome || '').replace(/'/g, "\\'")}', '${String(v.pagamento || '').replace(/'/g, "\\'")}', '${String(v.data || '').replace(/'/g, "\\'")}')">Editar</button>
+          </div>
         </div>
       `).join("");
     }
@@ -671,7 +793,6 @@
       const res = await fetch(API + "/financeiro/" + empresa.value, {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -720,13 +841,68 @@
       carregarUsuarios();
     }
 
+    async function editarUsuario(id, usuarioEd, tipoEd, empresaEd, nomeEd, cpfEd, nascEd) {
+      let novoUsuario = prompt("Usuário:", usuarioEd);
+      if (novoUsuario === null) return;
+
+      let novoNome = prompt("Nome completo:", nomeEd || "");
+      if (novoNome === null) return;
+
+      let novoCpf = prompt("CPF:", cpfEd || "");
+      if (novoCpf === null) return;
+
+      let novoNascimento = prompt("Nascimento (YYYY-MM-DD):", nascEd || "");
+      if (novoNascimento === null) return;
+
+      let novoTipo = tipoEd;
+      let novaEmpresa = empresaEd;
+
+      if (usuarioAtual.tipo === "admin") {
+        const tipoPrompt = prompt("Perfil (admin, gerente, funcionario):", tipoEd);
+        if (tipoPrompt === null) return;
+        novoTipo = tipoPrompt;
+
+        const empresaPrompt = prompt("Loja (variedades, tech) ou vazio para admin:", empresaEd || "");
+        if (empresaPrompt === null) return;
+        novaEmpresa = empresaPrompt === "" ? null : empresaPrompt;
+      }
+
+      if (usuarioAtual.tipo === "gerente") {
+        novoTipo = "funcionario";
+        novaEmpresa = usuarioAtual.empresa;
+      }
+
+      const novaSenha = prompt("Nova senha (deixe em branco para manter):", "");
+      if (novaSenha === null) return;
+
+      const res = await fetch(API + "/usuarios/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          usuario: novoUsuario,
+          senha: novaSenha,
+          tipo: novoTipo,
+          empresa: novaEmpresa,
+          nome_completo: novoNome,
+          cpf: novoCpf,
+          nascimento: novoNascimento
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarUsuarios();
+    }
+
     async function carregarUsuarios() {
       if (!(usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) return;
 
       const res = await fetch(API + "/usuarios", {
         headers: { "Authorization": token }
       });
-
       if (res.status !== 200) return;
 
       const data = await res.json();
@@ -740,6 +916,9 @@
           <strong>Nascimento:</strong> ${u.nascimento || "-"}<br>
           <strong>Perfil:</strong> ${u.tipo}<br>
           <strong>Loja:</strong> ${u.empresa ? nomeLoja(u.empresa) : "Todas as lojas"}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarUsuario('${u.id}', '${String(u.usuario).replace(/'/g, "\\'")}', '${String(u.tipo).replace(/'/g, "\\'")}', '${String(u.empresa || '').replace(/'/g, "\\'")}', '${String(u.nome_completo || '').replace(/'/g, "\\'")}', '${String(u.cpf || '').replace(/'/g, "\\'")}', '${String(u.nascimento || '').replace(/'/g, "\\'")}')">Editar</button>
+          </div>
         </div>
       `).join("");
     }
