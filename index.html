@@ -43,11 +43,24 @@
       color: white;
       padding: 20px;
       box-sizing: border-box;
+      transition: width 0.25s ease;
+      position: relative;
+    }
+
+    .sidebar.minimizado {
+      width: 84px;
     }
 
     .sidebar h2 {
       margin-top: 0;
       margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .sidebar.minimizado h2,
+    .sidebar.minimizado .user-info,
+    .sidebar.minimizado .btn-text {
+      display: none;
     }
 
     .sidebar .user-info {
@@ -57,7 +70,19 @@
       line-height: 1.6;
     }
 
-    .sidebar button {
+    .toggle-btn {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #374151;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .sidebar button.menu-btn {
       width: 100%;
       margin-bottom: 10px;
       padding: 12px;
@@ -67,10 +92,26 @@
       cursor: pointer;
       border-radius: 8px;
       text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-start;
     }
 
-    .sidebar button:hover {
+    .sidebar.minimizado button.menu-btn {
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .sidebar button.menu-btn:hover,
+    .toggle-btn:hover {
       background: #374151;
+    }
+
+    .icon {
+      font-size: 18px;
+      min-width: 20px;
+      text-align: center;
     }
 
     .main {
@@ -102,6 +143,26 @@
       flex: 1;
     }
 
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .store-title {
+      margin: 0;
+      font-size: 28px;
+      color: #111827;
+    }
+
+    .store-subtitle {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
     input, select, button {
       padding: 10px;
       margin: 5px 10px 10px 0;
@@ -127,6 +188,14 @@
 
     .btn-alt:hover {
       background: #1d4ed8;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
     }
 
     .list-item {
@@ -165,6 +234,18 @@
 
     .acoes {
       margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 12px;
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 1px solid #e5e7eb;
     }
 
     #erro {
@@ -178,10 +259,55 @@
 
       .sidebar {
         width: 100%;
+        padding: 12px;
+      }
+
+      .sidebar.minimizado {
+        width: 100%;
+      }
+
+      .sidebar.minimizado h2,
+      .sidebar.minimizado .user-info {
+        display: none;
+      }
+
+      .sidebar.minimizado .btn-text {
+        display: none;
+      }
+
+      .sidebar.minimizado button.menu-btn {
+        width: auto;
+        min-width: 48px;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .sidebar .user-info {
+        width: 100%;
+      }
+
+      .toggle-btn {
+        width: auto;
+        margin: 0;
+      }
+
+      .sidebar button.menu-btn {
+        width: auto;
+        margin: 0;
+        justify-content: center;
       }
 
       .grid-2, .grid-3, .grid-4 {
         grid-template-columns: 1fr;
+      }
+
+      .store-title {
+        font-size: 22px;
       }
     }
   </style>
@@ -190,7 +316,7 @@
 
   <div class="login" id="loginTela">
     <div class="login-box">
-      <h2>LF ERP 🔐</h2>
+      <h2>Entrar</h2>
       <input id="usuario" class="full" placeholder="Usuário">
       <input id="senha" class="full" type="password" placeholder="Senha">
       <button class="full" onclick="logar()">Entrar</button>
@@ -200,8 +326,11 @@
 
   <div class="app" id="app">
     <div class="layout">
-      <div class="sidebar">
-        <h2>LF ERP</h2>
+      <div class="sidebar" id="sidebar">
+        <button class="toggle-btn" onclick="alternarMenu()">☰</button>
+
+        <h2 id="sidebarTitle">Menu</h2>
+
         <div class="user-info">
           <div><strong>Usuário:</strong> <span id="usuarioLogado">-</span></div>
           <div><strong>Nome:</strong> <span id="nomeLogado">-</span></div>
@@ -209,20 +338,26 @@
           <div><strong>Loja:</strong> <span id="lojaLogada">-</span></div>
         </div>
 
-        <button onclick="mostrar('dashboard')">Dashboard</button>
-        <button onclick="mostrar('produtos')">Produtos</button>
-        <button onclick="mostrar('clientes')">Clientes</button>
-        <button onclick="mostrar('vendas')">Vendas</button>
-        <button onclick="mostrar('financeiro')">Financeiro</button>
-        <button id="btnUsuarios" onclick="mostrar('usuarios')" style="display:none;">Usuários</button>
-        <button onclick="logout()">Sair</button>
+        <button class="menu-btn" onclick="mostrar('dashboard')"><span class="icon">🏠</span><span class="btn-text">Dashboard</span></button>
+        <button class="menu-btn" onclick="mostrar('produtos')"><span class="icon">📦</span><span class="btn-text">Produtos</span></button>
+        <button class="menu-btn" onclick="mostrar('clientes')"><span class="icon">👥</span><span class="btn-text">Clientes</span></button>
+        <button class="menu-btn" onclick="mostrar('vendas')"><span class="icon">🛒</span><span class="btn-text">Vendas</span></button>
+        <button class="menu-btn" onclick="mostrar('financeiro')"><span class="icon">💰</span><span class="btn-text">Financeiro</span></button>
+        <button id="btnUsuarios" class="menu-btn" onclick="mostrar('usuarios')" style="display:none;"><span class="icon">🔐</span><span class="btn-text">Usuários</span></button>
+        <button class="menu-btn" onclick="logout()"><span class="icon">🚪</span><span class="btn-text">Sair</span></button>
       </div>
 
       <div class="main">
+        <div class="page-header">
+          <div>
+            <h1 class="store-title" id="tituloLoja">Loja</h1>
+            <div class="store-subtitle">Painel principal da loja selecionada</div>
+          </div>
+        </div>
 
         <div class="card loja">
           <h3 class="section-title">Selecionar Loja</h3>
-          <select id="empresa" onchange="atualizarTudo()">
+          <select id="empresa" onchange="atualizarTudo(); atualizarTituloLoja();">
             <option value="variedades">Lucileide Variedades</option>
             <option value="tech">LF Tech Solutions</option>
           </select>
@@ -260,7 +395,6 @@
           </div>
 
           <button onclick="cadastrarProduto()">Cadastrar Produto</button>
-
           <div id="listaProdutos"></div>
         </div>
 
@@ -276,7 +410,6 @@
           </div>
 
           <button onclick="cadastrarCliente()">Cadastrar Cliente</button>
-
           <div id="listaClientes"></div>
         </div>
 
@@ -299,7 +432,6 @@
           </div>
 
           <button onclick="vender()">Registrar Venda</button>
-
           <div id="listaVendas"></div>
         </div>
 
@@ -332,10 +464,10 @@
           </div>
 
           <button onclick="cadastrarUsuario()">Cadastrar Usuário</button>
-
           <div id="listaUsuarios"></div>
         </div>
 
+        <div class="footer-brand">LF ERP</div>
       </div>
     </div>
   </div>
@@ -344,11 +476,12 @@
     const API = "https://lf-erp-backend.onrender.com";
     let token = localStorage.getItem("token");
     let usuarioAtual = JSON.parse(localStorage.getItem("usuarioAtual") || "null");
+    let menuMinimizado = localStorage.getItem("menuMinimizado") === "true";
 
     function nomeLoja(valor) {
       if (valor === "variedades") return "Lucileide Variedades";
       if (valor === "tech") return "LF Tech Solutions";
-      return "Todas";
+      return "Loja";
     }
 
     function perfilFormatado(tipo) {
@@ -358,9 +491,12 @@
       return tipo || "-";
     }
 
+    function atualizarTituloLoja() {
+      document.getElementById("tituloLoja").innerText = nomeLoja(empresa.value);
+    }
+
     function atualizarPainelUsuario() {
       if (!usuarioAtual) return;
-
       usuarioLogado.innerText = usuarioAtual.usuario || "-";
       nomeLogado.innerText = usuarioAtual.nome_completo || "-";
       perfilLogado.innerText = perfilFormatado(usuarioAtual.tipo);
@@ -371,7 +507,6 @@
 
     function aplicarPermissaoLoja() {
       if (!usuarioAtual) return;
-
       if (usuarioAtual.tipo === "admin") {
         empresa.disabled = false;
       } else {
@@ -383,7 +518,7 @@
     function aplicarPermissaoUsuarios() {
       if (!usuarioAtual) return;
       btnUsuarios.style.display =
-        (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente") ? "block" : "none";
+        (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente") ? "flex" : "none";
     }
 
     function ajustarTipoUsuario() {
@@ -403,6 +538,20 @@
         empresaUsuario.disabled = true;
       } else {
         empresaUsuario.disabled = false;
+      }
+    }
+
+    function alternarMenu() {
+      menuMinimizado = !menuMinimizado;
+      localStorage.setItem("menuMinimizado", String(menuMinimizado));
+      aplicarEstadoMenu();
+    }
+
+    function aplicarEstadoMenu() {
+      if (menuMinimizado) {
+        sidebar.classList.add("minimizado");
+      } else {
+        sidebar.classList.remove("minimizado");
       }
     }
 
@@ -443,6 +592,8 @@
       aplicarPermissaoLoja();
       aplicarPermissaoUsuarios();
       ajustarTipoUsuario();
+      aplicarEstadoMenu();
+      atualizarTituloLoja();
       atualizarTudo();
     }
 
@@ -453,6 +604,8 @@
       aplicarPermissaoLoja();
       aplicarPermissaoUsuarios();
       ajustarTipoUsuario();
+      aplicarEstadoMenu();
+      atualizarTituloLoja();
       atualizarTudo();
     }
 
@@ -559,6 +712,24 @@
       carregarDashboard();
     }
 
+    async function excluirProduto(id) {
+      if (!confirm("Deseja excluir este produto?")) return;
+
+      const res = await fetch(API + "/produtos/" + id + "?empresa=" + empresa.value, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarProdutos();
+      carregarProdutosVenda();
+      carregarDashboard();
+    }
+
     async function carregarProdutos() {
       const res = await fetch(API + "/produtos/" + empresa.value, {
         headers: { "Authorization": token }
@@ -575,6 +746,7 @@
           <strong>Estoque:</strong> ${p.estoque}
           <div class="acoes">
             <button class="btn-alt" onclick="editarProduto('${p.id}', '${String(p.nome).replace(/'/g, "\\'")}', '${p.preco}', '${p.estoque}')">Editar</button>
+            <button class="btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
           </div>
         </div>
       `).join("");
@@ -646,6 +818,24 @@
       carregarDashboard();
     }
 
+    async function excluirCliente(id) {
+      if (!confirm("Deseja excluir este cliente?")) return;
+
+      const res = await fetch(API + "/clientes/" + id + "?empresa=" + empresa.value, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarClientes();
+      carregarClientesVenda();
+      carregarDashboard();
+    }
+
     async function carregarClientes() {
       const res = await fetch(API + "/clientes/" + empresa.value, {
         headers: { "Authorization": token }
@@ -664,6 +854,7 @@
           <strong>Nascimento:</strong> ${c.nascimento || "-"}
           <div class="acoes">
             <button class="btn-alt" onclick="editarCliente('${c.id}', '${String(c.nome).replace(/'/g, "\\'")}', '${String(c.endereco || '').replace(/'/g, "\\'")}', '${String(c.telefone || '').replace(/'/g, "\\'")}', '${String(c.nascimento || '').replace(/'/g, "\\'")}', '${String(c.cpf || '').replace(/'/g, "\\'")}')">Editar</button>
+            <button class="btn-danger" onclick="excluirCliente('${c.id}')">Excluir</button>
           </div>
         </div>
       `).join("");
@@ -765,6 +956,24 @@
       carregarDashboard();
     }
 
+    async function excluirVenda(id) {
+      if (!confirm("Deseja excluir esta venda?")) return;
+
+      const res = await fetch(API + "/vendas/" + id + "?empresa=" + empresa.value, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarVendas();
+      carregarFinanceiro();
+      carregarDashboard();
+    }
+
     async function carregarVendas() {
       const res = await fetch(API + "/vendas/" + empresa.value, {
         headers: { "Authorization": token }
@@ -784,6 +993,7 @@
           <strong>Data:</strong> ${v.data || "-"}
           <div class="acoes">
             <button class="btn-alt" onclick="editarVenda('${v.id}', '${String(v.produto).replace(/'/g, "\\'")}', '${v.quantidade}', '${v.total}', '${String(v.cliente_nome || '').replace(/'/g, "\\'")}', '${String(v.pagamento || '').replace(/'/g, "\\'")}', '${String(v.data || '').replace(/'/g, "\\'")}')">Editar</button>
+            <button class="btn-danger" onclick="excluirVenda('${v.id}')">Excluir</button>
           </div>
         </div>
       `).join("");
@@ -897,6 +1107,27 @@
       carregarUsuarios();
     }
 
+    async function excluirUsuario(id) {
+      if (usuarioAtual.tipo !== "admin") {
+        alert("Apenas admin pode excluir usuário");
+        return;
+      }
+
+      if (!confirm("Deseja excluir este usuário?")) return;
+
+      const res = await fetch(API + "/usuarios/" + id, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarUsuarios();
+    }
+
     async function carregarUsuarios() {
       if (!(usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) return;
 
@@ -918,6 +1149,7 @@
           <strong>Loja:</strong> ${u.empresa ? nomeLoja(u.empresa) : "Todas as lojas"}
           <div class="acoes">
             <button class="btn-alt" onclick="editarUsuario('${u.id}', '${String(u.usuario).replace(/'/g, "\\'")}', '${String(u.tipo).replace(/'/g, "\\'")}', '${String(u.empresa || '').replace(/'/g, "\\'")}', '${String(u.nome_completo || '').replace(/'/g, "\\'")}', '${String(u.cpf || '').replace(/'/g, "\\'")}', '${String(u.nascimento || '').replace(/'/g, "\\'")}')">Editar</button>
+            ${usuarioAtual.tipo === "admin" ? `<button class="btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>` : ""}
           </div>
         </div>
       `).join("");
