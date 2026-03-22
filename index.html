@@ -38,7 +38,7 @@
     }
 
     .sidebar {
-      width: 240px;
+      width: 260px;
       background: #111827;
       color: white;
       padding: 20px;
@@ -54,7 +54,7 @@
       font-size: 14px;
       color: #d1d5db;
       margin-bottom: 20px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .sidebar button {
@@ -155,10 +155,6 @@
       width: 100%;
     }
 
-    .muted {
-      color: #6b7280;
-    }
-
     #erro {
       color: red;
     }
@@ -180,7 +176,6 @@
 </head>
 <body>
 
-  <!-- LOGIN -->
   <div class="login" id="loginTela">
     <div class="login-box">
       <h2>LF ERP 🔐</h2>
@@ -191,13 +186,13 @@
     </div>
   </div>
 
-  <!-- APP -->
   <div class="app" id="app">
     <div class="layout">
       <div class="sidebar">
         <h2>LF ERP</h2>
         <div class="user-info">
           <div><strong>Usuário:</strong> <span id="usuarioLogado">-</span></div>
+          <div><strong>Nome:</strong> <span id="nomeLogado">-</span></div>
           <div><strong>Perfil:</strong> <span id="perfilLogado">-</span></div>
           <div><strong>Loja:</strong> <span id="lojaLogada">-</span></div>
         </div>
@@ -207,6 +202,7 @@
         <button onclick="mostrar('clientes')">Clientes</button>
         <button onclick="mostrar('vendas')">Vendas</button>
         <button onclick="mostrar('financeiro')">Financeiro</button>
+        <button id="btnUsuarios" onclick="mostrar('usuarios')" style="display:none;">Usuários</button>
         <button onclick="logout()">Sair</button>
       </div>
 
@@ -220,7 +216,6 @@
           </select>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="dashboard" class="card">
           <h3 class="section-title">Dashboard</h3>
           <div class="cards">
@@ -236,10 +231,13 @@
               <h4>Produtos</h4>
               <p id="totalProdutos">0</p>
             </div>
+            <div class="card-box">
+              <h4>Clientes</h4>
+              <p id="totalClientes">0</p>
+            </div>
           </div>
         </div>
 
-        <!-- PRODUTOS -->
         <div id="produtos" class="card" style="display:none;">
           <h3 class="section-title">Produtos</h3>
 
@@ -254,13 +252,13 @@
           <div id="listaProdutos"></div>
         </div>
 
-        <!-- CLIENTES -->
         <div id="clientes" class="card" style="display:none;">
           <h3 class="section-title">Clientes</h3>
 
-          <div class="grid-2">
+          <div class="grid-3">
             <input id="clienteNome" placeholder="Nome do cliente">
             <input id="clienteTelefone" placeholder="Telefone">
+            <input id="clienteCpf" placeholder="CPF">
             <input id="clienteEndereco" placeholder="Endereço">
             <input id="clienteNascimento" type="date">
           </div>
@@ -270,7 +268,6 @@
           <div id="listaClientes"></div>
         </div>
 
-        <!-- VENDAS -->
         <div id="vendas" class="card" style="display:none;">
           <h3 class="section-title">Vendas</h3>
 
@@ -294,10 +291,37 @@
           <div id="listaVendas"></div>
         </div>
 
-        <!-- FINANCEIRO -->
         <div id="financeiro" class="card" style="display:none;">
           <h3 class="section-title">Financeiro</h3>
           <p id="saldo">Saldo: R$ 0,00</p>
+        </div>
+
+        <div id="usuarios" class="card" style="display:none;">
+          <h3 class="section-title">Usuários</h3>
+
+          <div class="grid-4">
+            <input id="novoUsuario" placeholder="Usuário">
+            <input id="novaSenha" type="password" placeholder="Senha">
+            <select id="tipoUsuario" onchange="ajustarTipoUsuario()">
+              <option value="funcionario">Funcionário</option>
+              <option value="gerente">Gerente</option>
+              <option value="admin">Admin</option>
+            </select>
+            <select id="empresaUsuario">
+              <option value="variedades">Lucileide Variedades</option>
+              <option value="tech">LF Tech Solutions</option>
+            </select>
+          </div>
+
+          <div class="grid-3">
+            <input id="nomeCompletoUsuario" placeholder="Nome completo">
+            <input id="cpfUsuario" placeholder="CPF">
+            <input id="nascimentoUsuario" type="date">
+          </div>
+
+          <button onclick="cadastrarUsuario()">Cadastrar Usuário</button>
+
+          <div id="listaUsuarios"></div>
         </div>
 
       </div>
@@ -325,22 +349,50 @@
     function atualizarPainelUsuario() {
       if (!usuarioAtual) return;
 
-      document.getElementById("usuarioLogado").innerText = usuarioAtual.usuario || "-";
-      document.getElementById("perfilLogado").innerText = perfilFormatado(usuarioAtual.tipo);
-      document.getElementById("lojaLogada").innerText =
-        usuarioAtual.tipo === "admin" ? "Todas as lojas" : nomeLoja(usuarioAtual.empresa);
+      usuarioLogado.innerText = usuarioAtual.usuario || "-";
+      nomeLogado.innerText = usuarioAtual.nome_completo || "-";
+      perfilLogado.innerText = perfilFormatado(usuarioAtual.tipo);
+      lojaLogada.innerText = usuarioAtual.tipo === "admin"
+        ? "Todas as lojas"
+        : nomeLoja(usuarioAtual.empresa);
     }
 
     function aplicarPermissaoLoja() {
-      const selectEmpresa = document.getElementById("empresa");
-
       if (!usuarioAtual) return;
 
       if (usuarioAtual.tipo === "admin") {
-        selectEmpresa.disabled = false;
+        empresa.disabled = false;
       } else {
-        selectEmpresa.value = usuarioAtual.empresa;
-        selectEmpresa.disabled = true;
+        empresa.value = usuarioAtual.empresa;
+        empresa.disabled = true;
+      }
+    }
+
+    function aplicarPermissaoUsuarios() {
+      if (!usuarioAtual) return;
+
+      if (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente") {
+        btnUsuarios.style.display = "block";
+      } else {
+        btnUsuarios.style.display = "none";
+      }
+    }
+
+    function ajustarTipoUsuario() {
+      if (!usuarioAtual) return;
+
+      if (usuarioAtual.tipo === "gerente") {
+        tipoUsuario.value = "funcionario";
+        tipoUsuario.disabled = true;
+        empresaUsuario.value = usuarioAtual.empresa;
+        empresaUsuario.disabled = true;
+        return;
+      }
+
+      if (tipoUsuario.value === "admin") {
+        empresaUsuario.disabled = true;
+      } else {
+        empresaUsuario.disabled = false;
       }
     }
 
@@ -351,8 +403,8 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          usuario: document.getElementById("usuario").value,
-          senha: document.getElementById("senha").value
+          usuario: usuario.value,
+          senha: senha.value
         })
       });
 
@@ -365,27 +417,32 @@
 
       token = data.token;
       usuarioAtual = {
-        usuario: document.getElementById("usuario").value,
+        usuario: data.usuario,
         tipo: data.tipo,
-        empresa: data.empresa || null
+        empresa: data.empresa || null,
+        nome_completo: data.nome_completo || ""
       };
 
       localStorage.setItem("token", token);
       localStorage.setItem("usuarioAtual", JSON.stringify(usuarioAtual));
 
-      document.getElementById("loginTela").style.display = "none";
-      document.getElementById("app").style.display = "block";
+      loginTela.style.display = "none";
+      app.style.display = "block";
 
       atualizarPainelUsuario();
       aplicarPermissaoLoja();
+      aplicarPermissaoUsuarios();
+      ajustarTipoUsuario();
       atualizarTudo();
     }
 
     if (token && usuarioAtual) {
-      document.getElementById("loginTela").style.display = "none";
-      document.getElementById("app").style.display = "block";
+      loginTela.style.display = "none";
+      app.style.display = "block";
       atualizarPainelUsuario();
       aplicarPermissaoLoja();
+      aplicarPermissaoUsuarios();
+      ajustarTipoUsuario();
       atualizarTudo();
     }
 
@@ -403,6 +460,10 @@
       });
 
       document.getElementById(tela).style.display = "block";
+
+      if (tela === "usuarios") {
+        carregarUsuarios();
+      }
     }
 
     function headersAuth() {
@@ -420,6 +481,9 @@
       await carregarProdutosVenda();
       await carregarVendas();
       await carregarFinanceiro();
+      if (usuarioAtual && (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) {
+        await carregarUsuarios();
+      }
     }
 
     async function carregarDashboard() {
@@ -433,6 +497,7 @@
       faturamento.innerText = "R$ " + Number(data.faturamento || 0).toFixed(2);
       totalVendas.innerText = data.totalVendas || 0;
       totalProdutos.innerText = data.totalProdutos || 0;
+      totalClientes.innerText = data.totalClientes || 0;
     }
 
     async function cadastrarProduto() {
@@ -455,7 +520,6 @@
       nome.value = "";
       preco.value = "";
       estoque.value = "";
-
       atualizarTudo();
     }
 
@@ -487,7 +551,8 @@
           nome: clienteNome.value,
           endereco: clienteEndereco.value,
           telefone: clienteTelefone.value,
-          nascimento: clienteNascimento.value
+          nascimento: clienteNascimento.value,
+          cpf: clienteCpf.value
         })
       });
 
@@ -500,7 +565,7 @@
       clienteEndereco.value = "";
       clienteTelefone.value = "";
       clienteNascimento.value = "";
-
+      clienteCpf.value = "";
       atualizarTudo();
     }
 
@@ -517,6 +582,7 @@
         <div class="list-item">
           <strong>ID:</strong> ${c.id}<br>
           <strong>Nome:</strong> ${c.nome}<br>
+          <strong>CPF:</strong> ${c.cpf || "-"}<br>
           <strong>Endereço:</strong> ${c.endereco || "-"}<br>
           <strong>Telefone:</strong> ${c.telefone || "-"}<br>
           <strong>Nascimento:</strong> ${c.nascimento || "-"}
@@ -576,7 +642,6 @@
       quantidade.value = "";
       clienteVenda.value = "";
       pagamento.value = "Dinheiro";
-
       atualizarTudo();
     }
 
@@ -611,6 +676,72 @@
 
       const data = await res.json();
       saldo.innerText = "Saldo: R$ " + Number(data.entrada || 0).toFixed(2);
+    }
+
+    async function cadastrarUsuario() {
+      let tipoFinal = tipoUsuario.value;
+      let empresaFinal = empresaUsuario.value;
+
+      if (usuarioAtual.tipo === "gerente") {
+        tipoFinal = "funcionario";
+        empresaFinal = usuarioAtual.empresa;
+      }
+
+      const res = await fetch(API + "/usuarios", {
+        method: "POST",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          usuario: novoUsuario.value,
+          senha: novaSenha.value,
+          tipo: tipoFinal,
+          empresa: tipoFinal === "admin" ? null : empresaFinal,
+          nome_completo: nomeCompletoUsuario.value,
+          cpf: cpfUsuario.value,
+          nascimento: nascimentoUsuario.value
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      novoUsuario.value = "";
+      novaSenha.value = "";
+      nomeCompletoUsuario.value = "";
+      cpfUsuario.value = "";
+      nascimentoUsuario.value = "";
+      if (usuarioAtual.tipo === "admin") {
+        tipoUsuario.value = "funcionario";
+        empresaUsuario.value = "variedades";
+      }
+
+      ajustarTipoUsuario();
+      carregarUsuarios();
+    }
+
+    async function carregarUsuarios() {
+      if (!(usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) return;
+
+      const res = await fetch(API + "/usuarios", {
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+
+      listaUsuarios.innerHTML = data.map(u => `
+        <div class="list-item">
+          <strong>ID:</strong> ${u.id}<br>
+          <strong>Nome:</strong> ${u.nome_completo || "-"}<br>
+          <strong>Usuário:</strong> ${u.usuario}<br>
+          <strong>CPF:</strong> ${u.cpf || "-"}<br>
+          <strong>Nascimento:</strong> ${u.nascimento || "-"}<br>
+          <strong>Perfil:</strong> ${u.tipo}<br>
+          <strong>Loja:</strong> ${u.empresa ? nomeLoja(u.empresa) : "Todas as lojas"}
+        </div>
+      `).join("");
     }
   </script>
 
