@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LF ERP</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { margin:0; font-family: Arial, sans-serif; background:#f3f4f6; }
     .login { display:flex; height:100vh; justify-content:center; align-items:center; background:#111827; }
@@ -63,6 +64,9 @@
     .dre-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
     .dre-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
     .dre-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
+    .filtros-grid { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:12px; align-items:end; }
+    .chart-card { margin-top:16px; }
+    .chart-card canvas { width:100% !important; max-height:320px; }
     @media (max-width:900px) {
       .layout { flex-direction:column; }
       .sidebar { width:100%; padding:12px; }
@@ -75,6 +79,7 @@
       .sidebar button.menu-btn { justify-content:center; }
       .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
       .store-title { font-size:22px; }
+      .filtros-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -119,11 +124,28 @@
         </div>
 
         <div class="card loja">
-          <h3 class="section-title">Selecionar Loja</h3>
-          <select id="empresa" onchange="atualizarTudo(); atualizarTituloLoja();">
-            <option value="variedades">Lucileide Variedades</option>
-            <option value="tech">LF Tech Solutions</option>
-          </select>
+          <h3 class="section-title">Selecionar Loja e Período</h3>
+          <div class="filtros-grid">
+            <div>
+              <label for="empresa">Loja</label>
+              <select id="empresa" class="full" onchange="atualizarTudo(); atualizarTituloLoja();">
+                <option value="variedades">Lucileide Variedades</option>
+                <option value="tech">LF Tech Solutions</option>
+              </select>
+            </div>
+            <div>
+              <label for="filtroInicio">Data inicial</label>
+              <input id="filtroInicio" class="full" type="date">
+            </div>
+            <div>
+              <label for="filtroFim">Data final</label>
+              <input id="filtroFim" class="full" type="date">
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn-alt full" onclick="aplicarFiltrosGerais()">Aplicar filtro</button>
+            </div>
+          </div>
         </div>
 
         <div id="dashboard" class="card">
@@ -136,6 +158,17 @@
             <div class="card-box finance"><h4>Custos Pagos</h4><p id="dashboardCustos">R$ 0,00</p></div>
             <div class="card-box warn"><h4>Despesas Pagas</h4><p id="dashboardDespesas">R$ 0,00</p></div>
             <div class="card-box info"><h4>Investimentos</h4><p id="dashboardInvestimentos">R$ 0,00</p></div>
+          </div>
+
+          <div class="grid-2 chart-card">
+            <div class="card">
+              <h3 class="section-title">Faturamento por dia</h3>
+              <canvas id="graficoFaturamento"></canvas>
+            </div>
+            <div class="card">
+              <h3 class="section-title">Receitas x Saídas</h3>
+              <canvas id="graficoResumoFinanceiro"></canvas>
+            </div>
           </div>
         </div>
 
@@ -339,6 +372,28 @@
       return new Date().toISOString().slice(0, 10);
     }
 
+    function primeiroDiaMesAtual() {
+      const agora = new Date();
+      return new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString().slice(0, 10);
+    }
+
+    function getPeriodoQueryString() {
+      const params = new URLSearchParams();
+      if (filtroInicio.value) params.append("inicio", filtroInicio.value);
+      if (filtroFim.value) params.append("fim", filtroFim.value);
+      return params.toString();
+    }
+
+    function aplicarFiltrosGerais() {
+      if (filtroInicio.value && filtroFim.value && filtroInicio.value > filtroFim.value) {
+        alert("A data inicial não pode ser maior que a data final.");
+        return;
+      }
+      dreInicio.value = filtroInicio.value || primeiroDiaMesAtual();
+      dreFim.value = filtroFim.value || dataHoje();
+      atualizarTudo();
+    }
+
     function atualizarTituloLoja() {
       tituloLoja.innerText = nomeLoja(empresa.value);
     }
@@ -400,6 +455,15 @@
       const res = await fetch(url, options);
       if (res.status === 204) return null;
       const texto = await res.text();
+
+      if (res.status === 403 && (texto === "Token inválido" || texto === "Sem acesso")) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuarioAtual");
+        alert("Sua sessão expirou. Faça login novamente.");
+        location.reload();
+        return;
+      }
+
       if (!res.ok) throw new Error(texto || "Erro na requisição");
       try { return texto ? JSON.parse(texto) : null; } catch { return texto; }
     }
@@ -438,11 +502,10 @@
       ajustarTipoUsuario();
       aplicarEstadoMenu();
       atualizarTituloLoja();
-      if (!dreInicio.value) {
-        const dt = new Date();
-        dreInicio.value = new Date(dt.getFullYear(), dt.getMonth(), 1).toISOString().slice(0,10);
-      }
-      if (!dreFim.value) dreFim.value = dataHoje();
+      if (!filtroInicio.value) filtroInicio.value = primeiroDiaMesAtual();
+      if (!filtroFim.value) filtroFim.value = dataHoje();
+      if (!dreInicio.value) dreInicio.value = filtroInicio.value;
+      if (!dreFim.value) dreFim.value = filtroFim.value;
       if (!invData.value) invData.value = dataHoje();
       atualizarTudo();
     }
@@ -483,6 +546,7 @@
       await carregarClientesVenda();
       await carregarProdutosVenda();
       await carregarVendas();
+      await carregarGraficosDashboard();
       if (usuarioAtual && (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) {
         await carregarFinanceiroCompleto();
         await carregarUsuarios();
@@ -491,7 +555,8 @@
 
     async function carregarDashboard() {
       try {
-        const data = await requisicao(API + "/dashboard/" + empresa.value, { headers:{ "Authorization": token } });
+        const qs = getPeriodoQueryString();
+        const data = await requisicao(API + "/dashboard/" + empresa.value + (qs ? "?" + qs : ""), { headers:{ "Authorization": token } });
         faturamento.innerText = formatarMoeda(data.faturamento || 0);
         totalVendas.innerText = data.totalVendas || 0;
         totalProdutos.innerText = data.totalProdutos || 0;
@@ -500,6 +565,58 @@
         dashboardDespesas.innerText = formatarMoeda(data.despesas || 0);
         dashboardInvestimentos.innerText = formatarMoeda(data.investimentos || 0);
       } catch {}
+    }
+
+    let graficoFaturamentoInstancia = null;
+    let graficoResumoInstancia = null;
+
+    async function carregarGraficosDashboard() {
+      try {
+        const qs = getPeriodoQueryString();
+        const data = await requisicao(API + "/dashboard-graficos/" + empresa.value + (qs ? "?" + qs : ""), { headers:{ "Authorization": token } });
+
+        const labels = (data.vendasPorDia || []).map(item => item.data);
+        const valores = (data.vendasPorDia || []).map(item => Number(item.total || 0));
+
+        if (graficoFaturamentoInstancia) graficoFaturamentoInstancia.destroy();
+        if (graficoResumoInstancia) graficoResumoInstancia.destroy();
+
+        graficoFaturamentoInstancia = new Chart(document.getElementById("graficoFaturamento"), {
+          type: "bar",
+          data: {
+            labels: labels.length ? labels : ["Sem dados"],
+            datasets: [{
+              label: "Faturamento",
+              data: valores.length ? valores : [0]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+
+        graficoResumoInstancia = new Chart(document.getElementById("graficoResumoFinanceiro"), {
+          type: "line",
+          data: {
+            labels: ["Receitas", "Custos", "Despesas"],
+            datasets: [{
+              label: "Resumo financeiro",
+              data: [
+                Number(data.resumo?.receitas || 0),
+                Number(data.resumo?.custos || 0),
+                Number(data.resumo?.despesas || 0)
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     async function cadastrarProduto() {
@@ -844,6 +961,8 @@
 
     async function carregarDRE() {
       try {
+        dreInicio.value = filtroInicio.value || dreInicio.value;
+        dreFim.value = filtroFim.value || dreFim.value;
         const params = new URLSearchParams();
         if (dreInicio.value) params.append("inicio", dreInicio.value);
         if (dreFim.value) params.append("fim", dreFim.value);
