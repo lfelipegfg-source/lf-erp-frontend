@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LF ERP</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body { margin:0; font-family: Arial, sans-serif; background:#f3f4f6; }
     .login { display:flex; height:100vh; justify-content:center; align-items:center; background:#111827; }
@@ -67,6 +69,12 @@
     .filtros-grid { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:12px; align-items:end; }
     .chart-card { margin-top:16px; }
     .chart-card canvas { width:100% !important; max-height:320px; }
+    #dreExportavel { background:#ffffff; padding:10px 0; }
+    @media print {
+      body * { visibility:hidden; }
+      #dreExportavel, #dreExportavel * { visibility:visible; }
+      #dreExportavel { position:absolute; left:0; top:0; width:100%; }
+    }
     @media (max-width:900px) {
       .layout { flex-direction:column; }
       .sidebar { width:100%; padding:12px; }
@@ -296,22 +304,26 @@
           </div>
 
           <div id="abaDre" class="tab-pane">
-            <div class="grid-3">
+            <div class="grid-4">
               <input id="dreInicio" type="date">
               <input id="dreFim" type="date">
               <button class="btn-alt" onclick="carregarDRE()">Atualizar DRE</button>
+              <button class="btn-green" onclick="exportarDREPDF()">Exportar DRE em PDF</button>
             </div>
-            <div class="dre-grid">
-              <div class="dre-item"><h4>Receita Bruta</h4><p id="dreReceitaBruta">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Deduções</h4><p id="dreDeducoes">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Receita Líquida</h4><p id="dreReceitaLiquida">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Custos</h4><p id="dreCustos">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Lucro Bruto</h4><p id="dreLucroBruto">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Despesas Operacionais</h4><p id="dreDespesas">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Resultado Operacional</h4><p id="dreResultado">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Investimentos</h4><p id="dreInvestimentos">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Impacto Final no Caixa</h4><p id="dreImpactoCaixa">R$ 0,00</p></div>
-              <div class="dre-item"><h4>Pendências</h4><p id="drePendente">R$ 0,00</p></div>
+
+            <div id="dreExportavel">
+              <div class="dre-grid">
+                <div class="dre-item"><h4>Receita Bruta</h4><p id="dreReceitaBruta">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Deduções</h4><p id="dreDeducoes">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Receita Líquida</h4><p id="dreReceitaLiquida">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Custos</h4><p id="dreCustos">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Lucro Bruto</h4><p id="dreLucroBruto">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Despesas Operacionais</h4><p id="dreDespesas">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Resultado Operacional</h4><p id="dreResultado">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Investimentos</h4><p id="dreInvestimentos">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Impacto Final no Caixa</h4><p id="dreImpactoCaixa">R$ 0,00</p></div>
+                <div class="dre-item"><h4>Pendências</h4><p id="drePendente">R$ 0,00</p></div>
+              </div>
             </div>
           </div>
         </div>
@@ -978,6 +990,102 @@
         dreImpactoCaixa.innerText = formatarMoeda(data.impactoFinalCaixa || 0);
         drePendente.innerText = formatarMoeda(data.pendente || 0);
       } catch (e) { alert(e.message); }
+    }
+
+    async function exportarDREPDF() {
+      try {
+        const elemento = document.getElementById("dreExportavel");
+        if (!elemento) {
+          alert("Bloco da DRE não encontrado.");
+          return;
+        }
+
+        const lojaAtual = nomeLoja(empresa.value);
+        const inicio = dreInicio.value || filtroInicio.value || "";
+        const fim = dreFim.value || filtroFim.value || "";
+        const periodoTexto = inicio && fim ? `${inicio} até ${fim}` : "Período não informado";
+
+        const wrapper = document.createElement("div");
+        wrapper.style.position = "fixed";
+        wrapper.style.left = "-99999px";
+        wrapper.style.top = "0";
+        wrapper.style.width = "1200px";
+        wrapper.style.background = "#ffffff";
+        wrapper.style.padding = "30px";
+        wrapper.style.fontFamily = "Arial, sans-serif";
+        wrapper.style.color = "#111827";
+
+        wrapper.innerHTML = `
+          <div style="margin-bottom:20px;">
+            <h1 style="margin:0 0 8px 0; font-size:28px;">LF ERP</h1>
+            <h2 style="margin:0 0 8px 0; font-size:22px;">DRE - Demonstrativo de Resultado</h2>
+            <p style="margin:4px 0; font-size:14px;"><strong>Loja:</strong> ${lojaAtual}</p>
+            <p style="margin:4px 0; font-size:14px;"><strong>Período:</strong> ${periodoTexto}</p>
+            <p style="margin:4px 0; font-size:14px;"><strong>Emitido em:</strong> ${new Date().toLocaleString("pt-BR")}</p>
+          </div>
+          ${elemento.outerHTML}
+        `;
+
+        document.body.appendChild(wrapper);
+
+        const canvas = await html2canvas(wrapper, {
+          scale: 2,
+          backgroundColor: "#ffffff"
+        });
+
+        document.body.removeChild(wrapper);
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const larguraPagina = 210;
+        const alturaPagina = 297;
+        const margem = 10;
+        const larguraImagem = larguraPagina - margem * 2;
+
+        const proporcao = canvas.width / larguraImagem;
+        const alturaPaginaCanvas = (alturaPagina - margem * 2) * proporcao;
+
+        let offsetY = 0;
+
+        while (offsetY < canvas.height) {
+          const canvasPagina = document.createElement("canvas");
+          const ctxPagina = canvasPagina.getContext("2d");
+
+          canvasPagina.width = canvas.width;
+          canvasPagina.height = Math.min(alturaPaginaCanvas, canvas.height - offsetY);
+
+          ctxPagina.clearRect(0, 0, canvasPagina.width, canvasPagina.height);
+          ctxPagina.drawImage(
+            canvas,
+            0,
+            offsetY,
+            canvas.width,
+            canvasPagina.height,
+            0,
+            0,
+            canvas.width,
+            canvasPagina.height
+          );
+
+          const imgPagina = canvasPagina.toDataURL("image/png");
+          const alturaPaginaMm = (canvasPagina.height * larguraImagem) / canvasPagina.width;
+
+          pdf.addImage(imgPagina, "PNG", margem, margem, larguraImagem, alturaPaginaMm);
+
+          offsetY += canvasPagina.height;
+
+          if (offsetY < canvas.height) {
+            pdf.addPage();
+          }
+        }
+
+        const nomeArquivo = `DRE_${empresa.value}_${inicio || "sem-inicio"}_${fim || "sem-fim"}.pdf`;
+        pdf.save(nomeArquivo);
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao exportar PDF da DRE.");
+      }
     }
 
     async function cadastrarUsuario() {
