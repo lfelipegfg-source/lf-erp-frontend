@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LF ERP</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+    }
+
+    .login {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      background: #111827;
+    }
+
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .app {
+      display: none;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #111827;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+      transition: width 0.25s ease;
+      position: relative;
+    }
+
+    .sidebar.minimizado {
+      width: 84px;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .sidebar.minimizado h2,
+    .sidebar.minimizado .user-info,
+    .sidebar.minimizado .btn-text {
+      display: none;
+    }
+
+    .sidebar .user-info {
+      font-size: 14px;
+      color: #d1d5db;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .toggle-btn {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #374151;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .sidebar button.menu-btn {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 12px;
+      background: #1f2937;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-start;
+    }
+
+    .sidebar.minimizado button.menu-btn {
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .sidebar button.menu-btn:hover,
+    .toggle-btn:hover {
+      background: #374151;
+    }
+
+    .icon {
+      font-size: 18px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .main {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .card-box {
+      background: #1f2937;
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      min-width: 180px;
+      flex: 1;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .store-title {
+      margin: 0;
+      font-size: 28px;
+      color: #111827;
+    }
+
+    .store-subtitle {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin: 5px 10px 10px 0;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: #111827;
+      color: white;
+    }
+
+    button:hover {
+      background: #374151;
+    }
+
+    .btn-alt {
+      background: #2563eb;
+    }
+
+    .btn-alt:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .list-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+
+    .section-title {
+      margin-top: 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .full {
+      width: 100%;
+    }
+
+    .acoes {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 12px;
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    #erro {
+      color: red;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        padding: 12px;
+      }
+
+      .sidebar.minimizado {
+        width: 100%;
+      }
+
+      .sidebar.minimizado h2,
+      .sidebar.minimizado .user-info {
+        display: none;
+      }
+
+      .sidebar.minimizado .btn-text {
+        display: none;
+      }
+
+      .sidebar.minimizado button.menu-btn {
+        width: auto;
+        min-width: 48px;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .sidebar .user-info {
+        width: 100%;
+      }
+
+      .toggle-btn {
+        width: auto;
+        margin: 0;
+      }
+
+      .sidebar button.menu-btn {
+        width: auto;
+        margin: 0;
+        justify-content: center;
+      }
+
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .store-title {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login" id="loginTela">
+    <div class="login-box">
+      <h2>Entrar</h2>
+      <input id="usuario" class="full" placeholder="Usuário">
+      <input id="senha" class="full" type="password" placeholder="Senha">
+      <button class="full" onclick="logar()">Entrar</button>
+      <p id="erro"></p>
+    </div>
+  </div>
+
+  <div class="app" id="app">
+    <div class="layout">
+      <div class="sidebar" id="sidebar">
+        <button class="toggle-btn" onclick="alternarMenu()">☰</button>
+
+        <h2 id="sidebarTitle">Menu</h2>
+
+        <div class="user-info">
+          <div><strong>Usuário:</strong> <span id="usuarioLogado">-</span></div>
+          <div><strong>Nome:</strong> <span id="nomeLogado">-</span></div>
+          <div><strong>Perfil:</strong> <span id="perfilLogado">-</span></div>
+          <div><strong>Loja:</strong> <span id="lojaLogada">-</span></div>
+        </div>
+
+        <button class="menu-btn" onclick="mostrar('dashboard')"><span class="icon">🏠</span><span class="btn-text">Dashboard</span></button>
+        <button class="menu-btn" onclick="mostrar('produtos')"><span class="icon">📦</span><span class="btn-text">Produtos</span></button>
+        <button class="menu-btn" onclick="mostrar('clientes')"><span class="icon">👥</span><span class="btn-text">Clientes</span></button>
+        <button class="menu-btn" onclick="mostrar('vendas')"><span class="icon">🛒</span><span class="btn-text">Vendas</span></button>
+        <button class="menu-btn" onclick="mostrar('financeiro')"><span class="icon">💰</span><span class="btn-text">Financeiro</span></button>
+        <button id="btnUsuarios" class="menu-btn" onclick="mostrar('usuarios')" style="display:none;"><span class="icon">🔐</span><span class="btn-text">Usuários</span></button>
+        <button class="menu-btn" onclick="logout()"><span class="icon">🚪</span><span class="btn-text">Sair</span></button>
+      </div>
+
+      <div class="main">
+        <div class="page-header">
+          <div>
+            <h1 class="store-title" id="tituloLoja">Loja</h1>
+            <div class="store-subtitle">Painel principal da loja selecionada</div>
+          </div>
+        </div>
+
+        <div class="card loja">
+          <h3 class="section-title">Selecionar Loja</h3>
+          <select id="empresa" onchange="atualizarTudo(); atualizarTituloLoja();">
+            <option value="variedades">Lucileide Variedades</option>
+            <option value="tech">LF Tech Solutions</option>
+          </select>
+        </div>
+
+        <div id="dashboard" class="card">
+          <h3 class="section-title">Dashboard</h3>
+          <div class="cards">
+            <div class="card-box">
+              <h4>Faturamento</h4>
+              <p id="faturamento">R$ 0,00</p>
+            </div>
+            <div class="card-box">
+              <h4>Total de Vendas</h4>
+              <p id="totalVendas">0</p>
+            </div>
+            <div class="card-box">
+              <h4>Produtos</h4>
+              <p id="totalProdutos">0</p>
+            </div>
+            <div class="card-box">
+              <h4>Clientes</h4>
+              <p id="totalClientes">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="produtos" class="card" style="display:none;">
+          <h3 class="section-title">Produtos</h3>
+
+          <div class="grid-3">
+            <input id="nome" placeholder="Nome do produto">
+            <input id="preco" type="number" step="0.01" placeholder="Preço">
+            <input id="estoque" type="number" placeholder="Estoque">
+          </div>
+
+          <button onclick="cadastrarProduto()">Cadastrar Produto</button>
+          <div id="listaProdutos"></div>
+        </div>
+
+        <div id="clientes" class="card" style="display:none;">
+          <h3 class="section-title">Clientes</h3>
+
+          <div class="grid-3">
+            <input id="clienteNome" placeholder="Nome do cliente">
+            <input id="clienteTelefone" placeholder="Telefone">
+            <input id="clienteCpf" placeholder="CPF">
+            <input id="clienteEndereco" placeholder="Endereço">
+            <input id="clienteNascimento" type="date">
+          </div>
+
+          <button onclick="cadastrarCliente()">Cadastrar Cliente</button>
+          <div id="listaClientes"></div>
+        </div>
+
+        <div id="vendas" class="card" style="display:none;">
+          <h3 class="section-title">Vendas</h3>
+
+          <div class="grid-4">
+            <select id="produtoVenda"></select>
+            <input id="quantidade" type="number" placeholder="Quantidade">
+            <select id="clienteVenda">
+              <option value="">Consumidor Final</option>
+            </select>
+            <select id="pagamento">
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Pix">Pix</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Promissória">Promissória</option>
+            </select>
+          </div>
+
+          <button onclick="vender()">Registrar Venda</button>
+          <div id="listaVendas"></div>
+        </div>
+
+        <div id="financeiro" class="card" style="display:none;">
+          <h3 class="section-title">Financeiro</h3>
+          <p id="saldo">Saldo: R$ 0,00</p>
+        </div>
+
+        <div id="usuarios" class="card" style="display:none;">
+          <h3 class="section-title">Usuários</h3>
+
+          <div class="grid-4">
+            <input id="novoUsuario" placeholder="Usuário">
+            <input id="novaSenha" type="password" placeholder="Senha">
+            <select id="tipoUsuario" onchange="ajustarTipoUsuario()">
+              <option value="funcionario">Funcionário</option>
+              <option value="gerente">Gerente</option>
+              <option value="admin">Admin</option>
+            </select>
+            <select id="empresaUsuario">
+              <option value="variedades">Lucileide Variedades</option>
+              <option value="tech">LF Tech Solutions</option>
+            </select>
+          </div>
+
+          <div class="grid-3">
+            <input id="nomeCompletoUsuario" placeholder="Nome completo">
+            <input id="cpfUsuario" placeholder="CPF">
+            <input id="nascimentoUsuario" type="date">
+          </div>
+
+          <button onclick="cadastrarUsuario()">Cadastrar Usuário</button>
+          <div id="listaUsuarios"></div>
+        </div>
+
+        <div class="footer-brand">LF ERP</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://lf-erp-backend.onrender.com";
+    let token = localStorage.getItem("token");
+    let usuarioAtual = JSON.parse(localStorage.getItem("usuarioAtual") || "null");
+    let menuMinimizado = localStorage.getItem("menuMinimizado") === "true";
+
+    function nomeLoja(valor) {
+      if (valor === "variedades") return "Lucileide Variedades";
+      if (valor === "tech") return "LF Tech Solutions";
+      return "Loja";
+    }
+
+    function perfilFormatado(tipo) {
+      if (tipo === "admin") return "Administrador";
+      if (tipo === "gerente") return "Gerente";
+      if (tipo === "funcionario") return "Funcionário";
+      return tipo || "-";
+    }
+
+    function atualizarTituloLoja() {
+      document.getElementById("tituloLoja").innerText = nomeLoja(empresa.value);
+    }
+
+    function atualizarPainelUsuario() {
+      if (!usuarioAtual) return;
+      usuarioLogado.innerText = usuarioAtual.usuario || "-";
+      nomeLogado.innerText = usuarioAtual.nome_completo || "-";
+      perfilLogado.innerText = perfilFormatado(usuarioAtual.tipo);
+      lojaLogada.innerText = usuarioAtual.tipo === "admin"
+        ? "Todas as lojas"
+        : nomeLoja(usuarioAtual.empresa);
+    }
+
+    function aplicarPermissaoLoja() {
+      if (!usuarioAtual) return;
+      if (usuarioAtual.tipo === "admin") {
+        empresa.disabled = false;
+      } else {
+        empresa.value = usuarioAtual.empresa;
+        empresa.disabled = true;
+      }
+    }
+
+    function aplicarPermissaoUsuarios() {
+      if (!usuarioAtual) return;
+      btnUsuarios.style.display =
+        (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente") ? "flex" : "none";
+    }
+
+    function ajustarTipoUsuario() {
+      if (!usuarioAtual) return;
+
+      if (usuarioAtual.tipo === "gerente") {
+        tipoUsuario.value = "funcionario";
+        tipoUsuario.disabled = true;
+        empresaUsuario.value = usuarioAtual.empresa;
+        empresaUsuario.disabled = true;
+        return;
+      }
+
+      tipoUsuario.disabled = false;
+
+      if (tipoUsuario.value === "admin") {
+        empresaUsuario.disabled = true;
+      } else {
+        empresaUsuario.disabled = false;
+      }
+    }
+
+    function alternarMenu() {
+      menuMinimizado = !menuMinimizado;
+      localStorage.setItem("menuMinimizado", String(menuMinimizado));
+      aplicarEstadoMenu();
+    }
+
+    function aplicarEstadoMenu() {
+      if (menuMinimizado) {
+        sidebar.classList.add("minimizado");
+      } else {
+        sidebar.classList.remove("minimizado");
+      }
+    }
+
+    async function logar() {
+      erro.innerText = "";
+
+      const res = await fetch(API + "/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          usuario: usuario.value,
+          senha: senha.value
+        })
+      });
+
+      if (res.status !== 200) {
+        erro.innerText = "Login inválido";
+        return;
+      }
+
+      const data = await res.json();
+
+      token = data.token;
+      usuarioAtual = {
+        usuario: data.usuario,
+        tipo: data.tipo,
+        empresa: data.empresa || null,
+        nome_completo: data.nome_completo || ""
+      };
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("usuarioAtual", JSON.stringify(usuarioAtual));
+
+      loginTela.style.display = "none";
+      app.style.display = "block";
+
+      atualizarPainelUsuario();
+      aplicarPermissaoLoja();
+      aplicarPermissaoUsuarios();
+      ajustarTipoUsuario();
+      aplicarEstadoMenu();
+      atualizarTituloLoja();
+      atualizarTudo();
+    }
+
+    if (token && usuarioAtual) {
+      loginTela.style.display = "none";
+      app.style.display = "block";
+      atualizarPainelUsuario();
+      aplicarPermissaoLoja();
+      aplicarPermissaoUsuarios();
+      ajustarTipoUsuario();
+      aplicarEstadoMenu();
+      atualizarTituloLoja();
+      atualizarTudo();
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuarioAtual");
+      location.reload();
+    }
+
+    function mostrar(tela) {
+      document.querySelectorAll(".main > .card").forEach(c => {
+        if (!c.classList.contains("loja")) c.style.display = "none";
+      });
+
+      document.getElementById(tela).style.display = "block";
+
+      if (tela === "usuarios") carregarUsuarios();
+    }
+
+    function headersAuth() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": token
+      };
+    }
+
+    async function atualizarTudo() {
+      await carregarDashboard();
+      await carregarProdutos();
+      await carregarClientes();
+      await carregarClientesVenda();
+      await carregarProdutosVenda();
+      await carregarVendas();
+      await carregarFinanceiro();
+      if (usuarioAtual && (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) {
+        await carregarUsuarios();
+      }
+    }
+
+    async function carregarDashboard() {
+      const res = await fetch(API + "/dashboard/" + empresa.value, {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+      faturamento.innerText = "R$ " + Number(data.faturamento || 0).toFixed(2);
+      totalVendas.innerText = data.totalVendas || 0;
+      totalProdutos.innerText = data.totalProdutos || 0;
+      totalClientes.innerText = data.totalClientes || 0;
+    }
+
+    async function cadastrarProduto() {
+      const res = await fetch(API + "/produtos", {
+        method: "POST",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          nome: nome.value,
+          preco: Number(preco.value),
+          estoque: Number(estoque.value)
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      nome.value = "";
+      preco.value = "";
+      estoque.value = "";
+      atualizarTudo();
+    }
+
+    async function editarProduto(id, nomeAtual, precoAtual, estoqueAtual) {
+      const novoNome = prompt("Nome do produto:", nomeAtual);
+      if (novoNome === null) return;
+
+      const novoPreco = prompt("Preço:", precoAtual);
+      if (novoPreco === null) return;
+
+      const novoEstoque = prompt("Estoque:", estoqueAtual);
+      if (novoEstoque === null) return;
+
+      const res = await fetch(API + "/produtos/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          nome: novoNome,
+          preco: Number(novoPreco),
+          estoque: Number(novoEstoque)
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarProdutos();
+      carregarProdutosVenda();
+      carregarDashboard();
+    }
+
+    async function excluirProduto(id) {
+      if (!confirm("Deseja excluir este produto?")) return;
+
+      const res = await fetch(API + "/produtos/" + id + "?empresa=" + empresa.value, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarProdutos();
+      carregarProdutosVenda();
+      carregarDashboard();
+    }
+
+    async function carregarProdutos() {
+      const res = await fetch(API + "/produtos/" + empresa.value, {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+
+      listaProdutos.innerHTML = data.map(p => `
+        <div class="list-item">
+          <strong>ID:</strong> ${p.id}<br>
+          <strong>Produto:</strong> ${p.nome}<br>
+          <strong>Preço:</strong> R$ ${Number(p.preco || 0).toFixed(2)}<br>
+          <strong>Estoque:</strong> ${p.estoque}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarProduto('${p.id}', '${String(p.nome).replace(/'/g, "\\'")}', '${p.preco}', '${p.estoque}')">Editar</button>
+            <button class="btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function cadastrarCliente() {
+      const res = await fetch(API + "/clientes", {
+        method: "POST",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          nome: clienteNome.value,
+          endereco: clienteEndereco.value,
+          telefone: clienteTelefone.value,
+          nascimento: clienteNascimento.value,
+          cpf: clienteCpf.value
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      clienteNome.value = "";
+      clienteEndereco.value = "";
+      clienteTelefone.value = "";
+      clienteNascimento.value = "";
+      clienteCpf.value = "";
+      atualizarTudo();
+    }
+
+    async function editarCliente(id, nomeAtual, enderecoAtual, telefoneAtual, nascimentoAtual, cpfAtual) {
+      const novoNome = prompt("Nome do cliente:", nomeAtual);
+      if (novoNome === null) return;
+
+      const novoEndereco = prompt("Endereço:", enderecoAtual || "");
+      if (novoEndereco === null) return;
+
+      const novoTelefone = prompt("Telefone:", telefoneAtual || "");
+      if (novoTelefone === null) return;
+
+      const novoNascimento = prompt("Data de nascimento (YYYY-MM-DD):", nascimentoAtual || "");
+      if (novoNascimento === null) return;
+
+      const novoCpf = prompt("CPF:", cpfAtual || "");
+      if (novoCpf === null) return;
+
+      const res = await fetch(API + "/clientes/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          nome: novoNome,
+          endereco: novoEndereco,
+          telefone: novoTelefone,
+          nascimento: novoNascimento,
+          cpf: novoCpf
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarClientes();
+      carregarClientesVenda();
+      carregarDashboard();
+    }
+
+    async function excluirCliente(id) {
+      if (!confirm("Deseja excluir este cliente?")) return;
+
+      const res = await fetch(API + "/clientes/" + id + "?empresa=" + empresa.value, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarClientes();
+      carregarClientesVenda();
+      carregarDashboard();
+    }
+
+    async function carregarClientes() {
+      const res = await fetch(API + "/clientes/" + empresa.value, {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+
+      listaClientes.innerHTML = data.map(c => `
+        <div class="list-item">
+          <strong>ID:</strong> ${c.id}<br>
+          <strong>Nome:</strong> ${c.nome}<br>
+          <strong>CPF:</strong> ${c.cpf || "-"}<br>
+          <strong>Endereço:</strong> ${c.endereco || "-"}<br>
+          <strong>Telefone:</strong> ${c.telefone || "-"}<br>
+          <strong>Nascimento:</strong> ${c.nascimento || "-"}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarCliente('${c.id}', '${String(c.nome).replace(/'/g, "\\'")}', '${String(c.endereco || '').replace(/'/g, "\\'")}', '${String(c.telefone || '').replace(/'/g, "\\'")}', '${String(c.nascimento || '').replace(/'/g, "\\'")}', '${String(c.cpf || '').replace(/'/g, "\\'")}')">Editar</button>
+            <button class="btn-danger" onclick="excluirCliente('${c.id}')">Excluir</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function carregarClientesVenda() {
+      const res = await fetch(API + "/clientes/" + empresa.value, {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+
+      clienteVenda.innerHTML = `
+        <option value="">Consumidor Final</option>
+        ${data.map(c => `<option value="${c.id}">${c.nome}</option>`).join("")}
+      `;
+    }
+
+    async function carregarProdutosVenda() {
+      const res = await fetch(API + "/produtos/" + empresa.value, {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+
+      produtoVenda.innerHTML = data.map(p => `
+        <option value="${p.id}">
+          ID ${p.id} - ${p.nome} | Estoque: ${p.estoque} | R$ ${Number(p.preco || 0).toFixed(2)}
+        </option>
+      `).join("");
+    }
+
+    async function vender() {
+      const res = await fetch(API + "/vendas", {
+        method: "POST",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          produto_id: produtoVenda.value,
+          quantidade: Number(quantidade.value),
+          cliente_id: clienteVenda.value || null,
+          pagamento: pagamento.value
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      quantidade.value = "";
+      clienteVenda.value = "";
+      pagamento.value = "Dinheiro";
+      atualizarTudo();
+    }
+
+    async function editarVenda(id, produtoAtual, quantidadeAtual, totalAtual, clienteAtual, pagamentoAtual, dataAtual) {
+      const novoProduto = prompt("Produto:", produtoAtual);
+      if (novoProduto === null) return;
+
+      const novaQuantidade = prompt("Quantidade:", quantidadeAtual);
+      if (novaQuantidade === null) return;
+
+      const novoTotal = prompt("Total:", totalAtual);
+      if (novoTotal === null) return;
+
+      const novoCliente = prompt("Cliente:", clienteAtual);
+      if (novoCliente === null) return;
+
+      const novoPagamento = prompt("Pagamento:", pagamentoAtual);
+      if (novoPagamento === null) return;
+
+      const novaData = prompt("Data (YYYY-MM-DD):", dataAtual);
+      if (novaData === null) return;
+
+      const res = await fetch(API + "/vendas/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          empresa: empresa.value,
+          produto: novoProduto,
+          quantidade: Number(novaQuantidade),
+          total: Number(novoTotal),
+          cliente_nome: novoCliente,
+          pagamento: novoPagamento,
+          data: novaData
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarVendas();
+      carregarFinanceiro();
+      carregarDashboard();
+    }
+
+    async function excluirVenda(id) {
+      if (!confirm("Deseja excluir esta venda?")) return;
+
+      const res = await fetch(API + "/vendas/" + id + "?empresa=" + empresa.value, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarVendas();
+      carregarFinanceiro();
+      carregarDashboard();
+    }
+
+    async function carregarVendas() {
+      const res = await fetch(API + "/vendas/" + empresa.value, {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+
+      listaVendas.innerHTML = data.map(v => `
+        <div class="list-item">
+          <strong>Venda #${v.id}</strong><br>
+          <strong>Cliente:</strong> ${v.cliente_nome || "Consumidor Final"}<br>
+          <strong>Produto:</strong> ${v.produto}<br>
+          <strong>Quantidade:</strong> ${v.quantidade}<br>
+          <strong>Total:</strong> R$ ${Number(v.total || 0).toFixed(2)}<br>
+          <strong>Pagamento:</strong> ${v.pagamento || "-"}<br>
+          <strong>Data:</strong> ${v.data || "-"}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarVenda('${v.id}', '${String(v.produto).replace(/'/g, "\\'")}', '${v.quantidade}', '${v.total}', '${String(v.cliente_nome || '').replace(/'/g, "\\'")}', '${String(v.pagamento || '').replace(/'/g, "\\'")}', '${String(v.data || '').replace(/'/g, "\\'")}')">Editar</button>
+            <button class="btn-danger" onclick="excluirVenda('${v.id}')">Excluir</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function carregarFinanceiro() {
+      const res = await fetch(API + "/financeiro/" + empresa.value, {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+      saldo.innerText = "Saldo: R$ " + Number(data.entrada || 0).toFixed(2);
+    }
+
+    async function cadastrarUsuario() {
+      let tipoFinal = tipoUsuario.value;
+      let empresaFinal = empresaUsuario.value;
+
+      if (usuarioAtual.tipo === "gerente") {
+        tipoFinal = "funcionario";
+        empresaFinal = usuarioAtual.empresa;
+      }
+
+      const res = await fetch(API + "/usuarios", {
+        method: "POST",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          usuario: novoUsuario.value,
+          senha: novaSenha.value,
+          tipo: tipoFinal,
+          empresa: tipoFinal === "admin" ? null : empresaFinal,
+          nome_completo: nomeCompletoUsuario.value,
+          cpf: cpfUsuario.value,
+          nascimento: nascimentoUsuario.value
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      novoUsuario.value = "";
+      novaSenha.value = "";
+      nomeCompletoUsuario.value = "";
+      cpfUsuario.value = "";
+      nascimentoUsuario.value = "";
+      if (usuarioAtual.tipo === "admin") {
+        tipoUsuario.value = "funcionario";
+        empresaUsuario.value = "variedades";
+      }
+
+      ajustarTipoUsuario();
+      carregarUsuarios();
+    }
+
+    async function editarUsuario(id, usuarioEd, tipoEd, empresaEd, nomeEd, cpfEd, nascEd) {
+      let novoUsuario = prompt("Usuário:", usuarioEd);
+      if (novoUsuario === null) return;
+
+      let novoNome = prompt("Nome completo:", nomeEd || "");
+      if (novoNome === null) return;
+
+      let novoCpf = prompt("CPF:", cpfEd || "");
+      if (novoCpf === null) return;
+
+      let novoNascimento = prompt("Nascimento (YYYY-MM-DD):", nascEd || "");
+      if (novoNascimento === null) return;
+
+      let novoTipo = tipoEd;
+      let novaEmpresa = empresaEd;
+
+      if (usuarioAtual.tipo === "admin") {
+        const tipoPrompt = prompt("Perfil (admin, gerente, funcionario):", tipoEd);
+        if (tipoPrompt === null) return;
+        novoTipo = tipoPrompt;
+
+        const empresaPrompt = prompt("Loja (variedades, tech) ou vazio para admin:", empresaEd || "");
+        if (empresaPrompt === null) return;
+        novaEmpresa = empresaPrompt === "" ? null : empresaPrompt;
+      }
+
+      if (usuarioAtual.tipo === "gerente") {
+        novoTipo = "funcionario";
+        novaEmpresa = usuarioAtual.empresa;
+      }
+
+      const novaSenha = prompt("Nova senha (deixe em branco para manter):", "");
+      if (novaSenha === null) return;
+
+      const res = await fetch(API + "/usuarios/" + id, {
+        method: "PUT",
+        headers: headersAuth(),
+        body: JSON.stringify({
+          usuario: novoUsuario,
+          senha: novaSenha,
+          tipo: novoTipo,
+          empresa: novaEmpresa,
+          nome_completo: novoNome,
+          cpf: novoCpf,
+          nascimento: novoNascimento
+        })
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarUsuarios();
+    }
+
+    async function excluirUsuario(id) {
+      if (usuarioAtual.tipo !== "admin") {
+        alert("Apenas admin pode excluir usuário");
+        return;
+      }
+
+      if (!confirm("Deseja excluir este usuário?")) return;
+
+      const res = await fetch(API + "/usuarios/" + id, {
+        method: "DELETE",
+        headers: { "Authorization": token }
+      });
+
+      if (res.status !== 200) {
+        alert(await res.text());
+        return;
+      }
+
+      carregarUsuarios();
+    }
+
+    async function carregarUsuarios() {
+      if (!(usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) return;
+
+      const res = await fetch(API + "/usuarios", {
+        headers: { "Authorization": token }
+      });
+      if (res.status !== 200) return;
+
+      const data = await res.json();
+
+      listaUsuarios.innerHTML = data.map(u => `
+        <div class="list-item">
+          <strong>ID:</strong> ${u.id}<br>
+          <strong>Nome:</strong> ${u.nome_completo || "-"}<br>
+          <strong>Usuário:</strong> ${u.usuario}<br>
+          <strong>CPF:</strong> ${u.cpf || "-"}<br>
+          <strong>Nascimento:</strong> ${u.nascimento || "-"}<br>
+          <strong>Perfil:</strong> ${u.tipo}<br>
+          <strong>Loja:</strong> ${u.empresa ? nomeLoja(u.empresa) : "Todas as lojas"}
+          <div class="acoes">
+            <button class="btn-alt" onclick="editarUsuario('${u.id}', '${String(u.usuario).replace(/'/g, "\\'")}', '${String(u.tipo).replace(/'/g, "\\'")}', '${String(u.empresa || '').replace(/'/g, "\\'")}', '${String(u.nome_completo || '').replace(/'/g, "\\'")}', '${String(u.cpf || '').replace(/'/g, "\\'")}', '${String(u.nascimento || '').replace(/'/g, "\\'")}')">Editar</button>
+            ${usuarioAtual.tipo === "admin" ? `<button class="btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>` : ""}
+          </div>
+        </div>
+      `).join("");
+    }
+  </script>
+
+</body>
+</html>

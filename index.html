@@ -4,316 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LF ERP</title>
-
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-    }
-
-    .login {
-      display: flex;
-      height: 100vh;
-      justify-content: center;
-      align-items: center;
-      background: #111827;
-    }
-
-    .login-box {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      width: 320px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .app {
-      display: none;
-    }
-
-    .layout {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 260px;
-      background: #111827;
-      color: white;
-      padding: 20px;
-      box-sizing: border-box;
-      transition: width 0.25s ease;
-      position: relative;
-    }
-
-    .sidebar.minimizado {
-      width: 84px;
-    }
-
-    .sidebar h2 {
-      margin-top: 0;
-      margin-bottom: 8px;
-      font-size: 20px;
-    }
-
-    .sidebar.minimizado h2,
-    .sidebar.minimizado .user-info,
-    .sidebar.minimizado .btn-text {
-      display: none;
-    }
-
-    .sidebar .user-info {
-      font-size: 14px;
-      color: #d1d5db;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
-    .toggle-btn {
-      width: 100%;
-      margin-bottom: 12px;
-      padding: 12px;
-      background: #374151;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    .sidebar button.menu-btn {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 12px;
-      background: #1f2937;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 8px;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: flex-start;
-    }
-
-    .sidebar.minimizado button.menu-btn {
-      justify-content: center;
-      padding: 12px 0;
-    }
-
-    .sidebar button.menu-btn:hover,
-    .toggle-btn:hover {
-      background: #374151;
-    }
-
-    .icon {
-      font-size: 18px;
-      min-width: 20px;
-      text-align: center;
-    }
-
-    .main {
-      flex: 1;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
-
-    .cards {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .card-box {
-      background: #1f2937;
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      min-width: 180px;
-      flex: 1;
-    }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .store-title {
-      margin: 0;
-      font-size: 28px;
-      color: #111827;
-    }
-
-    .store-subtitle {
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    input, select, button {
-      padding: 10px;
-      margin: 5px 10px 10px 0;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      box-sizing: border-box;
-    }
-
-    button {
-      cursor: pointer;
-      border: none;
-      background: #111827;
-      color: white;
-    }
-
-    button:hover {
-      background: #374151;
-    }
-
-    .btn-alt {
-      background: #2563eb;
-    }
-
-    .btn-alt:hover {
-      background: #1d4ed8;
-    }
-
-    .btn-danger {
-      background: #dc2626;
-    }
-
-    .btn-danger:hover {
-      background: #b91c1c;
-    }
-
-    .list-item {
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-      background: #fafafa;
-    }
-
-    .section-title {
-      margin-top: 0;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    .full {
-      width: 100%;
-    }
-
-    .acoes {
-      margin-top: 10px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .footer-brand {
-      text-align: center;
-      color: #9ca3af;
-      font-size: 12px;
-      margin-top: 30px;
-      padding-top: 10px;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    #erro {
-      color: red;
-    }
-
-    @media (max-width: 900px) {
-      .layout {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        width: 100%;
-        padding: 12px;
-      }
-
-      .sidebar.minimizado {
-        width: 100%;
-      }
-
-      .sidebar.minimizado h2,
-      .sidebar.minimizado .user-info {
-        display: none;
-      }
-
-      .sidebar.minimizado .btn-text {
-        display: none;
-      }
-
-      .sidebar.minimizado button.menu-btn {
-        width: auto;
-        min-width: 48px;
-      }
-
-      .sidebar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .sidebar .user-info {
-        width: 100%;
-      }
-
-      .toggle-btn {
-        width: auto;
-        margin: 0;
-      }
-
-      .sidebar button.menu-btn {
-        width: auto;
-        margin: 0;
-        justify-content: center;
-      }
-
-      .grid-2, .grid-3, .grid-4 {
-        grid-template-columns: 1fr;
-      }
-
-      .store-title {
-        font-size: 22px;
-      }
+    body { margin:0; font-family: Arial, sans-serif; background:#f3f4f6; }
+    .login { display:flex; height:100vh; justify-content:center; align-items:center; background:#111827; }
+    .login-box { background:#fff; padding:30px; border-radius:12px; width:340px; box-shadow:0 10px 30px rgba(0,0,0,.2); }
+    .app { display:none; }
+    .layout { display:flex; min-height:100vh; }
+    .sidebar { width:260px; background:#111827; color:#fff; padding:20px; box-sizing:border-box; transition:width .25s ease; }
+    .sidebar.minimizado { width:84px; }
+    .sidebar h2 { margin-top:0; margin-bottom:8px; font-size:20px; }
+    .sidebar.minimizado h2, .sidebar.minimizado .user-info, .sidebar.minimizado .btn-text { display:none; }
+    .sidebar .user-info { font-size:14px; color:#d1d5db; margin-bottom:20px; line-height:1.6; }
+    .toggle-btn, .sidebar button.menu-btn { width:100%; margin-bottom:10px; padding:12px; border:none; border-radius:8px; color:#fff; cursor:pointer; }
+    .toggle-btn { background:#374151; }
+    .sidebar button.menu-btn { background:#1f2937; text-align:left; display:flex; gap:10px; align-items:center; }
+    .sidebar.minimizado button.menu-btn { justify-content:center; padding:12px 0; }
+    .toggle-btn:hover, .sidebar button.menu-btn:hover { background:#374151; }
+    .icon { font-size:18px; min-width:20px; text-align:center; }
+    .main { flex:1; padding:20px; box-sizing:border-box; }
+    .card { background:#fff; padding:20px; border-radius:12px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,.06); }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
+    .card-box { background:#1f2937; color:#fff; padding:20px; border-radius:12px; }
+    .card-box.finance { background:#0f766e; }
+    .card-box.warn { background:#7c2d12; }
+    .card-box.info { background:#1d4ed8; }
+    .page-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+    .store-title { margin:0; font-size:28px; color:#111827; }
+    .store-subtitle { color:#6b7280; font-size:14px; }
+    input, select, button, textarea { padding:10px; margin:5px 10px 10px 0; border-radius:8px; border:1px solid #d1d5db; box-sizing:border-box; font-family:inherit; }
+    textarea { min-height:90px; resize:vertical; }
+    button { cursor:pointer; border:none; background:#111827; color:white; }
+    button:hover { background:#374151; }
+    .btn-alt { background:#2563eb; }
+    .btn-alt:hover { background:#1d4ed8; }
+    .btn-danger { background:#dc2626; }
+    .btn-danger:hover { background:#b91c1c; }
+    .btn-green { background:#0f766e; }
+    .btn-green:hover { background:#115e59; }
+    .list-item { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; background:#fafafa; }
+    .section-title { margin-top:0; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .grid-4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; }
+    .full { width:100%; }
+    .acoes { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+    .footer-brand { text-align:center; color:#9ca3af; font-size:12px; margin-top:30px; padding-top:10px; border-top:1px solid #e5e7eb; }
+    #erro { color:red; }
+    .section-subtitle { color:#6b7280; font-size:14px; margin-bottom:12px; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .tab-btn { background:#e5e7eb; color:#111827; }
+    .tab-btn.ativo { background:#111827; color:#fff; }
+    .tab-pane { display:none; }
+    .tab-pane.ativo { display:block; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:bold; }
+    .pill.pendente { background:#fef3c7; color:#92400e; }
+    .pill.pago { background:#dcfce7; color:#166534; }
+    .dre-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+    .dre-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
+    .dre-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
+    .dre-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
+    @media (max-width:900px) {
+      .layout { flex-direction:column; }
+      .sidebar { width:100%; padding:12px; }
+      .sidebar.minimizado { width:100%; }
+      .sidebar.minimizado h2, .sidebar.minimizado .user-info, .sidebar.minimizado .btn-text { display:none; }
+      .sidebar.minimizado button.menu-btn { width:auto; min-width:48px; }
+      .sidebar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+      .sidebar .user-info { width:100%; }
+      .toggle-btn, .sidebar button.menu-btn { width:auto; margin:0; }
+      .sidebar button.menu-btn { justify-content:center; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
+      .store-title { font-size:22px; }
     }
   </style>
 </head>
 <body>
-
   <div class="login" id="loginTela">
     <div class="login-box">
       <h2>Entrar</h2>
@@ -328,9 +93,7 @@
     <div class="layout">
       <div class="sidebar" id="sidebar">
         <button class="toggle-btn" onclick="alternarMenu()">☰</button>
-
         <h2 id="sidebarTitle">Menu</h2>
-
         <div class="user-info">
           <div><strong>Usuário:</strong> <span id="usuarioLogado">-</span></div>
           <div><strong>Nome:</strong> <span id="nomeLogado">-</span></div>
@@ -342,7 +105,7 @@
         <button class="menu-btn" onclick="mostrar('produtos')"><span class="icon">📦</span><span class="btn-text">Produtos</span></button>
         <button class="menu-btn" onclick="mostrar('clientes')"><span class="icon">👥</span><span class="btn-text">Clientes</span></button>
         <button class="menu-btn" onclick="mostrar('vendas')"><span class="icon">🛒</span><span class="btn-text">Vendas</span></button>
-        <button class="menu-btn" onclick="mostrar('financeiro')"><span class="icon">💰</span><span class="btn-text">Financeiro</span></button>
+        <button id="btnFinanceiro" class="menu-btn" onclick="mostrar('financeiro')"><span class="icon">💰</span><span class="btn-text">Financeiro</span></button>
         <button id="btnUsuarios" class="menu-btn" onclick="mostrar('usuarios')" style="display:none;"><span class="icon">🔐</span><span class="btn-text">Usuários</span></button>
         <button class="menu-btn" onclick="logout()"><span class="icon">🚪</span><span class="btn-text">Sair</span></button>
       </div>
@@ -366,41 +129,29 @@
         <div id="dashboard" class="card">
           <h3 class="section-title">Dashboard</h3>
           <div class="cards">
-            <div class="card-box">
-              <h4>Faturamento</h4>
-              <p id="faturamento">R$ 0,00</p>
-            </div>
-            <div class="card-box">
-              <h4>Total de Vendas</h4>
-              <p id="totalVendas">0</p>
-            </div>
-            <div class="card-box">
-              <h4>Produtos</h4>
-              <p id="totalProdutos">0</p>
-            </div>
-            <div class="card-box">
-              <h4>Clientes</h4>
-              <p id="totalClientes">0</p>
-            </div>
+            <div class="card-box"><h4>Faturamento</h4><p id="faturamento">R$ 0,00</p></div>
+            <div class="card-box"><h4>Total de Vendas</h4><p id="totalVendas">0</p></div>
+            <div class="card-box"><h4>Produtos</h4><p id="totalProdutos">0</p></div>
+            <div class="card-box"><h4>Clientes</h4><p id="totalClientes">0</p></div>
+            <div class="card-box finance"><h4>Custos Pagos</h4><p id="dashboardCustos">R$ 0,00</p></div>
+            <div class="card-box warn"><h4>Despesas Pagas</h4><p id="dashboardDespesas">R$ 0,00</p></div>
+            <div class="card-box info"><h4>Investimentos</h4><p id="dashboardInvestimentos">R$ 0,00</p></div>
           </div>
         </div>
 
         <div id="produtos" class="card" style="display:none;">
           <h3 class="section-title">Produtos</h3>
-
           <div class="grid-3">
             <input id="nome" placeholder="Nome do produto">
             <input id="preco" type="number" step="0.01" placeholder="Preço">
             <input id="estoque" type="number" placeholder="Estoque">
           </div>
-
           <button onclick="cadastrarProduto()">Cadastrar Produto</button>
           <div id="listaProdutos"></div>
         </div>
 
         <div id="clientes" class="card" style="display:none;">
           <h3 class="section-title">Clientes</h3>
-
           <div class="grid-3">
             <input id="clienteNome" placeholder="Nome do cliente">
             <input id="clienteTelefone" placeholder="Telefone">
@@ -408,20 +159,16 @@
             <input id="clienteEndereco" placeholder="Endereço">
             <input id="clienteNascimento" type="date">
           </div>
-
           <button onclick="cadastrarCliente()">Cadastrar Cliente</button>
           <div id="listaClientes"></div>
         </div>
 
         <div id="vendas" class="card" style="display:none;">
           <h3 class="section-title">Vendas</h3>
-
           <div class="grid-4">
             <select id="produtoVenda"></select>
             <input id="quantidade" type="number" placeholder="Quantidade">
-            <select id="clienteVenda">
-              <option value="">Consumidor Final</option>
-            </select>
+            <select id="clienteVenda"><option value="">Consumidor Final</option></select>
             <select id="pagamento">
               <option value="Dinheiro">Dinheiro</option>
               <option value="Cartão de Crédito">Cartão de Crédito</option>
@@ -430,19 +177,114 @@
               <option value="Promissória">Promissória</option>
             </select>
           </div>
-
           <button onclick="vender()">Registrar Venda</button>
           <div id="listaVendas"></div>
         </div>
 
         <div id="financeiro" class="card" style="display:none;">
           <h3 class="section-title">Financeiro</h3>
-          <p id="saldo">Saldo: R$ 0,00</p>
+          <div class="section-subtitle">Custos e despesas, investimentos e DRE da loja selecionada.</div>
+
+          <div class="cards" style="margin-bottom:16px;">
+            <div class="card-box finance"><h4>Receitas</h4><p id="saldoReceitas">R$ 0,00</p></div>
+            <div class="card-box warn"><h4>Custos + Despesas</h4><p id="saldoSaidas">R$ 0,00</p></div>
+            <div class="card-box info"><h4>Investimentos</h4><p id="saldoInvestimentos">R$ 0,00</p></div>
+            <div class="card-box"><h4>Saldo Gerencial</h4><p id="saldoGerencial">R$ 0,00</p></div>
+          </div>
+
+          <div class="tabs">
+            <button id="tabBtnLancamentos" class="tab-btn ativo" onclick="mostrarAbaFinanceiro('lancamentos')">Custos e Despesas</button>
+            <button id="tabBtnInvestimentos" class="tab-btn" onclick="mostrarAbaFinanceiro('investimentos')">Investimentos</button>
+            <button id="tabBtnDre" class="tab-btn" onclick="mostrarAbaFinanceiro('dre')">DRE</button>
+          </div>
+
+          <div id="abaLancamentos" class="tab-pane ativo">
+            <div class="grid-4">
+              <select id="finTipo">
+                <option value="custo">Custo</option>
+                <option value="despesa">Despesa</option>
+              </select>
+              <input id="finCategoria" placeholder="Categoria">
+              <input id="finDescricao" placeholder="Descrição">
+              <input id="finValor" type="number" step="0.01" placeholder="Valor">
+              <input id="finVencimento" type="date">
+              <input id="finPagamentoData" type="date">
+              <select id="finStatus">
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+              </select>
+              <select id="finFormaPagamento">
+                <option value="">Forma de pagamento</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Boleto">Boleto</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </div>
+            <div class="grid-3">
+              <select id="finRecorrente">
+                <option value="false">Não recorrente</option>
+                <option value="true">Recorrente</option>
+              </select>
+              <select id="finFrequencia">
+                <option value="">Frequência</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensal">Mensal</option>
+                <option value="anual">Anual</option>
+                <option value="unica">Única</option>
+              </select>
+              <input id="finObservacao" placeholder="Observação">
+            </div>
+            <button class="btn-green" onclick="salvarLancamento()">Salvar Lançamento</button>
+            <div id="listaLancamentos"></div>
+          </div>
+
+          <div id="abaInvestimentos" class="tab-pane">
+            <div class="grid-4">
+              <input id="invTipo" placeholder="Tipo de investimento">
+              <input id="invDescricao" placeholder="Descrição">
+              <input id="invValor" type="number" step="0.01" placeholder="Valor">
+              <input id="invData" type="date">
+              <select id="invFormaPagamento">
+                <option value="">Forma de pagamento</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Boleto">Boleto</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+              <input id="invObservacao" placeholder="Observação">
+            </div>
+            <button class="btn-green" onclick="salvarInvestimento()">Salvar Investimento</button>
+            <div id="listaInvestimentos"></div>
+          </div>
+
+          <div id="abaDre" class="tab-pane">
+            <div class="grid-3">
+              <input id="dreInicio" type="date">
+              <input id="dreFim" type="date">
+              <button class="btn-alt" onclick="carregarDRE()">Atualizar DRE</button>
+            </div>
+            <div class="dre-grid">
+              <div class="dre-item"><h4>Receita Bruta</h4><p id="dreReceitaBruta">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Deduções</h4><p id="dreDeducoes">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Receita Líquida</h4><p id="dreReceitaLiquida">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Custos</h4><p id="dreCustos">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Lucro Bruto</h4><p id="dreLucroBruto">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Despesas Operacionais</h4><p id="dreDespesas">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Resultado Operacional</h4><p id="dreResultado">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Investimentos</h4><p id="dreInvestimentos">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Impacto Final no Caixa</h4><p id="dreImpactoCaixa">R$ 0,00</p></div>
+              <div class="dre-item"><h4>Pendências</h4><p id="drePendente">R$ 0,00</p></div>
+            </div>
+          </div>
         </div>
 
         <div id="usuarios" class="card" style="display:none;">
           <h3 class="section-title">Usuários</h3>
-
           <div class="grid-4">
             <input id="novoUsuario" placeholder="Usuário">
             <input id="novaSenha" type="password" placeholder="Senha">
@@ -456,13 +298,11 @@
               <option value="tech">LF Tech Solutions</option>
             </select>
           </div>
-
           <div class="grid-3">
             <input id="nomeCompletoUsuario" placeholder="Nome completo">
             <input id="cpfUsuario" placeholder="CPF">
             <input id="nascimentoUsuario" type="date">
           </div>
-
           <button onclick="cadastrarUsuario()">Cadastrar Usuário</button>
           <div id="listaUsuarios"></div>
         </div>
@@ -491,8 +331,16 @@
       return tipo || "-";
     }
 
+    function formatarMoeda(valor) {
+      return Number(valor || 0).toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+    }
+
+    function dataHoje() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
     function atualizarTituloLoja() {
-      document.getElementById("tituloLoja").innerText = nomeLoja(empresa.value);
+      tituloLoja.innerText = nomeLoja(empresa.value);
     }
 
     function atualizarPainelUsuario() {
@@ -500,9 +348,7 @@
       usuarioLogado.innerText = usuarioAtual.usuario || "-";
       nomeLogado.innerText = usuarioAtual.nome_completo || "-";
       perfilLogado.innerText = perfilFormatado(usuarioAtual.tipo);
-      lojaLogada.innerText = usuarioAtual.tipo === "admin"
-        ? "Todas as lojas"
-        : nomeLoja(usuarioAtual.empresa);
+      lojaLogada.innerText = usuarioAtual.tipo === "admin" ? "Todas as lojas" : nomeLoja(usuarioAtual.empresa);
     }
 
     function aplicarPermissaoLoja() {
@@ -515,15 +361,15 @@
       }
     }
 
-    function aplicarPermissaoUsuarios() {
+    function aplicarPermissoes() {
       if (!usuarioAtual) return;
-      btnUsuarios.style.display =
-        (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente") ? "flex" : "none";
+      const podeFinanceiro = usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente";
+      btnUsuarios.style.display = podeFinanceiro ? "flex" : "none";
+      btnFinanceiro.style.display = podeFinanceiro ? "flex" : "none";
     }
 
     function ajustarTipoUsuario() {
       if (!usuarioAtual) return;
-
       if (usuarioAtual.tipo === "gerente") {
         tipoUsuario.value = "funcionario";
         tipoUsuario.disabled = true;
@@ -531,14 +377,8 @@
         empresaUsuario.disabled = true;
         return;
       }
-
       tipoUsuario.disabled = false;
-
-      if (tipoUsuario.value === "admin") {
-        empresaUsuario.disabled = true;
-      } else {
-        empresaUsuario.disabled = false;
-      }
+      empresaUsuario.disabled = tipoUsuario.value === "admin";
     }
 
     function alternarMenu() {
@@ -548,65 +388,69 @@
     }
 
     function aplicarEstadoMenu() {
-      if (menuMinimizado) {
-        sidebar.classList.add("minimizado");
-      } else {
-        sidebar.classList.remove("minimizado");
-      }
+      if (menuMinimizado) sidebar.classList.add("minimizado");
+      else sidebar.classList.remove("minimizado");
+    }
+
+    function headersAuth() {
+      return { "Content-Type":"application/json", "Authorization": token };
+    }
+
+    async function requisicao(url, options = {}) {
+      const res = await fetch(url, options);
+      if (res.status === 204) return null;
+      const texto = await res.text();
+      if (!res.ok) throw new Error(texto || "Erro na requisição");
+      try { return texto ? JSON.parse(texto) : null; } catch { return texto; }
     }
 
     async function logar() {
       erro.innerText = "";
+      try {
+        const data = await requisicao(API + "/login", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ usuario: usuario.value, senha: senha.value })
+        });
 
-      const res = await fetch(API + "/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuario: usuario.value,
-          senha: senha.value
-        })
-      });
+        token = data.token;
+        usuarioAtual = {
+          usuario: data.usuario,
+          tipo: data.tipo,
+          empresa: data.empresa || null,
+          nome_completo: data.nome_completo || ""
+        };
 
-      if (res.status !== 200) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("usuarioAtual", JSON.stringify(usuarioAtual));
+        loginTela.style.display = "none";
+        app.style.display = "block";
+        iniciarPainel();
+      } catch {
         erro.innerText = "Login inválido";
-        return;
       }
+    }
 
-      const data = await res.json();
-
-      token = data.token;
-      usuarioAtual = {
-        usuario: data.usuario,
-        tipo: data.tipo,
-        empresa: data.empresa || null,
-        nome_completo: data.nome_completo || ""
-      };
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("usuarioAtual", JSON.stringify(usuarioAtual));
-
-      loginTela.style.display = "none";
-      app.style.display = "block";
-
+    function iniciarPainel() {
       atualizarPainelUsuario();
       aplicarPermissaoLoja();
-      aplicarPermissaoUsuarios();
+      aplicarPermissoes();
       ajustarTipoUsuario();
       aplicarEstadoMenu();
       atualizarTituloLoja();
+      if (!dreInicio.value) {
+        const dt = new Date();
+        dreInicio.value = new Date(dt.getFullYear(), dt.getMonth(), 1).toISOString().slice(0,10);
+      }
+      if (!dreFim.value) dreFim.value = dataHoje();
+      if (!invData.value) invData.value = dataHoje();
       atualizarTudo();
     }
 
     if (token && usuarioAtual) {
       loginTela.style.display = "none";
       app.style.display = "block";
-      atualizarPainelUsuario();
-      aplicarPermissaoLoja();
-      aplicarPermissaoUsuarios();
-      ajustarTipoUsuario();
-      aplicarEstadoMenu();
-      atualizarTituloLoja();
-      atualizarTudo();
+      iniciarPainel();
     }
 
     function logout() {
@@ -619,17 +463,17 @@
       document.querySelectorAll(".main > .card").forEach(c => {
         if (!c.classList.contains("loja")) c.style.display = "none";
       });
-
       document.getElementById(tela).style.display = "block";
-
       if (tela === "usuarios") carregarUsuarios();
+      if (tela === "financeiro") carregarFinanceiroCompleto();
     }
 
-    function headersAuth() {
-      return {
-        "Content-Type": "application/json",
-        "Authorization": token
-      };
+    function mostrarAbaFinanceiro(aba) {
+      document.querySelectorAll(".tab-pane").forEach(el => el.classList.remove("ativo"));
+      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("ativo"));
+      if (aba === "lancamentos") { abaLancamentos.classList.add("ativo"); tabBtnLancamentos.classList.add("ativo"); }
+      if (aba === "investimentos") { abaInvestimentos.classList.add("ativo"); tabBtnInvestimentos.classList.add("ativo"); }
+      if (aba === "dre") { abaDre.classList.add("ativo"); tabBtnDre.classList.add("ativo"); }
     }
 
     async function atualizarTudo() {
@@ -639,522 +483,451 @@
       await carregarClientesVenda();
       await carregarProdutosVenda();
       await carregarVendas();
-      await carregarFinanceiro();
       if (usuarioAtual && (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) {
+        await carregarFinanceiroCompleto();
         await carregarUsuarios();
       }
     }
 
     async function carregarDashboard() {
-      const res = await fetch(API + "/dashboard/" + empresa.value, {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
-
-      const data = await res.json();
-      faturamento.innerText = "R$ " + Number(data.faturamento || 0).toFixed(2);
-      totalVendas.innerText = data.totalVendas || 0;
-      totalProdutos.innerText = data.totalProdutos || 0;
-      totalClientes.innerText = data.totalClientes || 0;
+      try {
+        const data = await requisicao(API + "/dashboard/" + empresa.value, { headers:{ "Authorization": token } });
+        faturamento.innerText = formatarMoeda(data.faturamento || 0);
+        totalVendas.innerText = data.totalVendas || 0;
+        totalProdutos.innerText = data.totalProdutos || 0;
+        totalClientes.innerText = data.totalClientes || 0;
+        dashboardCustos.innerText = formatarMoeda(data.custos || 0);
+        dashboardDespesas.innerText = formatarMoeda(data.despesas || 0);
+        dashboardInvestimentos.innerText = formatarMoeda(data.investimentos || 0);
+      } catch {}
     }
 
     async function cadastrarProduto() {
-      const res = await fetch(API + "/produtos", {
-        method: "POST",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          empresa: empresa.value,
-          nome: nome.value,
-          preco: Number(preco.value),
-          estoque: Number(estoque.value)
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      nome.value = "";
-      preco.value = "";
-      estoque.value = "";
-      atualizarTudo();
+      try {
+        await requisicao(API + "/produtos", {
+          method:"POST",
+          headers: headersAuth(),
+          body: JSON.stringify({ empresa: empresa.value, nome: nome.value, preco: Number(preco.value), estoque: Number(estoque.value) })
+        });
+        nome.value = ""; preco.value = ""; estoque.value = "";
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function editarProduto(id, nomeAtual, precoAtual, estoqueAtual) {
-      const novoNome = prompt("Nome do produto:", nomeAtual);
-      if (novoNome === null) return;
-
-      const novoPreco = prompt("Preço:", precoAtual);
-      if (novoPreco === null) return;
-
-      const novoEstoque = prompt("Estoque:", estoqueAtual);
-      if (novoEstoque === null) return;
-
-      const res = await fetch(API + "/produtos/" + id, {
-        method: "PUT",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          empresa: empresa.value,
-          nome: novoNome,
-          preco: Number(novoPreco),
-          estoque: Number(novoEstoque)
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarProdutos();
-      carregarProdutosVenda();
-      carregarDashboard();
+      const novoNome = prompt("Nome do produto:", nomeAtual); if (novoNome === null) return;
+      const novoPreco = prompt("Preço:", precoAtual); if (novoPreco === null) return;
+      const novoEstoque = prompt("Estoque:", estoqueAtual); if (novoEstoque === null) return;
+      try {
+        await requisicao(API + "/produtos/" + id, {
+          method:"PUT", headers: headersAuth(),
+          body: JSON.stringify({ empresa: empresa.value, nome: novoNome, preco: Number(novoPreco), estoque: Number(novoEstoque) })
+        });
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function excluirProduto(id) {
-      if (!confirm("Deseja excluir este produto?")) return;
-
-      const res = await fetch(API + "/produtos/" + id + "?empresa=" + empresa.value, {
-        method: "DELETE",
-        headers: { "Authorization": token }
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarProdutos();
-      carregarProdutosVenda();
-      carregarDashboard();
+      if (!confirm("Excluir produto?")) return;
+      try {
+        await requisicao(API + "/produtos/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function carregarProdutos() {
-      const res = await fetch(API + "/produtos/" + empresa.value, {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
-
-      const data = await res.json();
-
-      listaProdutos.innerHTML = data.map(p => `
-        <div class="list-item">
-          <strong>ID:</strong> ${p.id}<br>
-          <strong>Produto:</strong> ${p.nome}<br>
-          <strong>Preço:</strong> R$ ${Number(p.preco || 0).toFixed(2)}<br>
-          <strong>Estoque:</strong> ${p.estoque}
-          <div class="acoes">
-            <button class="btn-alt" onclick="editarProduto('${p.id}', '${String(p.nome).replace(/'/g, "\\'")}', '${p.preco}', '${p.estoque}')">Editar</button>
-            <button class="btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
-          </div>
-        </div>
-      `).join("");
+      try {
+        const data = await requisicao(API + "/produtos/" + empresa.value, { headers:{ "Authorization": token } });
+        listaProdutos.innerHTML = data.map(p => `
+          <div class="list-item">
+            <strong>${p.nome}</strong><br>
+            Preço: ${formatarMoeda(p.preco)}<br>
+            Estoque: ${p.estoque}
+            <div class="acoes">
+              <button onclick="editarProduto('${p.id}','${(p.nome||'').replace(/'/g,"\\'")}', '${p.preco}', '${p.estoque}')">Editar</button>
+              <button class="btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
+            </div>
+          </div>`).join("");
+      } catch {}
     }
 
     async function cadastrarCliente() {
-      const res = await fetch(API + "/clientes", {
-        method: "POST",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          empresa: empresa.value,
-          nome: clienteNome.value,
-          endereco: clienteEndereco.value,
-          telefone: clienteTelefone.value,
-          nascimento: clienteNascimento.value,
-          cpf: clienteCpf.value
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      clienteNome.value = "";
-      clienteEndereco.value = "";
-      clienteTelefone.value = "";
-      clienteNascimento.value = "";
-      clienteCpf.value = "";
-      atualizarTudo();
+      try {
+        await requisicao(API + "/clientes", {
+          method:"POST", headers: headersAuth(),
+          body: JSON.stringify({
+            empresa: empresa.value,
+            nome: clienteNome.value,
+            endereco: clienteEndereco.value,
+            telefone: clienteTelefone.value,
+            nascimento: clienteNascimento.value,
+            cpf: clienteCpf.value
+          })
+        });
+        clienteNome.value = ""; clienteEndereco.value = ""; clienteTelefone.value = ""; clienteNascimento.value = ""; clienteCpf.value = "";
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function editarCliente(id, nomeAtual, enderecoAtual, telefoneAtual, nascimentoAtual, cpfAtual) {
-      const novoNome = prompt("Nome do cliente:", nomeAtual);
-      if (novoNome === null) return;
-
-      const novoEndereco = prompt("Endereço:", enderecoAtual || "");
-      if (novoEndereco === null) return;
-
-      const novoTelefone = prompt("Telefone:", telefoneAtual || "");
-      if (novoTelefone === null) return;
-
-      const novoNascimento = prompt("Data de nascimento (YYYY-MM-DD):", nascimentoAtual || "");
-      if (novoNascimento === null) return;
-
-      const novoCpf = prompt("CPF:", cpfAtual || "");
-      if (novoCpf === null) return;
-
-      const res = await fetch(API + "/clientes/" + id, {
-        method: "PUT",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          empresa: empresa.value,
-          nome: novoNome,
-          endereco: novoEndereco,
-          telefone: novoTelefone,
-          nascimento: novoNascimento,
-          cpf: novoCpf
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarClientes();
-      carregarClientesVenda();
-      carregarDashboard();
+      const novoNome = prompt("Nome do cliente:", nomeAtual); if (novoNome === null) return;
+      const novoEndereco = prompt("Endereço:", enderecoAtual || ""); if (novoEndereco === null) return;
+      const novoTelefone = prompt("Telefone:", telefoneAtual || ""); if (novoTelefone === null) return;
+      const novoNascimento = prompt("Nascimento (YYYY-MM-DD):", nascimentoAtual || ""); if (novoNascimento === null) return;
+      const novoCpf = prompt("CPF:", cpfAtual || ""); if (novoCpf === null) return;
+      try {
+        await requisicao(API + "/clientes/" + id, {
+          method:"PUT", headers: headersAuth(),
+          body: JSON.stringify({ empresa: empresa.value, nome: novoNome, endereco: novoEndereco, telefone: novoTelefone, nascimento: novoNascimento, cpf: novoCpf })
+        });
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function excluirCliente(id) {
-      if (!confirm("Deseja excluir este cliente?")) return;
-
-      const res = await fetch(API + "/clientes/" + id + "?empresa=" + empresa.value, {
-        method: "DELETE",
-        headers: { "Authorization": token }
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarClientes();
-      carregarClientesVenda();
-      carregarDashboard();
+      if (!confirm("Excluir cliente?")) return;
+      try {
+        await requisicao(API + "/clientes/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function carregarClientes() {
-      const res = await fetch(API + "/clientes/" + empresa.value, {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
-
-      const data = await res.json();
-
-      listaClientes.innerHTML = data.map(c => `
-        <div class="list-item">
-          <strong>ID:</strong> ${c.id}<br>
-          <strong>Nome:</strong> ${c.nome}<br>
-          <strong>CPF:</strong> ${c.cpf || "-"}<br>
-          <strong>Endereço:</strong> ${c.endereco || "-"}<br>
-          <strong>Telefone:</strong> ${c.telefone || "-"}<br>
-          <strong>Nascimento:</strong> ${c.nascimento || "-"}
-          <div class="acoes">
-            <button class="btn-alt" onclick="editarCliente('${c.id}', '${String(c.nome).replace(/'/g, "\\'")}', '${String(c.endereco || '').replace(/'/g, "\\'")}', '${String(c.telefone || '').replace(/'/g, "\\'")}', '${String(c.nascimento || '').replace(/'/g, "\\'")}', '${String(c.cpf || '').replace(/'/g, "\\'")}')">Editar</button>
-            <button class="btn-danger" onclick="excluirCliente('${c.id}')">Excluir</button>
-          </div>
-        </div>
-      `).join("");
+      try {
+        const data = await requisicao(API + "/clientes/" + empresa.value, { headers:{ "Authorization": token } });
+        listaClientes.innerHTML = data.map(c => `
+          <div class="list-item">
+            <strong>${c.nome}</strong><br>
+            Telefone: ${c.telefone || '-'}<br>
+            Endereço: ${c.endereco || '-'}<br>
+            CPF: ${c.cpf || '-'}
+            <div class="acoes">
+              <button onclick="editarCliente('${c.id}','${(c.nome||'').replace(/'/g,"\\'")}', '${(c.endereco||'').replace(/'/g,"\\'")}', '${(c.telefone||'').replace(/'/g,"\\'")}', '${c.nascimento || ''}', '${(c.cpf||'').replace(/'/g,"\\'")}')">Editar</button>
+              <button class="btn-danger" onclick="excluirCliente('${c.id}')">Excluir</button>
+            </div>
+          </div>`).join("");
+      } catch {}
     }
 
     async function carregarClientesVenda() {
-      const res = await fetch(API + "/clientes/" + empresa.value, {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
-
-      const data = await res.json();
-
-      clienteVenda.innerHTML = `
-        <option value="">Consumidor Final</option>
-        ${data.map(c => `<option value="${c.id}">${c.nome}</option>`).join("")}
-      `;
+      try {
+        const data = await requisicao(API + "/clientes/" + empresa.value, { headers:{ "Authorization": token } });
+        clienteVenda.innerHTML = `<option value="">Consumidor Final</option>` + data.map(c => `<option value="${c.id}">${c.nome}</option>`).join("");
+      } catch {}
     }
 
     async function carregarProdutosVenda() {
-      const res = await fetch(API + "/produtos/" + empresa.value, {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
-
-      const data = await res.json();
-
-      produtoVenda.innerHTML = data.map(p => `
-        <option value="${p.id}">
-          ID ${p.id} - ${p.nome} | Estoque: ${p.estoque} | R$ ${Number(p.preco || 0).toFixed(2)}
-        </option>
-      `).join("");
+      try {
+        const data = await requisicao(API + "/produtos/" + empresa.value, { headers:{ "Authorization": token } });
+        produtoVenda.innerHTML = data.map(p => `<option value="${p.id}">${p.nome} - Estoque: ${p.estoque} - ${formatarMoeda(p.preco)}</option>`).join("");
+      } catch {}
     }
 
     async function vender() {
-      const res = await fetch(API + "/vendas", {
-        method: "POST",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          empresa: empresa.value,
-          produto_id: produtoVenda.value,
-          quantidade: Number(quantidade.value),
-          cliente_id: clienteVenda.value || null,
-          pagamento: pagamento.value
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      quantidade.value = "";
-      clienteVenda.value = "";
-      pagamento.value = "Dinheiro";
-      atualizarTudo();
+      try {
+        await requisicao(API + "/vendas", {
+          method:"POST", headers: headersAuth(),
+          body: JSON.stringify({ produto_id: Number(produtoVenda.value), quantidade: Number(quantidade.value), empresa: empresa.value, cliente_id: clienteVenda.value || null, pagamento: pagamento.value })
+        });
+        quantidade.value = "";
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
-    async function editarVenda(id, produtoAtual, quantidadeAtual, totalAtual, clienteAtual, pagamentoAtual, dataAtual) {
-      const novoProduto = prompt("Produto:", produtoAtual);
-      if (novoProduto === null) return;
-
-      const novaQuantidade = prompt("Quantidade:", quantidadeAtual);
-      if (novaQuantidade === null) return;
-
-      const novoTotal = prompt("Total:", totalAtual);
-      if (novoTotal === null) return;
-
-      const novoCliente = prompt("Cliente:", clienteAtual);
-      if (novoCliente === null) return;
-
-      const novoPagamento = prompt("Pagamento:", pagamentoAtual);
-      if (novoPagamento === null) return;
-
-      const novaData = prompt("Data (YYYY-MM-DD):", dataAtual);
-      if (novaData === null) return;
-
-      const res = await fetch(API + "/vendas/" + id, {
-        method: "PUT",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          empresa: empresa.value,
-          produto: novoProduto,
-          quantidade: Number(novaQuantidade),
-          total: Number(novoTotal),
-          cliente_nome: novoCliente,
-          pagamento: novoPagamento,
-          data: novaData
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarVendas();
-      carregarFinanceiro();
-      carregarDashboard();
+    async function editarVenda(id, produtoEd, quantidadeEd, totalEd, clienteEd, pagamentoEd, dataEd) {
+      const produto = prompt("Produto:", produtoEd); if (produto === null) return;
+      const quantidade = prompt("Quantidade:", quantidadeEd); if (quantidade === null) return;
+      const total = prompt("Total:", totalEd); if (total === null) return;
+      const cliente_nome = prompt("Cliente:", clienteEd || "Consumidor Final"); if (cliente_nome === null) return;
+      const pagamento = prompt("Pagamento:", pagamentoEd); if (pagamento === null) return;
+      const data = prompt("Data (YYYY-MM-DD):", dataEd); if (data === null) return;
+      try {
+        await requisicao(API + "/vendas/" + id, {
+          method:"PUT", headers: headersAuth(),
+          body: JSON.stringify({ empresa: empresa.value, produto, quantidade: Number(quantidade), total: Number(total), cliente_nome, pagamento, data })
+        });
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function excluirVenda(id) {
-      if (!confirm("Deseja excluir esta venda?")) return;
-
-      const res = await fetch(API + "/vendas/" + id + "?empresa=" + empresa.value, {
-        method: "DELETE",
-        headers: { "Authorization": token }
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarVendas();
-      carregarFinanceiro();
-      carregarDashboard();
+      if (!confirm("Excluir venda?")) return;
+      try {
+        await requisicao(API + "/vendas/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
+        atualizarTudo();
+      } catch (e) { alert(e.message); }
     }
 
     async function carregarVendas() {
-      const res = await fetch(API + "/vendas/" + empresa.value, {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
-
-      const data = await res.json();
-
-      listaVendas.innerHTML = data.map(v => `
-        <div class="list-item">
-          <strong>Venda #${v.id}</strong><br>
-          <strong>Cliente:</strong> ${v.cliente_nome || "Consumidor Final"}<br>
-          <strong>Produto:</strong> ${v.produto}<br>
-          <strong>Quantidade:</strong> ${v.quantidade}<br>
-          <strong>Total:</strong> R$ ${Number(v.total || 0).toFixed(2)}<br>
-          <strong>Pagamento:</strong> ${v.pagamento || "-"}<br>
-          <strong>Data:</strong> ${v.data || "-"}
-          <div class="acoes">
-            <button class="btn-alt" onclick="editarVenda('${v.id}', '${String(v.produto).replace(/'/g, "\\'")}', '${v.quantidade}', '${v.total}', '${String(v.cliente_nome || '').replace(/'/g, "\\'")}', '${String(v.pagamento || '').replace(/'/g, "\\'")}', '${String(v.data || '').replace(/'/g, "\\'")}')">Editar</button>
-            <button class="btn-danger" onclick="excluirVenda('${v.id}')">Excluir</button>
-          </div>
-        </div>
-      `).join("");
+      try {
+        const data = await requisicao(API + "/vendas/" + empresa.value, { headers:{ "Authorization": token } });
+        listaVendas.innerHTML = data.map(v => `
+          <div class="list-item">
+            <strong>${v.produto}</strong><br>
+            Quantidade: ${v.quantidade}<br>
+            Total: ${formatarMoeda(v.total)}<br>
+            Cliente: ${v.cliente_nome || 'Consumidor Final'}<br>
+            Pagamento: ${v.pagamento || '-'}<br>
+            Data: ${v.data || '-'}
+            <div class="acoes">
+              <button onclick="editarVenda('${v.id}','${(v.produto||'').replace(/'/g,"\\'")}', '${v.quantidade}', '${v.total}', '${(v.cliente_nome || '').replace(/'/g,"\\'")}', '${(v.pagamento || '').replace(/'/g,"\\'")}', '${v.data || ''}')">Editar</button>
+              <button class="btn-danger" onclick="excluirVenda('${v.id}')">Excluir</button>
+            </div>
+          </div>`).join("");
+      } catch {}
     }
 
-    async function carregarFinanceiro() {
-      const res = await fetch(API + "/financeiro/" + empresa.value, {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
+    async function carregarFinanceiroCompleto() {
+      if (!usuarioAtual || (usuarioAtual.tipo !== "admin" && usuarioAtual.tipo !== "gerente")) return;
+      try {
+        const data = await requisicao(API + "/financeiro/" + empresa.value, { headers:{ "Authorization": token } });
+        saldoReceitas.innerText = formatarMoeda(data.receitas || 0);
+        saldoSaidas.innerText = formatarMoeda((data.custos || 0) + (data.despesas || 0));
+        saldoInvestimentos.innerText = formatarMoeda(data.investimentos || 0);
+        saldoGerencial.innerText = formatarMoeda(data.saldoGerencial || 0);
+      } catch {}
+      await carregarLancamentos();
+      await carregarInvestimentos();
+      await carregarDRE();
+    }
 
-      const data = await res.json();
-      saldo.innerText = "Saldo: R$ " + Number(data.entrada || 0).toFixed(2);
+    async function salvarLancamento() {
+      try {
+        await requisicao(API + "/lancamentos-financeiros", {
+          method:"POST", headers: headersAuth(),
+          body: JSON.stringify({
+            empresa: empresa.value,
+            tipo: finTipo.value,
+            categoria: finCategoria.value,
+            descricao: finDescricao.value,
+            valor: Number(finValor.value),
+            vencimento: finVencimento.value || null,
+            pagamento_data: finPagamentoData.value || null,
+            status: finStatus.value,
+            forma_pagamento: finFormaPagamento.value || null,
+            recorrente: finRecorrente.value === "true",
+            frequencia: finFrequencia.value || null,
+            observacao: finObservacao.value || null
+          })
+        });
+        finCategoria.value = ""; finDescricao.value = ""; finValor.value = ""; finVencimento.value = ""; finPagamentoData.value = ""; finStatus.value = "pendente"; finFormaPagamento.value = ""; finRecorrente.value = "false"; finFrequencia.value = ""; finObservacao.value = "";
+        carregarFinanceiroCompleto();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function editarLancamento(id, tipo, categoria, descricao, valor, vencimento, pagamentoData, status, formaPagamento, recorrente, frequencia, observacao) {
+      const novoTipo = prompt("Tipo (custo/despesa):", tipo); if (novoTipo === null) return;
+      const novaCategoria = prompt("Categoria:", categoria); if (novaCategoria === null) return;
+      const novaDescricao = prompt("Descrição:", descricao); if (novaDescricao === null) return;
+      const novoValor = prompt("Valor:", valor); if (novoValor === null) return;
+      const novoVencimento = prompt("Vencimento (YYYY-MM-DD):", vencimento || ""); if (novoVencimento === null) return;
+      const novaDataPagamento = prompt("Pagamento (YYYY-MM-DD):", pagamentoData || ""); if (novaDataPagamento === null) return;
+      const novoStatus = prompt("Status (pendente/pago):", status); if (novoStatus === null) return;
+      const novaForma = prompt("Forma de pagamento:", formaPagamento || ""); if (novaForma === null) return;
+      const novoRecorrente = prompt("Recorrente? (true/false):", String(recorrente)); if (novoRecorrente === null) return;
+      const novaFrequencia = prompt("Frequência:", frequencia || ""); if (novaFrequencia === null) return;
+      const novaObservacao = prompt("Observação:", observacao || ""); if (novaObservacao === null) return;
+      try {
+        await requisicao(API + "/lancamentos-financeiros/" + id, {
+          method:"PUT", headers: headersAuth(),
+          body: JSON.stringify({
+            empresa: empresa.value,
+            tipo: novoTipo,
+            categoria: novaCategoria,
+            descricao: novaDescricao,
+            valor: Number(novoValor),
+            vencimento: novoVencimento || null,
+            pagamento_data: novaDataPagamento || null,
+            status: novoStatus,
+            forma_pagamento: novaForma || null,
+            recorrente: novoRecorrente === "true",
+            frequencia: novaFrequencia || null,
+            observacao: novaObservacao || null
+          })
+        });
+        carregarFinanceiroCompleto();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function excluirLancamento(id) {
+      if (!confirm("Excluir lançamento?")) return;
+      try {
+        await requisicao(API + "/lancamentos-financeiros/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
+        carregarFinanceiroCompleto();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function carregarLancamentos() {
+      try {
+        const data = await requisicao(API + "/lancamentos-financeiros/" + empresa.value, { headers:{ "Authorization": token } });
+        listaLancamentos.innerHTML = data.map(item => `
+          <div class="list-item">
+            <strong>${item.descricao}</strong><br>
+            Tipo: ${item.tipo}<br>
+            Categoria: ${item.categoria}<br>
+            Valor: ${formatarMoeda(item.valor)}<br>
+            Vencimento: ${item.vencimento || '-'}<br>
+            Pagamento: ${item.pagamento_data || '-'}<br>
+            Status: <span class="pill ${item.status}">${item.status}</span><br>
+            Forma de pagamento: ${item.forma_pagamento || '-'}<br>
+            Recorrente: ${item.recorrente ? 'Sim' : 'Não'}${item.frequencia ? ' - ' + item.frequencia : ''}<br>
+            Observação: ${item.observacao || '-'}
+            <div class="acoes">
+              <button onclick="editarLancamento('${item.id}','${(item.tipo||'').replace(/'/g,"\\'")}','${(item.categoria||'').replace(/'/g,"\\'")}','${(item.descricao||'').replace(/'/g,"\\'")}','${item.valor}','${item.vencimento || ''}','${item.pagamento_data || ''}','${item.status}','${(item.forma_pagamento || '').replace(/'/g,"\\'")}',${item.recorrente ? 'true' : 'false'},'${(item.frequencia || '').replace(/'/g,"\\'")}','${(item.observacao || '').replace(/'/g,"\\'")}')">Editar</button>
+              <button class="btn-danger" onclick="excluirLancamento('${item.id}')">Excluir</button>
+            </div>
+          </div>`).join("");
+      } catch {}
+    }
+
+    async function salvarInvestimento() {
+      try {
+        await requisicao(API + "/investimentos", {
+          method:"POST", headers: headersAuth(),
+          body: JSON.stringify({
+            empresa: empresa.value,
+            tipo_investimento: invTipo.value,
+            descricao: invDescricao.value,
+            valor: Number(invValor.value),
+            data: invData.value || dataHoje(),
+            forma_pagamento: invFormaPagamento.value || null,
+            observacao: invObservacao.value || null
+          })
+        });
+        invTipo.value = ""; invDescricao.value = ""; invValor.value = ""; invData.value = dataHoje(); invFormaPagamento.value = ""; invObservacao.value = "";
+        carregarFinanceiroCompleto();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function editarInvestimento(id, tipoInvestimento, descricao, valor, data, formaPagamento, observacao) {
+      const novoTipo = prompt("Tipo de investimento:", tipoInvestimento); if (novoTipo === null) return;
+      const novaDescricao = prompt("Descrição:", descricao); if (novaDescricao === null) return;
+      const novoValor = prompt("Valor:", valor); if (novoValor === null) return;
+      const novaData = prompt("Data (YYYY-MM-DD):", data); if (novaData === null) return;
+      const novaForma = prompt("Forma de pagamento:", formaPagamento || ""); if (novaForma === null) return;
+      const novaObs = prompt("Observação:", observacao || ""); if (novaObs === null) return;
+      try {
+        await requisicao(API + "/investimentos/" + id, {
+          method:"PUT", headers: headersAuth(),
+          body: JSON.stringify({ empresa: empresa.value, tipo_investimento: novoTipo, descricao: novaDescricao, valor: Number(novoValor), data: novaData, forma_pagamento: novaForma || null, observacao: novaObs || null })
+        });
+        carregarFinanceiroCompleto();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function excluirInvestimento(id) {
+      if (!confirm("Excluir investimento?")) return;
+      try {
+        await requisicao(API + "/investimentos/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
+        carregarFinanceiroCompleto();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function carregarInvestimentos() {
+      try {
+        const data = await requisicao(API + "/investimentos/" + empresa.value, { headers:{ "Authorization": token } });
+        listaInvestimentos.innerHTML = data.map(item => `
+          <div class="list-item">
+            <strong>${item.tipo_investimento}</strong><br>
+            Descrição: ${item.descricao}<br>
+            Valor: ${formatarMoeda(item.valor)}<br>
+            Data: ${item.data || '-'}<br>
+            Forma de pagamento: ${item.forma_pagamento || '-'}<br>
+            Observação: ${item.observacao || '-'}
+            <div class="acoes">
+              <button onclick="editarInvestimento('${item.id}','${(item.tipo_investimento||'').replace(/'/g,"\\'")}','${(item.descricao||'').replace(/'/g,"\\'")}','${item.valor}','${item.data || ''}','${(item.forma_pagamento || '').replace(/'/g,"\\'")}','${(item.observacao || '').replace(/'/g,"\\'")}')">Editar</button>
+              <button class="btn-danger" onclick="excluirInvestimento('${item.id}')">Excluir</button>
+            </div>
+          </div>`).join("");
+      } catch {}
+    }
+
+    async function carregarDRE() {
+      try {
+        const params = new URLSearchParams();
+        if (dreInicio.value) params.append("inicio", dreInicio.value);
+        if (dreFim.value) params.append("fim", dreFim.value);
+        const data = await requisicao(API + "/dre/" + empresa.value + "?" + params.toString(), { headers:{ "Authorization": token } });
+        dreReceitaBruta.innerText = formatarMoeda(data.receitaBruta || 0);
+        dreDeducoes.innerText = formatarMoeda(data.deducoes || 0);
+        dreReceitaLiquida.innerText = formatarMoeda(data.receitaLiquida || 0);
+        dreCustos.innerText = formatarMoeda(data.custos || 0);
+        dreLucroBruto.innerText = formatarMoeda(data.lucroBruto || 0);
+        dreDespesas.innerText = formatarMoeda(data.despesasOperacionais || 0);
+        dreResultado.innerText = formatarMoeda(data.resultadoOperacional || 0);
+        dreInvestimentos.innerText = formatarMoeda(data.investimentos || 0);
+        dreImpactoCaixa.innerText = formatarMoeda(data.impactoFinalCaixa || 0);
+        drePendente.innerText = formatarMoeda(data.pendente || 0);
+      } catch (e) { alert(e.message); }
     }
 
     async function cadastrarUsuario() {
-      let tipoFinal = tipoUsuario.value;
-      let empresaFinal = empresaUsuario.value;
-
-      if (usuarioAtual.tipo === "gerente") {
-        tipoFinal = "funcionario";
-        empresaFinal = usuarioAtual.empresa;
-      }
-
-      const res = await fetch(API + "/usuarios", {
-        method: "POST",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          usuario: novoUsuario.value,
-          senha: novaSenha.value,
-          tipo: tipoFinal,
-          empresa: tipoFinal === "admin" ? null : empresaFinal,
-          nome_completo: nomeCompletoUsuario.value,
-          cpf: cpfUsuario.value,
-          nascimento: nascimentoUsuario.value
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      novoUsuario.value = "";
-      novaSenha.value = "";
-      nomeCompletoUsuario.value = "";
-      cpfUsuario.value = "";
-      nascimentoUsuario.value = "";
-      if (usuarioAtual.tipo === "admin") {
-        tipoUsuario.value = "funcionario";
-        empresaUsuario.value = "variedades";
-      }
-
-      ajustarTipoUsuario();
-      carregarUsuarios();
+      try {
+        let tipoFinal = tipoUsuario.value;
+        let empresaFinal = empresaUsuario.value;
+        if (usuarioAtual.tipo === "gerente") {
+          tipoFinal = "funcionario";
+          empresaFinal = usuarioAtual.empresa;
+        }
+        await requisicao(API + "/usuarios", {
+          method:"POST", headers: headersAuth(),
+          body: JSON.stringify({ usuario: novoUsuario.value, senha: novaSenha.value, tipo: tipoFinal, empresa: tipoFinal === "admin" ? null : empresaFinal, nome_completo: nomeCompletoUsuario.value, cpf: cpfUsuario.value, nascimento: nascimentoUsuario.value })
+        });
+        novoUsuario.value = ""; novaSenha.value = ""; nomeCompletoUsuario.value = ""; cpfUsuario.value = ""; nascimentoUsuario.value = "";
+        if (usuarioAtual.tipo === "admin") { tipoUsuario.value = "funcionario"; empresaUsuario.value = "variedades"; }
+        ajustarTipoUsuario();
+        carregarUsuarios();
+      } catch (e) { alert(e.message); }
     }
 
     async function editarUsuario(id, usuarioEd, tipoEd, empresaEd, nomeEd, cpfEd, nascEd) {
-      let novoUsuario = prompt("Usuário:", usuarioEd);
-      if (novoUsuario === null) return;
-
-      let novoNome = prompt("Nome completo:", nomeEd || "");
-      if (novoNome === null) return;
-
-      let novoCpf = prompt("CPF:", cpfEd || "");
-      if (novoCpf === null) return;
-
-      let novoNascimento = prompt("Nascimento (YYYY-MM-DD):", nascEd || "");
-      if (novoNascimento === null) return;
-
+      let novoUsuario = prompt("Usuário:", usuarioEd); if (novoUsuario === null) return;
+      let novoNome = prompt("Nome completo:", nomeEd || ""); if (novoNome === null) return;
+      let novoCpf = prompt("CPF:", cpfEd || ""); if (novoCpf === null) return;
+      let novoNascimento = prompt("Nascimento (YYYY-MM-DD):", nascEd || ""); if (novoNascimento === null) return;
       let novoTipo = tipoEd;
       let novaEmpresa = empresaEd;
-
       if (usuarioAtual.tipo === "admin") {
-        const tipoPrompt = prompt("Perfil (admin, gerente, funcionario):", tipoEd);
-        if (tipoPrompt === null) return;
-        novoTipo = tipoPrompt;
-
-        const empresaPrompt = prompt("Loja (variedades, tech) ou vazio para admin:", empresaEd || "");
-        if (empresaPrompt === null) return;
-        novaEmpresa = empresaPrompt === "" ? null : empresaPrompt;
+        const tipoPrompt = prompt("Perfil (admin, gerente, funcionario):", tipoEd); if (tipoPrompt === null) return; novoTipo = tipoPrompt;
+        const empresaPrompt = prompt("Loja (variedades, tech) ou vazio para admin:", empresaEd || ""); if (empresaPrompt === null) return; novaEmpresa = empresaPrompt === "" ? null : empresaPrompt;
       }
-
-      if (usuarioAtual.tipo === "gerente") {
-        novoTipo = "funcionario";
-        novaEmpresa = usuarioAtual.empresa;
-      }
-
-      const novaSenha = prompt("Nova senha (deixe em branco para manter):", "");
-      if (novaSenha === null) return;
-
-      const res = await fetch(API + "/usuarios/" + id, {
-        method: "PUT",
-        headers: headersAuth(),
-        body: JSON.stringify({
-          usuario: novoUsuario,
-          senha: novaSenha,
-          tipo: novoTipo,
-          empresa: novaEmpresa,
-          nome_completo: novoNome,
-          cpf: novoCpf,
-          nascimento: novoNascimento
-        })
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarUsuarios();
+      if (usuarioAtual.tipo === "gerente") { novoTipo = "funcionario"; novaEmpresa = usuarioAtual.empresa; }
+      const novaSenha = prompt("Nova senha (deixe em branco para manter):", ""); if (novaSenha === null) return;
+      try {
+        await requisicao(API + "/usuarios/" + id, {
+          method:"PUT", headers: headersAuth(),
+          body: JSON.stringify({ usuario: novoUsuario, tipo: novoTipo, empresa: novaEmpresa, nome_completo: novoNome, cpf: novoCpf, nascimento: novoNascimento, senha: novaSenha })
+        });
+        carregarUsuarios();
+      } catch (e) { alert(e.message); }
     }
 
     async function excluirUsuario(id) {
-      if (usuarioAtual.tipo !== "admin") {
-        alert("Apenas admin pode excluir usuário");
-        return;
-      }
-
-      if (!confirm("Deseja excluir este usuário?")) return;
-
-      const res = await fetch(API + "/usuarios/" + id, {
-        method: "DELETE",
-        headers: { "Authorization": token }
-      });
-
-      if (res.status !== 200) {
-        alert(await res.text());
-        return;
-      }
-
-      carregarUsuarios();
+      if (!confirm("Excluir usuário?")) return;
+      try {
+        await requisicao(API + "/usuarios/" + id, { method:"DELETE", headers:{ "Authorization": token } });
+        carregarUsuarios();
+      } catch (e) { alert(e.message); }
     }
 
     async function carregarUsuarios() {
-      if (!(usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) return;
-
-      const res = await fetch(API + "/usuarios", {
-        headers: { "Authorization": token }
-      });
-      if (res.status !== 200) return;
-
-      const data = await res.json();
-
-      listaUsuarios.innerHTML = data.map(u => `
-        <div class="list-item">
-          <strong>ID:</strong> ${u.id}<br>
-          <strong>Nome:</strong> ${u.nome_completo || "-"}<br>
-          <strong>Usuário:</strong> ${u.usuario}<br>
-          <strong>CPF:</strong> ${u.cpf || "-"}<br>
-          <strong>Nascimento:</strong> ${u.nascimento || "-"}<br>
-          <strong>Perfil:</strong> ${u.tipo}<br>
-          <strong>Loja:</strong> ${u.empresa ? nomeLoja(u.empresa) : "Todas as lojas"}
-          <div class="acoes">
-            <button class="btn-alt" onclick="editarUsuario('${u.id}', '${String(u.usuario).replace(/'/g, "\\'")}', '${String(u.tipo).replace(/'/g, "\\'")}', '${String(u.empresa || '').replace(/'/g, "\\'")}', '${String(u.nome_completo || '').replace(/'/g, "\\'")}', '${String(u.cpf || '').replace(/'/g, "\\'")}', '${String(u.nascimento || '').replace(/'/g, "\\'")}')">Editar</button>
-            ${usuarioAtual.tipo === "admin" ? `<button class="btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>` : ""}
-          </div>
-        </div>
-      `).join("");
+      try {
+        const data = await requisicao(API + "/usuarios", { headers:{ "Authorization": token } });
+        listaUsuarios.innerHTML = data.map(u => `
+          <div class="list-item">
+            <strong>${u.nome_completo || u.usuario}</strong><br>
+            Usuário: ${u.usuario}<br>
+            Perfil: ${perfilFormatado(u.tipo)}<br>
+            Loja: ${u.tipo === 'admin' ? 'Todas as lojas' : nomeLoja(u.empresa)}<br>
+            CPF: ${u.cpf || '-'}<br>
+            Nascimento: ${u.nascimento || '-'}
+            <div class="acoes">
+              <button onclick="editarUsuario('${u.id}','${(u.usuario||'').replace(/'/g,"\\'")}','${u.tipo}','${u.empresa || ''}','${(u.nome_completo || '').replace(/'/g,"\\'")}','${(u.cpf || '').replace(/'/g,"\\'")}','${u.nascimento || ''}')">Editar</button>
+              ${usuarioAtual.tipo === 'admin' ? `<button class="btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>` : ''}
+            </div>
+          </div>`).join("");
+      } catch {}
     }
   </script>
-
 </body>
 </html>
