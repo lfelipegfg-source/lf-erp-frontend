@@ -32,6 +32,7 @@
     .card-box.warn { background:#7c2d12; }
     .card-box.info { background:#1d4ed8; }
     .card-box.positive { background:#166534; }
+    .card-box.danger { background:#991b1b; }
     .page-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
     .store-title { margin:0; font-size:28px; color:#111827; }
     .store-subtitle { color:#6b7280; font-size:14px; }
@@ -45,6 +46,8 @@
     .btn-danger:hover { background:#b91c1c; }
     .btn-green { background:#0f766e; }
     .btn-green:hover { background:#115e59; }
+    .btn-orange { background:#ea580c; }
+    .btn-orange:hover { background:#c2410c; }
     .list-item { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; background:#fafafa; }
     .section-title { margin-top:0; }
     .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -63,8 +66,11 @@
     .pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:bold; }
     .pill.pendente { background:#fef3c7; color:#92400e; }
     .pill.pago { background:#dcfce7; color:#166534; }
+    .pill.atrasado { background:#fee2e2; color:#991b1b; }
     .pill.entrada { background:#dcfce7; color:#166534; }
     .pill.saida { background:#fee2e2; color:#991b1b; }
+    .pill.pagar { background:#fee2e2; color:#991b1b; }
+    .pill.receber { background:#dcfce7; color:#166534; }
     .dre-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
     .dre-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
     .dre-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
@@ -78,6 +84,10 @@
     .fluxo-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
     .fluxo-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
     .muted { color:#6b7280; font-size:13px; }
+    .contas-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+    .contas-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
+    .contas-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
+    .contas-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
     @media print {
       body * { visibility:hidden; }
       #dreExportavel, #dreExportavel * { visibility:visible; }
@@ -232,7 +242,7 @@
 
         <div id="financeiro" class="card" style="display:none;">
           <h3 class="section-title">Financeiro</h3>
-          <div class="section-subtitle">Custos e despesas, investimentos, DRE e fluxo de caixa da loja selecionada.</div>
+          <div class="section-subtitle">Custos e despesas, investimentos, DRE, fluxo de caixa e contas da loja selecionada.</div>
 
           <div class="cards" style="margin-bottom:16px;">
             <div class="card-box finance"><h4>Receitas</h4><p id="saldoReceitas">R$ 0,00</p></div>
@@ -246,6 +256,7 @@
             <button id="tabBtnInvestimentos" class="tab-btn" onclick="mostrarAbaFinanceiro('investimentos')">Investimentos</button>
             <button id="tabBtnDre" class="tab-btn" onclick="mostrarAbaFinanceiro('dre')">DRE</button>
             <button id="tabBtnFluxoCaixa" class="tab-btn" onclick="mostrarAbaFinanceiro('fluxocaixa')">Fluxo de Caixa</button>
+            <button id="tabBtnContas" class="tab-btn" onclick="mostrarAbaFinanceiro('contas')">Contas</button>
           </div>
 
           <div id="abaLancamentos" class="tab-pane ativo">
@@ -352,6 +363,50 @@
 
             <div class="muted">Movimentos em ordem cronológica dentro do período selecionado.</div>
             <div id="listaFluxoCaixa"></div>
+          </div>
+
+          <div id="abaContas" class="tab-pane">
+            <div class="grid-4">
+              <select id="contaTipo">
+                <option value="pagar">Conta a Pagar</option>
+                <option value="receber">Conta a Receber</option>
+              </select>
+              <input id="contaDescricao" placeholder="Descrição">
+              <input id="contaPessoa" placeholder="Cliente / Fornecedor">
+              <input id="contaValor" type="number" step="0.01" placeholder="Valor">
+              <input id="contaVencimento" type="date">
+              <select id="contaStatus">
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago / Recebido</option>
+              </select>
+              <select id="contaFormaPagamento">
+                <option value="">Forma de pagamento</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Boleto">Boleto</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+              <input id="contaPagamentoData" type="date">
+            </div>
+
+            <div class="grid-2">
+              <input id="contaObservacao" placeholder="Observação">
+              <div>
+                <button class="btn-green" onclick="salvarContaFinanceira()">Salvar Conta</button>
+              </div>
+            </div>
+
+            <div class="contas-grid">
+              <div class="contas-item"><h4>Total a Pagar</h4><p id="contasTotalPagar">R$ 0,00</p></div>
+              <div class="contas-item"><h4>Total a Receber</h4><p id="contasTotalReceber">R$ 0,00</p></div>
+              <div class="contas-item"><h4>Contas Pendentes</h4><p id="contasPendentes">0</p></div>
+              <div class="contas-item"><h4>Contas Atrasadas</h4><p id="contasAtrasadas">0</p></div>
+            </div>
+
+            <div class="muted">As contas atrasadas aparecem automaticamente em vermelho quando a data de vencimento já passou e a conta ainda não foi baixada.</div>
+            <div id="listaContasFinanceiras"></div>
           </div>
         </div>
 
@@ -551,6 +606,7 @@
       if (!dreFim.value) dreFim.value = filtroFim.value;
       if (!fluxoInicio.value) fluxoInicio.value = filtroInicio.value;
       if (!fluxoFim.value) fluxoFim.value = filtroFim.value;
+      if (!contaVencimento.value) contaVencimento.value = dataHoje();
       if (!invData.value) invData.value = dataHoje();
       atualizarTudo();
     }
@@ -579,10 +635,12 @@
     function mostrarAbaFinanceiro(aba) {
       document.querySelectorAll(".tab-pane").forEach(el => el.classList.remove("ativo"));
       document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("ativo"));
+
       if (aba === "lancamentos") { abaLancamentos.classList.add("ativo"); tabBtnLancamentos.classList.add("ativo"); }
       if (aba === "investimentos") { abaInvestimentos.classList.add("ativo"); tabBtnInvestimentos.classList.add("ativo"); }
       if (aba === "dre") { abaDre.classList.add("ativo"); tabBtnDre.classList.add("ativo"); }
       if (aba === "fluxocaixa") { abaFluxoCaixa.classList.add("ativo"); tabBtnFluxoCaixa.classList.add("ativo"); }
+      if (aba === "contas") { abaContas.classList.add("ativo"); tabBtnContas.classList.add("ativo"); }
     }
 
     async function atualizarTudo() {
@@ -853,6 +911,7 @@
       await carregarInvestimentos();
       await carregarDRE();
       await carregarFluxoCaixa();
+      await carregarContasFinanceiras();
     }
 
     async function salvarLancamento() {
@@ -1062,6 +1121,169 @@
             </div>
           `).join("")
           : `<div class="list-item">Nenhum movimento encontrado no período informado.</div>`;
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    function calcularStatusConta(conta) {
+      if ((conta.status || "").toLowerCase() === "pago") return "pago";
+      const hojeLocal = dataHoje();
+      if (conta.vencimento && conta.vencimento < hojeLocal) return "atrasado";
+      return "pendente";
+    }
+
+    async function salvarContaFinanceira() {
+      try {
+        await requisicao(API + "/contas-financeiras", {
+          method: "POST",
+          headers: headersAuth(),
+          body: JSON.stringify({
+            empresa: empresa.value,
+            tipo: contaTipo.value,
+            descricao: contaDescricao.value,
+            cliente_fornecedor: contaPessoa.value,
+            valor: Number(contaValor.value),
+            vencimento: contaVencimento.value || null,
+            pagamento_data: contaPagamentoData.value || null,
+            status: contaStatus.value,
+            forma_pagamento: contaFormaPagamento.value || null,
+            observacao: contaObservacao.value || null
+          })
+        });
+
+        contaTipo.value = "pagar";
+        contaDescricao.value = "";
+        contaPessoa.value = "";
+        contaValor.value = "";
+        contaVencimento.value = dataHoje();
+        contaPagamentoData.value = "";
+        contaStatus.value = "pendente";
+        contaFormaPagamento.value = "";
+        contaObservacao.value = "";
+
+        carregarContasFinanceiras();
+        carregarFluxoCaixa();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function carregarContasFinanceiras() {
+      try {
+        const data = await requisicao(API + "/contas-financeiras/" + empresa.value, {
+          headers: { "Authorization": token }
+        });
+
+        let totalPagar = 0;
+        let totalReceber = 0;
+        let pendentes = 0;
+        let atrasadas = 0;
+
+        listaContasFinanceiras.innerHTML = (data || []).length
+          ? data.map(item => {
+              const statusCalculado = calcularStatusConta(item);
+
+              if (item.tipo === "pagar") totalPagar += Number(item.valor || 0);
+              if (item.tipo === "receber") totalReceber += Number(item.valor || 0);
+              if (statusCalculado === "pendente") pendentes += 1;
+              if (statusCalculado === "atrasado") atrasadas += 1;
+
+              const textoAcao = item.tipo === "pagar" ? "Marcar como Pago" : "Marcar como Recebido";
+
+              return `
+                <div class="list-item">
+                  <strong>${item.descricao || "-"}</strong><br>
+                  Tipo: <span class="pill ${item.tipo}">${item.tipo}</span><br>
+                  Cliente/Fornecedor: ${item.cliente_fornecedor || "-"}<br>
+                  Valor: ${formatarMoeda(item.valor || 0)}<br>
+                  Vencimento: ${item.vencimento || "-"}<br>
+                  Pagamento/Recebimento: ${item.pagamento_data || "-"}<br>
+                  Status: <span class="pill ${statusCalculado}">${statusCalculado}</span><br>
+                  Forma de pagamento: ${item.forma_pagamento || "-"}<br>
+                  Observação: ${item.observacao || "-"}
+                  <div class="acoes">
+                    <button class="btn-alt" onclick="editarContaFinanceira('${item.id}', '${(item.tipo || "").replace(/'/g, "\\'")}', '${(item.descricao || "").replace(/'/g, "\\'")}', '${(item.cliente_fornecedor || "").replace(/'/g, "\\'")}', '${item.valor || ""}', '${item.vencimento || ""}', '${item.pagamento_data || ""}', '${(item.status || "").replace(/'/g, "\\'")}', '${(item.forma_pagamento || "").replace(/'/g, "\\'")}', '${(item.observacao || "").replace(/'/g, "\\'")}')">Editar</button>
+                    <button class="btn-green" onclick="marcarContaComoBaixada('${item.id}', '${item.tipo}')">${textoAcao}</button>
+                    <button class="btn-danger" onclick="excluirContaFinanceira('${item.id}')">Excluir</button>
+                  </div>
+                </div>
+              `;
+            }).join("")
+          : `<div class="list-item">Nenhuma conta cadastrada.</div>`;
+
+        contasTotalPagar.innerText = formatarMoeda(totalPagar);
+        contasTotalReceber.innerText = formatarMoeda(totalReceber);
+        contasPendentes.innerText = pendentes;
+        contasAtrasadas.innerText = atrasadas;
+      } catch (e) {
+        listaContasFinanceiras.innerHTML = `<div class="list-item">Não foi possível carregar as contas. Confirme se o backend já está com as rotas de contas financeiras.</div>`;
+      }
+    }
+
+    async function marcarContaComoBaixada(id, tipoConta) {
+      try {
+        await requisicao(API + "/contas-financeiras/" + id, {
+          method: "PUT",
+          headers: headersAuth(),
+          body: JSON.stringify({
+            empresa: empresa.value,
+            status: "pago",
+            pagamento_data: dataHoje(),
+            tipo: tipoConta
+          })
+        });
+        carregarContasFinanceiras();
+        carregarFluxoCaixa();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function editarContaFinanceira(id, tipoAtual, descricaoAtual, pessoaAtual, valorAtual, vencimentoAtual, pagamentoAtual, statusAtual, formaAtual, observacaoAtual) {
+      const novoTipo = prompt("Tipo (pagar/receber):", tipoAtual); if (novoTipo === null) return;
+      const novaDescricao = prompt("Descrição:", descricaoAtual); if (novaDescricao === null) return;
+      const novaPessoa = prompt("Cliente/Fornecedor:", pessoaAtual); if (novaPessoa === null) return;
+      const novoValor = prompt("Valor:", valorAtual); if (novoValor === null) return;
+      const novoVencimento = prompt("Vencimento (YYYY-MM-DD):", vencimentoAtual || ""); if (novoVencimento === null) return;
+      const novoPagamento = prompt("Pagamento/Recebimento (YYYY-MM-DD):", pagamentoAtual || ""); if (novoPagamento === null) return;
+      const novoStatus = prompt("Status (pendente/pago):", statusAtual || "pendente"); if (novoStatus === null) return;
+      const novaForma = prompt("Forma de pagamento:", formaAtual || ""); if (novaForma === null) return;
+      const novaObs = prompt("Observação:", observacaoAtual || ""); if (novaObs === null) return;
+
+      try {
+        await requisicao(API + "/contas-financeiras/" + id, {
+          method: "PUT",
+          headers: headersAuth(),
+          body: JSON.stringify({
+            empresa: empresa.value,
+            tipo: novoTipo,
+            descricao: novaDescricao,
+            cliente_fornecedor: novaPessoa,
+            valor: Number(novoValor),
+            vencimento: novoVencimento || null,
+            pagamento_data: novoPagamento || null,
+            status: novoStatus || "pendente",
+            forma_pagamento: novaForma || null,
+            observacao: novaObs || null
+          })
+        });
+        carregarContasFinanceiras();
+        carregarFluxoCaixa();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function excluirContaFinanceira(id) {
+      if (!confirm("Excluir conta?")) return;
+      try {
+        await requisicao(API + "/contas-financeiras/" + id + "?empresa=" + empresa.value, {
+          method: "DELETE",
+          headers: { "Authorization": token }
+        });
+        carregarContasFinanceiras();
+        carregarFluxoCaixa();
       } catch (e) {
         alert(e.message);
       }
