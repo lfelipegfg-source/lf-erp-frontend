@@ -1,1527 +1,175 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LF ERP</title>
-  <style>
-    :root {
-      --primary: #b30000;
-      --primary-dark: #8c0000;
-      --sidebar: #1f2937;
-      --sidebar-hover: #374151;
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
-      --error-bg: #fee2e2;
-      --error-text: #991b1b;
-      --warning-bg: #fef3c7;
-      --warning-text: #92400e;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      --radius: 16px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .login-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #7f0000, #c1121f);
-      padding: 20px;
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 430px;
-      background: var(--card);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
-    }
-
-    .login-card h1 {
-      font-size: 32px;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-
-    .login-card p {
-      color: var(--muted);
-      margin-bottom: 22px;
-    }
-
-    .app {
-      min-height: 100vh;
-    }
-
-    .topbar {
-      background: var(--primary);
-      color: white;
-      padding: 16px 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      box-shadow: var(--shadow);
-    }
-
-    .topbar-left h1 {
-      font-size: 26px;
-      margin-bottom: 4px;
-    }
-
-    .topbar-left small {
-      opacity: 0.9;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .user-pill {
-      background: rgba(255,255,255,0.12);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 14px;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      min-height: calc(100vh - 78px);
-    }
-
-    .sidebar {
-      background: var(--sidebar);
-      color: white;
-      padding: 18px 12px;
-    }
-
-    .sidebar h2 {
-      font-size: 15px;
-      margin-bottom: 16px;
-      padding-left: 8px;
-      opacity: 0.95;
-    }
-
-    .menu-btn {
-      width: 100%;
-      border: none;
-      background: transparent;
-      color: white;
-      text-align: left;
-      padding: 12px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-bottom: 8px;
-      font-size: 14px;
-      transition: 0.2s;
-    }
-
-    .menu-btn:hover,
-    .menu-btn.active {
-      background: var(--sidebar-hover);
-    }
-
-    .content {
-      padding: 22px;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    .page-header {
-      margin-bottom: 18px;
-    }
-
-    .page-header h2 {
-      font-size: 24px;
-      margin-bottom: 6px;
-    }
-
-    .page-header p {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .summary-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .summary-label {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    .summary-value {
-      font-size: 30px;
-      font-weight: bold;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .card h3 {
-      font-size: 18px;
-      margin-bottom: 14px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      font-weight: bold;
-      color: #374151;
-    }
-
-    .form-control {
-      width: 100%;
-      border: 1px solid #d1d5db;
-      background: white;
-      border-radius: 12px;
-      padding: 11px 12px;
-      outline: none;
-    }
-
-    .form-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(179, 0, 0, 0.08);
-    }
-
-    .actions-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 12px;
-      padding: 11px 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-secondary {
-      background: #374151;
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      background: #1f2937;
-    }
-
-    .btn-danger {
-      background: #dc2626;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #b91c1c;
-    }
-
-    .btn-outline {
-      background: white;
-      color: var(--primary);
-      border: 1px solid var(--primary);
-    }
-
-    .btn-outline:hover {
-      background: #fff5f5;
-    }
-
-    .status-box {
-      margin-bottom: 16px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      display: none;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .status-success {
-      display: block;
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .status-error {
-      display: block;
-      background: var(--error-bg);
-      color: var(--error-text);
-    }
-
-    .status-warning {
-      display: block;
-      background: var(--warning-bg);
-      color: var(--warning-text);
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      font-size: 14px;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
-
-    th {
-      background: #f9fafb;
-      color: var(--text);
-      position: sticky;
-      top: 0;
-    }
-
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 5px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .badge-ok {
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .badge-alert {
-      background: var(--error-bg);
-      color: var(--error-text);
-    }
-
-    .badge-info {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .totals-box {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 14px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: end;
-      margin-bottom: 16px;
-    }
-
-    .toolbar .form-group {
-      margin-bottom: 0;
-      min-width: 180px;
-    }
-
-    .item-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr auto;
-      gap: 10px;
-      align-items: end;
-      margin-top: 8px;
-    }
-
-    .stats-note {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .empty-state {
-      padding: 20px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .item-row {
-        grid-template-columns: 1fr;
-      }
-
-      .topbar-right {
-        width: 100%;
-        justify-content: flex-start;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>LF ERP</title>
+<style>
+body { font-family: Arial; margin:0; background:#f4f6f9;}
+header { background:#b30000; color:#fff; padding:15px; display:flex; justify-content:space-between;}
+.container { display:flex;}
+.sidebar { width:220px; background:#1f2937; color:#fff; padding:10px;}
+.sidebar button { width:100%; padding:10px; margin:5px 0; border:none; background:none; color:#fff; cursor:pointer;}
+.content { flex:1; padding:20px;}
+.card { background:#fff; padding:15px; margin-bottom:15px;}
+.hidden { display:none;}
+</style>
 </head>
+
 <body>
-  <div id="loginScreen" class="login-screen">
-    <div class="login-card">
-      <h1>LF ERP</h1>
-      <p>Entre com seu usuário e senha para acessar o sistema.</p>
-
-      <div id="loginStatus" class="status-box"></div>
-
-      <div class="form-group">
-        <label>Usuário</label>
-        <input id="loginUsuario" class="form-control" type="text" placeholder="Seu usuário" />
-      </div>
-
-      <div class="form-group">
-        <label>Senha</label>
-        <input id="loginSenha" class="form-control" type="password" placeholder="Sua senha" />
-      </div>
-
-      <div class="actions-row">
-        <button class="btn btn-primary" style="width:100%;" onclick="fazerLogin()">Entrar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="app" class="app hidden">
-    <header class="topbar">
-      <div class="topbar-left">
-        <h1>LF ERP</h1>
-        <small id="empresaLabel">Sistema de gestão</small>
-      </div>
-
-      <div class="topbar-right">
-        <div class="user-pill" id="usuarioInfo">Usuário</div>
-        <button class="btn btn-danger" onclick="sair()">Sair</button>
-      </div>
-    </header>
-
-    <div class="layout">
-      <aside class="sidebar">
-        <h2>Menu</h2>
-        <button class="menu-btn active" onclick="mostrarPagina('dashboard', this)">Dashboard</button>
-        <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)">Fornecedores</button>
-        <button class="menu-btn" onclick="mostrarPagina('compras', this)">Compras</button>
-        <button class="menu-btn" onclick="mostrarPagina('estoque', this)">Estoque</button>
-        <button class="menu-btn" onclick="mostrarPagina('movimentacoes', this)">Movimentações</button>
-        <button class="menu-btn" onclick="mostrarPagina('ajuste', this)">Ajuste de Estoque</button>
-      </aside>
-
-      <main class="content">
-        <div id="appStatus" class="status-box"></div>
-
-        <section id="dashboard" class="page active">
-          <div class="page-header">
-            <h2>Dashboard</h2>
-            <p>Resumo geral da operação de compras e estoque.</p>
-          </div>
-
-          <div class="summary-grid">
-            <div class="summary-card">
-              <div class="summary-label">Produtos</div>
-              <div class="summary-value" id="dashProdutos">0</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Fornecedores</div>
-              <div class="summary-value" id="dashFornecedores">0</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Compras</div>
-              <div class="summary-value" id="dashCompras">0</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Estoque Baixo</div>
-              <div class="summary-value" id="dashAlerta">0</div>
-            </div>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Produtos com alerta</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Produto</th>
-                      <th>Estoque</th>
-                      <th>Mínimo</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="dashboardAlertasBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Últimas movimentações</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Produto</th>
-                      <th>Tipo</th>
-                      <th>Qtd</th>
-                      <th>Data</th>
-                    </tr>
-                  </thead>
-                  <tbody id="dashboardMovBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="fornecedores" class="page">
-          <div class="page-header">
-            <h2>Fornecedores</h2>
-            <p>Cadastre e acompanhe os fornecedores da operação.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Novo fornecedor</h3>
-
-              <div class="form-group">
-                <label>Nome</label>
-                <input id="f_nome" class="form-control" type="text" />
-              </div>
-
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Contato</label>
-                  <input id="f_contato" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>Telefone</label>
-                  <input id="f_tel" class="form-control" type="text" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Email</label>
-                <input id="f_email" class="form-control" type="email" />
-              </div>
-
-              <div class="form-group">
-                <label>Endereço</label>
-                <input id="f_endereco" class="form-control" type="text" />
-              </div>
-
-              <div class="form-group">
-                <label>Observação</label>
-                <input id="f_obs" class="form-control" type="text" />
-              </div>
-
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarFornecedor()">Salvar fornecedor</button>
-                <button class="btn btn-secondary" onclick="limparFornecedor()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Lista de fornecedores</h3>
-
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar</label>
-                  <input id="buscaFornecedor" class="form-control" type="text" placeholder="Digite o nome..." oninput="renderFornecedores()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarFornecedores()">Atualizar</button>
-              </div>
-
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Nome</th>
-                      <th>Contato</th>
-                      <th>Telefone</th>
-                      <th>Email</th>
-                    </tr>
-                  </thead>
-                  <tbody id="listaFornecedores"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="compras" class="page">
-          <div class="page-header">
-            <h2>Compras</h2>
-            <p>Registre compras e atualize o estoque automaticamente.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Nova compra</h3>
-
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Fornecedor</label>
-                  <select id="c_fornecedor" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                  <label>Data</label>
-                  <input id="c_data" class="form-control" type="date" />
-                </div>
-              </div>
-
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Gerar conta a pagar</label>
-                  <select id="c_conta_pagar" class="form-control">
-                    <option value="false">Não</option>
-                    <option value="true">Sim</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Observação</label>
-                  <input id="c_obs" class="form-control" type="text" />
-                </div>
-              </div>
-
-              <h3 style="margin-top: 16px;">Adicionar item</h3>
-
-              <div class="item-row">
-                <div class="form-group">
-                  <label>Produto</label>
-                  <select id="c_produto" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                  <label>Quantidade</label>
-                  <input id="c_qtd" class="form-control" type="number" min="1" />
-                </div>
-                <div class="form-group">
-                  <label>Custo Unitário</label>
-                  <input id="c_custo" class="form-control" type="number" step="0.01" min="0" />
-                </div>
-                <div class="form-group">
-                  <label>&nbsp;</label>
-                  <button class="btn btn-primary" style="width:100%;" onclick="adicionarItemCompra()">Adicionar</button>
-                </div>
-              </div>
-
-              <div class="table-wrap" style="margin-top: 14px;">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Produto</th>
-                      <th>Quantidade</th>
-                      <th>Custo</th>
-                      <th>Subtotal</th>
-                      <th>Ação</th>
-                    </tr>
-                  </thead>
-                  <tbody id="itensCompraBody"></tbody>
-                </table>
-              </div>
-
-              <div class="totals-box">
-                Total da compra: R$ <span id="totalCompra" style="margin-left: 6px;">0,00</span>
-              </div>
-
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarCompra()">Salvar compra</button>
-                <button class="btn btn-secondary" onclick="limparCompra()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Histórico de compras</h3>
-
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar por fornecedor</label>
-                  <input id="buscaCompra" class="form-control" type="text" placeholder="Digite o fornecedor..." oninput="renderCompras()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarCompras()">Atualizar</button>
-              </div>
-
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>ID</th>
-                      <th>Fornecedor</th>
-                      <th>Total</th>
-                      <th>Data</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="listaCompras"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="estoque" class="page">
-          <div class="page-header">
-            <h2>Estoque</h2>
-            <p>Acompanhe custo, preço, estoque atual e estoque mínimo.</p>
-          </div>
-
-          <div class="card">
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar produto</label>
-                <input id="buscaProduto" class="form-control" type="text" placeholder="Digite o nome do produto..." oninput="renderProdutos()" />
-              </div>
-              <button class="btn btn-outline" onclick="carregarProdutos()">Atualizar</button>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Empresa</th>
-                    <th>Produto</th>
-                    <th>Categoria</th>
-                    <th>Preço</th>
-                    <th>Custo</th>
-                    <th>Estoque</th>
-                    <th>Mínimo</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="listaProdutos"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="movimentacoes" class="page">
-          <div class="page-header">
-            <h2>Movimentações</h2>
-            <p>Histórico de entradas, saídas e ajustes do estoque.</p>
-          </div>
-
-          <div class="card">
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar produto</label>
-                <input id="buscaMov" class="form-control" type="text" placeholder="Digite o nome do produto..." oninput="renderMovimentacoes()" />
-              </div>
-              <button class="btn btn-outline" onclick="carregarMovimentacoes()">Atualizar</button>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Empresa</th>
-                    <th>Produto</th>
-                    <th>Tipo</th>
-                    <th>Quantidade</th>
-                    <th>Observação</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody id="listaMov"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="ajuste" class="page">
-          <div class="page-header">
-            <h2>Ajuste de Estoque</h2>
-            <p>Faça correções manuais, perdas e avarias com rastreabilidade.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Novo ajuste</h3>
-
-              <div class="form-group">
-                <label>Produto</label>
-                <select id="a_produto" class="form-control"></select>
-              </div>
-
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Tipo</label>
-                  <select id="a_tipo" class="form-control">
-                    <option value="ajuste_entrada">Ajuste de entrada</option>
-                    <option value="ajuste_saida">Ajuste de saída</option>
-                    <option value="perda">Perda</option>
-                    <option value="avaria">Avaria</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label>Quantidade</label>
-                  <input id="a_qtd" class="form-control" type="number" min="1" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Observação</label>
-                <input id="a_obs" class="form-control" type="text" />
-              </div>
-
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarAjuste()">Salvar ajuste</button>
-                <button class="btn btn-secondary" onclick="limparAjuste()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Orientação</h3>
-              <p class="muted">
-                Use esta tela apenas para correções operacionais, inventário, perda, avaria ou acerto manual.
-                Toda movimentação fica registrada no histórico.
-              </p>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <script>
-    const API = "https://lf-erp-backend.onrender.com";
-
-    let token = localStorage.getItem("lf_token") || "";
-    let empresa = localStorage.getItem("lf_empresa") || "";
-    let tipo = localStorage.getItem("lf_tipo") || "";
-    let usuario = localStorage.getItem("lf_usuario") || "";
-    let nomeCompleto = localStorage.getItem("lf_nome_completo") || "";
-
-    let produtos = [];
-    let fornecedores = [];
-    let compras = [];
-    let movimentacoes = [];
-    let itensCompra = [];
-
-    function money(v) {
-      return Number(v || 0).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-    function formatDate(value) {
-      if (!value) return "-";
-      if (typeof value === "string" && value.length === 10 && value.includes("-")) {
-        const [ano, mes, dia] = value.split("-");
-        return `${dia}/${mes}/${ano}`;
-      }
-      const d = new Date(value);
-      if (isNaN(d.getTime())) return value;
-      return d.toLocaleString("pt-BR");
-    }
-
-    function hojeInput() {
-      const d = new Date();
-      const ano = d.getFullYear();
-      const mes = String(d.getMonth() + 1).padStart(2, "0");
-      const dia = String(d.getDate()).padStart(2, "0");
-      return `${ano}-${mes}-${dia}`;
-    }
-
-    function setStatus(message, type = "success", target = "appStatus") {
-      const box = document.getElementById(target);
-      box.className = `status-box status-${type}`;
-      box.textContent = message;
-      setTimeout(() => {
-        box.className = "status-box";
-        box.textContent = "";
-      }, 3500);
-    }
-
-    function mostrarPagina(pageId, button) {
-      document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
-      document.querySelectorAll(".menu-btn").forEach(btn => btn.classList.remove("active"));
-      document.getElementById(pageId).classList.add("active");
-      if (button) button.classList.add("active");
-    }
-
-    async function api(url, options = {}) {
-      const response = await fetch(`${API}${url}`, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { authorization: token } : {}),
-          ...(options.headers || {})
-        }
-      });
-
-      if (response.status === 403) {
-        sair();
-        throw new Error("Sessão expirada ou sem permissão.");
-      }
-
-      const contentType = response.headers.get("content-type") || "";
-      if (!response.ok) {
-        let errorText = "Erro na requisição.";
-        try {
-          if (contentType.includes("application/json")) {
-            const json = await response.json();
-            errorText = json.message || JSON.stringify(json);
-          } else {
-            errorText = await response.text();
-          }
-        } catch (_) {}
-        throw new Error(errorText || "Erro na requisição.");
-      }
-
-      if (contentType.includes("application/json")) {
-        return response.json();
-      }
-
-      return response.text();
-    }
-
-    async function fazerLogin() {
-      const usuarioInput = document.getElementById("loginUsuario").value.trim();
-      const senhaInput = document.getElementById("loginSenha").value.trim();
-
-      if (!usuarioInput || !senhaInput) {
-        setStatus("Preencha usuário e senha.", "error", "loginStatus");
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            usuario: usuarioInput,
-            senha: senhaInput
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(await response.text());
-        }
-
-        const data = await response.json();
-
-        token = data.token || "";
-        empresa = data.empresa || "";
-        tipo = data.tipo || "";
-        usuario = data.usuario || "";
-        nomeCompleto = data.nome_completo || "";
-
-        localStorage.setItem("lf_token", token);
-        localStorage.setItem("lf_empresa", empresa);
-        localStorage.setItem("lf_tipo", tipo);
-        localStorage.setItem("lf_usuario", usuario);
-        localStorage.setItem("lf_nome_completo", nomeCompleto);
-
-        alternarTelas();
-        await carregarTudo();
-      } catch (error) {
-        setStatus(error.message || "Erro ao fazer login.", "error", "loginStatus");
-      }
-    }
-
-    function sair() {
-      localStorage.removeItem("lf_token");
-      localStorage.removeItem("lf_empresa");
-      localStorage.removeItem("lf_tipo");
-      localStorage.removeItem("lf_usuario");
-      localStorage.removeItem("lf_nome_completo");
-
-      token = "";
-      empresa = "";
-      tipo = "";
-      usuario = "";
-      nomeCompleto = "";
-
-      document.getElementById("app").classList.add("hidden");
-      document.getElementById("loginScreen").classList.remove("hidden");
-      document.getElementById("loginSenha").value = "";
-    }
-
-    function alternarTelas() {
-      if (token) {
-        document.getElementById("loginScreen").classList.add("hidden");
-        document.getElementById("app").classList.remove("hidden");
-
-        const empresaTexto = tipo === "admin"
-          ? "Administrador geral"
-          : `Loja: ${empresa}`;
-
-        document.getElementById("empresaLabel").textContent = empresaTexto;
-        document.getElementById("usuarioInfo").textContent =
-          `${nomeCompleto || usuario || "Usuário"} • ${tipo || "-"}`;
-      } else {
-        document.getElementById("app").classList.add("hidden");
-        document.getElementById("loginScreen").classList.remove("hidden");
-      }
-    }
-
-    async function carregarProdutos() {
-      produtos = tipo === "admin"
-        ? await api("/admin/produtos")
-        : await api(`/produtos/${empresa}`);
-
-      document.getElementById("dashProdutos").textContent = produtos.length;
-      preencherSelectProdutos();
-      renderProdutos();
-      renderDashboardAlertas();
-    }
-
-    async function carregarFornecedores() {
-      fornecedores = tipo === "admin"
-        ? await api("/admin/fornecedores")
-        : await api(`/fornecedores/${empresa}`);
-
-      document.getElementById("dashFornecedores").textContent = fornecedores.length;
-      preencherSelectFornecedores();
-      renderFornecedores();
-    }
-
-    async function carregarCompras() {
-      compras = tipo === "admin"
-        ? await api("/admin/compras")
-        : await api(`/compras/${empresa}`);
-
-      document.getElementById("dashCompras").textContent = compras.length;
-      renderCompras();
-    }
-
-    async function carregarMovimentacoes() {
-      movimentacoes = tipo === "admin"
-        ? await api("/admin/movimentacoes-estoque")
-        : await api(`/movimentacoes-estoque/${empresa}`);
-
-      renderMovimentacoes();
-      renderDashboardMovimentacoes();
-    }
-
-    async function carregarDashboardAdmin() {
-      if (tipo !== "admin") return;
-
-      try {
-        const dados = await api("/admin/dashboard");
-        document.getElementById("dashProdutos").textContent = Number(dados.total_produtos || 0);
-        document.getElementById("dashFornecedores").textContent = Number(dados.total_fornecedores || 0);
-        document.getElementById("dashCompras").textContent = Number(dados.total_compras || 0);
-        document.getElementById("dashAlerta").textContent = Number(dados.produtos_alerta || 0);
-      } catch (_) {
-        // fallback para cálculo local
-        calcularDashLocal();
-      }
-    }
-
-    function calcularDashLocal() {
-      document.getElementById("dashProdutos").textContent = produtos.length;
-      document.getElementById("dashFornecedores").textContent = fornecedores.length;
-      document.getElementById("dashCompras").textContent = compras.length;
-      const alertas = produtos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0);
-      document.getElementById("dashAlerta").textContent = alertas.length;
-    }
-
-    function preencherSelectProdutos() {
-      const produtoOptions = produtos.map(p => `<option value="${p.id}">${p.nome}</option>`).join("");
-      const fallback = `<option value="">Nenhum produto encontrado</option>`;
-
-      document.getElementById("c_produto").innerHTML = produtoOptions || fallback;
-      document.getElementById("a_produto").innerHTML = produtoOptions || fallback;
-    }
-
-    function preencherSelectFornecedores() {
-      const fornecedorOptions = fornecedores.map(f => `<option value="${f.id}">${f.nome}</option>`).join("");
-      const fallback = `<option value="">Nenhum fornecedor encontrado</option>`;
-
-      document.getElementById("c_fornecedor").innerHTML = fornecedorOptions || fallback;
-    }
-
-    function renderFornecedores() {
-      const filtro = document.getElementById("buscaFornecedor").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaFornecedores");
-
-      const lista = fornecedores.filter(f => {
-        const nome = (f.nome || "").toLowerCase();
-        return nome.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum fornecedor encontrado.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(f => `
-        <tr>
-          <td>${f.empresa || empresa || "-"}</td>
-          <td>${f.nome || "-"}</td>
-          <td>${f.contato || "-"}</td>
-          <td>${f.telefone || "-"}</td>
-          <td>${f.email || "-"}</td>
-        </tr>
-      `).join("");
-    }
-
-    function renderCompras() {
-      const filtro = document.getElementById("buscaCompra").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaCompras");
-
-      const lista = compras.filter(c => {
-        const fornecedor = (c.fornecedor_nome || "").toLowerCase();
-        return fornecedor.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(c => `
-        <tr>
-          <td>${c.empresa || empresa || "-"}</td>
-          <td>${c.id}</td>
-          <td>${c.fornecedor_nome || "-"}</td>
-          <td>R$ ${money(c.total)}</td>
-          <td>${formatDate(c.data)}</td>
-          <td><span class="badge badge-info">${c.status || "finalizada"}</span></td>
-        </tr>
-      `).join("");
-    }
-
-    function renderProdutos() {
-      const filtro = document.getElementById("buscaProduto").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaProdutos");
-
-      const lista = produtos.filter(p => {
-        const nome = (p.nome || "").toLowerCase();
-        return nome.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhum produto encontrado.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(p => {
-        const baixo = Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0;
-        return `
-          <tr>
-            <td>${p.empresa || empresa || "-"}</td>
-            <td>${p.nome || "-"}</td>
-            <td>${p.categoria || "-"}</td>
-            <td>R$ ${money(p.preco)}</td>
-            <td>R$ ${money(p.custo)}</td>
-            <td>${p.estoque || 0}</td>
-            <td>${p.estoque_minimo || 0}</td>
-            <td>${baixo ? `<span class="badge badge-alert">Baixo</span>` : `<span class="badge badge-ok">OK</span>`}</td>
-          </tr>
-        `;
-      }).join("");
-
-      calcularDashLocal();
-    }
-
-    function renderMovimentacoes() {
-      const filtro = document.getElementById("buscaMov").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaMov");
-
-      const lista = movimentacoes.filter(m => {
-        const nome = (m.produto_nome || "").toLowerCase();
-        return nome.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhuma movimentação encontrada.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(m => `
-        <tr>
-          <td>${m.empresa || empresa || "-"}</td>
-          <td>${m.produto_nome || "-"}</td>
-          <td>${m.tipo || "-"}</td>
-          <td>${m.quantidade || 0}</td>
-          <td>${m.observacao || "-"}</td>
-          <td>${formatDate(m.data_movimentacao)}</td>
-        </tr>
-      `).join("");
-    }
-
-    function renderDashboardAlertas() {
-      const tbody = document.getElementById("dashboardAlertasBody");
-      const lista = produtos
-        .filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0)
-        .slice(0, 10);
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum produto com estoque baixo.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(p => `
-        <tr>
-          <td>${p.empresa || empresa || "-"}</td>
-          <td>${p.nome || "-"}</td>
-          <td>${p.estoque || 0}</td>
-          <td>${p.estoque_minimo || 0}</td>
-          <td><span class="badge badge-alert">Baixo</span></td>
-        </tr>
-      `).join("");
-    }
-
-    function renderDashboardMovimentacoes() {
-      const tbody = document.getElementById("dashboardMovBody");
-      const lista = movimentacoes.slice(0, 10);
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhuma movimentação recente.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(m => `
-        <tr>
-          <td>${m.empresa || empresa || "-"}</td>
-          <td>${m.produto_nome || "-"}</td>
-          <td>${m.tipo || "-"}</td>
-          <td>${m.quantidade || 0}</td>
-          <td>${formatDate(m.data_movimentacao)}</td>
-        </tr>
-      `).join("");
-    }
-
-    function limparFornecedor() {
-      document.getElementById("f_nome").value = "";
-      document.getElementById("f_contato").value = "";
-      document.getElementById("f_tel").value = "";
-      document.getElementById("f_email").value = "";
-      document.getElementById("f_endereco").value = "";
-      document.getElementById("f_obs").value = "";
-    }
-
-    async function salvarFornecedor() {
-      if (tipo === "admin") {
-        setStatus("Para cadastrar fornecedor com admin, use um usuário de loja ou adapte o backend para receber empresa no cadastro admin.", "warning");
-      }
-
-      const nome = document.getElementById("f_nome").value.trim();
-      const contato = document.getElementById("f_contato").value.trim();
-      const telefone = document.getElementById("f_tel").value.trim();
-      const email = document.getElementById("f_email").value.trim();
-      const endereco = document.getElementById("f_endereco").value.trim();
-      const observacao = document.getElementById("f_obs").value.trim();
-
-      if (!nome) {
-        setStatus("Informe o nome do fornecedor.", "error");
-        return;
-      }
-
-      try {
-        await api("/fornecedores", {
-          method: "POST",
-          body: JSON.stringify({
-            empresa,
-            nome,
-            contato,
-            telefone,
-            email,
-            endereco,
-            observacao
-          })
-        });
-
-        limparFornecedor();
-        await carregarFornecedores();
-        setStatus("Fornecedor cadastrado com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
-      }
-    }
-
-    function adicionarItemCompra() {
-      const produtoId = Number(document.getElementById("c_produto").value);
-      const quantidade = Number(document.getElementById("c_qtd").value);
-      const custo = Number(document.getElementById("c_custo").value);
-
-      if (!produtoId) {
-        setStatus("Selecione um produto.", "error");
-        return;
-      }
-
-      if (!quantidade || quantidade <= 0) {
-        setStatus("Informe uma quantidade válida.", "error");
-        return;
-      }
-
-      if (isNaN(custo) || custo < 0) {
-        setStatus("Informe um custo válido.", "error");
-        return;
-      }
-
-      const produto = produtos.find(p => Number(p.id) === produtoId);
-      if (!produto) {
-        setStatus("Produto não encontrado.", "error");
-        return;
-      }
-
-      itensCompra.push({
-        produto_id: produtoId,
-        produto_nome: produto.nome,
-        quantidade,
-        custo_unitario: custo,
-        subtotal: quantidade * custo
-      });
-
-      document.getElementById("c_qtd").value = "";
-      document.getElementById("c_custo").value = "";
-
-      renderItensCompra();
-    }
-
-    function removerItemCompra(index) {
-      itensCompra.splice(index, 1);
-      renderItensCompra();
-    }
-
-    function renderItensCompra() {
-      const tbody = document.getElementById("itensCompraBody");
-
-      if (!itensCompra.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
-        document.getElementById("totalCompra").textContent = "0,00";
-        return;
-      }
-
-      tbody.innerHTML = itensCompra.map((item, index) => `
-        <tr>
-          <td>${item.produto_nome}</td>
-          <td>${item.quantidade}</td>
-          <td>R$ ${money(item.custo_unitario)}</td>
-          <td>R$ ${money(item.subtotal)}</td>
-          <td><button class="btn btn-danger" onclick="removerItemCompra(${index})">Remover</button></td>
-        </tr>
-      `).join("");
-
-      const total = itensCompra.reduce((acc, item) => acc + Number(item.subtotal || 0), 0);
-      document.getElementById("totalCompra").textContent = money(total);
-    }
-
-    function limparCompra() {
-      itensCompra = [];
-      document.getElementById("c_data").value = hojeInput();
-      document.getElementById("c_obs").value = "";
-      document.getElementById("c_conta_pagar").value = "false";
-      renderItensCompra();
-    }
-
-    async function salvarCompra() {
-      if (tipo === "admin") {
-        setStatus("Para registrar compra com admin, use um usuário de loja ou adapte o backend para uma empresa específica no cadastro.", "warning");
-      }
-
-      const fornecedorId = Number(document.getElementById("c_fornecedor").value);
-      const data = document.getElementById("c_data").value;
-      const observacao = document.getElementById("c_obs").value.trim();
-      const gerarContaPagar = document.getElementById("c_conta_pagar").value === "true";
-
-      if (!fornecedorId) {
-        setStatus("Selecione um fornecedor.", "error");
-        return;
-      }
-
-      if (!itensCompra.length) {
-        setStatus("Adicione pelo menos um item.", "error");
-        return;
-      }
-
-      try {
-        await api("/compras", {
-          method: "POST",
-          body: JSON.stringify({
-            empresa,
-            fornecedor_id: fornecedorId,
-            data,
-            observacao,
-            gerar_conta_pagar: gerarContaPagar,
-            itens: itensCompra.map(item => ({
-              produto_id: item.produto_id,
-              quantidade: item.quantidade,
-              custo_unitario: item.custo_unitario
-            }))
-          })
-        });
-
-        limparCompra();
-        await Promise.all([
-          carregarProdutos(),
-          carregarCompras(),
-          carregarMovimentacoes()
-        ]);
-        setStatus("Compra registrada com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
-      }
-    }
-
-    function limparAjuste() {
-      document.getElementById("a_qtd").value = "";
-      document.getElementById("a_obs").value = "";
-    }
-
-    async function salvarAjuste() {
-      if (tipo === "admin") {
-        setStatus("Para ajustar estoque com admin, use um usuário de loja ou adapte o backend para uma empresa específica.", "warning");
-      }
-
-      const produtoId = Number(document.getElementById("a_produto").value);
-      const tipoAjuste = document.getElementById("a_tipo").value;
-      const quantidade = Number(document.getElementById("a_qtd").value);
-      const observacao = document.getElementById("a_obs").value.trim();
-
-      if (!produtoId) {
-        setStatus("Selecione um produto.", "error");
-        return;
-      }
-
-      if (!quantidade || quantidade <= 0) {
-        setStatus("Informe uma quantidade válida.", "error");
-        return;
-      }
-
-      try {
-        await api("/movimentacoes-estoque/ajuste", {
-          method: "POST",
-          body: JSON.stringify({
-            empresa,
-            produto_id: produtoId,
-            tipo: tipoAjuste,
-            quantidade,
-            observacao
-          })
-        });
-
-        limparAjuste();
-        await Promise.all([
-          carregarProdutos(),
-          carregarMovimentacoes()
-        ]);
-        setStatus("Ajuste realizado com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
-      }
-    }
-
-    async function carregarTudo() {
-      try {
-        document.getElementById("c_data").value = hojeInput();
-
-        await Promise.all([
-          carregarProdutos(),
-          carregarFornecedores(),
-          carregarCompras(),
-          carregarMovimentacoes()
-        ]);
-
-        if (tipo === "admin") {
-          await carregarDashboardAdmin();
-        } else {
-          calcularDashLocal();
-        }
-
-        renderItensCompra();
-      } catch (error) {
-        setStatus(error.message, "error");
-      }
-    }
-
-    document.getElementById("loginSenha").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") fazerLogin();
-    });
-
-    alternarTelas();
-    if (token) {
-      carregarTudo();
-    } else {
-      document.getElementById("loginUsuario").focus();
-    }
-  </script>
+
+<div id="login">
+<h2>Login</h2>
+<input id="usuario" placeholder="Usuário">
+<input id="senha" type="password" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+</div>
+
+<div id="app" class="hidden">
+
+<header>
+<h2>LF ERP</h2>
+<div id="userInfo"></div>
+<button onclick="logout()">Sair</button>
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('produtos')">Produtos</button>
+<button onclick="show('fornecedores')">Fornecedores</button>
+<button onclick="show('compras')">Compras</button>
+</div>
+
+<div class="content">
+
+<div id="dashboard" class="card">Dashboard</div>
+
+<div id="produtos" class="card hidden">
+<h3>Novo Produto</h3>
+<input id="p_nome" placeholder="Nome">
+<input id="p_preco" placeholder="Preço">
+<input id="p_custo" placeholder="Custo">
+<input id="p_min" placeholder="Estoque mínimo">
+<button onclick="salvarProduto()">Salvar</button>
+
+<h3>Lista</h3>
+<table><tbody id="listaProdutos"></tbody></table>
+</div>
+
+<div id="fornecedores" class="card hidden">
+<input id="f_nome" placeholder="Nome">
+<input id="f_tel" placeholder="Telefone">
+<button onclick="salvarFornecedor()">Salvar</button>
+<table><tbody id="listaFornecedores"></tbody></table>
+</div>
+
+<div id="compras" class="card hidden">
+<select id="c_fornecedor"></select>
+<select id="c_produto"></select>
+<input id="c_qtd" placeholder="Qtd">
+<input id="c_custo" placeholder="Custo">
+<button onclick="addItem()">Adicionar</button>
+<ul id="itens"></ul>
+<button onclick="salvarCompra()">Salvar</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+const API="https://lf-erp-backend.onrender.com";
+
+let token, empresa, tipo;
+let produtos=[], fornecedores=[], itens=[];
+
+function headers(){
+return { "Content-Type":"application/json", authorization:token };
+}
+
+function login(){
+fetch(API+"/login",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({usuario:usuario.value,senha:senha.value})})
+.then(r=>r.json()).then(d=>{
+token=d.token; empresa=d.empresa; tipo=d.tipo;
+login.style.display="none"; app.classList.remove("hidden");
+carregarTudo();
+});
+}
+
+function logout(){ location.reload(); }
+
+function show(id){
+["dashboard","produtos","fornecedores","compras"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+}
+
+async function api(url,opt={}) {
+const r=await fetch(API+url,{...opt,headers:{...headers()}});
+return r.json();
+}
+
+async function carregarTudo(){
+await carregarProdutos();
+await carregarFornecedores();
+}
+
+async function carregarProdutos(){
+produtos = tipo==="admin"? await api("/admin/produtos") : await api("/produtos/"+empresa);
+
+listaProdutos.innerHTML = produtos.map(p=>`
+<tr>
+<td>${p.nome}</td>
+<td>${p.estoque}</td>
+</tr>`).join("");
+
+c_produto.innerHTML = produtos.map(p=>`<option value="${p.id}">${p.nome}</option>`).join("");
+}
+
+function salvarProduto(){
+api("/produtos",{method:"POST",
+body:JSON.stringify({
+nome:p_nome.value,
+preco:p_preco.value,
+custo:p_custo.value,
+estoque_minimo:p_min.value
+})}).then(carregarProdutos);
+}
+
+async function carregarFornecedores(){
+fornecedores = await api("/fornecedores/"+empresa);
+
+listaFornecedores.innerHTML = fornecedores.map(f=>`
+<tr><td>${f.nome}</td></tr>`).join("");
+
+c_fornecedor.innerHTML = fornecedores.map(f=>`<option value="${f.id}">${f.nome}</option>`).join("");
+}
+
+function salvarFornecedor(){
+api("/fornecedores",{method:"POST",
+body:JSON.stringify({nome:f_nome.value,telefone:f_tel.value})})
+.then(carregarFornecedores);
+}
+
+function addItem(){
+itens.push({
+produto_id:c_produto.value,
+quantidade:c_qtd.value,
+custo_unitario:c_custo.value
+});
+itensEl.innerHTML = itens.map(i=>`<li>${i.produto_id}</li>`).join("");
+}
+
+function salvarCompra(){
+api("/compras",{method:"POST",
+body:JSON.stringify({
+fornecedor_id:c_fornecedor.value,
+itens:itens
+})});
+}
+
+</script>
+
 </body>
 </html>
