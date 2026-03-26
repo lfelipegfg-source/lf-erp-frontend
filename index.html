@@ -31,6 +31,7 @@
     .card-box.finance { background:#0f766e; }
     .card-box.warn { background:#7c2d12; }
     .card-box.info { background:#1d4ed8; }
+    .card-box.positive { background:#166534; }
     .page-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
     .store-title { margin:0; font-size:28px; color:#111827; }
     .store-subtitle { color:#6b7280; font-size:14px; }
@@ -62,6 +63,8 @@
     .pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:bold; }
     .pill.pendente { background:#fef3c7; color:#92400e; }
     .pill.pago { background:#dcfce7; color:#166534; }
+    .pill.entrada { background:#dcfce7; color:#166534; }
+    .pill.saida { background:#fee2e2; color:#991b1b; }
     .dre-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
     .dre-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
     .dre-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
@@ -70,6 +73,11 @@
     .chart-card { margin-top:16px; }
     .chart-card canvas { width:100% !important; max-height:320px; }
     #dreExportavel { background:#ffffff; padding:10px 0; }
+    .fluxo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
+    .fluxo-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
+    .fluxo-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
+    .fluxo-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
+    .muted { color:#6b7280; font-size:13px; }
     @media print {
       body * { visibility:hidden; }
       #dreExportavel, #dreExportavel * { visibility:visible; }
@@ -224,7 +232,7 @@
 
         <div id="financeiro" class="card" style="display:none;">
           <h3 class="section-title">Financeiro</h3>
-          <div class="section-subtitle">Custos e despesas, investimentos e DRE da loja selecionada.</div>
+          <div class="section-subtitle">Custos e despesas, investimentos, DRE e fluxo de caixa da loja selecionada.</div>
 
           <div class="cards" style="margin-bottom:16px;">
             <div class="card-box finance"><h4>Receitas</h4><p id="saldoReceitas">R$ 0,00</p></div>
@@ -237,6 +245,7 @@
             <button id="tabBtnLancamentos" class="tab-btn ativo" onclick="mostrarAbaFinanceiro('lancamentos')">Custos e Despesas</button>
             <button id="tabBtnInvestimentos" class="tab-btn" onclick="mostrarAbaFinanceiro('investimentos')">Investimentos</button>
             <button id="tabBtnDre" class="tab-btn" onclick="mostrarAbaFinanceiro('dre')">DRE</button>
+            <button id="tabBtnFluxoCaixa" class="tab-btn" onclick="mostrarAbaFinanceiro('fluxocaixa')">Fluxo de Caixa</button>
           </div>
 
           <div id="abaLancamentos" class="tab-pane ativo">
@@ -326,6 +335,24 @@
               </div>
             </div>
           </div>
+
+          <div id="abaFluxoCaixa" class="tab-pane">
+            <div class="grid-3">
+              <input id="fluxoInicio" type="date">
+              <input id="fluxoFim" type="date">
+              <button class="btn-alt" onclick="carregarFluxoCaixa()">Atualizar Fluxo de Caixa</button>
+            </div>
+
+            <div class="fluxo-grid">
+              <div class="fluxo-item"><h4>Saldo Inicial</h4><p id="fluxoSaldoInicial">R$ 0,00</p></div>
+              <div class="fluxo-item"><h4>Entradas</h4><p id="fluxoEntradas">R$ 0,00</p></div>
+              <div class="fluxo-item"><h4>Saídas</h4><p id="fluxoSaidas">R$ 0,00</p></div>
+              <div class="fluxo-item"><h4>Saldo Final</h4><p id="fluxoSaldoFinal">R$ 0,00</p></div>
+            </div>
+
+            <div class="muted">Movimentos em ordem cronológica dentro do período selecionado.</div>
+            <div id="listaFluxoCaixa"></div>
+          </div>
         </div>
 
         <div id="usuarios" class="card" style="display:none;">
@@ -401,8 +428,12 @@
         alert("A data inicial não pode ser maior que a data final.");
         return;
       }
-      dreInicio.value = filtroInicio.value || primeiroDiaMesAtual();
-      dreFim.value = filtroFim.value || dataHoje();
+      const inicioPadrao = filtroInicio.value || primeiroDiaMesAtual();
+      const fimPadrao = filtroFim.value || dataHoje();
+      dreInicio.value = inicioPadrao;
+      dreFim.value = fimPadrao;
+      fluxoInicio.value = inicioPadrao;
+      fluxoFim.value = fimPadrao;
       atualizarTudo();
     }
 
@@ -518,6 +549,8 @@
       if (!filtroFim.value) filtroFim.value = dataHoje();
       if (!dreInicio.value) dreInicio.value = filtroInicio.value;
       if (!dreFim.value) dreFim.value = filtroFim.value;
+      if (!fluxoInicio.value) fluxoInicio.value = filtroInicio.value;
+      if (!fluxoFim.value) fluxoFim.value = filtroFim.value;
       if (!invData.value) invData.value = dataHoje();
       atualizarTudo();
     }
@@ -549,6 +582,7 @@
       if (aba === "lancamentos") { abaLancamentos.classList.add("ativo"); tabBtnLancamentos.classList.add("ativo"); }
       if (aba === "investimentos") { abaInvestimentos.classList.add("ativo"); tabBtnInvestimentos.classList.add("ativo"); }
       if (aba === "dre") { abaDre.classList.add("ativo"); tabBtnDre.classList.add("ativo"); }
+      if (aba === "fluxocaixa") { abaFluxoCaixa.classList.add("ativo"); tabBtnFluxoCaixa.classList.add("ativo"); }
     }
 
     async function atualizarTudo() {
@@ -818,6 +852,7 @@
       await carregarLancamentos();
       await carregarInvestimentos();
       await carregarDRE();
+      await carregarFluxoCaixa();
     }
 
     async function salvarLancamento() {
@@ -990,6 +1025,46 @@
         dreImpactoCaixa.innerText = formatarMoeda(data.impactoFinalCaixa || 0);
         drePendente.innerText = formatarMoeda(data.pendente || 0);
       } catch (e) { alert(e.message); }
+    }
+
+    async function carregarFluxoCaixa() {
+      try {
+        fluxoInicio.value = filtroInicio.value || fluxoInicio.value;
+        fluxoFim.value = filtroFim.value || fluxoFim.value;
+
+        if (!fluxoInicio.value || !fluxoFim.value) {
+          return;
+        }
+
+        const params = new URLSearchParams();
+        params.append("inicio", fluxoInicio.value);
+        params.append("fim", fluxoFim.value);
+
+        const data = await requisicao(API + "/fluxo-caixa/" + empresa.value + "?" + params.toString(), {
+          headers: { "Authorization": token }
+        });
+
+        fluxoSaldoInicial.innerText = formatarMoeda(data.saldoInicial || 0);
+        fluxoEntradas.innerText = formatarMoeda(data.entradas || 0);
+        fluxoSaidas.innerText = formatarMoeda(data.saidas || 0);
+        fluxoSaldoFinal.innerText = formatarMoeda(data.saldoFinal || 0);
+
+        listaFluxoCaixa.innerHTML = (data.movimentos || []).length
+          ? data.movimentos.map(item => `
+            <div class="list-item">
+              <strong>${item.titulo || "-"}</strong><br>
+              Data: ${item.data || "-"}<br>
+              Natureza: <span class="pill ${item.natureza}">${item.natureza}</span><br>
+              Origem: ${item.origem || "-"}<br>
+              Detalhe: ${item.detalhe || "-"}<br>
+              Valor: ${formatarMoeda(item.valor || 0)}<br>
+              Saldo após movimento: ${formatarMoeda(item.saldo_apos || 0)}
+            </div>
+          `).join("")
+          : `<div class="list-item">Nenhum movimento encontrado no período informado.</div>`;
+      } catch (e) {
+        alert(e.message);
+      }
     }
 
     async function exportarDREPDF() {
