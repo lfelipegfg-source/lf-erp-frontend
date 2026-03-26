@@ -200,6 +200,11 @@
       font-weight: bold;
     }
 
+    .summary-value.money {
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -389,6 +394,11 @@
       color: var(--info-text);
     }
 
+    .badge-warning {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+    }
+
     .toolbar {
       display: flex;
       gap: 10px;
@@ -508,6 +518,10 @@
             <div class="summary-card">
               <div class="summary-label">Estoque Baixo</div>
               <div class="summary-value" id="dashAlerta">0</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Valor em Estoque</div>
+              <div class="summary-value money" id="dashValorEstoque">R$ 0,00</div>
             </div>
           </div>
 
@@ -714,7 +728,7 @@
         <section id="compras" class="page">
           <div class="page-header">
             <h2>Compras</h2>
-            <p>Registre compras e atualize o estoque automaticamente.</p>
+            <p>Registre compras, atualize o estoque e reflita corretamente no financeiro.</p>
           </div>
 
           <div class="grid">
@@ -734,11 +748,31 @@
 
               <div class="form-grid">
                 <div class="form-group">
-                  <label>Gerar conta a pagar</label>
-                  <select id="c_conta_pagar" class="form-control">
-                    <option value="false">Não</option>
-                    <option value="true">Sim</option>
+                  <label>Tipo de pagamento</label>
+                  <select id="c_tipo_pagamento" class="form-control" onchange="atualizarCamposPagamentoCompra()">
+                    <option value="vista">À vista</option>
+                    <option value="prazo">A prazo</option>
                   </select>
+                </div>
+                <div class="form-group">
+                  <label>Forma de pagamento</label>
+                  <select id="c_forma_pagamento" class="form-control">
+                    <option value="">Selecione</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Pix">Pix</option>
+                    <option value="Cartão de Débito">Cartão de Débito</option>
+                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                    <option value="Transferência">Transferência</option>
+                    <option value="Boleto">Boleto</option>
+                    <option value="Promissória">Promissória</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group" id="grupoVencimentoCompra">
+                  <label>Vencimento</label>
+                  <input id="c_vencimento" class="form-control" type="date" />
                 </div>
                 <div class="form-group">
                   <label>Observação</label>
@@ -812,6 +846,9 @@
                       <th>Fornecedor</th>
                       <th>Total</th>
                       <th>Data</th>
+                      <th>Pagamento</th>
+                      <th>Forma</th>
+                      <th>Vencimento</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -848,6 +885,7 @@
                     <th>Custo</th>
                     <th>Estoque</th>
                     <th>Mínimo</th>
+                    <th>Valor em Estoque</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -1001,8 +1039,8 @@
     }
 
     function mostrarPagina(pageId, button) {
-      document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
-      document.querySelectorAll(".menu-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".page").forEach((page) => page.classList.remove("active"));
+      document.querySelectorAll(".menu-btn").forEach((btn) => btn.classList.remove("active"));
       document.getElementById(pageId).classList.add("active");
       if (button) button.classList.add("active");
     }
@@ -1123,12 +1161,10 @@
         ? await api("/admin/produtos")
         : await api(`/produtos/${empresa}`);
 
-      document.getElementById("dashProdutos").textContent = produtos.length;
       preencherSelectProdutos();
       renderProdutos();
       renderEstoque();
       renderDashboardAlertas();
-      calcularDashLocal();
     }
 
     async function carregarFornecedores() {
@@ -1136,7 +1172,6 @@
         ? await api("/admin/fornecedores")
         : await api(`/fornecedores/${empresa}`);
 
-      document.getElementById("dashFornecedores").textContent = fornecedores.length;
       preencherSelectFornecedores();
       renderFornecedores();
     }
@@ -1146,7 +1181,6 @@
         ? await api("/admin/compras")
         : await api(`/compras/${empresa}`);
 
-      document.getElementById("dashCompras").textContent = compras.length;
       renderCompras();
     }
 
@@ -1168,22 +1202,48 @@
         document.getElementById("dashFornecedores").textContent = Number(dados.total_fornecedores || 0);
         document.getElementById("dashCompras").textContent = Number(dados.total_compras || 0);
         document.getElementById("dashAlerta").textContent = Number(dados.produtos_alerta || 0);
+        document.getElementById("dashValorEstoque").textContent = `R$ ${money(dados.valor_estoque || 0)}`;
+      } catch (_) {
+        calcularDashLocal();
+      }
+    }
+
+    async function carregarDashboardLoja() {
+      if (tipo === "admin" || !empresa) return;
+
+      try {
+        const dados = await api(`/dashboard/${empresa}`);
+        document.getElementById("dashProdutos").textContent = Number(dados.total_produtos || 0);
+        document.getElementById("dashFornecedores").textContent = Number(dados.total_fornecedores || 0);
+        document.getElementById("dashCompras").textContent = Number(dados.total_compras || 0);
+        document.getElementById("dashAlerta").textContent = Number(dados.produtos_alerta || 0);
+        document.getElementById("dashValorEstoque").textContent = `R$ ${money(dados.valor_estoque || 0)}`;
       } catch (_) {
         calcularDashLocal();
       }
     }
 
     function calcularDashLocal() {
-      const alertas = produtos.filter(p =>
+      document.getElementById("dashProdutos").textContent = produtos.length;
+      document.getElementById("dashFornecedores").textContent = fornecedores.length;
+      document.getElementById("dashCompras").textContent = compras.length;
+
+      const alertas = produtos.filter((p) =>
         Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) &&
         Number(p.estoque_minimo || 0) > 0
       );
+
+      const valorEstoque = produtos.reduce((acc, p) => {
+        return acc + (Number(p.estoque || 0) * Number(p.custo || 0));
+      }, 0);
+
       document.getElementById("dashAlerta").textContent = alertas.length;
+      document.getElementById("dashValorEstoque").textContent = `R$ ${money(valorEstoque)}`;
     }
 
     function preencherSelectProdutos() {
       const html = produtos.length
-        ? produtos.map(p => `<option value="${p.id}">${p.nome}</option>`).join("")
+        ? produtos.map((p) => `<option value="${p.id}">${p.nome}</option>`).join("")
         : `<option value="">Nenhum produto encontrado</option>`;
 
       document.getElementById("c_produto").innerHTML = html;
@@ -1192,7 +1252,7 @@
 
     function preencherSelectFornecedores() {
       const html = fornecedores.length
-        ? fornecedores.map(f => `<option value="${f.id}">${f.nome}</option>`).join("")
+        ? fornecedores.map((f) => `<option value="${f.id}">${f.nome}</option>`).join("")
         : `<option value="">Nenhum fornecedor encontrado</option>`;
 
       document.getElementById("c_fornecedor").innerHTML = html;
@@ -1202,7 +1262,7 @@
       const filtro = document.getElementById("buscaProduto").value.trim().toLowerCase();
       const tbody = document.getElementById("listaProdutos");
 
-      const lista = produtos.filter(p => {
+      const lista = produtos.filter((p) => {
         const nome = (p.nome || "").toLowerCase();
         return nome.includes(filtro);
       });
@@ -1212,7 +1272,7 @@
         return;
       }
 
-      tbody.innerHTML = lista.map(p => `
+      tbody.innerHTML = lista.map((p) => `
         <tr>
           <td>${p.empresa || empresa || "-"}</td>
           <td>${p.nome || "-"}</td>
@@ -1229,18 +1289,20 @@
       const filtro = document.getElementById("buscaEstoque").value.trim().toLowerCase();
       const tbody = document.getElementById("listaEstoque");
 
-      const lista = produtos.filter(p => {
+      const lista = produtos.filter((p) => {
         const nome = (p.nome || "").toLowerCase();
         return nome.includes(filtro);
       });
 
       if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhum produto encontrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Nenhum produto encontrado.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = lista.map(p => {
+      tbody.innerHTML = lista.map((p) => {
         const baixo = Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0;
+        const valorEstoque = Number(p.estoque || 0) * Number(p.custo || 0);
+
         return `
           <tr>
             <td>${p.empresa || empresa || "-"}</td>
@@ -1250,6 +1312,7 @@
             <td>R$ ${money(p.custo)}</td>
             <td>${p.estoque || 0}</td>
             <td>${p.estoque_minimo || 0}</td>
+            <td>R$ ${money(valorEstoque)}</td>
             <td>${baixo ? `<span class="badge badge-alert">Baixo</span>` : `<span class="badge badge-ok">OK</span>`}</td>
           </tr>
         `;
@@ -1260,7 +1323,7 @@
       const filtro = document.getElementById("buscaFornecedor").value.trim().toLowerCase();
       const tbody = document.getElementById("listaFornecedores");
 
-      const lista = fornecedores.filter(f => {
+      const lista = fornecedores.filter((f) => {
         const nome = (f.nome || "").toLowerCase();
         return nome.includes(filtro);
       });
@@ -1270,7 +1333,7 @@
         return;
       }
 
-      tbody.innerHTML = lista.map(f => `
+      tbody.innerHTML = lista.map((f) => `
         <tr>
           <td>${f.empresa || empresa || "-"}</td>
           <td>${f.nome || "-"}</td>
@@ -1285,33 +1348,43 @@
       const filtro = document.getElementById("buscaCompra").value.trim().toLowerCase();
       const tbody = document.getElementById("listaCompras");
 
-      const lista = compras.filter(c => {
+      const lista = compras.filter((c) => {
         const fornecedor = (c.fornecedor_nome || "").toLowerCase();
         return fornecedor.includes(filtro);
       });
 
       if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = lista.map(c => `
-        <tr>
-          <td>${c.empresa || empresa || "-"}</td>
-          <td>${c.id}</td>
-          <td>${c.fornecedor_nome || "-"}</td>
-          <td>R$ ${money(c.total)}</td>
-          <td>${formatDate(c.data)}</td>
-          <td><span class="badge badge-info">${c.status || "finalizada"}</span></td>
-        </tr>
-      `).join("");
+      tbody.innerHTML = lista.map((c) => {
+        const pagamento = c.gerar_conta_pagar ? "A prazo" : "À vista";
+        const badgeStatus = c.status_pagamento === "pago"
+          ? `<span class="badge badge-ok">Pago</span>`
+          : `<span class="badge badge-warning">Pendente</span>`;
+
+        return `
+          <tr>
+            <td>${c.empresa || empresa || "-"}</td>
+            <td>${c.id}</td>
+            <td>${c.fornecedor_nome || "-"}</td>
+            <td>R$ ${money(c.total)}</td>
+            <td>${formatDate(c.data)}</td>
+            <td>${pagamento}</td>
+            <td>${c.forma_pagamento || "-"}</td>
+            <td>${formatDate(c.vencimento)}</td>
+            <td>${badgeStatus}</td>
+          </tr>
+        `;
+      }).join("");
     }
 
     function renderMovimentacoes() {
       const filtro = document.getElementById("buscaMov").value.trim().toLowerCase();
       const tbody = document.getElementById("listaMov");
 
-      const lista = movimentacoes.filter(m => {
+      const lista = movimentacoes.filter((m) => {
         const nome = (m.produto_nome || "").toLowerCase();
         return nome.includes(filtro);
       });
@@ -1321,7 +1394,7 @@
         return;
       }
 
-      tbody.innerHTML = lista.map(m => `
+      tbody.innerHTML = lista.map((m) => `
         <tr>
           <td>${m.empresa || empresa || "-"}</td>
           <td>${m.produto_nome || "-"}</td>
@@ -1336,7 +1409,7 @@
     function renderDashboardAlertas() {
       const tbody = document.getElementById("dashboardAlertasBody");
       const lista = produtos
-        .filter(p =>
+        .filter((p) =>
           Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) &&
           Number(p.estoque_minimo || 0) > 0
         )
@@ -1347,7 +1420,7 @@
         return;
       }
 
-      tbody.innerHTML = lista.map(p => `
+      tbody.innerHTML = lista.map((p) => `
         <tr>
           <td>${p.empresa || empresa || "-"}</td>
           <td>${p.nome || "-"}</td>
@@ -1367,7 +1440,7 @@
         return;
       }
 
-      tbody.innerHTML = lista.map(m => `
+      tbody.innerHTML = lista.map((m) => `
         <tr>
           <td>${m.empresa || empresa || "-"}</td>
           <td>${m.produto_nome || "-"}</td>
@@ -1376,6 +1449,21 @@
           <td>${formatDate(m.data_movimentacao)}</td>
         </tr>
       `).join("");
+    }
+
+    function atualizarCamposPagamentoCompra() {
+      const tipoPagamento = document.getElementById("c_tipo_pagamento").value;
+      const grupoVencimento = document.getElementById("grupoVencimentoCompra");
+
+      if (tipoPagamento === "prazo") {
+        grupoVencimento.classList.remove("hidden");
+        if (!document.getElementById("c_vencimento").value) {
+          document.getElementById("c_vencimento").value = document.getElementById("c_data").value || hojeInput();
+        }
+      } else {
+        grupoVencimento.classList.add("hidden");
+        document.getElementById("c_vencimento").value = "";
+      }
     }
 
     function limparProduto() {
@@ -1427,6 +1515,13 @@
           carregarProdutos(),
           carregarMovimentacoes()
         ]);
+
+        if (tipo === "admin") {
+          await carregarDashboardAdmin();
+        } else {
+          await carregarDashboardLoja();
+        }
+
         setStatus("Produto cadastrado com sucesso.");
       } catch (error) {
         setStatus(error.message, "error");
@@ -1475,7 +1570,16 @@
         });
 
         limparFornecedor();
-        await carregarFornecedores();
+        await Promise.all([
+          carregarFornecedores()
+        ]);
+
+        if (tipo === "admin") {
+          await carregarDashboardAdmin();
+        } else {
+          await carregarDashboardLoja();
+        }
+
         setStatus("Fornecedor cadastrado com sucesso.");
       } catch (error) {
         setStatus(error.message, "error");
@@ -1502,7 +1606,7 @@
         return;
       }
 
-      const produto = produtos.find(p => Number(p.id) === produtoId);
+      const produto = produtos.find((p) => Number(p.id) === produtoId);
       if (!produto) {
         setStatus("Produto não encontrado.", "error");
         return;
@@ -1554,7 +1658,10 @@
       itensCompra = [];
       document.getElementById("c_data").value = hojeInput();
       document.getElementById("c_obs").value = "";
-      document.getElementById("c_conta_pagar").value = "false";
+      document.getElementById("c_tipo_pagamento").value = "vista";
+      document.getElementById("c_forma_pagamento").value = "";
+      document.getElementById("c_vencimento").value = "";
+      atualizarCamposPagamentoCompra();
       renderItensCompra();
     }
 
@@ -1567,10 +1674,30 @@
       const fornecedorId = Number(document.getElementById("c_fornecedor").value);
       const data = document.getElementById("c_data").value;
       const observacao = document.getElementById("c_obs").value.trim();
-      const gerarContaPagar = document.getElementById("c_conta_pagar").value === "true";
+      const tipoPagamento = document.getElementById("c_tipo_pagamento").value;
+      const formaPagamento = document.getElementById("c_forma_pagamento").value;
+      const vencimento = document.getElementById("c_vencimento").value;
+
+      const gerarContaPagar = tipoPagamento === "prazo";
+      const statusPagamento = gerarContaPagar ? "pendente" : "pago";
 
       if (!fornecedorId) {
         setStatus("Selecione um fornecedor.", "error");
+        return;
+      }
+
+      if (!data) {
+        setStatus("Informe a data da compra.", "error");
+        return;
+      }
+
+      if (!formaPagamento) {
+        setStatus("Selecione a forma de pagamento.", "error");
+        return;
+      }
+
+      if (gerarContaPagar && !vencimento) {
+        setStatus("Informe o vencimento da compra a prazo.", "error");
         return;
       }
 
@@ -1588,7 +1715,10 @@
             data,
             observacao,
             gerar_conta_pagar: gerarContaPagar,
-            itens: itensCompra.map(item => ({
+            forma_pagamento: formaPagamento,
+            status_pagamento: statusPagamento,
+            vencimento: gerarContaPagar ? vencimento : null,
+            itens: itensCompra.map((item) => ({
               produto_id: item.produto_id,
               quantidade: item.quantidade,
               custo_unitario: item.custo_unitario
@@ -1600,8 +1730,16 @@
         await Promise.all([
           carregarProdutos(),
           carregarCompras(),
-          carregarMovimentacoes()
+          carregarMovimentacoes(),
+          carregarFornecedores()
         ]);
+
+        if (tipo === "admin") {
+          await carregarDashboardAdmin();
+        } else {
+          await carregarDashboardLoja();
+        }
+
         setStatus("Compra registrada com sucesso.");
       } catch (error) {
         setStatus(error.message, "error");
@@ -1651,6 +1789,13 @@
           carregarProdutos(),
           carregarMovimentacoes()
         ]);
+
+        if (tipo === "admin") {
+          await carregarDashboardAdmin();
+        } else {
+          await carregarDashboardLoja();
+        }
+
         setStatus("Ajuste realizado com sucesso.");
       } catch (error) {
         setStatus(error.message, "error");
@@ -1660,6 +1805,7 @@
     async function carregarTudo() {
       try {
         document.getElementById("c_data").value = hojeInput();
+        limparCompra();
 
         await Promise.all([
           carregarProdutos(),
@@ -1671,7 +1817,7 @@
         if (tipo === "admin") {
           await carregarDashboardAdmin();
         } else {
-          calcularDashLocal();
+          await carregarDashboardLoja();
         }
 
         renderItensCompra();
