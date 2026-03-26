@@ -1,1456 +1,1315 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LF ERP</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body { margin:0; font-family: Arial, sans-serif; background:#f3f4f6; }
-    .login { display:flex; height:100vh; justify-content:center; align-items:center; background:#111827; }
-    .login-box { background:#fff; padding:30px; border-radius:12px; width:340px; box-shadow:0 10px 30px rgba(0,0,0,.2); }
-    .app { display:none; }
-    .layout { display:flex; min-height:100vh; }
-    .sidebar { width:260px; background:#111827; color:#fff; padding:20px; box-sizing:border-box; transition:width .25s ease; }
-    .sidebar.minimizado { width:84px; }
-    .sidebar h2 { margin-top:0; margin-bottom:8px; font-size:20px; }
-    .sidebar.minimizado h2, .sidebar.minimizado .user-info, .sidebar.minimizado .btn-text { display:none; }
-    .sidebar .user-info { font-size:14px; color:#d1d5db; margin-bottom:20px; line-height:1.6; }
-    .toggle-btn, .sidebar button.menu-btn { width:100%; margin-bottom:10px; padding:12px; border:none; border-radius:8px; color:#fff; cursor:pointer; }
-    .toggle-btn { background:#374151; }
-    .sidebar button.menu-btn { background:#1f2937; text-align:left; display:flex; gap:10px; align-items:center; }
-    .sidebar.minimizado button.menu-btn { justify-content:center; padding:12px 0; }
-    .toggle-btn:hover, .sidebar button.menu-btn:hover { background:#374151; }
-    .icon { font-size:18px; min-width:20px; text-align:center; }
-    .main { flex:1; padding:20px; box-sizing:border-box; }
-    .card { background:#fff; padding:20px; border-radius:12px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,.06); }
-    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; }
-    .card-box { background:#1f2937; color:#fff; padding:20px; border-radius:12px; }
-    .card-box.finance { background:#0f766e; }
-    .card-box.warn { background:#7c2d12; }
-    .card-box.info { background:#1d4ed8; }
-    .card-box.positive { background:#166534; }
-    .card-box.danger { background:#991b1b; }
-    .page-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
-    .store-title { margin:0; font-size:28px; color:#111827; }
-    .store-subtitle { color:#6b7280; font-size:14px; }
-    input, select, button, textarea { padding:10px; margin:5px 10px 10px 0; border-radius:8px; border:1px solid #d1d5db; box-sizing:border-box; font-family:inherit; }
-    textarea { min-height:90px; resize:vertical; }
-    button { cursor:pointer; border:none; background:#111827; color:white; }
-    button:hover { background:#374151; }
-    .btn-alt { background:#2563eb; }
-    .btn-alt:hover { background:#1d4ed8; }
-    .btn-danger { background:#dc2626; }
-    .btn-danger:hover { background:#b91c1c; }
-    .btn-green { background:#0f766e; }
-    .btn-green:hover { background:#115e59; }
-    .btn-orange { background:#ea580c; }
-    .btn-orange:hover { background:#c2410c; }
-    .list-item { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin-bottom:10px; background:#fafafa; }
-    .section-title { margin-top:0; }
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
-    .grid-4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; }
-    .full { width:100%; }
-    .acoes { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
-    .footer-brand { text-align:center; color:#9ca3af; font-size:12px; margin-top:30px; padding-top:10px; border-top:1px solid #e5e7eb; }
-    #erro { color:red; }
-    .section-subtitle { color:#6b7280; font-size:14px; margin-bottom:12px; }
-    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
-    .tab-btn { background:#e5e7eb; color:#111827; }
-    .tab-btn.ativo { background:#111827; color:#fff; }
-    .tab-pane { display:none; }
-    .tab-pane.ativo { display:block; }
-    .pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:bold; }
-    .pill.pendente { background:#fef3c7; color:#92400e; }
-    .pill.pago { background:#dcfce7; color:#166534; }
-    .pill.atrasado { background:#fee2e2; color:#991b1b; }
-    .pill.entrada { background:#dcfce7; color:#166534; }
-    .pill.saida { background:#fee2e2; color:#991b1b; }
-    .pill.pagar { background:#fee2e2; color:#991b1b; }
-    .pill.receber { background:#dcfce7; color:#166534; }
-    .dre-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
-    .dre-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
-    .dre-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
-    .dre-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
-    .filtros-grid { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:12px; align-items:end; }
-    .chart-card { margin-top:16px; }
-    .chart-card canvas { width:100% !important; max-height:320px; }
-    #dreExportavel { background:#ffffff; padding:10px 0; }
-    .fluxo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
-    .fluxo-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
-    .fluxo-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
-    .fluxo-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
-    .muted { color:#6b7280; font-size:13px; }
-    .contas-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px; }
-    .contas-item { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; }
-    .contas-item h4 { margin:0 0 6px; font-size:14px; color:#475569; }
-    .contas-item p { margin:0; font-size:22px; font-weight:bold; color:#111827; }
-    @media print {
-      body * { visibility:hidden; }
-      #dreExportavel, #dreExportavel * { visibility:visible; }
-      #dreExportavel { position:absolute; left:0; top:0; width:100%; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
     }
-    @media (max-width:900px) {
-      .layout { flex-direction:column; }
-      .sidebar { width:100%; padding:12px; }
-      .sidebar.minimizado { width:100%; }
-      .sidebar.minimizado h2, .sidebar.minimizado .user-info, .sidebar.minimizado .btn-text { display:none; }
-      .sidebar.minimizado button.menu-btn { width:auto; min-width:48px; }
-      .sidebar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-      .sidebar .user-info { width:100%; }
-      .toggle-btn, .sidebar button.menu-btn { width:auto; margin:0; }
-      .sidebar button.menu-btn { justify-content:center; }
-      .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
-      .store-title { font-size:22px; }
-      .filtros-grid { grid-template-columns:1fr; }
+
+    body {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #8b0000, #c1121f);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+      padding: 28px;
+    }
+
+    .login-card h1 {
+      font-size: 28px;
+      color: #8b0000;
+      margin-bottom: 8px;
+    }
+
+    .login-card p {
+      color: #6b7280;
+      margin-bottom: 22px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #374151;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      outline: none;
+      background: #fff;
+    }
+
+    .form-control:focus {
+      border-color: #8b0000;
+      box-shadow: 0 0 0 3px rgba(139,0,0,0.08);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background: #8b0000;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #6f0000;
+    }
+
+    .btn-secondary {
+      background: #374151;
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: #1f2937;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .status-box {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status-success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: #8b0000;
+      color: #fff;
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-left h1 {
+      font-size: 24px;
+    }
+
+    .topbar-left small {
+      display: block;
+      margin-top: 4px;
+      opacity: 0.9;
+    }
+
+    .topbar-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-end;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 80px);
+    }
+
+    .sidebar {
+      background: #1f2937;
+      color: #fff;
+      padding: 18px 12px;
+    }
+
+    .sidebar h2 {
+      font-size: 15px;
+      margin-bottom: 16px;
+      padding-left: 8px;
+      opacity: 0.9;
+    }
+
+    .menu-btn {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #fff;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .menu-btn:hover,
+    .menu-btn.active {
+      background: #374151;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .summary-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+
+    .summary-card .label {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .summary-card .value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+      margin-bottom: 18px;
+    }
+
+    .card h3 {
+      margin-bottom: 14px;
+      font-size: 18px;
+      color: #111827;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #111827;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .badge-ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-alert {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .item-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    hr.sep {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .item-row {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-right {
+        align-items: flex-start;
+        text-align: left;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="login" id="loginTela">
-    <div class="login-box">
-      <h2>Entrar</h2>
-      <input id="usuario" class="full" placeholder="Usuário">
-      <input id="senha" class="full" type="password" placeholder="Senha">
-      <button class="full" onclick="logar()">Entrar</button>
-      <p id="erro"></p>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <h1>LF ERP</h1>
+      <p>Entre com seu usuário e senha</p>
+
+      <div class="form-group">
+        <label>Usuário</label>
+        <input id="loginUsuario" class="form-control" type="text" />
+      </div>
+
+      <div class="form-group">
+        <label>Senha</label>
+        <input id="loginSenha" class="form-control" type="password" />
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="fazerLogin()">Entrar</button>
+
+      <div id="loginStatus" class="status-box"></div>
     </div>
   </div>
 
-  <div class="app" id="app">
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>LF ERP</h1>
+        <small id="empresaLabel">Sistema de gestão</small>
+      </div>
+
+      <div class="topbar-right">
+        <strong id="usuarioLogado">Usuário</strong>
+        <small id="tipoUsuario">Tipo</small>
+        <button class="btn btn-danger" onclick="sair()">Sair</button>
+      </div>
+    </header>
+
     <div class="layout">
-      <div class="sidebar" id="sidebar">
-        <button class="toggle-btn" onclick="alternarMenu()">☰</button>
-        <h2 id="sidebarTitle">Menu</h2>
-        <div class="user-info">
-          <div><strong>Usuário:</strong> <span id="usuarioLogado">-</span></div>
-          <div><strong>Nome:</strong> <span id="nomeLogado">-</span></div>
-          <div><strong>Perfil:</strong> <span id="perfilLogado">-</span></div>
-          <div><strong>Loja:</strong> <span id="lojaLogada">-</span></div>
-        </div>
+      <aside class="sidebar">
+        <h2>Menu</h2>
+        <button class="menu-btn active" onclick="mostrarPagina('dashboard', this)">Dashboard</button>
+        <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)">Fornecedores</button>
+        <button class="menu-btn" onclick="mostrarPagina('compras', this)">Compras</button>
+        <button class="menu-btn" onclick="mostrarPagina('movimentacoes', this)">Movimentações</button>
+        <button class="menu-btn" onclick="mostrarPagina('ajustes', this)">Ajuste de Estoque</button>
+        <button class="menu-btn" onclick="mostrarPagina('estoque', this)">Estoque</button>
+      </aside>
 
-        <button class="menu-btn" onclick="mostrar('dashboard')"><span class="icon">🏠</span><span class="btn-text">Dashboard</span></button>
-        <button class="menu-btn" onclick="mostrar('produtos')"><span class="icon">📦</span><span class="btn-text">Produtos</span></button>
-        <button class="menu-btn" onclick="mostrar('clientes')"><span class="icon">👥</span><span class="btn-text">Clientes</span></button>
-        <button class="menu-btn" onclick="mostrar('vendas')"><span class="icon">🛒</span><span class="btn-text">Vendas</span></button>
-        <button id="btnFinanceiro" class="menu-btn" onclick="mostrar('financeiro')"><span class="icon">💰</span><span class="btn-text">Financeiro</span></button>
-        <button id="btnUsuarios" class="menu-btn" onclick="mostrar('usuarios')" style="display:none;"><span class="icon">🔐</span><span class="btn-text">Usuários</span></button>
-        <button class="menu-btn" onclick="logout()"><span class="icon">🚪</span><span class="btn-text">Sair</span></button>
-      </div>
+      <main class="content">
+        <div id="appStatus" class="status-box"></div>
 
-      <div class="main">
-        <div class="page-header">
-          <div>
-            <h1 class="store-title" id="tituloLoja">Loja</h1>
-            <div class="store-subtitle">Painel principal da loja selecionada</div>
-          </div>
-        </div>
+        <section id="dashboard" class="page active">
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="label">Produtos</div>
+              <div class="value" id="dashProdutos">0</div>
+            </div>
 
-        <div class="card loja">
-          <h3 class="section-title">Selecionar Loja e Período</h3>
-          <div class="filtros-grid">
-            <div>
-              <label for="empresa">Loja</label>
-              <select id="empresa" class="full" onchange="atualizarTudo(); atualizarTituloLoja();">
-                <option value="variedades">Lucileide Variedades</option>
-                <option value="tech">LF Tech Solutions</option>
-              </select>
+            <div class="summary-card">
+              <div class="label">Fornecedores</div>
+              <div class="value" id="dashFornecedores">0</div>
             </div>
-            <div>
-              <label for="filtroInicio">Data inicial</label>
-              <input id="filtroInicio" class="full" type="date">
+
+            <div class="summary-card">
+              <div class="label">Compras</div>
+              <div class="value" id="dashCompras">0</div>
             </div>
-            <div>
-              <label for="filtroFim">Data final</label>
-              <input id="filtroFim" class="full" type="date">
-            </div>
-            <div>
-              <label>&nbsp;</label>
-              <button class="btn-alt full" onclick="aplicarFiltrosGerais()">Aplicar filtro</button>
+
+            <div class="summary-card">
+              <div class="label">Estoque baixo</div>
+              <div class="value" id="dashBaixo">0</div>
             </div>
           </div>
-        </div>
 
-        <div id="dashboard" class="card">
-          <h3 class="section-title">Dashboard</h3>
-          <div class="cards">
-            <div class="card-box"><h4>Faturamento</h4><p id="faturamento">R$ 0,00</p></div>
-            <div class="card-box"><h4>Total de Vendas</h4><p id="totalVendas">0</p></div>
-            <div class="card-box"><h4>Produtos</h4><p id="totalProdutos">0</p></div>
-            <div class="card-box"><h4>Clientes</h4><p id="totalClientes">0</p></div>
-            <div class="card-box finance"><h4>Custos Pagos</h4><p id="dashboardCustos">R$ 0,00</p></div>
-            <div class="card-box warn"><h4>Despesas Pagas</h4><p id="dashboardDespesas">R$ 0,00</p></div>
-            <div class="card-box info"><h4>Investimentos</h4><p id="dashboardInvestimentos">R$ 0,00</p></div>
-          </div>
-
-          <div class="grid-2 chart-card">
+          <div class="grid">
             <div class="card">
-              <h3 class="section-title">Faturamento por dia</h3>
-              <canvas id="graficoFaturamento"></canvas>
-            </div>
-            <div class="card">
-              <h3 class="section-title">Receitas x Saídas</h3>
-              <canvas id="graficoResumoFinanceiro"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div id="produtos" class="card" style="display:none;">
-          <h3 class="section-title">Produtos</h3>
-          <div class="grid-3">
-            <input id="nome" placeholder="Nome do produto">
-            <input id="preco" type="number" step="0.01" placeholder="Preço">
-            <input id="estoque" type="number" placeholder="Estoque">
-          </div>
-          <button onclick="cadastrarProduto()">Cadastrar Produto</button>
-          <div id="listaProdutos"></div>
-        </div>
-
-        <div id="clientes" class="card" style="display:none;">
-          <h3 class="section-title">Clientes</h3>
-          <div class="grid-3">
-            <input id="clienteNome" placeholder="Nome do cliente">
-            <input id="clienteTelefone" placeholder="Telefone">
-            <input id="clienteCpf" placeholder="CPF">
-            <input id="clienteEndereco" placeholder="Endereço">
-            <input id="clienteNascimento" type="date">
-          </div>
-          <button onclick="cadastrarCliente()">Cadastrar Cliente</button>
-          <div id="listaClientes"></div>
-        </div>
-
-        <div id="vendas" class="card" style="display:none;">
-          <h3 class="section-title">Vendas</h3>
-          <div class="grid-4">
-            <select id="produtoVenda"></select>
-            <input id="quantidade" type="number" placeholder="Quantidade">
-            <select id="clienteVenda"><option value="">Consumidor Final</option></select>
-            <select id="pagamento">
-              <option value="Dinheiro">Dinheiro</option>
-              <option value="Cartão de Crédito">Cartão de Crédito</option>
-              <option value="Pix">Pix</option>
-              <option value="Cartão de Débito">Cartão de Débito</option>
-              <option value="Promissória">Promissória</option>
-            </select>
-          </div>
-          <button onclick="vender()">Registrar Venda</button>
-          <div id="listaVendas"></div>
-        </div>
-
-        <div id="financeiro" class="card" style="display:none;">
-          <h3 class="section-title">Financeiro</h3>
-          <div class="section-subtitle">Custos e despesas, investimentos, DRE, fluxo de caixa e contas da loja selecionada.</div>
-
-          <div class="cards" style="margin-bottom:16px;">
-            <div class="card-box finance"><h4>Receitas</h4><p id="saldoReceitas">R$ 0,00</p></div>
-            <div class="card-box warn"><h4>Custos + Despesas</h4><p id="saldoSaidas">R$ 0,00</p></div>
-            <div class="card-box info"><h4>Investimentos</h4><p id="saldoInvestimentos">R$ 0,00</p></div>
-            <div class="card-box"><h4>Saldo Gerencial</h4><p id="saldoGerencial">R$ 0,00</p></div>
-          </div>
-
-          <div class="tabs">
-            <button id="tabBtnLancamentos" class="tab-btn ativo" onclick="mostrarAbaFinanceiro('lancamentos')">Custos e Despesas</button>
-            <button id="tabBtnInvestimentos" class="tab-btn" onclick="mostrarAbaFinanceiro('investimentos')">Investimentos</button>
-            <button id="tabBtnDre" class="tab-btn" onclick="mostrarAbaFinanceiro('dre')">DRE</button>
-            <button id="tabBtnFluxoCaixa" class="tab-btn" onclick="mostrarAbaFinanceiro('fluxocaixa')">Fluxo de Caixa</button>
-            <button id="tabBtnContas" class="tab-btn" onclick="mostrarAbaFinanceiro('contas')">Contas</button>
-          </div>
-
-          <div id="abaLancamentos" class="tab-pane ativo">
-            <div class="grid-4">
-              <select id="finTipo">
-                <option value="custo">Custo</option>
-                <option value="despesa">Despesa</option>
-              </select>
-              <input id="finCategoria" placeholder="Categoria">
-              <input id="finDescricao" placeholder="Descrição">
-              <input id="finValor" type="number" step="0.01" placeholder="Valor">
-              <input id="finVencimento" type="date">
-              <input id="finPagamentoData" type="date">
-              <select id="finStatus">
-                <option value="pendente">Pendente</option>
-                <option value="pago">Pago</option>
-              </select>
-              <select id="finFormaPagamento">
-                <option value="">Forma de pagamento</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Pix">Pix</option>
-                <option value="Cartão de Débito">Cartão de Débito</option>
-                <option value="Cartão de Crédito">Cartão de Crédito</option>
-                <option value="Boleto">Boleto</option>
-                <option value="Transferência">Transferência</option>
-              </select>
-            </div>
-            <div class="grid-3">
-              <select id="finRecorrente">
-                <option value="false">Não recorrente</option>
-                <option value="true">Recorrente</option>
-              </select>
-              <select id="finFrequencia">
-                <option value="">Frequência</option>
-                <option value="semanal">Semanal</option>
-                <option value="mensal">Mensal</option>
-                <option value="anual">Anual</option>
-                <option value="unica">Única</option>
-              </select>
-              <input id="finObservacao" placeholder="Observação">
-            </div>
-            <button class="btn-green" onclick="salvarLancamento()">Salvar Lançamento</button>
-            <div id="listaLancamentos"></div>
-          </div>
-
-          <div id="abaInvestimentos" class="tab-pane">
-            <div class="grid-4">
-              <input id="invTipo" placeholder="Tipo de investimento">
-              <input id="invDescricao" placeholder="Descrição">
-              <input id="invValor" type="number" step="0.01" placeholder="Valor">
-              <input id="invData" type="date">
-              <select id="invFormaPagamento">
-                <option value="">Forma de pagamento</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Pix">Pix</option>
-                <option value="Cartão de Débito">Cartão de Débito</option>
-                <option value="Cartão de Crédito">Cartão de Crédito</option>
-                <option value="Boleto">Boleto</option>
-                <option value="Transferência">Transferência</option>
-              </select>
-              <input id="invObservacao" placeholder="Observação">
-            </div>
-            <button class="btn-green" onclick="salvarInvestimento()">Salvar Investimento</button>
-            <div id="listaInvestimentos"></div>
-          </div>
-
-          <div id="abaDre" class="tab-pane">
-            <div class="grid-4">
-              <input id="dreInicio" type="date">
-              <input id="dreFim" type="date">
-              <button class="btn-alt" onclick="carregarDRE()">Atualizar DRE</button>
-              <button class="btn-green" onclick="exportarDREPDF()">Exportar DRE em PDF</button>
-            </div>
-
-            <div id="dreExportavel">
-              <div class="dre-grid">
-                <div class="dre-item"><h4>Receita Bruta</h4><p id="dreReceitaBruta">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Deduções</h4><p id="dreDeducoes">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Receita Líquida</h4><p id="dreReceitaLiquida">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Custos</h4><p id="dreCustos">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Lucro Bruto</h4><p id="dreLucroBruto">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Despesas Operacionais</h4><p id="dreDespesas">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Resultado Operacional</h4><p id="dreResultado">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Investimentos</h4><p id="dreInvestimentos">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Impacto Final no Caixa</h4><p id="dreImpactoCaixa">R$ 0,00</p></div>
-                <div class="dre-item"><h4>Pendências</h4><p id="drePendente">R$ 0,00</p></div>
-              </div>
-            </div>
-          </div>
-
-          <div id="abaFluxoCaixa" class="tab-pane">
-            <div class="grid-3">
-              <input id="fluxoInicio" type="date">
-              <input id="fluxoFim" type="date">
-              <button class="btn-alt" onclick="carregarFluxoCaixa()">Atualizar Fluxo de Caixa</button>
-            </div>
-
-            <div class="fluxo-grid">
-              <div class="fluxo-item"><h4>Saldo Inicial</h4><p id="fluxoSaldoInicial">R$ 0,00</p></div>
-              <div class="fluxo-item"><h4>Entradas</h4><p id="fluxoEntradas">R$ 0,00</p></div>
-              <div class="fluxo-item"><h4>Saídas</h4><p id="fluxoSaidas">R$ 0,00</p></div>
-              <div class="fluxo-item"><h4>Saldo Final</h4><p id="fluxoSaldoFinal">R$ 0,00</p></div>
-            </div>
-
-            <div class="muted">Movimentos em ordem cronológica dentro do período selecionado.</div>
-            <div id="listaFluxoCaixa"></div>
-          </div>
-
-          <div id="abaContas" class="tab-pane">
-            <div class="grid-4">
-              <select id="contaTipo">
-                <option value="pagar">Conta a Pagar</option>
-                <option value="receber">Conta a Receber</option>
-              </select>
-              <input id="contaDescricao" placeholder="Descrição">
-              <input id="contaPessoa" placeholder="Cliente / Fornecedor">
-              <input id="contaValor" type="number" step="0.01" placeholder="Valor">
-              <input id="contaVencimento" type="date">
-              <select id="contaStatus">
-                <option value="pendente">Pendente</option>
-                <option value="pago">Pago / Recebido</option>
-              </select>
-              <select id="contaFormaPagamento">
-                <option value="">Forma de pagamento</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Pix">Pix</option>
-                <option value="Cartão de Débito">Cartão de Débito</option>
-                <option value="Cartão de Crédito">Cartão de Crédito</option>
-                <option value="Boleto">Boleto</option>
-                <option value="Transferência">Transferência</option>
-              </select>
-              <input id="contaPagamentoData" type="date">
-            </div>
-
-            <div class="grid-2">
-              <input id="contaObservacao" placeholder="Observação">
-              <div>
-                <button class="btn-green" onclick="salvarContaFinanceira()">Salvar Conta</button>
+              <h3>Resumo do estoque</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Estoque</th>
+                      <th>Estoque mínimo</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardEstoqueBody"></tbody>
+                </table>
               </div>
             </div>
 
-            <div class="contas-grid">
-              <div class="contas-item"><h4>Total a Pagar</h4><p id="contasTotalPagar">R$ 0,00</p></div>
-              <div class="contas-item"><h4>Total a Receber</h4><p id="contasTotalReceber">R$ 0,00</p></div>
-              <div class="contas-item"><h4>Contas Pendentes</h4><p id="contasPendentes">0</p></div>
-              <div class="contas-item"><h4>Contas Atrasadas</h4><p id="contasAtrasadas">0</p></div>
+            <div class="card">
+              <h3>Últimas movimentações</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Tipo</th>
+                      <th>Qtd</th>
+                      <th>Data</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboardMovBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="fornecedores" class="page">
+          <div class="grid">
+            <div class="card">
+              <h3>Cadastrar fornecedor</h3>
+
+              <div class="form-group">
+                <label>Nome</label>
+                <input id="fornecedorNome" class="form-control" type="text" />
+              </div>
+
+              <div class="form-group">
+                <label>Contato</label>
+                <input id="fornecedorContato" class="form-control" type="text" />
+              </div>
+
+              <div class="form-group">
+                <label>Telefone</label>
+                <input id="fornecedorTelefone" class="form-control" type="text" />
+              </div>
+
+              <div class="form-group">
+                <label>Email</label>
+                <input id="fornecedorEmail" class="form-control" type="email" />
+              </div>
+
+              <div class="form-group">
+                <label>Endereço</label>
+                <input id="fornecedorEndereco" class="form-control" type="text" />
+              </div>
+
+              <div class="form-group">
+                <label>Observação</label>
+                <input id="fornecedorObservacao" class="form-control" type="text" />
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" onclick="salvarFornecedor()">Salvar fornecedor</button>
+                <button class="btn btn-secondary" onclick="limparFormularioFornecedor()">Limpar</button>
+              </div>
             </div>
 
-            <div class="muted">As contas atrasadas aparecem automaticamente em vermelho quando a data de vencimento já passou e a conta ainda não foi baixada.</div>
-            <div id="listaContasFinanceiras"></div>
+            <div class="card">
+              <h3>Lista de fornecedores</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Contato</th>
+                      <th>Telefone</th>
+                      <th>Email</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fornecedoresBody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div id="usuarios" class="card" style="display:none;">
-          <h3 class="section-title">Usuários</h3>
-          <div class="grid-4">
-            <input id="novoUsuario" placeholder="Usuário">
-            <input id="novaSenha" type="password" placeholder="Senha">
-            <select id="tipoUsuario" onchange="ajustarTipoUsuario()">
-              <option value="funcionario">Funcionário</option>
-              <option value="gerente">Gerente</option>
-              <option value="admin">Admin</option>
-            </select>
-            <select id="empresaUsuario">
-              <option value="variedades">Lucileide Variedades</option>
-              <option value="tech">LF Tech Solutions</option>
-            </select>
-          </div>
-          <div class="grid-3">
-            <input id="nomeCompletoUsuario" placeholder="Nome completo">
-            <input id="cpfUsuario" placeholder="CPF">
-            <input id="nascimentoUsuario" type="date">
-          </div>
-          <button onclick="cadastrarUsuario()">Cadastrar Usuário</button>
-          <div id="listaUsuarios"></div>
-        </div>
+        <section id="compras" class="page">
+          <div class="grid">
+            <div class="card">
+              <h3>Nova compra</h3>
 
-        <div class="footer-brand">LF ERP</div>
-      </div>
+              <div class="form-group">
+                <label>Fornecedor</label>
+                <select id="compraFornecedor" class="form-control"></select>
+              </div>
+
+              <div class="form-group">
+                <label>Data</label>
+                <input id="compraData" class="form-control" type="date" />
+              </div>
+
+              <div class="form-group">
+                <label>Observação</label>
+                <input id="compraObservacao" class="form-control" type="text" />
+              </div>
+
+              <div class="form-group">
+                <label>Gerar conta a pagar automaticamente</label>
+                <select id="compraGerarContaPagar" class="form-control">
+                  <option value="false">Não</option>
+                  <option value="true">Sim</option>
+                </select>
+              </div>
+
+              <hr class="sep" />
+
+              <h3 style="font-size:16px;">Adicionar item</h3>
+
+              <div class="item-row">
+                <div class="form-group">
+                  <label>Produto</label>
+                  <select id="itemProduto" class="form-control"></select>
+                </div>
+
+                <div class="form-group">
+                  <label>Quantidade</label>
+                  <input id="itemQuantidade" class="form-control" type="number" min="1" />
+                </div>
+
+                <div class="form-group">
+                  <label>Custo unitário</label>
+                  <input id="itemCusto" class="form-control" type="number" min="0" step="0.01" />
+                </div>
+
+                <div class="form-group">
+                  <button class="btn btn-primary" onclick="adicionarItemCompra()">Adicionar</button>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Quantidade</th>
+                      <th>Custo unitário</th>
+                      <th>Subtotal</th>
+                      <th>Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody id="itensCompraBody"></tbody>
+                </table>
+              </div>
+
+              <div style="margin-top: 14px;">
+                <strong>Total da compra: R$ <span id="totalCompra">0,00</span></strong>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" onclick="salvarCompra()">Salvar compra</button>
+                <button class="btn btn-secondary" onclick="limparCompra()">Limpar</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Compras cadastradas</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Fornecedor</th>
+                      <th>Total</th>
+                      <th>Data</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comprasBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="movimentacoes" class="page">
+          <div class="card">
+            <h3>Histórico de movimentações</h3>
+            <div class="actions-row" style="margin-bottom: 12px;">
+              <button class="btn btn-secondary" onclick="carregarMovimentacoes()">Atualizar</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Observação</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody id="movimentacoesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="ajustes" class="page">
+          <div class="grid">
+            <div class="card">
+              <h3>Ajuste manual de estoque</h3>
+
+              <div class="form-group">
+                <label>Produto</label>
+                <select id="ajusteProduto" class="form-control"></select>
+              </div>
+
+              <div class="form-group">
+                <label>Tipo</label>
+                <select id="ajusteTipo" class="form-control">
+                  <option value="ajuste_entrada">Ajuste de entrada</option>
+                  <option value="ajuste_saida">Ajuste de saída</option>
+                  <option value="perda">Perda</option>
+                  <option value="avaria">Avaria</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Quantidade</label>
+                <input id="ajusteQuantidade" class="form-control" type="number" min="1" />
+              </div>
+
+              <div class="form-group">
+                <label>Observação</label>
+                <input id="ajusteObservacao" class="form-control" type="text" />
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" onclick="salvarAjusteEstoque()">Salvar ajuste</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Observação</h3>
+              <p class="muted">
+                Use ajuste manual apenas quando necessário: correção de inventário, quebra, perda,
+                avaria ou acerto operacional.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="estoque" class="page">
+          <div class="card">
+            <h3>Posição de estoque</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Custo</th>
+                    <th>Estoque</th>
+                    <th>Estoque mínimo</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="estoqueBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   </div>
 
   <script>
-    const API = "https://lf-erp-backend.onrender.com";
-    let token = localStorage.getItem("token");
-    let usuarioAtual = JSON.parse(localStorage.getItem("usuarioAtual") || "null");
-    let menuMinimizado = localStorage.getItem("menuMinimizado") === "true";
+    const API_BASE = 'https://lf-erp-backend.onrender.com';
 
-    function nomeLoja(valor) {
-      if (valor === "variedades") return "Lucileide Variedades";
-      if (valor === "tech") return "LF Tech Solutions";
-      return "Loja";
-    }
+    let token = localStorage.getItem('lf_token') || '';
+    let empresa = localStorage.getItem('lf_empresa') || '';
+    let tipo = localStorage.getItem('lf_tipo') || '';
+    let usuario = localStorage.getItem('lf_usuario') || '';
+    let nomeCompleto = localStorage.getItem('lf_nome_completo') || '';
 
-    function perfilFormatado(tipo) {
-      if (tipo === "admin") return "Administrador";
-      if (tipo === "gerente") return "Gerente";
-      if (tipo === "funcionario") return "Funcionário";
-      return tipo || "-";
-    }
+    let produtos = [];
+    let fornecedores = [];
+    let compras = [];
+    let movimentacoes = [];
+    let itensCompra = [];
 
-    function formatarMoeda(valor) {
-      return Number(valor || 0).toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
-    }
-
-    function dataHoje() {
-      return new Date().toISOString().slice(0, 10);
-    }
-
-    function primeiroDiaMesAtual() {
-      const agora = new Date();
-      return new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString().slice(0, 10);
-    }
-
-    function getPeriodoQueryString() {
-      const params = new URLSearchParams();
-      if (filtroInicio.value) params.append("inicio", filtroInicio.value);
-      if (filtroFim.value) params.append("fim", filtroFim.value);
-      return params.toString();
-    }
-
-    function aplicarFiltrosGerais() {
-      if (filtroInicio.value && filtroFim.value && filtroInicio.value > filtroFim.value) {
-        alert("A data inicial não pode ser maior que a data final.");
-        return;
-      }
-      const inicioPadrao = filtroInicio.value || primeiroDiaMesAtual();
-      const fimPadrao = filtroFim.value || dataHoje();
-      dreInicio.value = inicioPadrao;
-      dreFim.value = fimPadrao;
-      fluxoInicio.value = inicioPadrao;
-      fluxoFim.value = fimPadrao;
-      atualizarTudo();
-    }
-
-    function atualizarTituloLoja() {
-      tituloLoja.innerText = nomeLoja(empresa.value);
-    }
-
-    function atualizarPainelUsuario() {
-      if (!usuarioAtual) return;
-      usuarioLogado.innerText = usuarioAtual.usuario || "-";
-      nomeLogado.innerText = usuarioAtual.nome_completo || "-";
-      perfilLogado.innerText = perfilFormatado(usuarioAtual.tipo);
-      lojaLogada.innerText = usuarioAtual.tipo === "admin" ? "Todas as lojas" : nomeLoja(usuarioAtual.empresa);
-    }
-
-    function aplicarPermissaoLoja() {
-      if (!usuarioAtual) return;
-      if (usuarioAtual.tipo === "admin") {
-        empresa.disabled = false;
-      } else {
-        empresa.value = usuarioAtual.empresa;
-        empresa.disabled = true;
-      }
-    }
-
-    function aplicarPermissoes() {
-      if (!usuarioAtual) return;
-      const podeFinanceiro = usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente";
-      btnUsuarios.style.display = podeFinanceiro ? "flex" : "none";
-      btnFinanceiro.style.display = podeFinanceiro ? "flex" : "none";
-    }
-
-    function ajustarTipoUsuario() {
-      if (!usuarioAtual) return;
-      if (usuarioAtual.tipo === "gerente") {
-        tipoUsuario.value = "funcionario";
-        tipoUsuario.disabled = true;
-        empresaUsuario.value = usuarioAtual.empresa;
-        empresaUsuario.disabled = true;
-        return;
-      }
-      tipoUsuario.disabled = false;
-      empresaUsuario.disabled = tipoUsuario.value === "admin";
-    }
-
-    function alternarMenu() {
-      menuMinimizado = !menuMinimizado;
-      localStorage.setItem("menuMinimizado", String(menuMinimizado));
-      aplicarEstadoMenu();
-    }
-
-    function aplicarEstadoMenu() {
-      if (menuMinimizado) sidebar.classList.add("minimizado");
-      else sidebar.classList.remove("minimizado");
-    }
-
-    function headersAuth() {
-      return { "Content-Type":"application/json", "Authorization": token };
-    }
-
-    async function requisicao(url, options = {}) {
-      const res = await fetch(url, options);
-      if (res.status === 204) return null;
-      const texto = await res.text();
-
-      if (res.status === 403 && (texto === "Token inválido" || texto === "Sem acesso")) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("usuarioAtual");
-        alert("Sua sessão expirou. Faça login novamente.");
-        location.reload();
-        return;
-      }
-
-      if (!res.ok) throw new Error(texto || "Erro na requisição");
-      try { return texto ? JSON.parse(texto) : null; } catch { return texto; }
-    }
-
-    async function logar() {
-      erro.innerText = "";
-      try {
-        const data = await requisicao(API + "/login", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ usuario: usuario.value, senha: senha.value })
-        });
-
-        token = data.token;
-        usuarioAtual = {
-          usuario: data.usuario,
-          tipo: data.tipo,
-          empresa: data.empresa || null,
-          nome_completo: data.nome_completo || ""
-        };
-
-        localStorage.setItem("token", token);
-        localStorage.setItem("usuarioAtual", JSON.stringify(usuarioAtual));
-        loginTela.style.display = "none";
-        app.style.display = "block";
-        iniciarPainel();
-      } catch {
-        erro.innerText = "Login inválido";
-      }
-    }
-
-    function iniciarPainel() {
-      atualizarPainelUsuario();
-      aplicarPermissaoLoja();
-      aplicarPermissoes();
-      ajustarTipoUsuario();
-      aplicarEstadoMenu();
-      atualizarTituloLoja();
-      if (!filtroInicio.value) filtroInicio.value = primeiroDiaMesAtual();
-      if (!filtroFim.value) filtroFim.value = dataHoje();
-      if (!dreInicio.value) dreInicio.value = filtroInicio.value;
-      if (!dreFim.value) dreFim.value = filtroFim.value;
-      if (!fluxoInicio.value) fluxoInicio.value = filtroInicio.value;
-      if (!fluxoFim.value) fluxoFim.value = filtroFim.value;
-      if (!contaVencimento.value) contaVencimento.value = dataHoje();
-      if (!invData.value) invData.value = dataHoje();
-      atualizarTudo();
-    }
-
-    if (token && usuarioAtual) {
-      loginTela.style.display = "none";
-      app.style.display = "block";
-      iniciarPainel();
-    }
-
-    function logout() {
-      localStorage.removeItem("token");
-      localStorage.removeItem("usuarioAtual");
-      location.reload();
-    }
-
-    function mostrar(tela) {
-      document.querySelectorAll(".main > .card").forEach(c => {
-        if (!c.classList.contains("loja")) c.style.display = "none";
+    function money(value) {
+      return Number(value || 0).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       });
-      document.getElementById(tela).style.display = "block";
-      if (tela === "usuarios") carregarUsuarios();
-      if (tela === "financeiro") carregarFinanceiroCompleto();
     }
 
-    function mostrarAbaFinanceiro(aba) {
-      document.querySelectorAll(".tab-pane").forEach(el => el.classList.remove("ativo"));
-      document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("ativo"));
+    function formatDate(value) {
+      if (!value) return '-';
 
-      if (aba === "lancamentos") { abaLancamentos.classList.add("ativo"); tabBtnLancamentos.classList.add("ativo"); }
-      if (aba === "investimentos") { abaInvestimentos.classList.add("ativo"); tabBtnInvestimentos.classList.add("ativo"); }
-      if (aba === "dre") { abaDre.classList.add("ativo"); tabBtnDre.classList.add("ativo"); }
-      if (aba === "fluxocaixa") { abaFluxoCaixa.classList.add("ativo"); tabBtnFluxoCaixa.classList.add("ativo"); }
-      if (aba === "contas") { abaContas.classList.add("ativo"); tabBtnContas.classList.add("ativo"); }
-    }
-
-    async function atualizarTudo() {
-      await carregarDashboard();
-      await carregarProdutos();
-      await carregarClientes();
-      await carregarClientesVenda();
-      await carregarProdutosVenda();
-      await carregarVendas();
-      await carregarGraficosDashboard();
-      if (usuarioAtual && (usuarioAtual.tipo === "admin" || usuarioAtual.tipo === "gerente")) {
-        await carregarFinanceiroCompleto();
-        await carregarUsuarios();
+      if (typeof value === 'string' && value.length === 10 && value.includes('-')) {
+        const [ano, mes, dia] = value.split('-');
+        return `${dia}/${mes}/${ano}`;
       }
+
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return value;
+      return d.toLocaleString('pt-BR');
     }
 
-    async function carregarDashboard() {
-      try {
-        const qs = getPeriodoQueryString();
-        const data = await requisicao(API + "/dashboard/" + empresa.value + (qs ? "?" + qs : ""), { headers:{ "Authorization": token } });
-        faturamento.innerText = formatarMoeda(data.faturamento || 0);
-        totalVendas.innerText = data.totalVendas || 0;
-        totalProdutos.innerText = data.totalProdutos || 0;
-        totalClientes.innerText = data.totalClientes || 0;
-        dashboardCustos.innerText = formatarMoeda(data.custos || 0);
-        dashboardDespesas.innerText = formatarMoeda(data.despesas || 0);
-        dashboardInvestimentos.innerText = formatarMoeda(data.investimentos || 0);
-      } catch {}
+    function hojeInput() {
+      const d = new Date();
+      const ano = d.getFullYear();
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const dia = String(d.getDate()).padStart(2, '0');
+      return `${ano}-${mes}-${dia}`;
     }
 
-    let graficoFaturamentoInstancia = null;
-    let graficoResumoInstancia = null;
+    function setStatus(message, type = 'success', target = 'appStatus') {
+      const box = document.getElementById(target);
+      box.className = `status-box ${type === 'success' ? 'status-success' : 'status-error'}`;
+      box.textContent = message;
 
-    async function carregarGraficosDashboard() {
+      setTimeout(() => {
+        box.className = 'status-box';
+        box.textContent = '';
+      }, 3500);
+    }
+
+    function mostrarPagina(pageId, btn) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.querySelectorAll('.menu-btn').forEach(button => button.classList.remove('active'));
+
+      document.getElementById(pageId).classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    async function api(path, options = {}) {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      };
+
+      if (token) {
+        headers.authorization = token;
+      }
+
+      const response = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers
+      });
+
+      if (response.status === 403) {
+        sair();
+        throw new Error('Sessão expirada ou acesso negado');
+      }
+
+      if (!response.ok) {
+        let text = 'Erro na requisição';
+        try {
+          text = await response.text();
+        } catch (e) {}
+        throw new Error(text || 'Erro na requisição');
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        return await response.json();
+      }
+
+      return await response.text();
+    }
+
+    async function fazerLogin() {
+      const usuarioInput = document.getElementById('loginUsuario').value.trim();
+      const senhaInput = document.getElementById('loginSenha').value.trim();
+
+      if (!usuarioInput || !senhaInput) {
+        setStatus('Preencha usuário e senha.', 'error', 'loginStatus');
+        return;
+      }
+
       try {
-        const qs = getPeriodoQueryString();
-        const data = await requisicao(API + "/dashboard-graficos/" + empresa.value + (qs ? "?" + qs : ""), { headers:{ "Authorization": token } });
-
-        const labels = (data.vendasPorDia || []).map(item => item.data);
-        const valores = (data.vendasPorDia || []).map(item => Number(item.total || 0));
-
-        if (graficoFaturamentoInstancia) graficoFaturamentoInstancia.destroy();
-        if (graficoResumoInstancia) graficoResumoInstancia.destroy();
-
-        graficoFaturamentoInstancia = new Chart(document.getElementById("graficoFaturamento"), {
-          type: "bar",
-          data: {
-            labels: labels.length ? labels : ["Sem dados"],
-            datasets: [{
-              label: "Faturamento",
-              data: valores.length ? valores : [0]
-            }]
+        const response = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
+          body: JSON.stringify({
+            usuario: usuarioInput,
+            senha: senhaInput
+          })
         });
 
-        graficoResumoInstancia = new Chart(document.getElementById("graficoResumoFinanceiro"), {
-          type: "line",
-          data: {
-            labels: ["Receitas", "Custos", "Despesas"],
-            datasets: [{
-              label: "Resumo financeiro",
-              data: [
-                Number(data.resumo?.receitas || 0),
-                Number(data.resumo?.custos || 0),
-                Number(data.resumo?.despesas || 0)
-              ]
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || 'Erro ao entrar');
+        }
+
+        const data = await response.json();
+
+        token = data.token || '';
+        empresa = data.empresa || '';
+        tipo = data.tipo || '';
+        usuario = data.usuario || '';
+        nomeCompleto = data.nome_completo || '';
+
+        localStorage.setItem('lf_token', token);
+        localStorage.setItem('lf_empresa', empresa);
+        localStorage.setItem('lf_tipo', tipo);
+        localStorage.setItem('lf_usuario', usuario);
+        localStorage.setItem('lf_nome_completo', nomeCompleto);
+
+        alternarTela();
+        await carregarTudo();
       } catch (error) {
-        console.log(error);
+        setStatus(error.message, 'error', 'loginStatus');
       }
     }
 
-    async function cadastrarProduto() {
-      try {
-        await requisicao(API + "/produtos", {
-          method:"POST",
-          headers: headersAuth(),
-          body: JSON.stringify({ empresa: empresa.value, nome: nome.value, preco: Number(preco.value), estoque: Number(estoque.value) })
-        });
-        nome.value = ""; preco.value = ""; estoque.value = "";
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
+    function sair() {
+      localStorage.removeItem('lf_token');
+      localStorage.removeItem('lf_empresa');
+      localStorage.removeItem('lf_tipo');
+      localStorage.removeItem('lf_usuario');
+      localStorage.removeItem('lf_nome_completo');
+
+      token = '';
+      empresa = '';
+      tipo = '';
+      usuario = '';
+      nomeCompleto = '';
+
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('loginSenha').value = '';
     }
 
-    async function editarProduto(id, nomeAtual, precoAtual, estoqueAtual) {
-      const novoNome = prompt("Nome do produto:", nomeAtual); if (novoNome === null) return;
-      const novoPreco = prompt("Preço:", precoAtual); if (novoPreco === null) return;
-      const novoEstoque = prompt("Estoque:", estoqueAtual); if (novoEstoque === null) return;
-      try {
-        await requisicao(API + "/produtos/" + id, {
-          method:"PUT", headers: headersAuth(),
-          body: JSON.stringify({ empresa: empresa.value, nome: novoNome, preco: Number(novoPreco), estoque: Number(novoEstoque) })
-        });
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
-    }
+    function alternarTela() {
+      if (token) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
 
-    async function excluirProduto(id) {
-      if (!confirm("Excluir produto?")) return;
-      try {
-        await requisicao(API + "/produtos/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
+        document.getElementById('empresaLabel').textContent = empresa ? `Loja: ${empresa}` : 'Administrador geral';
+        document.getElementById('usuarioLogado').textContent = nomeCompleto || usuario || 'Usuário';
+        document.getElementById('tipoUsuario').textContent = `Perfil: ${tipo || '-'}`;
+      } else {
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+      }
     }
 
     async function carregarProdutos() {
-      try {
-        const data = await requisicao(API + "/produtos/" + empresa.value, { headers:{ "Authorization": token } });
-        listaProdutos.innerHTML = data.map(p => `
-          <div class="list-item">
-            <strong>${p.nome}</strong><br>
-            Preço: ${formatarMoeda(p.preco)}<br>
-            Estoque: ${p.estoque}
-            <div class="acoes">
-              <button onclick="editarProduto('${p.id}','${(p.nome||'').replace(/'/g,"\\'")}', '${p.preco}', '${p.estoque}')">Editar</button>
-              <button class="btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
-            </div>
-          </div>`).join("");
-      } catch {}
+      produtos = await api(`/produtos/${empresa}`);
+      preencherSelectProdutos();
+      renderEstoque();
+      renderDashboardEstoque();
+      document.getElementById('dashProdutos').textContent = produtos.length;
     }
 
-    async function cadastrarCliente() {
-      try {
-        await requisicao(API + "/clientes", {
-          method:"POST", headers: headersAuth(),
-          body: JSON.stringify({
-            empresa: empresa.value,
-            nome: clienteNome.value,
-            endereco: clienteEndereco.value,
-            telefone: clienteTelefone.value,
-            nascimento: clienteNascimento.value,
-            cpf: clienteCpf.value
-          })
-        });
-        clienteNome.value = ""; clienteEndereco.value = ""; clienteTelefone.value = ""; clienteNascimento.value = ""; clienteCpf.value = "";
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
+    async function carregarFornecedores() {
+      fornecedores = await api(`/fornecedores/${empresa}`);
+      preencherSelectFornecedores();
+      renderFornecedores();
+      document.getElementById('dashFornecedores').textContent = fornecedores.length;
     }
 
-    async function editarCliente(id, nomeAtual, enderecoAtual, telefoneAtual, nascimentoAtual, cpfAtual) {
-      const novoNome = prompt("Nome do cliente:", nomeAtual); if (novoNome === null) return;
-      const novoEndereco = prompt("Endereço:", enderecoAtual || ""); if (novoEndereco === null) return;
-      const novoTelefone = prompt("Telefone:", telefoneAtual || ""); if (novoTelefone === null) return;
-      const novoNascimento = prompt("Nascimento (YYYY-MM-DD):", nascimentoAtual || ""); if (novoNascimento === null) return;
-      const novoCpf = prompt("CPF:", cpfAtual || ""); if (novoCpf === null) return;
-      try {
-        await requisicao(API + "/clientes/" + id, {
-          method:"PUT", headers: headersAuth(),
-          body: JSON.stringify({ empresa: empresa.value, nome: novoNome, endereco: novoEndereco, telefone: novoTelefone, nascimento: novoNascimento, cpf: novoCpf })
-        });
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
+    async function carregarCompras() {
+      compras = await api(`/compras/${empresa}`);
+      renderCompras();
+      document.getElementById('dashCompras').textContent = compras.length;
     }
 
-    async function excluirCliente(id) {
-      if (!confirm("Excluir cliente?")) return;
-      try {
-        await requisicao(API + "/clientes/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
+    async function carregarMovimentacoes() {
+      movimentacoes = await api(`/movimentacoes-estoque/${empresa}`);
+      renderMovimentacoes();
+      renderDashboardMovimentacoes();
     }
 
-    async function carregarClientes() {
-      try {
-        const data = await requisicao(API + "/clientes/" + empresa.value, { headers:{ "Authorization": token } });
-        listaClientes.innerHTML = data.map(c => `
-          <div class="list-item">
-            <strong>${c.nome}</strong><br>
-            Telefone: ${c.telefone || '-'}<br>
-            Endereço: ${c.endereco || '-'}<br>
-            CPF: ${c.cpf || '-'}
-            <div class="acoes">
-              <button onclick="editarCliente('${c.id}','${(c.nome||'').replace(/'/g,"\\'")}', '${(c.endereco||'').replace(/'/g,"\\'")}', '${(c.telefone||'').replace(/'/g,"\\'")}', '${c.nascimento || ''}', '${(c.cpf||'').replace(/'/g,"\\'")}')">Editar</button>
-              <button class="btn-danger" onclick="excluirCliente('${c.id}')">Excluir</button>
-            </div>
-          </div>`).join("");
-      } catch {}
-    }
+    function preencherSelectProdutos() {
+      const itemProduto = document.getElementById('itemProduto');
+      const ajusteProduto = document.getElementById('ajusteProduto');
 
-    async function carregarClientesVenda() {
-      try {
-        const data = await requisicao(API + "/clientes/" + empresa.value, { headers:{ "Authorization": token } });
-        clienteVenda.innerHTML = `<option value="">Consumidor Final</option>` + data.map(c => `<option value="${c.id}">${c.nome}</option>`).join("");
-      } catch {}
-    }
-
-    async function carregarProdutosVenda() {
-      try {
-        const data = await requisicao(API + "/produtos/" + empresa.value, { headers:{ "Authorization": token } });
-        produtoVenda.innerHTML = data.map(p => `<option value="${p.id}">${p.nome} - Estoque: ${p.estoque} - ${formatarMoeda(p.preco)}</option>`).join("");
-      } catch {}
-    }
-
-    async function vender() {
-      try {
-        await requisicao(API + "/vendas", {
-          method:"POST", headers: headersAuth(),
-          body: JSON.stringify({ produto_id: Number(produtoVenda.value), quantidade: Number(quantidade.value), empresa: empresa.value, cliente_id: clienteVenda.value || null, pagamento: pagamento.value })
-        });
-        quantidade.value = "";
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function editarVenda(id, produtoEd, quantidadeEd, totalEd, clienteEd, pagamentoEd, dataEd) {
-      const produto = prompt("Produto:", produtoEd); if (produto === null) return;
-      const quantidade = prompt("Quantidade:", quantidadeEd); if (quantidade === null) return;
-      const total = prompt("Total:", totalEd); if (total === null) return;
-      const cliente_nome = prompt("Cliente:", clienteEd || "Consumidor Final"); if (cliente_nome === null) return;
-      const pagamento = prompt("Pagamento:", pagamentoEd); if (pagamento === null) return;
-      const data = prompt("Data (YYYY-MM-DD):", dataEd); if (data === null) return;
-      try {
-        await requisicao(API + "/vendas/" + id, {
-          method:"PUT", headers: headersAuth(),
-          body: JSON.stringify({ empresa: empresa.value, produto, quantidade: Number(quantidade), total: Number(total), cliente_nome, pagamento, data })
-        });
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function excluirVenda(id) {
-      if (!confirm("Excluir venda?")) return;
-      try {
-        await requisicao(API + "/vendas/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
-        atualizarTudo();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function carregarVendas() {
-      try {
-        const data = await requisicao(API + "/vendas/" + empresa.value, { headers:{ "Authorization": token } });
-        listaVendas.innerHTML = data.map(v => `
-          <div class="list-item">
-            <strong>${v.produto}</strong><br>
-            Quantidade: ${v.quantidade}<br>
-            Total: ${formatarMoeda(v.total)}<br>
-            Cliente: ${v.cliente_nome || 'Consumidor Final'}<br>
-            Pagamento: ${v.pagamento || '-'}<br>
-            Data: ${v.data || '-'}
-            <div class="acoes">
-              <button onclick="editarVenda('${v.id}','${(v.produto||'').replace(/'/g,"\\'")}', '${v.quantidade}', '${v.total}', '${(v.cliente_nome || '').replace(/'/g,"\\'")}', '${(v.pagamento || '').replace(/'/g,"\\'")}', '${v.data || ''}')">Editar</button>
-              <button class="btn-danger" onclick="excluirVenda('${v.id}')">Excluir</button>
-            </div>
-          </div>`).join("");
-      } catch {}
-    }
-
-    async function carregarFinanceiroCompleto() {
-      if (!usuarioAtual || (usuarioAtual.tipo !== "admin" && usuarioAtual.tipo !== "gerente")) return;
-      try {
-        const data = await requisicao(API + "/financeiro/" + empresa.value, { headers:{ "Authorization": token } });
-        saldoReceitas.innerText = formatarMoeda(data.receitas || 0);
-        saldoSaidas.innerText = formatarMoeda((data.custos || 0) + (data.despesas || 0));
-        saldoInvestimentos.innerText = formatarMoeda(data.investimentos || 0);
-        saldoGerencial.innerText = formatarMoeda(data.saldoGerencial || 0);
-      } catch {}
-      await carregarLancamentos();
-      await carregarInvestimentos();
-      await carregarDRE();
-      await carregarFluxoCaixa();
-      await carregarContasFinanceiras();
-    }
-
-    async function salvarLancamento() {
-      try {
-        await requisicao(API + "/lancamentos-financeiros", {
-          method:"POST", headers: headersAuth(),
-          body: JSON.stringify({
-            empresa: empresa.value,
-            tipo: finTipo.value,
-            categoria: finCategoria.value,
-            descricao: finDescricao.value,
-            valor: Number(finValor.value),
-            vencimento: finVencimento.value || null,
-            pagamento_data: finPagamentoData.value || null,
-            status: finStatus.value,
-            forma_pagamento: finFormaPagamento.value || null,
-            recorrente: finRecorrente.value === "true",
-            frequencia: finFrequencia.value || null,
-            observacao: finObservacao.value || null
-          })
-        });
-        finCategoria.value = ""; finDescricao.value = ""; finValor.value = ""; finVencimento.value = ""; finPagamentoData.value = ""; finStatus.value = "pendente"; finFormaPagamento.value = ""; finRecorrente.value = "false"; finFrequencia.value = ""; finObservacao.value = "";
-        carregarFinanceiroCompleto();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function editarLancamento(id, tipo, categoria, descricao, valor, vencimento, pagamentoData, status, formaPagamento, recorrente, frequencia, observacao) {
-      const novoTipo = prompt("Tipo (custo/despesa):", tipo); if (novoTipo === null) return;
-      const novaCategoria = prompt("Categoria:", categoria); if (novaCategoria === null) return;
-      const novaDescricao = prompt("Descrição:", descricao); if (novaDescricao === null) return;
-      const novoValor = prompt("Valor:", valor); if (novoValor === null) return;
-      const novoVencimento = prompt("Vencimento (YYYY-MM-DD):", vencimento || ""); if (novoVencimento === null) return;
-      const novaDataPagamento = prompt("Pagamento (YYYY-MM-DD):", pagamentoData || ""); if (novaDataPagamento === null) return;
-      const novoStatus = prompt("Status (pendente/pago):", status); if (novoStatus === null) return;
-      const novaForma = prompt("Forma de pagamento:", formaPagamento || ""); if (novaForma === null) return;
-      const novoRecorrente = prompt("Recorrente? (true/false):", String(recorrente)); if (novoRecorrente === null) return;
-      const novaFrequencia = prompt("Frequência:", frequencia || ""); if (novaFrequencia === null) return;
-      const novaObservacao = prompt("Observação:", observacao || ""); if (novaObservacao === null) return;
-      try {
-        await requisicao(API + "/lancamentos-financeiros/" + id, {
-          method:"PUT", headers: headersAuth(),
-          body: JSON.stringify({
-            empresa: empresa.value,
-            tipo: novoTipo,
-            categoria: novaCategoria,
-            descricao: novaDescricao,
-            valor: Number(novoValor),
-            vencimento: novoVencimento || null,
-            pagamento_data: novaDataPagamento || null,
-            status: novoStatus,
-            forma_pagamento: novaForma || null,
-            recorrente: novoRecorrente === "true",
-            frequencia: novaFrequencia || null,
-            observacao: novaObservacao || null
-          })
-        });
-        carregarFinanceiroCompleto();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function excluirLancamento(id) {
-      if (!confirm("Excluir lançamento?")) return;
-      try {
-        await requisicao(API + "/lancamentos-financeiros/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
-        carregarFinanceiroCompleto();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function carregarLancamentos() {
-      try {
-        const data = await requisicao(API + "/lancamentos-financeiros/" + empresa.value, { headers:{ "Authorization": token } });
-        listaLancamentos.innerHTML = data.map(item => `
-          <div class="list-item">
-            <strong>${item.descricao}</strong><br>
-            Tipo: ${item.tipo}<br>
-            Categoria: ${item.categoria}<br>
-            Valor: ${formatarMoeda(item.valor)}<br>
-            Vencimento: ${item.vencimento || '-'}<br>
-            Pagamento: ${item.pagamento_data || '-'}<br>
-            Status: <span class="pill ${item.status}">${item.status}</span><br>
-            Forma de pagamento: ${item.forma_pagamento || '-'}<br>
-            Recorrente: ${item.recorrente ? 'Sim' : 'Não'}${item.frequencia ? ' - ' + item.frequencia : ''}<br>
-            Observação: ${item.observacao || '-'}
-            <div class="acoes">
-              <button onclick="editarLancamento('${item.id}','${(item.tipo||'').replace(/'/g,"\\'")}','${(item.categoria||'').replace(/'/g,"\\'")}','${(item.descricao||'').replace(/'/g,"\\'")}','${item.valor}','${item.vencimento || ''}','${item.pagamento_data || ''}','${item.status}','${(item.forma_pagamento || '').replace(/'/g,"\\'")}',${item.recorrente ? 'true' : 'false'},'${(item.frequencia || '').replace(/'/g,"\\'")}','${(item.observacao || '').replace(/'/g,"\\'")}')">Editar</button>
-              <button class="btn-danger" onclick="excluirLancamento('${item.id}')">Excluir</button>
-            </div>
-          </div>`).join("");
-      } catch {}
-    }
-
-    async function salvarInvestimento() {
-      try {
-        await requisicao(API + "/investimentos", {
-          method:"POST", headers: headersAuth(),
-          body: JSON.stringify({
-            empresa: empresa.value,
-            tipo_investimento: invTipo.value,
-            descricao: invDescricao.value,
-            valor: Number(invValor.value),
-            data: invData.value || dataHoje(),
-            forma_pagamento: invFormaPagamento.value || null,
-            observacao: invObservacao.value || null
-          })
-        });
-        invTipo.value = ""; invDescricao.value = ""; invValor.value = ""; invData.value = dataHoje(); invFormaPagamento.value = ""; invObservacao.value = "";
-        carregarFinanceiroCompleto();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function editarInvestimento(id, tipoInvestimento, descricao, valor, data, formaPagamento, observacao) {
-      const novoTipo = prompt("Tipo de investimento:", tipoInvestimento); if (novoTipo === null) return;
-      const novaDescricao = prompt("Descrição:", descricao); if (novaDescricao === null) return;
-      const novoValor = prompt("Valor:", valor); if (novoValor === null) return;
-      const novaData = prompt("Data (YYYY-MM-DD):", data); if (novaData === null) return;
-      const novaForma = prompt("Forma de pagamento:", formaPagamento || ""); if (novaForma === null) return;
-      const novaObs = prompt("Observação:", observacao || ""); if (novaObs === null) return;
-      try {
-        await requisicao(API + "/investimentos/" + id, {
-          method:"PUT", headers: headersAuth(),
-          body: JSON.stringify({ empresa: empresa.value, tipo_investimento: novoTipo, descricao: novaDescricao, valor: Number(novoValor), data: novaData, forma_pagamento: novaForma || null, observacao: novaObs || null })
-        });
-        carregarFinanceiroCompleto();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function excluirInvestimento(id) {
-      if (!confirm("Excluir investimento?")) return;
-      try {
-        await requisicao(API + "/investimentos/" + id + "?empresa=" + empresa.value, { method:"DELETE", headers:{ "Authorization": token } });
-        carregarFinanceiroCompleto();
-      } catch (e) { alert(e.message); }
-    }
-
-    async function carregarInvestimentos() {
-      try {
-        const data = await requisicao(API + "/investimentos/" + empresa.value, { headers:{ "Authorization": token } });
-        listaInvestimentos.innerHTML = data.map(item => `
-          <div class="list-item">
-            <strong>${item.tipo_investimento}</strong><br>
-            Descrição: ${item.descricao}<br>
-            Valor: ${formatarMoeda(item.valor)}<br>
-            Data: ${item.data || '-'}<br>
-            Forma de pagamento: ${item.forma_pagamento || '-'}<br>
-            Observação: ${item.observacao || '-'}
-            <div class="acoes">
-              <button onclick="editarInvestimento('${item.id}','${(item.tipo_investimento||'').replace(/'/g,"\\'")}','${(item.descricao||'').replace(/'/g,"\\'")}','${item.valor}','${item.data || ''}','${(item.forma_pagamento || '').replace(/'/g,"\\'")}','${(item.observacao || '').replace(/'/g,"\\'")}')">Editar</button>
-              <button class="btn-danger" onclick="excluirInvestimento('${item.id}')">Excluir</button>
-            </div>
-          </div>`).join("");
-      } catch {}
-    }
-
-    async function carregarDRE() {
-      try {
-        dreInicio.value = filtroInicio.value || dreInicio.value;
-        dreFim.value = filtroFim.value || dreFim.value;
-        const params = new URLSearchParams();
-        if (dreInicio.value) params.append("inicio", dreInicio.value);
-        if (dreFim.value) params.append("fim", dreFim.value);
-        const data = await requisicao(API + "/dre/" + empresa.value + "?" + params.toString(), { headers:{ "Authorization": token } });
-        dreReceitaBruta.innerText = formatarMoeda(data.receitaBruta || 0);
-        dreDeducoes.innerText = formatarMoeda(data.deducoes || 0);
-        dreReceitaLiquida.innerText = formatarMoeda(data.receitaLiquida || 0);
-        dreCustos.innerText = formatarMoeda(data.custos || 0);
-        dreLucroBruto.innerText = formatarMoeda(data.lucroBruto || 0);
-        dreDespesas.innerText = formatarMoeda(data.despesasOperacionais || 0);
-        dreResultado.innerText = formatarMoeda(data.resultadoOperacional || 0);
-        dreInvestimentos.innerText = formatarMoeda(data.investimentos || 0);
-        dreImpactoCaixa.innerText = formatarMoeda(data.impactoFinalCaixa || 0);
-        drePendente.innerText = formatarMoeda(data.pendente || 0);
-      } catch (e) { alert(e.message); }
-    }
-
-    async function carregarFluxoCaixa() {
-      try {
-        fluxoInicio.value = filtroInicio.value || fluxoInicio.value;
-        fluxoFim.value = filtroFim.value || fluxoFim.value;
-
-        if (!fluxoInicio.value || !fluxoFim.value) {
-          return;
-        }
-
-        const params = new URLSearchParams();
-        params.append("inicio", fluxoInicio.value);
-        params.append("fim", fluxoFim.value);
-
-        const data = await requisicao(API + "/fluxo-caixa/" + empresa.value + "?" + params.toString(), {
-          headers: { "Authorization": token }
-        });
-
-        fluxoSaldoInicial.innerText = formatarMoeda(data.saldoInicial || 0);
-        fluxoEntradas.innerText = formatarMoeda(data.entradas || 0);
-        fluxoSaidas.innerText = formatarMoeda(data.saidas || 0);
-        fluxoSaldoFinal.innerText = formatarMoeda(data.saldoFinal || 0);
-
-        listaFluxoCaixa.innerHTML = (data.movimentos || []).length
-          ? data.movimentos.map(item => `
-            <div class="list-item">
-              <strong>${item.titulo || "-"}</strong><br>
-              Data: ${item.data || "-"}<br>
-              Natureza: <span class="pill ${item.natureza}">${item.natureza}</span><br>
-              Origem: ${item.origem || "-"}<br>
-              Detalhe: ${item.detalhe || "-"}<br>
-              Valor: ${formatarMoeda(item.valor || 0)}<br>
-              Saldo após movimento: ${formatarMoeda(item.saldo_apos || 0)}
-            </div>
-          `).join("")
-          : `<div class="list-item">Nenhum movimento encontrado no período informado.</div>`;
-      } catch (e) {
-        alert(e.message);
+      if (!produtos.length) {
+        itemProduto.innerHTML = `<option value="">Nenhum produto cadastrado</option>`;
+        ajusteProduto.innerHTML = `<option value="">Nenhum produto cadastrado</option>`;
+        return;
       }
+
+      const options = produtos.map(produto => (
+        `<option value="${produto.id}">${produto.nome}</option>`
+      )).join('');
+
+      itemProduto.innerHTML = options;
+      ajusteProduto.innerHTML = options;
     }
 
-    function calcularStatusConta(conta) {
-      if ((conta.status || "").toLowerCase() === "pago") return "pago";
-      const hojeLocal = dataHoje();
-      if (conta.vencimento && conta.vencimento < hojeLocal) return "atrasado";
-      return "pendente";
-    }
+    function preencherSelectFornecedores() {
+      const select = document.getElementById('compraFornecedor');
 
-    async function salvarContaFinanceira() {
-      try {
-        await requisicao(API + "/contas-financeiras", {
-          method: "POST",
-          headers: headersAuth(),
-          body: JSON.stringify({
-            empresa: empresa.value,
-            tipo: contaTipo.value,
-            descricao: contaDescricao.value,
-            cliente_fornecedor: contaPessoa.value,
-            valor: Number(contaValor.value),
-            vencimento: contaVencimento.value || null,
-            pagamento_data: contaPagamentoData.value || null,
-            status: contaStatus.value,
-            forma_pagamento: contaFormaPagamento.value || null,
-            observacao: contaObservacao.value || null
-          })
-        });
-
-        contaTipo.value = "pagar";
-        contaDescricao.value = "";
-        contaPessoa.value = "";
-        contaValor.value = "";
-        contaVencimento.value = dataHoje();
-        contaPagamentoData.value = "";
-        contaStatus.value = "pendente";
-        contaFormaPagamento.value = "";
-        contaObservacao.value = "";
-
-        carregarContasFinanceiras();
-        carregarFluxoCaixa();
-      } catch (e) {
-        alert(e.message);
+      if (!fornecedores.length) {
+        select.innerHTML = `<option value="">Nenhum fornecedor cadastrado</option>`;
+        return;
       }
+
+      select.innerHTML = fornecedores.map(fornecedor => (
+        `<option value="${fornecedor.id}">${fornecedor.nome}</option>`
+      )).join('');
     }
 
-    async function carregarContasFinanceiras() {
-      try {
-        const data = await requisicao(API + "/contas-financeiras/" + empresa.value, {
-          headers: { "Authorization": token }
-        });
+    function renderFornecedores() {
+      const body = document.getElementById('fornecedoresBody');
 
-        let totalPagar = 0;
-        let totalReceber = 0;
-        let pendentes = 0;
-        let atrasadas = 0;
-
-        listaContasFinanceiras.innerHTML = (data || []).length
-          ? data.map(item => {
-              const statusCalculado = calcularStatusConta(item);
-
-              if (item.tipo === "pagar") totalPagar += Number(item.valor || 0);
-              if (item.tipo === "receber") totalReceber += Number(item.valor || 0);
-              if (statusCalculado === "pendente") pendentes += 1;
-              if (statusCalculado === "atrasado") atrasadas += 1;
-
-              const textoAcao = item.tipo === "pagar" ? "Marcar como Pago" : "Marcar como Recebido";
-
-              return `
-                <div class="list-item">
-                  <strong>${item.descricao || "-"}</strong><br>
-                  Tipo: <span class="pill ${item.tipo}">${item.tipo}</span><br>
-                  Cliente/Fornecedor: ${item.cliente_fornecedor || "-"}<br>
-                  Valor: ${formatarMoeda(item.valor || 0)}<br>
-                  Vencimento: ${item.vencimento || "-"}<br>
-                  Pagamento/Recebimento: ${item.pagamento_data || "-"}<br>
-                  Status: <span class="pill ${statusCalculado}">${statusCalculado}</span><br>
-                  Forma de pagamento: ${item.forma_pagamento || "-"}<br>
-                  Observação: ${item.observacao || "-"}
-                  <div class="acoes">
-                    <button class="btn-alt" onclick="editarContaFinanceira('${item.id}', '${(item.tipo || "").replace(/'/g, "\\'")}', '${(item.descricao || "").replace(/'/g, "\\'")}', '${(item.cliente_fornecedor || "").replace(/'/g, "\\'")}', '${item.valor || ""}', '${item.vencimento || ""}', '${item.pagamento_data || ""}', '${(item.status || "").replace(/'/g, "\\'")}', '${(item.forma_pagamento || "").replace(/'/g, "\\'")}', '${(item.observacao || "").replace(/'/g, "\\'")}')">Editar</button>
-                    <button class="btn-green" onclick="marcarContaComoBaixada('${item.id}', '${item.tipo}')">${textoAcao}</button>
-                    <button class="btn-danger" onclick="excluirContaFinanceira('${item.id}')">Excluir</button>
-                  </div>
-                </div>
-              `;
-            }).join("")
-          : `<div class="list-item">Nenhuma conta cadastrada.</div>`;
-
-        contasTotalPagar.innerText = formatarMoeda(totalPagar);
-        contasTotalReceber.innerText = formatarMoeda(totalReceber);
-        contasPendentes.innerText = pendentes;
-        contasAtrasadas.innerText = atrasadas;
-      } catch (e) {
-        listaContasFinanceiras.innerHTML = `<div class="list-item">Não foi possível carregar as contas. Confirme se o backend já está com as rotas de contas financeiras.</div>`;
+      if (!fornecedores.length) {
+        body.innerHTML = `<tr><td colspan="4">Nenhum fornecedor cadastrado.</td></tr>`;
+        return;
       }
+
+      body.innerHTML = fornecedores.map(f => `
+        <tr>
+          <td>${f.nome || '-'}</td>
+          <td>${f.contato || '-'}</td>
+          <td>${f.telefone || '-'}</td>
+          <td>${f.email || '-'}</td>
+        </tr>
+      `).join('');
     }
 
-    async function marcarContaComoBaixada(id, tipoConta) {
-      try {
-        await requisicao(API + "/contas-financeiras/" + id, {
-          method: "PUT",
-          headers: headersAuth(),
-          body: JSON.stringify({
-            empresa: empresa.value,
-            status: "pago",
-            pagamento_data: dataHoje(),
-            tipo: tipoConta
-          })
-        });
-        carregarContasFinanceiras();
-        carregarFluxoCaixa();
-      } catch (e) {
-        alert(e.message);
+    function renderCompras() {
+      const body = document.getElementById('comprasBody');
+
+      if (!compras.length) {
+        body.innerHTML = `<tr><td colspan="4">Nenhuma compra cadastrada.</td></tr>`;
+        return;
       }
+
+      body.innerHTML = compras.map(c => `
+        <tr>
+          <td>${c.id}</td>
+          <td>${c.fornecedor_nome || '-'}</td>
+          <td>R$ ${money(c.total)}</td>
+          <td>${formatDate(c.data)}</td>
+        </tr>
+      `).join('');
     }
 
-    async function editarContaFinanceira(id, tipoAtual, descricaoAtual, pessoaAtual, valorAtual, vencimentoAtual, pagamentoAtual, statusAtual, formaAtual, observacaoAtual) {
-      const novoTipo = prompt("Tipo (pagar/receber):", tipoAtual); if (novoTipo === null) return;
-      const novaDescricao = prompt("Descrição:", descricaoAtual); if (novaDescricao === null) return;
-      const novaPessoa = prompt("Cliente/Fornecedor:", pessoaAtual); if (novaPessoa === null) return;
-      const novoValor = prompt("Valor:", valorAtual); if (novoValor === null) return;
-      const novoVencimento = prompt("Vencimento (YYYY-MM-DD):", vencimentoAtual || ""); if (novoVencimento === null) return;
-      const novoPagamento = prompt("Pagamento/Recebimento (YYYY-MM-DD):", pagamentoAtual || ""); if (novoPagamento === null) return;
-      const novoStatus = prompt("Status (pendente/pago):", statusAtual || "pendente"); if (novoStatus === null) return;
-      const novaForma = prompt("Forma de pagamento:", formaAtual || ""); if (novaForma === null) return;
-      const novaObs = prompt("Observação:", observacaoAtual || ""); if (novaObs === null) return;
+    function renderMovimentacoes() {
+      const body = document.getElementById('movimentacoesBody');
 
-      try {
-        await requisicao(API + "/contas-financeiras/" + id, {
-          method: "PUT",
-          headers: headersAuth(),
-          body: JSON.stringify({
-            empresa: empresa.value,
-            tipo: novoTipo,
-            descricao: novaDescricao,
-            cliente_fornecedor: novaPessoa,
-            valor: Number(novoValor),
-            vencimento: novoVencimento || null,
-            pagamento_data: novoPagamento || null,
-            status: novoStatus || "pendente",
-            forma_pagamento: novaForma || null,
-            observacao: novaObs || null
-          })
-        });
-        carregarContasFinanceiras();
-        carregarFluxoCaixa();
-      } catch (e) {
-        alert(e.message);
+      if (!movimentacoes.length) {
+        body.innerHTML = `<tr><td colspan="5">Nenhuma movimentação encontrada.</td></tr>`;
+        return;
       }
+
+      body.innerHTML = movimentacoes.map(m => `
+        <tr>
+          <td>${m.produto_nome || '-'}</td>
+          <td>${m.tipo || '-'}</td>
+          <td>${m.quantidade || 0}</td>
+          <td>${m.observacao || '-'}</td>
+          <td>${formatDate(m.data_movimentacao)}</td>
+        </tr>
+      `).join('');
     }
 
-    async function excluirContaFinanceira(id) {
-      if (!confirm("Excluir conta?")) return;
-      try {
-        await requisicao(API + "/contas-financeiras/" + id + "?empresa=" + empresa.value, {
-          method: "DELETE",
-          headers: { "Authorization": token }
-        });
-        carregarContasFinanceiras();
-        carregarFluxoCaixa();
-      } catch (e) {
-        alert(e.message);
+    function renderEstoque() {
+      const body = document.getElementById('estoqueBody');
+
+      if (!produtos.length) {
+        body.innerHTML = `<tr><td colspan="7">Nenhum produto cadastrado.</td></tr>`;
+        document.getElementById('dashBaixo').textContent = '0';
+        return;
       }
-    }
 
-    async function exportarDREPDF() {
-      try {
-        const elemento = document.getElementById("dreExportavel");
-        if (!elemento) {
-          alert("Bloco da DRE não encontrado.");
-          return;
-        }
+      let estoqueBaixo = 0;
 
-        const lojaAtual = nomeLoja(empresa.value);
-        const inicio = dreInicio.value || filtroInicio.value || "";
-        const fim = dreFim.value || filtroFim.value || "";
-        const periodoTexto = inicio && fim ? `${inicio} até ${fim}` : "Período não informado";
+      body.innerHTML = produtos.map(produto => {
+        const estoque = Number(produto.estoque || 0);
+        const estoqueMinimo = Number(produto.estoque_minimo || 0);
+        const baixo = estoqueMinimo > 0 && estoque <= estoqueMinimo;
 
-        const wrapper = document.createElement("div");
-        wrapper.style.position = "fixed";
-        wrapper.style.left = "-99999px";
-        wrapper.style.top = "0";
-        wrapper.style.width = "1200px";
-        wrapper.style.background = "#ffffff";
-        wrapper.style.padding = "30px";
-        wrapper.style.fontFamily = "Arial, sans-serif";
-        wrapper.style.color = "#111827";
+        if (baixo) estoqueBaixo++;
 
-        wrapper.innerHTML = `
-          <div style="margin-bottom:20px;">
-            <h1 style="margin:0 0 8px 0; font-size:28px;">LF ERP</h1>
-            <h2 style="margin:0 0 8px 0; font-size:22px;">DRE - Demonstrativo de Resultado</h2>
-            <p style="margin:4px 0; font-size:14px;"><strong>Loja:</strong> ${lojaAtual}</p>
-            <p style="margin:4px 0; font-size:14px;"><strong>Período:</strong> ${periodoTexto}</p>
-            <p style="margin:4px 0; font-size:14px;"><strong>Emitido em:</strong> ${new Date().toLocaleString("pt-BR")}</p>
-          </div>
-          ${elemento.outerHTML}
+        return `
+          <tr>
+            <td>${produto.nome || '-'}</td>
+            <td>${produto.categoria || '-'}</td>
+            <td>R$ ${money(produto.preco)}</td>
+            <td>R$ ${money(produto.custo)}</td>
+            <td>${estoque}</td>
+            <td>${estoqueMinimo}</td>
+            <td>${baixo
+              ? '<span class="badge badge-alert">Baixo</span>'
+              : '<span class="badge badge-ok">OK</span>'}
+            </td>
+          </tr>
         `;
+      }).join('');
 
-        document.body.appendChild(wrapper);
+      document.getElementById('dashBaixo').textContent = estoqueBaixo;
+    }
 
-        const canvas = await html2canvas(wrapper, {
-          scale: 2,
-          backgroundColor: "#ffffff"
+    function renderDashboardEstoque() {
+      const body = document.getElementById('dashboardEstoqueBody');
+
+      if (!produtos.length) {
+        body.innerHTML = `<tr><td colspan="4">Sem dados.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = produtos.slice(0, 8).map(produto => {
+        const estoque = Number(produto.estoque || 0);
+        const estoqueMinimo = Number(produto.estoque_minimo || 0);
+        const baixo = estoqueMinimo > 0 && estoque <= estoqueMinimo;
+
+        return `
+          <tr>
+            <td>${produto.nome || '-'}</td>
+            <td>${estoque}</td>
+            <td>${estoqueMinimo}</td>
+            <td>${baixo
+              ? '<span class="badge badge-alert">Baixo</span>'
+              : '<span class="badge badge-ok">OK</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderDashboardMovimentacoes() {
+      const body = document.getElementById('dashboardMovBody');
+
+      if (!movimentacoes.length) {
+        body.innerHTML = `<tr><td colspan="4">Sem dados.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = movimentacoes.slice(0, 8).map(m => `
+        <tr>
+          <td>${m.produto_nome || '-'}</td>
+          <td>${m.tipo || '-'}</td>
+          <td>${m.quantidade || 0}</td>
+          <td>${formatDate(m.data_movimentacao)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function limparFormularioFornecedor() {
+      document.getElementById('fornecedorNome').value = '';
+      document.getElementById('fornecedorContato').value = '';
+      document.getElementById('fornecedorTelefone').value = '';
+      document.getElementById('fornecedorEmail').value = '';
+      document.getElementById('fornecedorEndereco').value = '';
+      document.getElementById('fornecedorObservacao').value = '';
+    }
+
+    async function salvarFornecedor() {
+      const nome = document.getElementById('fornecedorNome').value.trim();
+      const contato = document.getElementById('fornecedorContato').value.trim();
+      const telefone = document.getElementById('fornecedorTelefone').value.trim();
+      const email = document.getElementById('fornecedorEmail').value.trim();
+      const endereco = document.getElementById('fornecedorEndereco').value.trim();
+      const observacao = document.getElementById('fornecedorObservacao').value.trim();
+
+      if (!nome) {
+        setStatus('Informe o nome do fornecedor.', 'error');
+        return;
+      }
+
+      try {
+        await api('/fornecedores', {
+          method: 'POST',
+          body: JSON.stringify({
+            empresa,
+            nome,
+            contato,
+            telefone,
+            email,
+            endereco,
+            observacao
+          })
         });
 
-        document.body.removeChild(wrapper);
-
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
-
-        const larguraPagina = 210;
-        const alturaPagina = 297;
-        const margem = 10;
-        const larguraImagem = larguraPagina - margem * 2;
-
-        const proporcao = canvas.width / larguraImagem;
-        const alturaPaginaCanvas = (alturaPagina - margem * 2) * proporcao;
-
-        let offsetY = 0;
-
-        while (offsetY < canvas.height) {
-          const canvasPagina = document.createElement("canvas");
-          const ctxPagina = canvasPagina.getContext("2d");
-
-          canvasPagina.width = canvas.width;
-          canvasPagina.height = Math.min(alturaPaginaCanvas, canvas.height - offsetY);
-
-          ctxPagina.clearRect(0, 0, canvasPagina.width, canvasPagina.height);
-          ctxPagina.drawImage(
-            canvas,
-            0,
-            offsetY,
-            canvas.width,
-            canvasPagina.height,
-            0,
-            0,
-            canvas.width,
-            canvasPagina.height
-          );
-
-          const imgPagina = canvasPagina.toDataURL("image/png");
-          const alturaPaginaMm = (canvasPagina.height * larguraImagem) / canvasPagina.width;
-
-          pdf.addImage(imgPagina, "PNG", margem, margem, larguraImagem, alturaPaginaMm);
-
-          offsetY += canvasPagina.height;
-
-          if (offsetY < canvas.height) {
-            pdf.addPage();
-          }
-        }
-
-        const nomeArquivo = `DRE_${empresa.value}_${inicio || "sem-inicio"}_${fim || "sem-fim"}.pdf`;
-        pdf.save(nomeArquivo);
+        limparFormularioFornecedor();
+        await carregarFornecedores();
+        setStatus('Fornecedor cadastrado com sucesso.');
       } catch (error) {
-        console.error(error);
-        alert("Erro ao exportar PDF da DRE.");
+        setStatus(error.message, 'error');
       }
     }
 
-    async function cadastrarUsuario() {
-      try {
-        let tipoFinal = tipoUsuario.value;
-        let empresaFinal = empresaUsuario.value;
-        if (usuarioAtual.tipo === "gerente") {
-          tipoFinal = "funcionario";
-          empresaFinal = usuarioAtual.empresa;
-        }
-        await requisicao(API + "/usuarios", {
-          method:"POST", headers: headersAuth(),
-          body: JSON.stringify({ usuario: novoUsuario.value, senha: novaSenha.value, tipo: tipoFinal, empresa: tipoFinal === "admin" ? null : empresaFinal, nome_completo: nomeCompletoUsuario.value, cpf: cpfUsuario.value, nascimento: nascimentoUsuario.value })
-        });
-        novoUsuario.value = ""; novaSenha.value = ""; nomeCompletoUsuario.value = ""; cpfUsuario.value = ""; nascimentoUsuario.value = "";
-        if (usuarioAtual.tipo === "admin") { tipoUsuario.value = "funcionario"; empresaUsuario.value = "variedades"; }
-        ajustarTipoUsuario();
-        carregarUsuarios();
-      } catch (e) { alert(e.message); }
-    }
+    function adicionarItemCompra() {
+      const produtoId = document.getElementById('itemProduto').value;
+      const quantidade = Number(document.getElementById('itemQuantidade').value);
+      const custoUnitario = Number(document.getElementById('itemCusto').value);
 
-    async function editarUsuario(id, usuarioEd, tipoEd, empresaEd, nomeEd, cpfEd, nascEd) {
-      let novoUsuario = prompt("Usuário:", usuarioEd); if (novoUsuario === null) return;
-      let novoNome = prompt("Nome completo:", nomeEd || ""); if (novoNome === null) return;
-      let novoCpf = prompt("CPF:", cpfEd || ""); if (novoCpf === null) return;
-      let novoNascimento = prompt("Nascimento (YYYY-MM-DD):", nascEd || ""); if (novoNascimento === null) return;
-      let novoTipo = tipoEd;
-      let novaEmpresa = empresaEd;
-      if (usuarioAtual.tipo === "admin") {
-        const tipoPrompt = prompt("Perfil (admin, gerente, funcionario):", tipoEd); if (tipoPrompt === null) return; novoTipo = tipoPrompt;
-        const empresaPrompt = prompt("Loja (variedades, tech) ou vazio para admin:", empresaEd || ""); if (empresaPrompt === null) return; novaEmpresa = empresaPrompt === "" ? null : empresaPrompt;
+      if (!produtoId) {
+        setStatus('Selecione um produto.', 'error');
+        return;
       }
-      if (usuarioAtual.tipo === "gerente") { novoTipo = "funcionario"; novaEmpresa = usuarioAtual.empresa; }
-      const novaSenha = prompt("Nova senha (deixe em branco para manter):", ""); if (novaSenha === null) return;
+
+      if (!quantidade || quantidade <= 0) {
+        setStatus('Informe uma quantidade válida.', 'error');
+        return;
+      }
+
+      if (Number.isNaN(custoUnitario) || custoUnitario < 0) {
+        setStatus('Informe um custo unitário válido.', 'error');
+        return;
+      }
+
+      const produto = produtos.find(p => String(p.id) === String(produtoId));
+      if (!produto) {
+        setStatus('Produto não encontrado.', 'error');
+        return;
+      }
+
+      itensCompra.push({
+        produto_id: Number(produtoId),
+        produto_nome: produto.nome,
+        quantidade,
+        custo_unitario: custoUnitario,
+        subtotal: quantidade * custoUnitario
+      });
+
+      document.getElementById('itemQuantidade').value = '';
+      document.getElementById('itemCusto').value = '';
+
+      renderItensCompra();
+    }
+
+    function removerItemCompra(index) {
+      itensCompra.splice(index, 1);
+      renderItensCompra();
+    }
+
+    function renderItensCompra() {
+      const body = document.getElementById('itensCompraBody');
+
+      if (!itensCompra.length) {
+        body.innerHTML = `<tr><td colspan="5">Nenhum item adicionado.</td></tr>`;
+        document.getElementById('totalCompra').textContent = '0,00';
+        return;
+      }
+
+      body.innerHTML = itensCompra.map((item, index) => `
+        <tr>
+          <td>${item.produto_nome}</td>
+          <td>${item.quantidade}</td>
+          <td>R$ ${money(item.custo_unitario)}</td>
+          <td>R$ ${money(item.subtotal)}</td>
+          <td><button class="btn btn-danger" onclick="removerItemCompra(${index})">Remover</button></td>
+        </tr>
+      `).join('');
+
+      const total = itensCompra.reduce((acc, item) => acc + Number(item.subtotal || 0), 0);
+      document.getElementById('totalCompra').textContent = money(total);
+    }
+
+    function limparCompra() {
+      itensCompra = [];
+      document.getElementById('compraData').value = hojeInput();
+      document.getElementById('compraObservacao').value = '';
+      document.getElementById('compraGerarContaPagar').value = 'false';
+      renderItensCompra();
+    }
+
+    async function salvarCompra() {
+      const fornecedorId = document.getElementById('compraFornecedor').value;
+      const data = document.getElementById('compraData').value;
+      const observacao = document.getElementById('compraObservacao').value.trim();
+      const gerarContaPagar = document.getElementById('compraGerarContaPagar').value === 'true';
+
+      if (!fornecedorId) {
+        setStatus('Selecione um fornecedor.', 'error');
+        return;
+      }
+
+      if (!itensCompra.length) {
+        setStatus('Adicione pelo menos um item à compra.', 'error');
+        return;
+      }
+
       try {
-        await requisicao(API + "/usuarios/" + id, {
-          method:"PUT", headers: headersAuth(),
-          body: JSON.stringify({ usuario: novoUsuario, tipo: novoTipo, empresa: novaEmpresa, nome_completo: novoNome, cpf: novoCpf, nascimento: novoNascimento, senha: novaSenha })
+        await api('/compras', {
+          method: 'POST',
+          body: JSON.stringify({
+            empresa,
+            fornecedor_id: Number(fornecedorId),
+            data,
+            observacao,
+            gerar_conta_pagar: gerarContaPagar,
+            itens: itensCompra.map(item => ({
+              produto_id: item.produto_id,
+              quantidade: item.quantidade,
+              custo_unitario: item.custo_unitario
+            }))
+          })
         });
-        carregarUsuarios();
-      } catch (e) { alert(e.message); }
+
+        limparCompra();
+        await Promise.all([
+          carregarProdutos(),
+          carregarCompras(),
+          carregarMovimentacoes()
+        ]);
+
+        setStatus('Compra registrada com sucesso.');
+      } catch (error) {
+        setStatus(error.message, 'error');
+      }
     }
 
-    async function excluirUsuario(id) {
-      if (!confirm("Excluir usuário?")) return;
+    async function salvarAjusteEstoque() {
+      const produtoId = document.getElementById('ajusteProduto').value;
+      const tipoAjuste = document.getElementById('ajusteTipo').value;
+      const quantidade = Number(document.getElementById('ajusteQuantidade').value);
+      const observacao = document.getElementById('ajusteObservacao').value.trim();
+
+      if (!produtoId) {
+        setStatus('Selecione um produto.', 'error');
+        return;
+      }
+
+      if (!quantidade || quantidade <= 0) {
+        setStatus('Informe uma quantidade válida.', 'error');
+        return;
+      }
+
       try {
-        await requisicao(API + "/usuarios/" + id, { method:"DELETE", headers:{ "Authorization": token } });
-        carregarUsuarios();
-      } catch (e) { alert(e.message); }
+        await api('/movimentacoes-estoque/ajuste', {
+          method: 'POST',
+          body: JSON.stringify({
+            empresa,
+            produto_id: Number(produtoId),
+            tipo: tipoAjuste,
+            quantidade,
+            observacao
+          })
+        });
+
+        document.getElementById('ajusteQuantidade').value = '';
+        document.getElementById('ajusteObservacao').value = '';
+
+        await Promise.all([
+          carregarProdutos(),
+          carregarMovimentacoes()
+        ]);
+
+        setStatus('Ajuste de estoque realizado com sucesso.');
+      } catch (error) {
+        setStatus(error.message, 'error');
+      }
     }
 
-    async function carregarUsuarios() {
+    async function carregarTudo() {
       try {
-        const data = await requisicao(API + "/usuarios", { headers:{ "Authorization": token } });
-        listaUsuarios.innerHTML = data.map(u => `
-          <div class="list-item">
-            <strong>${u.nome_completo || u.usuario}</strong><br>
-            Usuário: ${u.usuario}<br>
-            Perfil: ${perfilFormatado(u.tipo)}<br>
-            Loja: ${u.tipo === 'admin' ? 'Todas as lojas' : nomeLoja(u.empresa)}<br>
-            CPF: ${u.cpf || '-'}<br>
-            Nascimento: ${u.nascimento || '-'}
-            <div class="acoes">
-              <button onclick="editarUsuario('${u.id}','${(u.usuario||'').replace(/'/g,"\\'")}','${u.tipo}','${u.empresa || ''}','${(u.nome_completo || '').replace(/'/g,"\\'")}','${(u.cpf || '').replace(/'/g,"\\'")}','${u.nascimento || ''}')">Editar</button>
-              ${usuarioAtual.tipo === 'admin' ? `<button class="btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>` : ''}
-            </div>
-          </div>`).join("");
-      } catch {}
+        document.getElementById('compraData').value = hojeInput();
+
+        await Promise.all([
+          carregarProdutos(),
+          carregarFornecedores(),
+          carregarCompras(),
+          carregarMovimentacoes()
+        ]);
+
+        renderItensCompra();
+      } catch (error) {
+        setStatus(error.message, 'error');
+      }
+    }
+
+    alternarTela();
+
+    if (token) {
+      carregarTudo();
+    } else {
+      document.getElementById('loginUsuario').focus();
     }
   </script>
 </body>
