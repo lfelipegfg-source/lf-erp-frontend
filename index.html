@@ -513,6 +513,45 @@
       font-size: 13px;
     }
 
+    .empresa-bloco {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 18px;
+      background: #fff;
+    }
+
+    .empresa-bloco h3 {
+      margin-bottom: 12px;
+      font-size: 20px;
+      color: var(--primary);
+    }
+
+    .subcards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .subcard {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .subcard-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .subcard-value {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
     @media (max-width: 980px) {
       .layout,
       .layout.sidebar-collapsed {
@@ -620,6 +659,11 @@
         <button class="menu-btn" onclick="mostrarPagina('ajuste', this)" title="Ajuste de Estoque">
           <span class="menu-icon">🛠️</span>
           <span class="menu-text">Ajuste de Estoque</span>
+        </button>
+
+        <button class="menu-btn" onclick="abrirRelatorio(this)" title="Relatório de Estoque">
+          <span class="menu-icon">📊</span>
+          <span class="menu-text">Relatório de Estoque</span>
         </button>
       </aside>
 
@@ -1110,6 +1154,104 @@
             </div>
           </div>
         </section>
+
+        <section id="relatorio" class="page">
+          <div class="page-header">
+            <h2>Relatório de Estoque</h2>
+            <p>Visão gerencial do estoque, valor parado, alertas e movimentação.</p>
+          </div>
+
+          <div id="relatorioLojaWrap" class="hidden">
+            <div class="summary-grid">
+              <div class="summary-card">
+                <div class="summary-label">Total de Produtos</div>
+                <div class="summary-value" id="relTotalProdutos">0</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Total de Unidades</div>
+                <div class="summary-value" id="relTotalUnidades">0</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Valor Total do Estoque</div>
+                <div class="summary-value money" id="relValorTotalEstoque">R$ 0,00</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Produtos em Alerta</div>
+                <div class="summary-value" id="relProdutosAlerta">0</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Produtos Zerados</div>
+                <div class="summary-value" id="relProdutosZerados">0</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Entradas / Saídas</div>
+                <div class="summary-value" id="relEntradasSaidas">0 / 0</div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="card">
+                <h3>Top 10 valor parado</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th>Estoque</th>
+                        <th>Custo</th>
+                        <th>Valor em Estoque</th>
+                      </tr>
+                    </thead>
+                    <tbody id="relTopValorParadoBody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Produtos com alerta</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Estoque</th>
+                        <th>Mínimo</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="relProdutosAlertaBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Todos os produtos</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Categoria</th>
+                      <th>Preço</th>
+                      <th>Custo</th>
+                      <th>Estoque</th>
+                      <th>Mínimo</th>
+                      <th>Valor em Estoque</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="relTodosProdutosBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div id="relatorioAdminWrap" class="hidden">
+            <div id="relatorioAdminLista"></div>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -1173,6 +1315,11 @@
       document.querySelectorAll(".menu-btn").forEach((btn) => btn.classList.remove("active"));
       document.getElementById(pageId).classList.add("active");
       if (button) button.classList.add("active");
+    }
+
+    async function abrirRelatorio(button) {
+      mostrarPagina("relatorio", button);
+      await carregarRelatorioEstoque();
     }
 
     function aplicarEstadoSidebar() {
@@ -1627,6 +1774,199 @@
       }
     }
 
+    function renderRelatorioLoja(data) {
+      document.getElementById("relatorioLojaWrap").classList.remove("hidden");
+      document.getElementById("relatorioAdminWrap").classList.add("hidden");
+
+      const resumo = data.resumo || {};
+
+      document.getElementById("relTotalProdutos").textContent = Number(resumo.total_produtos || 0);
+      document.getElementById("relTotalUnidades").textContent = Number(resumo.total_unidades || 0);
+      document.getElementById("relValorTotalEstoque").textContent = `R$ ${money(resumo.valor_total_estoque || 0)}`;
+      document.getElementById("relProdutosAlerta").textContent = Number(resumo.produtos_alerta || 0);
+      document.getElementById("relProdutosZerados").textContent = Number(resumo.produtos_zerados || 0);
+      document.getElementById("relEntradasSaidas").textContent = `${Number(resumo.total_entradas || 0)} / ${Number(resumo.total_saidas || 0)}`;
+
+      const topBody = document.getElementById("relTopValorParadoBody");
+      const alertaBody = document.getElementById("relProdutosAlertaBody");
+      const todosBody = document.getElementById("relTodosProdutosBody");
+
+      const top = data.top_valor_parado || [];
+      const alertas = data.produtos_alerta || [];
+      const todos = data.produtos || [];
+
+      if (!top.length) {
+        topBody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum produto encontrado.</td></tr>`;
+      } else {
+        topBody.innerHTML = top.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.categoria || "-"}</td>
+            <td>${p.estoque || 0}</td>
+            <td>R$ ${money(p.custo)}</td>
+            <td>R$ ${money(p.valor_estoque)}</td>
+          </tr>
+        `).join("");
+      }
+
+      if (!alertas.length) {
+        alertaBody.innerHTML = `<tr><td colspan="4" class="empty-state">Nenhum produto em alerta.</td></tr>`;
+      } else {
+        alertaBody.innerHTML = alertas.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.estoque || 0}</td>
+            <td>${p.estoque_minimo || 0}</td>
+            <td><span class="badge badge-alert">Baixo</span></td>
+          </tr>
+        `).join("");
+      }
+
+      if (!todos.length) {
+        todosBody.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhum produto encontrado.</td></tr>`;
+      } else {
+        todosBody.innerHTML = todos.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.categoria || "-"}</td>
+            <td>R$ ${money(p.preco)}</td>
+            <td>R$ ${money(p.custo)}</td>
+            <td>${p.estoque || 0}</td>
+            <td>${p.estoque_minimo || 0}</td>
+            <td>R$ ${money(p.valor_estoque)}</td>
+            <td>${p.alerta_estoque ? `<span class="badge badge-alert">Baixo</span>` : `<span class="badge badge-ok">OK</span>`}</td>
+          </tr>
+        `).join("");
+      }
+    }
+
+    function renderRelatorioAdmin(relatorios) {
+      document.getElementById("relatorioLojaWrap").classList.add("hidden");
+      document.getElementById("relatorioAdminWrap").classList.remove("hidden");
+
+      const wrap = document.getElementById("relatorioAdminLista");
+
+      if (!Array.isArray(relatorios) || !relatorios.length) {
+        wrap.innerHTML = `<div class="card"><div class="empty-state">Nenhuma empresa encontrada no relatório.</div></div>`;
+        return;
+      }
+
+      wrap.innerHTML = relatorios.map((item) => {
+        const resumo = item.resumo || {};
+        const top = item.top_valor_parado || [];
+        const alertas = item.produtos_alerta || [];
+
+        return `
+          <div class="empresa-bloco">
+            <h3>${item.empresa || "-"}</h3>
+
+            <div class="subcards-grid">
+              <div class="subcard">
+                <div class="subcard-label">Total de Produtos</div>
+                <div class="subcard-value">${Number(resumo.total_produtos || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Total de Unidades</div>
+                <div class="subcard-value">${Number(resumo.total_unidades || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Valor em Estoque</div>
+                <div class="subcard-value">R$ ${money(resumo.valor_total_estoque || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Produtos em Alerta</div>
+                <div class="subcard-value">${Number(resumo.produtos_alerta || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Produtos Zerados</div>
+                <div class="subcard-value">${Number(resumo.produtos_zerados || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Entradas / Saídas</div>
+                <div class="subcard-value">${Number(resumo.total_entradas || 0)} / ${Number(resumo.total_saidas || 0)}</div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="card">
+                <h3>Top valor parado</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Estoque</th>
+                        <th>Custo</th>
+                        <th>Valor</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${
+                        top.length
+                          ? top.slice(0, 10).map((p) => `
+                            <tr>
+                              <td>${p.nome || "-"}</td>
+                              <td>${p.estoque || 0}</td>
+                              <td>R$ ${money(p.custo)}</td>
+                              <td>R$ ${money(p.valor_estoque)}</td>
+                            </tr>
+                          `).join("")
+                          : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Produtos em alerta</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Estoque</th>
+                        <th>Mínimo</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${
+                        alertas.length
+                          ? alertas.slice(0, 10).map((p) => `
+                            <tr>
+                              <td>${p.nome || "-"}</td>
+                              <td>${p.estoque || 0}</td>
+                              <td>${p.estoque_minimo || 0}</td>
+                              <td><span class="badge badge-alert">Baixo</span></td>
+                            </tr>
+                          `).join("")
+                          : `<tr><td colspan="4" class="empty-state">Sem alertas.</td></tr>`
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function carregarRelatorioEstoque() {
+      try {
+        if (tipo === "admin") {
+          const data = await api("/admin/relatorio-estoque");
+          renderRelatorioAdmin(data);
+        } else {
+          const data = await api(`/relatorio-estoque/${empresa}`);
+          renderRelatorioLoja(data);
+        }
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
+    }
+
     function limparProduto() {
       document.getElementById("p_nome").value = "";
       document.getElementById("p_preco").value = "";
@@ -1989,6 +2329,10 @@
     }
 
     window.addEventListener("resize", aplicarEstadoSidebar);
+
+    document.getElementById("loginUsuario").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") fazerLogin();
+    });
 
     document.getElementById("loginSenha").addEventListener("keydown", (e) => {
       if (e.key === "Enter") fazerLogin();
