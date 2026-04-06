@@ -25,6 +25,8 @@
       --info-text: #1d4ed8;
       --radius: 18px;
       --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --sidebar-width: 280px;
+      --sidebar-collapsed-width: 86px;
     }
 
     * {
@@ -114,20 +116,52 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: var(--sidebar-width) 1fr;
       min-height: calc(100vh - 84px);
+      transition: grid-template-columns 0.25s ease;
+    }
+
+    .layout.sidebar-collapsed {
+      grid-template-columns: var(--sidebar-collapsed-width) 1fr;
     }
 
     .sidebar {
       background: var(--sidebar);
       color: white;
       padding: 18px 14px;
+      transition: width 0.25s ease, padding 0.25s ease;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
     }
 
     .sidebar h2 {
       font-size: 16px;
-      margin-bottom: 18px;
       padding-left: 8px;
+      white-space: nowrap;
+    }
+
+    .sidebar-toggle {
+      border: none;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(255,255,255,0.2);
     }
 
     .menu-btn {
@@ -142,6 +176,11 @@
       margin-bottom: 8px;
       font-size: 15px;
       transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .menu-btn:hover,
@@ -149,8 +188,49 @@
       background: var(--sidebar-hover);
     }
 
+    .menu-icon {
+      min-width: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .menu-text,
+    .sidebar-title-text {
+      transition: opacity 0.2s ease, width 0.2s ease;
+    }
+
+    .layout.sidebar-collapsed .sidebar {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .layout.sidebar-collapsed .sidebar h2 {
+      padding-left: 0;
+    }
+
+    .layout.sidebar-collapsed .sidebar-title-text,
+    .layout.sidebar-collapsed .menu-text {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .layout.sidebar-collapsed .menu-btn {
+      justify-content: center;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .layout.sidebar-collapsed .menu-icon {
+      min-width: auto;
+    }
+
     .content {
       padding: 24px;
+      min-width: 0;
     }
 
     .page {
@@ -434,8 +514,27 @@
     }
 
     @media (max-width: 980px) {
-      .layout {
+      .layout,
+      .layout.sidebar-collapsed {
         grid-template-columns: 1fr;
+      }
+
+      .sidebar,
+      .layout.sidebar-collapsed .sidebar {
+        padding: 14px;
+      }
+
+      .layout.sidebar-collapsed .sidebar-title-text,
+      .layout.sidebar-collapsed .menu-text {
+        opacity: 1;
+        width: auto;
+        pointer-events: auto;
+      }
+
+      .layout.sidebar-collapsed .menu-btn {
+        justify-content: flex-start;
+        padding-left: 14px;
+        padding-right: 14px;
       }
 
       .item-row {
@@ -481,16 +580,47 @@
       </div>
     </header>
 
-    <div class="layout">
+    <div id="layout" class="layout">
       <aside class="sidebar">
-        <h2>Menu</h2>
-        <button class="menu-btn active" onclick="mostrarPagina('dashboard', this)">Dashboard</button>
-        <button class="menu-btn" onclick="mostrarPagina('produtos', this)">Produtos</button>
-        <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)">Fornecedores</button>
-        <button class="menu-btn" onclick="mostrarPagina('compras', this)">Compras</button>
-        <button class="menu-btn" onclick="mostrarPagina('estoque', this)">Estoque</button>
-        <button class="menu-btn" onclick="mostrarPagina('movimentacoes', this)">Movimentações</button>
-        <button class="menu-btn" onclick="mostrarPagina('ajuste', this)">Ajuste de Estoque</button>
+        <div class="sidebar-header">
+          <h2><span class="sidebar-title-text">Menu</span></h2>
+          <button id="sidebarToggle" class="sidebar-toggle" onclick="alternarSidebar()" title="Minimizar menu">☰</button>
+        </div>
+
+        <button class="menu-btn active" onclick="mostrarPagina('dashboard', this)" title="Dashboard">
+          <span class="menu-icon">🏠</span>
+          <span class="menu-text">Dashboard</span>
+        </button>
+
+        <button class="menu-btn" onclick="mostrarPagina('produtos', this)" title="Produtos">
+          <span class="menu-icon">📦</span>
+          <span class="menu-text">Produtos</span>
+        </button>
+
+        <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)" title="Fornecedores">
+          <span class="menu-icon">🚚</span>
+          <span class="menu-text">Fornecedores</span>
+        </button>
+
+        <button class="menu-btn" onclick="mostrarPagina('compras', this)" title="Compras">
+          <span class="menu-icon">🛒</span>
+          <span class="menu-text">Compras</span>
+        </button>
+
+        <button class="menu-btn" onclick="mostrarPagina('estoque', this)" title="Estoque">
+          <span class="menu-icon">🏬</span>
+          <span class="menu-text">Estoque</span>
+        </button>
+
+        <button class="menu-btn" onclick="mostrarPagina('movimentacoes', this)" title="Movimentações">
+          <span class="menu-icon">🔄</span>
+          <span class="menu-text">Movimentações</span>
+        </button>
+
+        <button class="menu-btn" onclick="mostrarPagina('ajuste', this)" title="Ajuste de Estoque">
+          <span class="menu-icon">🛠️</span>
+          <span class="menu-text">Ajuste de Estoque</span>
+        </button>
       </aside>
 
       <main class="content">
@@ -1045,6 +1175,35 @@
       if (button) button.classList.add("active");
     }
 
+    function aplicarEstadoSidebar() {
+      const layout = document.getElementById("layout");
+      const btn = document.getElementById("sidebarToggle");
+      const salvo = localStorage.getItem("lf_sidebar_collapsed") === "true";
+
+      if (window.innerWidth <= 980) {
+        layout.classList.remove("sidebar-collapsed");
+        btn.title = "Minimizar menu";
+        return;
+      }
+
+      if (salvo) {
+        layout.classList.add("sidebar-collapsed");
+        btn.title = "Expandir menu";
+      } else {
+        layout.classList.remove("sidebar-collapsed");
+        btn.title = "Minimizar menu";
+      }
+    }
+
+    function alternarSidebar() {
+      if (window.innerWidth <= 980) return;
+
+      const layout = document.getElementById("layout");
+      const estaFechado = layout.classList.toggle("sidebar-collapsed");
+      localStorage.setItem("lf_sidebar_collapsed", estaFechado ? "true" : "false");
+      document.getElementById("sidebarToggle").title = estaFechado ? "Expandir menu" : "Minimizar menu";
+    }
+
     async function api(url, options = {}) {
       const response = await fetch(`${API}${url}`, {
         ...options,
@@ -1150,6 +1309,8 @@
         document.getElementById("empresaLabel").textContent = empresaTexto;
         document.getElementById("usuarioInfo").textContent =
           `${nomeCompleto || usuario || "Usuário"} • ${tipo || "-"}`;
+
+        aplicarEstadoSidebar();
       } else {
         document.getElementById("app").classList.add("hidden");
         document.getElementById("loginScreen").classList.remove("hidden");
@@ -1821,10 +1982,13 @@
         }
 
         renderItensCompra();
+        aplicarEstadoSidebar();
       } catch (error) {
         setStatus(error.message, "error");
       }
     }
+
+    window.addEventListener("resize", aplicarEstadoSidebar);
 
     document.getElementById("loginSenha").addEventListener("keydown", (e) => {
       if (e.key === "Enter") fazerLogin();
