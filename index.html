@@ -665,6 +665,11 @@
           <span class="menu-icon">📊</span>
           <span class="menu-text">Relatório de Estoque</span>
         </button>
+
+        <button class="menu-btn" onclick="abrirRelatorioPerformance(this)" title="Performance dos Produtos">
+          <span class="menu-icon">📈</span>
+          <span class="menu-text">Performance dos Produtos</span>
+        </button>
       </aside>
 
       <main class="content">
@@ -1252,6 +1257,140 @@
             <div id="relatorioAdminLista"></div>
           </div>
         </section>
+
+        <section id="performance" class="page">
+          <div class="page-header">
+            <h2>Performance dos Produtos</h2>
+            <p>Rentabilidade, giro, valor parado e produtos sem saída.</p>
+          </div>
+
+          <div id="performanceLojaWrap" class="hidden">
+            <div class="summary-grid">
+              <div class="summary-card">
+                <div class="summary-label">Total de Produtos</div>
+                <div class="summary-value" id="perfTotalProdutos">0</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Faturamento Total</div>
+                <div class="summary-value money" id="perfFaturamentoTotal">R$ 0,00</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Lucro Estimado Total</div>
+                <div class="summary-value money" id="perfLucroEstimadoTotal">R$ 0,00</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Valor Total Parado</div>
+                <div class="summary-value money" id="perfValorParado">R$ 0,00</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Produtos Sem Saída</div>
+                <div class="summary-value" id="perfSemSaida">0</div>
+              </div>
+              <div class="summary-card">
+                <div class="summary-label">Produtos Baixo Giro</div>
+                <div class="summary-value" id="perfBaixoGiro">0</div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="card">
+                <h3>Top faturamento</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Qtd Vendida</th>
+                        <th>Faturamento</th>
+                        <th>Lucro Estimado</th>
+                      </tr>
+                    </thead>
+                    <tbody id="perfTopFaturamentoBody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Top quantidade vendida</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Qtd Vendida</th>
+                        <th>Faturamento</th>
+                        <th>Margem</th>
+                      </tr>
+                    </thead>
+                    <tbody id="perfTopQuantidadeBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="card">
+                <h3>Produtos sem saída</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Estoque</th>
+                        <th>Valor Parado</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="perfSemSaidaBody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Produtos de baixo giro</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Qtd Vendida</th>
+                        <th>Valor Parado</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="perfBaixoGiroBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Todos os produtos</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Categoria</th>
+                      <th>Preço</th>
+                      <th>Custo</th>
+                      <th>Lucro Unitário</th>
+                      <th>Margem</th>
+                      <th>Qtd Vendida</th>
+                      <th>Faturamento</th>
+                      <th>Valor Parado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="perfTodosProdutosBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div id="performanceAdminWrap" class="hidden">
+            <div id="performanceAdminLista"></div>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -1276,6 +1415,13 @@
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
+    }
+
+    function percent(v) {
+      return `${Number(v || 0).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}%`;
     }
 
     function formatDate(value) {
@@ -1320,6 +1466,11 @@
     async function abrirRelatorio(button) {
       mostrarPagina("relatorio", button);
       await carregarRelatorioEstoque();
+    }
+
+    async function abrirRelatorioPerformance(button) {
+      mostrarPagina("performance", button);
+      await carregarRelatorioPerformance();
     }
 
     function aplicarEstadoSidebar() {
@@ -1953,6 +2104,204 @@
       }).join("");
     }
 
+    function renderPerformanceLoja(data) {
+      document.getElementById("performanceLojaWrap").classList.remove("hidden");
+      document.getElementById("performanceAdminWrap").classList.add("hidden");
+
+      const resumo = data.resumo || {};
+      document.getElementById("perfTotalProdutos").textContent = Number(resumo.total_produtos || 0);
+      document.getElementById("perfFaturamentoTotal").textContent = `R$ ${money(resumo.faturamento_total || 0)}`;
+      document.getElementById("perfLucroEstimadoTotal").textContent = `R$ ${money(resumo.lucro_estimado_total || 0)}`;
+      document.getElementById("perfValorParado").textContent = `R$ ${money(resumo.valor_total_parado || 0)}`;
+      document.getElementById("perfSemSaida").textContent = Number(resumo.produtos_sem_saida || 0);
+      document.getElementById("perfBaixoGiro").textContent = Number(resumo.produtos_baixo_giro || 0);
+
+      const topFat = data.top_faturamento || [];
+      const topQtd = data.top_quantidade_vendida || [];
+      const semSaida = data.produtos_sem_saida || [];
+      const baixoGiro = data.produtos_baixo_giro || [];
+      const todos = data.produtos || [];
+
+      const topFatBody = document.getElementById("perfTopFaturamentoBody");
+      const topQtdBody = document.getElementById("perfTopQuantidadeBody");
+      const semSaidaBody = document.getElementById("perfSemSaidaBody");
+      const baixoGiroBody = document.getElementById("perfBaixoGiroBody");
+      const todosBody = document.getElementById("perfTodosProdutosBody");
+
+      topFatBody.innerHTML = topFat.length
+        ? topFat.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.quantidade_vendida || 0}</td>
+            <td>R$ ${money(p.faturamento)}</td>
+            <td>R$ ${money(p.lucro_estimado_vendido)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
+
+      topQtdBody.innerHTML = topQtd.length
+        ? topQtd.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.quantidade_vendida || 0}</td>
+            <td>R$ ${money(p.faturamento)}</td>
+            <td>${percent(p.margem_percentual)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
+
+      semSaidaBody.innerHTML = semSaida.length
+        ? semSaida.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.estoque || 0}</td>
+            <td>R$ ${money(p.valor_estoque)}</td>
+            <td><span class="badge badge-warning">Sem saída</span></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="4" class="empty-state">Nenhum produto sem saída.</td></tr>`;
+
+      baixoGiroBody.innerHTML = baixoGiro.length
+        ? baixoGiro.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.quantidade_vendida || 0}</td>
+            <td>R$ ${money(p.valor_estoque)}</td>
+            <td><span class="badge badge-info">Baixo giro</span></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="4" class="empty-state">Nenhum produto com baixo giro.</td></tr>`;
+
+      todosBody.innerHTML = todos.length
+        ? todos.map((p) => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.categoria || "-"}</td>
+            <td>R$ ${money(p.preco)}</td>
+            <td>R$ ${money(p.custo)}</td>
+            <td>R$ ${money(p.lucro_unitario)}</td>
+            <td>${percent(p.margem_percentual)}</td>
+            <td>${p.quantidade_vendida || 0}</td>
+            <td>R$ ${money(p.faturamento)}</td>
+            <td>R$ ${money(p.valor_estoque)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="9" class="empty-state">Nenhum produto encontrado.</td></tr>`;
+    }
+
+    function renderPerformanceAdmin(relatorios) {
+      document.getElementById("performanceLojaWrap").classList.add("hidden");
+      document.getElementById("performanceAdminWrap").classList.remove("hidden");
+
+      const wrap = document.getElementById("performanceAdminLista");
+
+      if (!Array.isArray(relatorios) || !relatorios.length) {
+        wrap.innerHTML = `<div class="card"><div class="empty-state">Nenhuma empresa encontrada na performance.</div></div>`;
+        return;
+      }
+
+      wrap.innerHTML = relatorios.map((item) => {
+        const resumo = item.resumo || {};
+        const topFat = item.top_faturamento || [];
+        const semSaida = item.produtos_sem_saida || [];
+
+        return `
+          <div class="empresa-bloco">
+            <h3>${item.empresa || "-"}</h3>
+
+            <div class="subcards-grid">
+              <div class="subcard">
+                <div class="subcard-label">Total de Produtos</div>
+                <div class="subcard-value">${Number(resumo.total_produtos || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Faturamento Total</div>
+                <div class="subcard-value">R$ ${money(resumo.faturamento_total || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Lucro Estimado</div>
+                <div class="subcard-value">R$ ${money(resumo.lucro_estimado_total || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Valor Parado</div>
+                <div class="subcard-value">R$ ${money(resumo.valor_total_parado || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Sem Saída</div>
+                <div class="subcard-value">${Number(resumo.produtos_sem_saida || 0)}</div>
+              </div>
+              <div class="subcard">
+                <div class="subcard-label">Baixo Giro</div>
+                <div class="subcard-value">${Number(resumo.produtos_baixo_giro || 0)}</div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="card">
+                <h3>Top faturamento</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Qtd</th>
+                        <th>Faturamento</th>
+                        <th>Lucro Estimado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${
+                        topFat.length
+                          ? topFat.slice(0, 10).map((p) => `
+                            <tr>
+                              <td>${p.nome || "-"}</td>
+                              <td>${p.quantidade_vendida || 0}</td>
+                              <td>R$ ${money(p.faturamento)}</td>
+                              <td>R$ ${money(p.lucro_estimado_vendido)}</td>
+                            </tr>
+                          `).join("")
+                          : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Produtos sem saída</h3>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Produto</th>
+                        <th>Estoque</th>
+                        <th>Valor Parado</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${
+                        semSaida.length
+                          ? semSaida.slice(0, 10).map((p) => `
+                            <tr>
+                              <td>${p.nome || "-"}</td>
+                              <td>${p.estoque || 0}</td>
+                              <td>R$ ${money(p.valor_estoque)}</td>
+                              <td><span class="badge badge-warning">Sem saída</span></td>
+                            </tr>
+                          `).join("")
+                          : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
     async function carregarRelatorioEstoque() {
       try {
         if (tipo === "admin") {
@@ -1961,6 +2310,20 @@
         } else {
           const data = await api(`/relatorio-estoque/${empresa}`);
           renderRelatorioLoja(data);
+        }
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
+    }
+
+    async function carregarRelatorioPerformance() {
+      try {
+        if (tipo === "admin") {
+          const data = await api("/admin/relatorio-performance");
+          renderPerformanceAdmin(data);
+        } else {
+          const data = await api(`/relatorio-performance/${empresa}`);
+          renderPerformanceLoja(data);
         }
       } catch (error) {
         setStatus(error.message, "error");
