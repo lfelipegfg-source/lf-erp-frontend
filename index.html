@@ -390,6 +390,15 @@
       background: #fff5f5;
     }
 
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+    }
+
     .status-box {
       margin-bottom: 16px;
       padding: 12px 14px;
@@ -552,6 +561,57 @@
       font-weight: bold;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 520px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 24px 40px rgba(0,0,0,0.2);
+      padding: 22px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .modal-close {
+      border: none;
+      background: #f3f4f6;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      background: #e5e7eb;
+    }
+
     @media (max-width: 980px) {
       .layout,
       .layout.sidebar-collapsed {
@@ -670,6 +730,11 @@
           <span class="menu-icon">📈</span>
           <span class="menu-text">Performance dos Produtos</span>
         </button>
+
+        <button class="menu-btn" onclick="abrirContasReceber(this)" title="Contas a Receber">
+          <span class="menu-icon">💰</span>
+          <span class="menu-text">Contas a Receber</span>
+        </button>
       </aside>
 
       <main class="content">
@@ -678,7 +743,7 @@
         <section id="dashboard" class="page active">
           <div class="page-header">
             <h2>Dashboard</h2>
-            <p>Resumo geral da operação de compras e estoque.</p>
+            <p>Resumo geral da operação de compras, estoque e recebimentos.</p>
           </div>
 
           <div class="summary-grid">
@@ -1391,7 +1456,127 @@
             <div id="performanceAdminLista"></div>
           </div>
         </section>
+
+        <section id="contasReceber" class="page">
+          <div class="page-header">
+            <h2>Contas a Receber</h2>
+            <p>Controle de parcelas, vencimentos, atrasos e baixas de recebimento.</p>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="summary-label">Pendente</div>
+              <div class="summary-value money" id="crResumoPendente">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Pago</div>
+              <div class="summary-value money" id="crResumoPago">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Atrasado</div>
+              <div class="summary-value money" id="crResumoAtrasado">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Parcelas</div>
+              <div class="summary-value" id="crResumoParcelas">0</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="toolbar">
+              <div class="form-group">
+                <label>Buscar cliente</label>
+                <input id="buscaContaReceber" class="form-control" type="text" placeholder="Digite o cliente..." oninput="renderContasReceber()" />
+              </div>
+
+              <div class="form-group">
+                <label>Status</label>
+                <select id="filtroContaReceberStatus" class="form-control" onchange="renderContasReceber()">
+                  <option value="">Todos</option>
+                  <option value="pendente">Pendente</option>
+                  <option value="pago">Pago</option>
+                  <option value="atrasado">Atrasado</option>
+                </select>
+              </div>
+
+              <button class="btn btn-outline" onclick="carregarContasReceber()">Atualizar</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Empresa</th>
+                    <th>Cliente</th>
+                    <th>Parcela</th>
+                    <th>Valor</th>
+                    <th>Vencimento</th>
+                    <th>Pagamento</th>
+                    <th>Forma</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="listaContasReceber"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
       </main>
+    </div>
+  </div>
+
+  <div id="modalBaixaBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Baixar parcela</h3>
+        <button class="modal-close" onclick="fecharModalBaixa()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Cliente</label>
+        <input id="mb_cliente" class="form-control" type="text" disabled />
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Parcela</label>
+          <input id="mb_parcela" class="form-control" type="text" disabled />
+        </div>
+        <div class="form-group">
+          <label>Valor</label>
+          <input id="mb_valor" class="form-control" type="text" disabled />
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data do pagamento</label>
+          <input id="mb_data_pagamento" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Forma de pagamento</label>
+          <select id="mb_forma_pagamento" class="form-control">
+            <option value="">Selecione</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Pix">Pix</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Transferência">Transferência</option>
+            <option value="Promissória">Promissória</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Observação</label>
+        <input id="mb_observacao" class="form-control" type="text" />
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-primary" onclick="confirmarBaixaContaReceber()">Confirmar baixa</button>
+        <button class="btn btn-secondary" onclick="fecharModalBaixa()">Cancelar</button>
+      </div>
     </div>
   </div>
 
@@ -1409,6 +1594,8 @@
     let compras = [];
     let movimentacoes = [];
     let itensCompra = [];
+    let contasReceber = [];
+    let contaReceberSelecionada = null;
 
     function money(v) {
       return Number(v || 0).toLocaleString("pt-BR", {
@@ -1471,6 +1658,11 @@
     async function abrirRelatorioPerformance(button) {
       mostrarPagina("performance", button);
       await carregarRelatorioPerformance();
+    }
+
+    async function abrirContasReceber(button) {
+      mostrarPagina("contasReceber", button);
+      await carregarContasReceber();
     }
 
     function aplicarEstadoSidebar() {
@@ -1593,6 +1785,7 @@
       document.getElementById("app").classList.add("hidden");
       document.getElementById("loginScreen").classList.remove("hidden");
       document.getElementById("loginSenha").value = "";
+      document.getElementById("loginUsuario").focus();
     }
 
     function alternarTelas() {
@@ -1650,6 +1843,49 @@
 
       renderMovimentacoes();
       renderDashboardMovimentacoes();
+    }
+
+    async function carregarContasReceber() {
+      try {
+        if (tipo === "admin") {
+          contasReceber = await api("/admin/contas-receber");
+          atualizarResumoContasReceberAdmin();
+        } else {
+          contasReceber = await api(`/contas-receber/${empresa}`);
+          await carregarResumoContasReceberLoja();
+        }
+
+        renderContasReceber();
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
+    }
+
+    async function carregarResumoContasReceberLoja() {
+      const resumo = await api(`/contas-receber/${empresa}/resumo`);
+      document.getElementById("crResumoPendente").textContent = `R$ ${money(resumo.pendente || 0)}`;
+      document.getElementById("crResumoPago").textContent = `R$ ${money(resumo.pago || 0)}`;
+      document.getElementById("crResumoAtrasado").textContent = `R$ ${money(resumo.atrasado || 0)}`;
+      document.getElementById("crResumoParcelas").textContent = Number(resumo.total_parcelas || 0);
+    }
+
+    function atualizarResumoContasReceberAdmin() {
+      const pendente = contasReceber
+        .filter((c) => c.status === "pendente")
+        .reduce((acc, c) => acc + Number(c.valor || 0), 0);
+
+      const pago = contasReceber
+        .filter((c) => c.status === "pago")
+        .reduce((acc, c) => acc + Number(c.valor || 0), 0);
+
+      const atrasado = contasReceber
+        .filter((c) => c.status === "atrasado")
+        .reduce((acc, c) => acc + Number(c.valor || 0), 0);
+
+      document.getElementById("crResumoPendente").textContent = `R$ ${money(pendente)}`;
+      document.getElementById("crResumoPago").textContent = `R$ ${money(pago)}`;
+      document.getElementById("crResumoAtrasado").textContent = `R$ ${money(atrasado)}`;
+      document.getElementById("crResumoParcelas").textContent = contasReceber.length;
     }
 
     async function carregarDashboardAdmin() {
@@ -2122,13 +2358,7 @@
       const baixoGiro = data.produtos_baixo_giro || [];
       const todos = data.produtos || [];
 
-      const topFatBody = document.getElementById("perfTopFaturamentoBody");
-      const topQtdBody = document.getElementById("perfTopQuantidadeBody");
-      const semSaidaBody = document.getElementById("perfSemSaidaBody");
-      const baixoGiroBody = document.getElementById("perfBaixoGiroBody");
-      const todosBody = document.getElementById("perfTodosProdutosBody");
-
-      topFatBody.innerHTML = topFat.length
+      document.getElementById("perfTopFaturamentoBody").innerHTML = topFat.length
         ? topFat.map((p) => `
           <tr>
             <td>${p.nome || "-"}</td>
@@ -2139,7 +2369,7 @@
         `).join("")
         : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
 
-      topQtdBody.innerHTML = topQtd.length
+      document.getElementById("perfTopQuantidadeBody").innerHTML = topQtd.length
         ? topQtd.map((p) => `
           <tr>
             <td>${p.nome || "-"}</td>
@@ -2150,7 +2380,7 @@
         `).join("")
         : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
 
-      semSaidaBody.innerHTML = semSaida.length
+      document.getElementById("perfSemSaidaBody").innerHTML = semSaida.length
         ? semSaida.map((p) => `
           <tr>
             <td>${p.nome || "-"}</td>
@@ -2159,9 +2389,9 @@
             <td><span class="badge badge-warning">Sem saída</span></td>
           </tr>
         `).join("")
-        : `<tr><td colspan="4" class="empty-state">Nenhum produto sem saída.</td></tr>`;
+        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
 
-      baixoGiroBody.innerHTML = baixoGiro.length
+      document.getElementById("perfBaixoGiroBody").innerHTML = baixoGiro.length
         ? baixoGiro.map((p) => `
           <tr>
             <td>${p.nome || "-"}</td>
@@ -2170,9 +2400,9 @@
             <td><span class="badge badge-info">Baixo giro</span></td>
           </tr>
         `).join("")
-        : `<tr><td colspan="4" class="empty-state">Nenhum produto com baixo giro.</td></tr>`;
+        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
 
-      todosBody.innerHTML = todos.length
+      document.getElementById("perfTodosProdutosBody").innerHTML = todos.length
         ? todos.map((p) => `
           <tr>
             <td>${p.nome || "-"}</td>
@@ -2186,7 +2416,7 @@
             <td>R$ ${money(p.valor_estoque)}</td>
           </tr>
         `).join("")
-        : `<tr><td colspan="9" class="empty-state">Nenhum produto encontrado.</td></tr>`;
+        : `<tr><td colspan="9" class="empty-state">Sem dados.</td></tr>`;
     }
 
     function renderPerformanceAdmin(relatorios) {
@@ -2275,8 +2505,7 @@
                       <tr>
                         <th>Produto</th>
                         <th>Estoque</th>
-                        <th>Valor Parado</th>
-                        <th>Status</th>
+                        <th>Valor parado</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2287,10 +2516,9 @@
                               <td>${p.nome || "-"}</td>
                               <td>${p.estoque || 0}</td>
                               <td>R$ ${money(p.valor_estoque)}</td>
-                              <td><span class="badge badge-warning">Sem saída</span></td>
                             </tr>
                           `).join("")
-                          : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`
+                          : `<tr><td colspan="3" class="empty-state">Sem dados.</td></tr>`
                       }
                     </tbody>
                   </table>
@@ -2302,29 +2530,122 @@
       }).join("");
     }
 
-    async function carregarRelatorioEstoque() {
-      try {
-        if (tipo === "admin") {
-          const data = await api("/admin/relatorio-estoque");
-          renderRelatorioAdmin(data);
-        } else {
-          const data = await api(`/relatorio-estoque/${empresa}`);
-          renderRelatorioLoja(data);
-        }
-      } catch (error) {
-        setStatus(error.message, "error");
+    function renderContasReceber() {
+      const filtroBusca = document.getElementById("buscaContaReceber").value.trim().toLowerCase();
+      const filtroStatus = document.getElementById("filtroContaReceberStatus").value;
+      const tbody = document.getElementById("listaContasReceber");
+
+      let lista = [...contasReceber];
+
+      if (filtroBusca) {
+        lista = lista.filter((c) => (c.cliente_nome || "").toLowerCase().includes(filtroBusca));
       }
+
+      if (filtroStatus) {
+        lista = lista.filter((c) => c.status === filtroStatus);
+      }
+
+      if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Nenhuma parcela encontrada.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = lista.map((c) => {
+        let badge = `<span class="badge badge-info">${c.status || "-"}</span>`;
+        if (c.status === "pago") badge = `<span class="badge badge-ok">Pago</span>`;
+        if (c.status === "pendente") badge = `<span class="badge badge-warning">Pendente</span>`;
+        if (c.status === "atrasado") badge = `<span class="badge badge-alert">Atrasado</span>`;
+
+        return `
+          <tr>
+            <td>${c.empresa || empresa || "-"}</td>
+            <td>${c.cliente_nome || "-"}</td>
+            <td>${c.parcela || 1}/${c.total_parcelas || 1}</td>
+            <td>R$ ${money(c.valor)}</td>
+            <td>${formatDate(c.data_vencimento)}</td>
+            <td>${formatDate(c.data_pagamento)}</td>
+            <td>${c.forma_pagamento || "-"}</td>
+            <td>${badge}</td>
+            <td>
+              ${c.status !== "pago"
+                ? `<button class="btn btn-primary" onclick="abrirModalBaixa(${c.id})">Baixar</button>`
+                : `<button class="btn btn-secondary" disabled>Baixado</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
-    async function carregarRelatorioPerformance() {
+    function abrirModalBaixa(id) {
+      const conta = contasReceber.find((c) => Number(c.id) === Number(id));
+      if (!conta) {
+        setStatus("Parcela não encontrada.", "error");
+        return;
+      }
+
+      contaReceberSelecionada = conta;
+      document.getElementById("mb_cliente").value = conta.cliente_nome || "";
+      document.getElementById("mb_parcela").value = `${conta.parcela || 1}/${conta.total_parcelas || 1}`;
+      document.getElementById("mb_valor").value = `R$ ${money(conta.valor)}`;
+      document.getElementById("mb_data_pagamento").value = hojeInput();
+      document.getElementById("mb_forma_pagamento").value = conta.forma_pagamento || "";
+      document.getElementById("mb_observacao").value = conta.observacao || "";
+      document.getElementById("modalBaixaBackdrop").classList.add("show");
+    }
+
+    function fecharModalBaixa() {
+      contaReceberSelecionada = null;
+      document.getElementById("modalBaixaBackdrop").classList.remove("show");
+      document.getElementById("mb_cliente").value = "";
+      document.getElementById("mb_parcela").value = "";
+      document.getElementById("mb_valor").value = "";
+      document.getElementById("mb_data_pagamento").value = "";
+      document.getElementById("mb_forma_pagamento").value = "";
+      document.getElementById("mb_observacao").value = "";
+    }
+
+    async function confirmarBaixaContaReceber() {
+      if (!contaReceberSelecionada) {
+        setStatus("Nenhuma parcela selecionada.", "error");
+        return;
+      }
+
+      const dataPagamento = document.getElementById("mb_data_pagamento").value;
+      const formaPagamento = document.getElementById("mb_forma_pagamento").value;
+      const observacao = document.getElementById("mb_observacao").value.trim();
+
+      if (!dataPagamento) {
+        setStatus("Informe a data do pagamento.", "error");
+        return;
+      }
+
+      if (!formaPagamento) {
+        setStatus("Selecione a forma de pagamento.", "error");
+        return;
+      }
+
       try {
+        await api(`/contas-receber/${contaReceberSelecionada.id}/baixar`, {
+          method: "PUT",
+          body: JSON.stringify({
+            empresa: contaReceberSelecionada.empresa || empresa,
+            data_pagamento: dataPagamento,
+            forma_pagamento: formaPagamento,
+            observacao
+          })
+        });
+
+        fecharModalBaixa();
+        await carregarContasReceber();
+
         if (tipo === "admin") {
-          const data = await api("/admin/relatorio-performance");
-          renderPerformanceAdmin(data);
+          await carregarDashboardAdmin();
         } else {
-          const data = await api(`/relatorio-performance/${empresa}`);
-          renderPerformanceLoja(data);
+          await carregarDashboardLoja();
         }
+
+        setStatus("Parcela baixada com sucesso.");
       } catch (error) {
         setStatus(error.message, "error");
       }
@@ -2347,11 +2668,11 @@
       }
 
       const nome = document.getElementById("p_nome").value.trim();
-      const preco = document.getElementById("p_preco").value;
-      const custo = document.getElementById("p_custo").value;
-      const estoque = document.getElementById("p_estoque").value;
-      const estoque_minimo = document.getElementById("p_estoque_minimo").value;
-      const codigo_barras = document.getElementById("p_codigo_barras").value.trim();
+      const preco = Number(document.getElementById("p_preco").value || 0);
+      const custo = Number(document.getElementById("p_custo").value || 0);
+      const estoque = Number(document.getElementById("p_estoque").value || 0);
+      const estoqueMinimo = Number(document.getElementById("p_estoque_minimo").value || 0);
+      const codigoBarras = document.getElementById("p_codigo_barras").value.trim();
       const categoria = document.getElementById("p_categoria").value.trim();
 
       if (!nome) {
@@ -2366,10 +2687,10 @@
             empresa,
             nome,
             preco,
-            estoque,
             custo,
-            estoque_minimo,
-            codigo_barras,
+            estoque,
+            estoque_minimo: estoqueMinimo,
+            codigo_barras: codigoBarras,
             categoria
           })
         });
@@ -2434,9 +2755,7 @@
         });
 
         limparFornecedor();
-        await Promise.all([
-          carregarFornecedores()
-        ]);
+        await carregarFornecedores();
 
         if (tipo === "admin") {
           await carregarDashboardAdmin();
@@ -2486,7 +2805,6 @@
 
       document.getElementById("c_qtd").value = "";
       document.getElementById("c_custo").value = "";
-
       renderItensCompra();
     }
 
@@ -2660,7 +2978,35 @@
           await carregarDashboardLoja();
         }
 
-        setStatus("Ajuste realizado com sucesso.");
+        setStatus("Ajuste registrado com sucesso.");
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
+    }
+
+    async function carregarRelatorioEstoque() {
+      try {
+        if (tipo === "admin") {
+          const data = await api("/admin/relatorio-estoque");
+          renderRelatorioAdmin(data);
+        } else {
+          const data = await api(`/relatorio-estoque/${empresa}`);
+          renderRelatorioLoja(data);
+        }
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
+    }
+
+    async function carregarRelatorioPerformance() {
+      try {
+        if (tipo === "admin") {
+          const data = await api("/admin/relatorio-performance");
+          renderPerformanceAdmin(data);
+        } else {
+          const data = await api(`/relatorio-performance/${empresa}`);
+          renderPerformanceLoja(data);
+        }
       } catch (error) {
         setStatus(error.message, "error");
       }
@@ -2668,14 +3014,12 @@
 
     async function carregarTudo() {
       try {
-        document.getElementById("c_data").value = hojeInput();
-        limparCompra();
-
         await Promise.all([
           carregarProdutos(),
           carregarFornecedores(),
           carregarCompras(),
-          carregarMovimentacoes()
+          carregarMovimentacoes(),
+          carregarContasReceber()
         ]);
 
         if (tipo === "admin") {
@@ -2684,8 +3028,8 @@
           await carregarDashboardLoja();
         }
 
+        limparCompra();
         renderItensCompra();
-        aplicarEstadoSidebar();
       } catch (error) {
         setStatus(error.message, "error");
       }
@@ -2701,10 +3045,11 @@
       if (e.key === "Enter") fazerLogin();
     });
 
-    alternarTelas();
     if (token) {
+      alternarTelas();
       carregarTudo();
     } else {
+      document.getElementById("c_data").value = hojeInput();
       document.getElementById("loginUsuario").focus();
     }
   </script>
