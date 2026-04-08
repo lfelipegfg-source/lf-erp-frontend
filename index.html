@@ -5,644 +5,559 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LF ERP</title>
   <style>
-    :root {
-      --primary: #b30000;
-      --primary-dark: #8a0000;
-      --sidebar: #1f2937;
-      --sidebar-hover: #374151;
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --success-bg: #dcfce7;
-      --success-text: #166534;
-      --error-bg: #fee2e2;
-      --error-text: #991b1b;
-      --warning-bg: #fef3c7;
-      --warning-text: #92400e;
-      --info-bg: #dbeafe;
-      --info-text: #1d4ed8;
-      --radius: 18px;
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      --sidebar-width: 280px;
-      --sidebar-collapsed-width: 86px;
+    :root{
+      --primary:#b30000;
+      --primary-dark:#8a0000;
+      --sidebar:#1f2937;
+      --sidebar-hover:#374151;
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --success-bg:#dcfce7;
+      --success-text:#166534;
+      --error-bg:#fee2e2;
+      --error-text:#991b1b;
+      --warning-bg:#fef3c7;
+      --warning-text:#92400e;
+      --info-bg:#dbeafe;
+      --info-text:#1d4ed8;
+      --radius:18px;
+      --shadow:0 8px 24px rgba(0,0,0,0.08);
+      --sidebar-width:280px;
+      --sidebar-collapsed-width:86px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica, sans-serif;
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:Arial, Helvetica, sans-serif;
     }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
+    body{
+      background:var(--bg);
+      color:var(--text);
     }
 
-    .hidden {
-      display: none !important;
+    .hidden{
+      display:none !important;
     }
 
-    .login-screen {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      background: linear-gradient(135deg, #7f0000, #d10000);
+    .login-screen{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      background:linear-gradient(135deg,#7f0000,#d10000);
     }
 
-    .login-card {
-      width: 100%;
-      max-width: 440px;
-      background: white;
-      border-radius: 28px;
-      padding: 32px;
-      box-shadow: 0 24px 40px rgba(0,0,0,0.18);
+    .login-card{
+      width:100%;
+      max-width:440px;
+      background:#fff;
+      border-radius:28px;
+      padding:32px;
+      box-shadow:0 24px 40px rgba(0,0,0,0.18);
     }
 
-    .login-card h1 {
-      color: var(--primary);
-      font-size: 40px;
-      margin-bottom: 10px;
+    .login-card h1{
+      color:var(--primary);
+      font-size:40px;
+      margin-bottom:10px;
     }
 
-    .login-card p {
-      color: var(--muted);
-      margin-bottom: 24px;
-      font-size: 16px;
+    .login-card p{
+      color:var(--muted);
+      margin-bottom:24px;
+      font-size:16px;
     }
 
-    .app {
-      min-height: 100vh;
+    .app{
+      min-height:100vh;
     }
 
-    .topbar {
-      background: var(--primary);
-      color: white;
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
+    .topbar{
+      background:var(--primary);
+      color:#fff;
+      padding:18px 24px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
     }
 
-    .topbar-left h1 {
-      font-size: 28px;
-      margin-bottom: 4px;
+    .topbar-left h1{
+      font-size:28px;
+      margin-bottom:4px;
     }
 
-    .topbar-left small {
-      opacity: 0.95;
-      font-size: 14px;
+    .topbar-left small{
+      opacity:.95;
+      font-size:14px;
     }
 
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+    .topbar-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    .user-pill {
-      background: rgba(255,255,255,0.12);
-      border-radius: 999px;
-      padding: 12px 16px;
-      font-weight: bold;
+    .user-pill{
+      background:rgba(255,255,255,0.12);
+      border-radius:999px;
+      padding:12px 16px;
+      font-weight:bold;
     }
 
-    .layout {
-      display: grid;
-      grid-template-columns: var(--sidebar-width) 1fr;
-      min-height: calc(100vh - 84px);
-      transition: grid-template-columns 0.25s ease;
+    .layout{
+      display:grid;
+      grid-template-columns:var(--sidebar-width) 1fr;
+      min-height:calc(100vh - 84px);
+      transition:grid-template-columns .25s ease;
     }
 
-    .layout.sidebar-collapsed {
-      grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+    .layout.sidebar-collapsed{
+      grid-template-columns:var(--sidebar-collapsed-width) 1fr;
     }
 
-    .sidebar {
-      background: var(--sidebar);
-      color: white;
-      padding: 18px 14px;
-      transition: width 0.25s ease, padding 0.25s ease;
-      overflow: hidden;
+    .sidebar{
+      background:var(--sidebar);
+      color:#fff;
+      padding:18px 14px;
+      overflow:hidden;
     }
 
-    .sidebar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 18px;
+    .sidebar-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:18px;
     }
 
-    .sidebar h2 {
-      font-size: 16px;
-      padding-left: 8px;
-      white-space: nowrap;
+    .sidebar h2{
+      font-size:16px;
+      padding-left:8px;
+      white-space:nowrap;
     }
 
-    .sidebar-toggle {
-      border: none;
-      background: rgba(255,255,255,0.12);
-      color: white;
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: bold;
-      flex-shrink: 0;
+    .sidebar-toggle{
+      border:none;
+      background:rgba(255,255,255,0.12);
+      color:#fff;
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:18px;
+      font-weight:bold;
+      flex-shrink:0;
     }
 
-    .sidebar-toggle:hover {
-      background: rgba(255,255,255,0.2);
+    .sidebar-toggle:hover{
+      background:rgba(255,255,255,0.2);
     }
 
-    .menu-btn {
-      width: 100%;
-      border: none;
-      background: transparent;
-      color: white;
-      text-align: left;
-      padding: 13px 14px;
-      border-radius: 14px;
-      cursor: pointer;
-      margin-bottom: 8px;
-      font-size: 15px;
-      transition: 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      white-space: nowrap;
-      overflow: hidden;
+    .menu-btn{
+      width:100%;
+      border:none;
+      background:transparent;
+      color:#fff;
+      text-align:left;
+      padding:13px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      margin-bottom:8px;
+      font-size:15px;
+      transition:.2s;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      white-space:nowrap;
+      overflow:hidden;
     }
 
     .menu-btn:hover,
-    .menu-btn.active {
-      background: var(--sidebar-hover);
+    .menu-btn.active{
+      background:var(--sidebar-hover);
     }
 
-    .menu-icon {
-      min-width: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
+    .menu-icon{
+      min-width:28px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
     }
 
     .menu-text,
-    .sidebar-title-text {
-      transition: opacity 0.2s ease, width 0.2s ease;
+    .sidebar-title-text{
+      transition:opacity .2s ease, width .2s ease;
     }
 
-    .layout.sidebar-collapsed .sidebar {
-      padding-left: 10px;
-      padding-right: 10px;
+    .layout.sidebar-collapsed .sidebar{
+      padding-left:10px;
+      padding-right:10px;
     }
 
-    .layout.sidebar-collapsed .sidebar h2 {
-      padding-left: 0;
+    .layout.sidebar-collapsed .sidebar h2{
+      padding-left:0;
     }
 
     .layout.sidebar-collapsed .sidebar-title-text,
-    .layout.sidebar-collapsed .menu-text {
-      opacity: 0;
-      width: 0;
-      overflow: hidden;
-      pointer-events: none;
+    .layout.sidebar-collapsed .menu-text{
+      opacity:0;
+      width:0;
+      overflow:hidden;
+      pointer-events:none;
     }
 
-    .layout.sidebar-collapsed .menu-btn {
-      justify-content: center;
-      padding-left: 10px;
-      padding-right: 10px;
+    .layout.sidebar-collapsed .menu-btn{
+      justify-content:center;
+      padding-left:10px;
+      padding-right:10px;
     }
 
-    .layout.sidebar-collapsed .menu-icon {
-      min-width: auto;
+    .layout.sidebar-collapsed .menu-icon{
+      min-width:auto;
     }
 
-    .content {
-      padding: 24px;
-      min-width: 0;
+    .content{
+      padding:24px;
+      min-width:0;
     }
 
-    .page {
-      display: none;
+    .page{
+      display:none;
     }
 
-    .page.active {
-      display: block;
+    .page.active{
+      display:block;
     }
 
-    .page-header {
-      margin-bottom: 18px;
+    .page-header{
+      margin-bottom:18px;
     }
 
-    .page-header h2 {
-      font-size: 24px;
-      margin-bottom: 6px;
+    .page-header h2{
+      font-size:24px;
+      margin-bottom:6px;
     }
 
-    .page-header p {
-      color: var(--muted);
-      font-size: 14px;
+    .page-header p{
+      color:var(--muted);
+      font-size:14px;
     }
 
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 18px;
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:16px;
+      margin-bottom:18px;
     }
 
-    .summary-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
+    .summary-card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:var(--shadow);
     }
 
-    .summary-label {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 10px;
+    .summary-label{
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:10px;
     }
 
-    .summary-value {
-      font-size: 34px;
-      font-weight: bold;
+    .summary-value{
+      font-size:34px;
+      font-weight:bold;
     }
 
-    .summary-value.money {
-      font-size: 24px;
-      line-height: 1.25;
+    .summary-value.money{
+      font-size:24px;
+      line-height:1.25;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 18px;
-      margin-bottom: 18px;
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+      gap:18px;
+      margin-bottom:18px;
     }
 
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: var(--shadow);
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:var(--shadow);
     }
 
-    .card h3 {
-      font-size: 18px;
-      margin-bottom: 14px;
+    .card h3{
+      font-size:18px;
+      margin-bottom:14px;
     }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:14px;
     }
 
-    .form-group {
-      margin-bottom: 12px;
+    .form-group{
+      margin-bottom:12px;
     }
 
-    .form-group label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 14px;
-      font-weight: bold;
-      color: #374151;
+    .form-group label{
+      display:block;
+      margin-bottom:6px;
+      font-size:14px;
+      font-weight:bold;
+      color:#374151;
     }
 
-    .form-control {
-      width: 100%;
-      border: 1px solid #d1d5db;
-      background: white;
-      border-radius: 12px;
-      padding: 11px 12px;
-      outline: none;
-      font-size: 14px;
+    .form-control{
+      width:100%;
+      border:1px solid #d1d5db;
+      background:#fff;
+      border-radius:12px;
+      padding:11px 12px;
+      outline:none;
+      font-size:14px;
     }
 
-    .form-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(179,0,0,0.08);
+    .form-control:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px rgba(179,0,0,0.08);
     }
 
-    .actions-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
+    .actions-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
     }
 
-    .btn {
-      border: none;
-      border-radius: 12px;
-      padding: 11px 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:11px 16px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:.2s;
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: white;
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
     }
 
-    .btn-primary:hover {
-      background: var(--primary-dark);
+    .btn-primary:hover{
+      background:var(--primary-dark);
     }
 
-    .btn-secondary {
-      background: #374151;
-      color: white;
+    .btn-secondary{
+      background:#374151;
+      color:#fff;
     }
 
-    .btn-secondary:hover {
-      background: #1f2937;
+    .btn-secondary:hover{
+      background:#1f2937;
     }
 
-    .btn-danger {
-      background: #dc2626;
-      color: white;
+    .btn-danger{
+      background:#dc2626;
+      color:#fff;
     }
 
-    .btn-danger:hover {
-      background: #b91c1c;
+    .btn-danger:hover{
+      background:#b91c1c;
     }
 
-    .btn-outline {
-      background: white;
-      color: var(--primary);
-      border: 1px solid var(--primary);
+    .btn-outline{
+      background:#fff;
+      color:var(--primary);
+      border:1px solid var(--primary);
     }
 
-    .btn-outline:hover {
-      background: #fff5f5;
+    .btn-outline:hover{
+      background:#fff5f5;
     }
 
-    .btn-warning {
-      background: #f59e0b;
-      color: white;
+    .status-box{
+      margin-bottom:16px;
+      padding:12px 14px;
+      border-radius:12px;
+      display:none;
+      font-size:14px;
+      font-weight:bold;
     }
 
-    .btn-warning:hover {
-      background: #d97706;
-    }
-
-    .status-box {
-      margin-bottom: 16px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      display: none;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .status-success {
-      display: block;
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .status-error {
-      display: block;
-      background: var(--error-bg);
-      color: var(--error-text);
-    }
-
-    .status-warning {
-      display: block;
-      background: var(--warning-bg);
-      color: var(--warning-text);
-    }
-
-    .status-info {
-      display: block;
-      background: var(--info-bg);
-      color: var(--info-text);
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      font-size: 14px;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
-
-    th {
-      background: #f9fafb;
-    }
-
-    .empty-state {
-      padding: 20px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 5px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .badge-ok {
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .badge-alert {
-      background: var(--error-bg);
-      color: var(--error-text);
-    }
-
-    .badge-info {
-      background: var(--info-bg);
-      color: var(--info-text);
-    }
-
-    .badge-warning {
-      background: var(--warning-bg);
-      color: var(--warning-text);
-    }
+    .status-success{display:block;background:var(--success-bg);color:var(--success-text);}
+    .status-error{display:block;background:var(--error-bg);color:var(--error-text);}
+    .status-warning{display:block;background:var(--warning-bg);color:var(--warning-text);}
+    .status-info{display:block;background:var(--info-bg);color:var(--info-text);}
 
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: end;
-      margin-bottom: 16px;
+    .table-wrap{
+      overflow-x:auto;
     }
 
-    .toolbar .form-group {
-      margin-bottom: 0;
-      min-width: 180px;
+    table{
+      width:100%;
+      border-collapse:collapse;
     }
 
-    .item-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr auto;
-      gap: 10px;
-      align-items: end;
-      margin-top: 8px;
+    th, td{
+      padding:12px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:14px;
+      vertical-align:middle;
+      white-space:nowrap;
     }
 
-    .totals-box {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 14px;
-      font-size: 18px;
-      font-weight: bold;
+    th{
+      background:#f9fafb;
     }
 
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
+    .empty-state{
+      padding:20px;
+      text-align:center;
+      color:var(--muted);
     }
 
-    .empresa-bloco {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 18px;
-      background: #fff;
+    .badge{
+      display:inline-block;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:bold;
     }
 
-    .empresa-bloco h3 {
-      margin-bottom: 12px;
-      font-size: 20px;
-      color: var(--primary);
-    }
+    .badge-ok{background:var(--success-bg);color:var(--success-text);}
+    .badge-alert{background:var(--error-bg);color:var(--error-text);}
+    .badge-warning{background:var(--warning-bg);color:var(--warning-text);}
+    .badge-info{background:var(--info-bg);color:var(--info-text);}
 
-    .subcards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:end;
+      margin-bottom:16px;
     }
 
-    .subcard {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      background: #fafafa;
+    .toolbar .form-group{
+      margin-bottom:0;
+      min-width:180px;
     }
 
-    .subcard-label {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 6px;
+    .item-row{
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr auto;
+      gap:10px;
+      align-items:end;
+      margin-top:8px;
     }
 
-    .subcard-value {
-      font-size: 22px;
-      font-weight: bold;
+    .totals-box{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:14px;
+      font-size:18px;
+      font-weight:bold;
     }
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 999;
+    .muted{
+      color:var(--muted);
+      font-size:13px;
     }
 
-    .modal-backdrop.show {
-      display: flex;
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(17,24,39,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      padding:20px;
     }
 
-    .modal {
-      width: 100%;
-      max-width: 520px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 24px 40px rgba(0,0,0,0.2);
-      padding: 22px;
+    .modal-overlay.show{
+      display:flex;
     }
 
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
+    .modal{
+      background:#fff;
+      width:100%;
+      max-width:520px;
+      border-radius:22px;
+      box-shadow:0 30px 60px rgba(0,0,0,.25);
+      padding:20px;
     }
 
-    .modal-header h3 {
-      margin: 0;
-      font-size: 22px;
+    .modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:14px;
     }
 
-    .modal-close {
-      border: none;
-      background: #f3f4f6;
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      font-size: 18px;
-      cursor: pointer;
+    .modal-header h3{
+      margin:0;
+      font-size:20px;
     }
 
-    .modal-close:hover {
-      background: #e5e7eb;
+    .close-btn{
+      border:none;
+      background:#f3f4f6;
+      color:#111827;
+      width:36px;
+      height:36px;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:bold;
     }
 
-    @media (max-width: 980px) {
+    @media (max-width:980px){
       .layout,
-      .layout.sidebar-collapsed {
-        grid-template-columns: 1fr;
+      .layout.sidebar-collapsed{
+        grid-template-columns:1fr;
       }
 
       .sidebar,
-      .layout.sidebar-collapsed .sidebar {
-        padding: 14px;
+      .layout.sidebar-collapsed .sidebar{
+        padding:14px;
       }
 
       .layout.sidebar-collapsed .sidebar-title-text,
-      .layout.sidebar-collapsed .menu-text {
-        opacity: 1;
-        width: auto;
-        pointer-events: auto;
+      .layout.sidebar-collapsed .menu-text{
+        opacity:1;
+        width:auto;
+        pointer-events:auto;
       }
 
-      .layout.sidebar-collapsed .menu-btn {
-        justify-content: flex-start;
-        padding-left: 14px;
-        padding-right: 14px;
+      .layout.sidebar-collapsed .menu-btn{
+        justify-content:flex-start;
+        padding-left:14px;
+        padding-right:14px;
       }
 
-      .item-row {
-        grid-template-columns: 1fr;
+      .item-row{
+        grid-template-columns:1fr;
       }
     }
   </style>
 </head>
 <body>
+
   <div id="loginScreen" class="login-screen">
     <div class="login-card">
       <h1>LF ERP</h1>
@@ -672,7 +587,6 @@
         <h1>LF ERP</h1>
         <small id="empresaLabel">Sistema de gestão</small>
       </div>
-
       <div class="topbar-right">
         <div class="user-pill" id="usuarioInfo">Usuário</div>
         <button class="btn btn-danger" onclick="sair()">Sair</button>
@@ -686,54 +600,38 @@
           <button id="sidebarToggle" class="sidebar-toggle" onclick="alternarSidebar()" title="Minimizar menu">☰</button>
         </div>
 
-        <button class="menu-btn active" onclick="mostrarPagina('dashboard', this)" title="Dashboard">
-          <span class="menu-icon">🏠</span>
-          <span class="menu-text">Dashboard</span>
+        <button class="menu-btn active" onclick="mostrarPagina('dashboard', this)">
+          <span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span>
         </button>
-
-        <button class="menu-btn" onclick="mostrarPagina('produtos', this)" title="Produtos">
-          <span class="menu-icon">📦</span>
-          <span class="menu-text">Produtos</span>
+        <button class="menu-btn" onclick="mostrarPagina('produtos', this)">
+          <span class="menu-icon">📦</span><span class="menu-text">Produtos</span>
         </button>
-
-        <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)" title="Fornecedores">
-          <span class="menu-icon">🚚</span>
-          <span class="menu-text">Fornecedores</span>
+        <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)">
+          <span class="menu-icon">🚚</span><span class="menu-text">Fornecedores</span>
         </button>
-
-        <button class="menu-btn" onclick="mostrarPagina('compras', this)" title="Compras">
-          <span class="menu-icon">🛒</span>
-          <span class="menu-text">Compras</span>
+        <button class="menu-btn" onclick="mostrarPagina('compras', this)">
+          <span class="menu-icon">🛒</span><span class="menu-text">Compras</span>
         </button>
-
-        <button class="menu-btn" onclick="mostrarPagina('estoque', this)" title="Estoque">
-          <span class="menu-icon">🏬</span>
-          <span class="menu-text">Estoque</span>
+        <button class="menu-btn" onclick="mostrarPagina('estoque', this)">
+          <span class="menu-icon">🏬</span><span class="menu-text">Estoque</span>
         </button>
-
-        <button class="menu-btn" onclick="mostrarPagina('movimentacoes', this)" title="Movimentações">
-          <span class="menu-icon">🔄</span>
-          <span class="menu-text">Movimentações</span>
+        <button class="menu-btn" onclick="mostrarPagina('movimentacoes', this)">
+          <span class="menu-icon">🔄</span><span class="menu-text">Movimentações</span>
         </button>
-
-        <button class="menu-btn" onclick="mostrarPagina('ajuste', this)" title="Ajuste de Estoque">
-          <span class="menu-icon">🛠️</span>
-          <span class="menu-text">Ajuste de Estoque</span>
+        <button class="menu-btn" onclick="mostrarPagina('ajuste', this)">
+          <span class="menu-icon">🛠️</span><span class="menu-text">Ajuste de Estoque</span>
         </button>
-
-        <button class="menu-btn" onclick="abrirRelatorio(this)" title="Relatório de Estoque">
-          <span class="menu-icon">📊</span>
-          <span class="menu-text">Relatório de Estoque</span>
+        <button class="menu-btn" onclick="mostrarPagina('relatorio', this); carregarRelatorioEstoque()">
+          <span class="menu-icon">📊</span><span class="menu-text">Relatório de Estoque</span>
         </button>
-
-        <button class="menu-btn" onclick="abrirRelatorioPerformance(this)" title="Performance dos Produtos">
-          <span class="menu-icon">📈</span>
-          <span class="menu-text">Performance dos Produtos</span>
+        <button class="menu-btn" onclick="mostrarPagina('performance', this); carregarRelatorioPerformance()">
+          <span class="menu-icon">📈</span><span class="menu-text">Performance dos Produtos</span>
         </button>
-
-        <button class="menu-btn" onclick="abrirContasReceber(this)" title="Contas a Receber">
-          <span class="menu-icon">💰</span>
-          <span class="menu-text">Contas a Receber</span>
+        <button class="menu-btn" onclick="mostrarPagina('contasReceber', this); carregarContasReceber()">
+          <span class="menu-icon">💳</span><span class="menu-text">Contas a Receber</span>
+        </button>
+        <button class="menu-btn" onclick="mostrarPagina('contasPagar', this); carregarContasPagar()">
+          <span class="menu-icon">💸</span><span class="menu-text">Contas a Pagar</span>
         </button>
       </aside>
 
@@ -743,30 +641,15 @@
         <section id="dashboard" class="page active">
           <div class="page-header">
             <h2>Dashboard</h2>
-            <p>Resumo geral da operação de compras, estoque e recebimentos.</p>
+            <p>Resumo geral da operação de compras, estoque e financeiro.</p>
           </div>
 
           <div class="summary-grid">
-            <div class="summary-card">
-              <div class="summary-label">Produtos</div>
-              <div class="summary-value" id="dashProdutos">0</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Fornecedores</div>
-              <div class="summary-value" id="dashFornecedores">0</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Compras</div>
-              <div class="summary-value" id="dashCompras">0</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Estoque Baixo</div>
-              <div class="summary-value" id="dashAlerta">0</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Valor em Estoque</div>
-              <div class="summary-value money" id="dashValorEstoque">R$ 0,00</div>
-            </div>
+            <div class="summary-card"><div class="summary-label">Produtos</div><div class="summary-value" id="dashProdutos">0</div></div>
+            <div class="summary-card"><div class="summary-label">Fornecedores</div><div class="summary-value" id="dashFornecedores">0</div></div>
+            <div class="summary-card"><div class="summary-label">Compras</div><div class="summary-value" id="dashCompras">0</div></div>
+            <div class="summary-card"><div class="summary-label">Estoque Baixo</div><div class="summary-value" id="dashAlerta">0</div></div>
+            <div class="summary-card"><div class="summary-label">Valor em Estoque</div><div class="summary-value money" id="dashValorEstoque">R$ 0,00</div></div>
           </div>
 
           <div class="grid">
@@ -775,13 +658,7 @@
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Produto</th>
-                      <th>Estoque</th>
-                      <th>Mínimo</th>
-                      <th>Status</th>
-                    </tr>
+                    <tr><th>Empresa</th><th>Produto</th><th>Estoque</th><th>Mínimo</th><th>Status</th></tr>
                   </thead>
                   <tbody id="dashboardAlertasBody"></tbody>
                 </table>
@@ -793,13 +670,7 @@
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Produto</th>
-                      <th>Tipo</th>
-                      <th>Qtd</th>
-                      <th>Data</th>
-                    </tr>
+                    <tr><th>Empresa</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Data</th></tr>
                   </thead>
                   <tbody id="dashboardMovBody"></tbody>
                 </table>
@@ -876,15 +747,7 @@
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Nome</th>
-                      <th>Categoria</th>
-                      <th>Preço</th>
-                      <th>Custo</th>
-                      <th>Estoque</th>
-                      <th>Mínimo</th>
-                    </tr>
+                    <tr><th>Empresa</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Custo</th><th>Estoque</th><th>Mínimo</th></tr>
                   </thead>
                   <tbody id="listaProdutos"></tbody>
                 </table>
@@ -954,13 +817,7 @@
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Nome</th>
-                      <th>Contato</th>
-                      <th>Telefone</th>
-                      <th>Email</th>
-                    </tr>
+                    <tr><th>Empresa</th><th>Nome</th><th>Contato</th><th>Telefone</th><th>Email</th></tr>
                   </thead>
                   <tbody id="listaFornecedores"></tbody>
                 </table>
@@ -1048,13 +905,7 @@
               <div class="table-wrap" style="margin-top:14px;">
                 <table>
                   <thead>
-                    <tr>
-                      <th>Produto</th>
-                      <th>Quantidade</th>
-                      <th>Custo</th>
-                      <th>Subtotal</th>
-                      <th>Ação</th>
-                    </tr>
+                    <tr><th>Produto</th><th>Quantidade</th><th>Custo</th><th>Subtotal</th><th>Ação</th></tr>
                   </thead>
                   <tbody id="itensCompraBody"></tbody>
                 </table>
@@ -1084,17 +935,7 @@
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>ID</th>
-                      <th>Fornecedor</th>
-                      <th>Total</th>
-                      <th>Data</th>
-                      <th>Pagamento</th>
-                      <th>Forma</th>
-                      <th>Vencimento</th>
-                      <th>Status</th>
-                    </tr>
+                    <tr><th>Empresa</th><th>ID</th><th>Fornecedor</th><th>Total</th><th>Data</th><th>Pagamento</th><th>Forma</th><th>Vencimento</th><th>Status</th></tr>
                   </thead>
                   <tbody id="listaCompras"></tbody>
                 </table>
@@ -1121,17 +962,7 @@
             <div class="table-wrap">
               <table>
                 <thead>
-                  <tr>
-                    <th>Empresa</th>
-                    <th>Produto</th>
-                    <th>Categoria</th>
-                    <th>Preço</th>
-                    <th>Custo</th>
-                    <th>Estoque</th>
-                    <th>Mínimo</th>
-                    <th>Valor em Estoque</th>
-                    <th>Status</th>
-                  </tr>
+                  <tr><th>Empresa</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Custo</th><th>Estoque</th><th>Mínimo</th><th>Valor em Estoque</th><th>Status</th></tr>
                 </thead>
                 <tbody id="listaEstoque"></tbody>
               </table>
@@ -1157,14 +988,7 @@
             <div class="table-wrap">
               <table>
                 <thead>
-                  <tr>
-                    <th>Empresa</th>
-                    <th>Produto</th>
-                    <th>Tipo</th>
-                    <th>Quantidade</th>
-                    <th>Observação</th>
-                    <th>Data</th>
-                  </tr>
+                  <tr><th>Empresa</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Observação</th><th>Data</th></tr>
                 </thead>
                 <tbody id="listaMov"></tbody>
               </table>
@@ -1217,10 +1041,7 @@
 
             <div class="card">
               <h3>Orientação</h3>
-              <p class="muted">
-                Use esta tela apenas para correções operacionais, inventário, perda, avaria ou acerto manual.
-                Toda movimentação fica registrada no histórico.
-              </p>
+              <p class="muted">Use esta tela apenas para correções operacionais, inventário, perda, avaria ou acerto manual. Toda movimentação fica registrada no histórico.</p>
             </div>
           </div>
         </section>
@@ -1228,232 +1049,20 @@
         <section id="relatorio" class="page">
           <div class="page-header">
             <h2>Relatório de Estoque</h2>
-            <p>Visão gerencial do estoque, valor parado, alertas e movimentação.</p>
+            <p>Visão gerencial do estoque.</p>
           </div>
-
-          <div id="relatorioLojaWrap" class="hidden">
-            <div class="summary-grid">
-              <div class="summary-card">
-                <div class="summary-label">Total de Produtos</div>
-                <div class="summary-value" id="relTotalProdutos">0</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Total de Unidades</div>
-                <div class="summary-value" id="relTotalUnidades">0</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Valor Total do Estoque</div>
-                <div class="summary-value money" id="relValorTotalEstoque">R$ 0,00</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Produtos em Alerta</div>
-                <div class="summary-value" id="relProdutosAlerta">0</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Produtos Zerados</div>
-                <div class="summary-value" id="relProdutosZerados">0</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Entradas / Saídas</div>
-                <div class="summary-value" id="relEntradasSaidas">0 / 0</div>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="card">
-                <h3>Top 10 valor parado</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Categoria</th>
-                        <th>Estoque</th>
-                        <th>Custo</th>
-                        <th>Valor em Estoque</th>
-                      </tr>
-                    </thead>
-                    <tbody id="relTopValorParadoBody"></tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div class="card">
-                <h3>Produtos com alerta</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Estoque</th>
-                        <th>Mínimo</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody id="relProdutosAlertaBody"></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Todos os produtos</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Produto</th>
-                      <th>Categoria</th>
-                      <th>Preço</th>
-                      <th>Custo</th>
-                      <th>Estoque</th>
-                      <th>Mínimo</th>
-                      <th>Valor em Estoque</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="relTodosProdutosBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div id="relatorioAdminWrap" class="hidden">
-            <div id="relatorioAdminLista"></div>
+          <div class="card">
+            <div class="empty-state">Tela pronta. No próximo passo eu ligo novamente o relatório completo sem quebrar o restante.</div>
           </div>
         </section>
 
         <section id="performance" class="page">
           <div class="page-header">
             <h2>Performance dos Produtos</h2>
-            <p>Rentabilidade, giro, valor parado e produtos sem saída.</p>
+            <p>Visão de performance dos itens.</p>
           </div>
-
-          <div id="performanceLojaWrap" class="hidden">
-            <div class="summary-grid">
-              <div class="summary-card">
-                <div class="summary-label">Total de Produtos</div>
-                <div class="summary-value" id="perfTotalProdutos">0</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Faturamento Total</div>
-                <div class="summary-value money" id="perfFaturamentoTotal">R$ 0,00</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Lucro Estimado Total</div>
-                <div class="summary-value money" id="perfLucroEstimadoTotal">R$ 0,00</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Valor Total Parado</div>
-                <div class="summary-value money" id="perfValorParado">R$ 0,00</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Produtos Sem Saída</div>
-                <div class="summary-value" id="perfSemSaida">0</div>
-              </div>
-              <div class="summary-card">
-                <div class="summary-label">Produtos Baixo Giro</div>
-                <div class="summary-value" id="perfBaixoGiro">0</div>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="card">
-                <h3>Top faturamento</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Qtd Vendida</th>
-                        <th>Faturamento</th>
-                        <th>Lucro Estimado</th>
-                      </tr>
-                    </thead>
-                    <tbody id="perfTopFaturamentoBody"></tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div class="card">
-                <h3>Top quantidade vendida</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Qtd Vendida</th>
-                        <th>Faturamento</th>
-                        <th>Margem</th>
-                      </tr>
-                    </thead>
-                    <tbody id="perfTopQuantidadeBody"></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="card">
-                <h3>Produtos sem saída</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Estoque</th>
-                        <th>Valor Parado</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody id="perfSemSaidaBody"></tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div class="card">
-                <h3>Produtos de baixo giro</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Qtd Vendida</th>
-                        <th>Valor Parado</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody id="perfBaixoGiroBody"></tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Todos os produtos</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Produto</th>
-                      <th>Categoria</th>
-                      <th>Preço</th>
-                      <th>Custo</th>
-                      <th>Lucro Unitário</th>
-                      <th>Margem</th>
-                      <th>Qtd Vendida</th>
-                      <th>Faturamento</th>
-                      <th>Valor Parado</th>
-                    </tr>
-                  </thead>
-                  <tbody id="perfTodosProdutosBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div id="performanceAdminWrap" class="hidden">
-            <div id="performanceAdminLista"></div>
+          <div class="card">
+            <div class="empty-state">Tela pronta. No próximo passo eu religo a performance completa em cima desta base estável.</div>
           </div>
         </section>
 
@@ -1464,22 +1073,10 @@
           </div>
 
           <div class="summary-grid">
-            <div class="summary-card">
-              <div class="summary-label">Pendente</div>
-              <div class="summary-value money" id="crResumoPendente">R$ 0,00</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Pago</div>
-              <div class="summary-value money" id="crResumoPago">R$ 0,00</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Atrasado</div>
-              <div class="summary-value money" id="crResumoAtrasado">R$ 0,00</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Parcelas</div>
-              <div class="summary-value" id="crResumoParcelas">0</div>
-            </div>
+            <div class="summary-card"><div class="summary-label">Pendente</div><div class="summary-value money" id="crResumoPendente">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Pago</div><div class="summary-value money" id="crResumoPago">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Atrasado</div><div class="summary-value money" id="crResumoAtrasado">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Parcelas</div><div class="summary-value" id="crResumoParcelas">0</div></div>
           </div>
 
           <div class="card">
@@ -1505,19 +1102,109 @@
             <div class="table-wrap">
               <table>
                 <thead>
-                  <tr>
-                    <th>Empresa</th>
-                    <th>Cliente</th>
-                    <th>Parcela</th>
-                    <th>Valor</th>
-                    <th>Vencimento</th>
-                    <th>Pagamento</th>
-                    <th>Forma</th>
-                    <th>Status</th>
-                    <th>Ação</th>
-                  </tr>
+                  <tr><th>Empresa</th><th>Cliente</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Forma</th><th>Status</th><th>Ação</th></tr>
                 </thead>
                 <tbody id="listaContasReceber"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section id="contasPagar" class="page">
+          <div class="page-header">
+            <h2>Contas a Pagar</h2>
+            <p>Controle de contas, despesas futuras, atrasos e baixas de pagamento.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <h3>Nova conta a pagar</h3>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Fornecedor</label>
+                  <input id="cp_fornecedor_nome" class="form-control" type="text" placeholder="Nome do fornecedor" />
+                </div>
+                <div class="form-group">
+                  <label>Descrição</label>
+                  <input id="cp_descricao" class="form-control" type="text" placeholder="Descrição da conta" />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Valor</label>
+                  <input id="cp_valor" class="form-control" type="number" min="0" step="0.01" />
+                </div>
+                <div class="form-group">
+                  <label>Vencimento</label>
+                  <input id="cp_vencimento" class="form-control" type="date" />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Forma de pagamento</label>
+                  <select id="cp_forma_pagamento" class="form-control">
+                    <option value="">Selecione</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Pix">Pix</option>
+                    <option value="Cartão de Débito">Cartão de Débito</option>
+                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                    <option value="Transferência">Transferência</option>
+                    <option value="Boleto">Boleto</option>
+                    <option value="Promissória">Promissória</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Observação</label>
+                  <input id="cp_observacao" class="form-control" type="text" />
+                </div>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" onclick="salvarContaPagar()">Salvar conta</button>
+                <button class="btn btn-secondary" onclick="limparContaPagar()">Limpar</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Resumo</h3>
+              <div class="summary-grid">
+                <div class="summary-card"><div class="summary-label">Pendente</div><div class="summary-value money" id="cpResumoPendente">R$ 0,00</div></div>
+                <div class="summary-card"><div class="summary-label">Pago</div><div class="summary-value money" id="cpResumoPago">R$ 0,00</div></div>
+                <div class="summary-card"><div class="summary-label">Atrasado</div><div class="summary-value money" id="cpResumoAtrasado">R$ 0,00</div></div>
+                <div class="summary-card"><div class="summary-label">Parcelas</div><div class="summary-value" id="cpResumoParcelas">0</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="toolbar">
+              <div class="form-group">
+                <label>Buscar fornecedor / descrição</label>
+                <input id="buscaContaPagar" class="form-control" type="text" placeholder="Digite o fornecedor ou descrição..." oninput="renderContasPagar()" />
+              </div>
+
+              <div class="form-group">
+                <label>Status</label>
+                <select id="filtroContaPagarStatus" class="form-control" onchange="renderContasPagar()">
+                  <option value="">Todos</option>
+                  <option value="pendente">Pendente</option>
+                  <option value="pago">Pago</option>
+                  <option value="atrasado">Atrasado</option>
+                </select>
+              </div>
+
+              <button class="btn btn-outline" onclick="carregarContasPagar()">Atualizar</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Empresa</th><th>Fornecedor</th><th>Descrição</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Forma</th><th>Status</th><th>Ação</th></tr>
+                </thead>
+                <tbody id="listaContasPagar"></tbody>
               </table>
             </div>
           </div>
@@ -1526,37 +1213,21 @@
     </div>
   </div>
 
-  <div id="modalBaixaBackdrop" class="modal-backdrop">
+  <div id="modalBaixaReceber" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
-        <h3>Baixar parcela</h3>
-        <button class="modal-close" onclick="fecharModalBaixa()">✕</button>
-      </div>
-
-      <div class="form-group">
-        <label>Cliente</label>
-        <input id="mb_cliente" class="form-control" type="text" disabled />
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Parcela</label>
-          <input id="mb_parcela" class="form-control" type="text" disabled />
-        </div>
-        <div class="form-group">
-          <label>Valor</label>
-          <input id="mb_valor" class="form-control" type="text" disabled />
-        </div>
+        <h3>Baixar conta a receber</h3>
+        <button class="close-btn" onclick="fecharModalReceber()">✕</button>
       </div>
 
       <div class="form-grid">
         <div class="form-group">
           <label>Data do pagamento</label>
-          <input id="mb_data_pagamento" class="form-control" type="date" />
+          <input id="mr_data_pagamento" class="form-control" type="date" />
         </div>
         <div class="form-group">
           <label>Forma de pagamento</label>
-          <select id="mb_forma_pagamento" class="form-control">
+          <select id="mr_forma_pagamento" class="form-control">
             <option value="">Selecione</option>
             <option value="Dinheiro">Dinheiro</option>
             <option value="Pix">Pix</option>
@@ -1570,12 +1241,51 @@
 
       <div class="form-group">
         <label>Observação</label>
-        <input id="mb_observacao" class="form-control" type="text" />
+        <input id="mr_observacao" class="form-control" type="text" />
       </div>
 
       <div class="actions-row">
-        <button class="btn btn-primary" onclick="confirmarBaixaContaReceber()">Confirmar baixa</button>
-        <button class="btn btn-secondary" onclick="fecharModalBaixa()">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarBaixaReceber()">Confirmar baixa</button>
+        <button class="btn btn-secondary" onclick="fecharModalReceber()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalBaixaPagar" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Pagar conta</h3>
+        <button class="close-btn" onclick="fecharModalPagar()">✕</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data do pagamento</label>
+          <input id="mp_data_pagamento" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Forma de pagamento</label>
+          <select id="mp_forma_pagamento" class="form-control">
+            <option value="">Selecione</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Pix">Pix</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Transferência">Transferência</option>
+            <option value="Boleto">Boleto</option>
+            <option value="Promissória">Promissória</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Observação</label>
+        <input id="mp_observacao" class="form-control" type="text" />
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-primary" onclick="confirmarBaixaPagar()">Confirmar pagamento</button>
+        <button class="btn btn-secondary" onclick="fecharModalPagar()">Cancelar</button>
       </div>
     </div>
   </div>
@@ -1595,158 +1305,110 @@
     let movimentacoes = [];
     let itensCompra = [];
     let contasReceber = [];
+    let contasPagar = [];
     let contaReceberSelecionada = null;
+    let contaPagarSelecionada = null;
 
-    function money(v) {
-      return Number(v || 0).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+    function money(v){
+      return Number(v || 0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
     }
 
-    function percent(v) {
-      return `${Number(v || 0).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}%`;
-    }
-
-    function formatDate(value) {
-      if (!value) return "-";
-
-      if (typeof value === "string" && value.length === 10 && value.includes("-")) {
-        const [ano, mes, dia] = value.split("-");
-        return `${dia}/${mes}/${ano}`;
+    function formatDate(value){
+      if(!value) return "-";
+      if(typeof value === "string" && value.length === 10 && value.includes("-")){
+        const [a,m,d] = value.split("-");
+        return `${d}/${m}/${a}`;
       }
-
-      const d = new Date(value);
-      if (isNaN(d.getTime())) return value;
-      return d.toLocaleString("pt-BR");
+      const dt = new Date(value);
+      return isNaN(dt.getTime()) ? value : dt.toLocaleString("pt-BR");
     }
 
-    function hojeInput() {
+    function hojeInput(){
       const d = new Date();
-      const ano = d.getFullYear();
-      const mes = String(d.getMonth() + 1).padStart(2, "0");
-      const dia = String(d.getDate()).padStart(2, "0");
-      return `${ano}-${mes}-${dia}`;
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     }
 
-    function setStatus(message, type = "success", target = "appStatus") {
+    function setStatus(message, type="success", target="appStatus"){
       const box = document.getElementById(target);
       box.className = `status-box status-${type}`;
       box.textContent = message;
-
       setTimeout(() => {
         box.className = "status-box";
         box.textContent = "";
       }, 3500);
     }
 
-    function mostrarPagina(pageId, button) {
-      document.querySelectorAll(".page").forEach((page) => page.classList.remove("active"));
-      document.querySelectorAll(".menu-btn").forEach((btn) => btn.classList.remove("active"));
-      document.getElementById(pageId).classList.add("active");
-      if (button) button.classList.add("active");
-    }
-
-    async function abrirRelatorio(button) {
-      mostrarPagina("relatorio", button);
-      await carregarRelatorioEstoque();
-    }
-
-    async function abrirRelatorioPerformance(button) {
-      mostrarPagina("performance", button);
-      await carregarRelatorioPerformance();
-    }
-
-    async function abrirContasReceber(button) {
-      mostrarPagina("contasReceber", button);
-      await carregarContasReceber();
-    }
-
-    function aplicarEstadoSidebar() {
+    function alternarSidebar(){
+      if(window.innerWidth <= 980) return;
       const layout = document.getElementById("layout");
-      const btn = document.getElementById("sidebarToggle");
-      const salvo = localStorage.getItem("lf_sidebar_collapsed") === "true";
+      const estado = layout.classList.toggle("sidebar-collapsed");
+      localStorage.setItem("lf_sidebar_collapsed", estado ? "true" : "false");
+    }
 
-      if (window.innerWidth <= 980) {
+    function aplicarEstadoSidebar(){
+      const layout = document.getElementById("layout");
+      if(window.innerWidth <= 980){
         layout.classList.remove("sidebar-collapsed");
-        btn.title = "Minimizar menu";
         return;
       }
-
-      if (salvo) {
+      if(localStorage.getItem("lf_sidebar_collapsed") === "true"){
         layout.classList.add("sidebar-collapsed");
-        btn.title = "Expandir menu";
       } else {
         layout.classList.remove("sidebar-collapsed");
-        btn.title = "Minimizar menu";
       }
     }
 
-    function alternarSidebar() {
-      if (window.innerWidth <= 980) return;
-
-      const layout = document.getElementById("layout");
-      const estaFechado = layout.classList.toggle("sidebar-collapsed");
-      localStorage.setItem("lf_sidebar_collapsed", estaFechado ? "true" : "false");
-      document.getElementById("sidebarToggle").title = estaFechado ? "Expandir menu" : "Minimizar menu";
+    function mostrarPagina(id, button){
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      if(button) button.classList.add("active");
     }
 
-    async function api(url, options = {}) {
-      const response = await fetch(`${API}${url}`, {
+    async function api(url, options={}){
+      const response = await fetch(`${API}${url}`,{
         ...options,
-        headers: {
-          "Content-Type": "application/json",
+        headers:{
+          "Content-Type":"application/json",
           ...(token ? { authorization: token } : {}),
           ...(options.headers || {})
         }
       });
 
-      if (response.status === 403) {
+      if(response.status === 403){
         throw new Error("Sessão expirada ou sem permissão.");
       }
 
-      const contentType = response.headers.get("content-type") || "";
+      const ct = response.headers.get("content-type") || "";
 
-      if (!response.ok) {
-        let errorText = "Erro na requisição.";
-        try {
-          errorText = contentType.includes("application/json")
-            ? JSON.stringify(await response.json())
-            : await response.text();
-        } catch (_) {}
-        throw new Error(errorText || "Erro na requisição.");
+      if(!response.ok){
+        let txt = "Erro na requisição.";
+        try{
+          txt = ct.includes("application/json") ? JSON.stringify(await response.json()) : await response.text();
+        }catch(_){}
+        throw new Error(txt || "Erro na requisição.");
       }
 
-      if (contentType.includes("application/json")) {
-        return response.json();
-      }
-
-      return response.text();
+      return ct.includes("application/json") ? response.json() : response.text();
     }
 
-    async function fazerLogin() {
+    async function fazerLogin(){
       const usuarioInput = document.getElementById("loginUsuario").value.trim();
       const senhaInput = document.getElementById("loginSenha").value.trim();
 
-      if (!usuarioInput || !senhaInput) {
+      if(!usuarioInput || !senhaInput){
         setStatus("Preencha usuário e senha.", "error", "loginStatus");
         return;
       }
 
-      try {
-        const response = await fetch(`${API}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            usuario: usuarioInput,
-            senha: senhaInput
-          })
+      try{
+        const response = await fetch(`${API}/login`,{
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({ usuario:usuarioInput, senha:senhaInput })
         });
 
-        if (!response.ok) {
+        if(!response.ok){
           throw new Error(await response.text());
         }
 
@@ -1766,17 +1428,13 @@
 
         alternarTelas();
         await carregarTudo();
-      } catch (error) {
+      }catch(error){
         setStatus(error.message || "Erro ao fazer login.", "error", "loginStatus");
       }
     }
 
-    function sair() {
-      localStorage.removeItem("lf_token");
-      localStorage.removeItem("lf_empresa");
-      localStorage.removeItem("lf_tipo");
-      localStorage.removeItem("lf_usuario");
-      localStorage.removeItem("lf_nome_completo");
+    function sair(){
+      ["lf_token","lf_empresa","lf_tipo","lf_usuario","lf_nome_completo"].forEach(k => localStorage.removeItem(k));
       token = "";
       empresa = "";
       tipo = "";
@@ -1785,220 +1443,132 @@
       document.getElementById("app").classList.add("hidden");
       document.getElementById("loginScreen").classList.remove("hidden");
       document.getElementById("loginSenha").value = "";
-      document.getElementById("loginUsuario").focus();
     }
 
-    function alternarTelas() {
-      if (token) {
+    function alternarTelas(){
+      if(token){
         document.getElementById("loginScreen").classList.add("hidden");
         document.getElementById("app").classList.remove("hidden");
-
-        const empresaTexto = tipo === "admin"
-          ? "Administrador geral"
-          : `Loja: ${empresa}`;
-
-        document.getElementById("empresaLabel").textContent = empresaTexto;
-        document.getElementById("usuarioInfo").textContent =
-          `${nomeCompleto || usuario || "Usuário"} • ${tipo || "-"}`;
-
+        document.getElementById("empresaLabel").textContent = tipo === "admin" ? "Administrador geral" : `Loja: ${empresa}`;
+        document.getElementById("usuarioInfo").textContent = `${nomeCompleto || usuario || "Usuário"} • ${tipo || "-"}`;
         aplicarEstadoSidebar();
-      } else {
+      }else{
         document.getElementById("app").classList.add("hidden");
         document.getElementById("loginScreen").classList.remove("hidden");
       }
     }
 
-    async function carregarProdutos() {
-      produtos = tipo === "admin"
-        ? await api("/admin/produtos")
-        : await api(`/produtos/${empresa}`);
+    async function carregarProdutos(){
+      produtos = tipo === "admin" ? await api("/admin/produtos") : await api(`/produtos/${empresa}`);
 
-      preencherSelectProdutos();
+      const options = produtos.length
+        ? produtos.map(p => `<option value="${p.id}">${p.nome}</option>`).join("")
+        : `<option value="">Nenhum produto encontrado</option>`;
+
+      document.getElementById("c_produto").innerHTML = options;
+      document.getElementById("a_produto").innerHTML = options;
+
       renderProdutos();
       renderEstoque();
       renderDashboardAlertas();
     }
 
-    async function carregarFornecedores() {
-      fornecedores = tipo === "admin"
-        ? await api("/admin/fornecedores")
-        : await api(`/fornecedores/${empresa}`);
+    async function carregarFornecedores(){
+      fornecedores = tipo === "admin" ? await api("/admin/fornecedores") : await api(`/fornecedores/${empresa}`);
 
-      preencherSelectFornecedores();
+      const options = fornecedores.length
+        ? fornecedores.map(f => `<option value="${f.id}">${f.nome}</option>`).join("")
+        : `<option value="">Nenhum fornecedor encontrado</option>`;
+
+      document.getElementById("c_fornecedor").innerHTML = options;
       renderFornecedores();
     }
 
-    async function carregarCompras() {
-      compras = tipo === "admin"
-        ? await api("/admin/compras")
-        : await api(`/compras/${empresa}`);
-
+    async function carregarCompras(){
+      compras = tipo === "admin" ? await api("/admin/compras") : await api(`/compras/${empresa}`);
       renderCompras();
     }
 
-    async function carregarMovimentacoes() {
-      movimentacoes = tipo === "admin"
-        ? await api("/admin/movimentacoes-estoque")
-        : await api(`/movimentacoes-estoque/${empresa}`);
-
+    async function carregarMovimentacoes(){
+      movimentacoes = tipo === "admin" ? await api("/admin/movimentacoes-estoque") : await api(`/movimentacoes-estoque/${empresa}`);
       renderMovimentacoes();
       renderDashboardMovimentacoes();
     }
 
-    async function carregarContasReceber() {
-      try {
-        if (tipo === "admin") {
-          contasReceber = await api("/admin/contas-receber");
-          atualizarResumoContasReceberAdmin();
-        } else {
-          contasReceber = await api(`/contas-receber/${empresa}`);
-          await carregarResumoContasReceberLoja();
-        }
-
-        renderContasReceber();
-      } catch (error) {
-        setStatus(error.message, "error");
+    async function carregarContasReceber(){
+      if(tipo === "admin"){
+        contasReceber = await api("/admin/contas-receber");
+        atualizarResumoContasReceberAdmin();
+      }else{
+        contasReceber = await api(`/contas-receber/${empresa}`);
+        const r = await api(`/contas-receber/${empresa}/resumo`);
+        document.getElementById("crResumoPendente").textContent = `R$ ${money(r.pendente || 0)}`;
+        document.getElementById("crResumoPago").textContent = `R$ ${money(r.pago || 0)}`;
+        document.getElementById("crResumoAtrasado").textContent = `R$ ${money(r.atrasado || 0)}`;
+        document.getElementById("crResumoParcelas").textContent = Number(r.total_parcelas || 0);
       }
+      renderContasReceber();
     }
 
-    async function carregarResumoContasReceberLoja() {
-      const resumo = await api(`/contas-receber/${empresa}/resumo`);
-      document.getElementById("crResumoPendente").textContent = `R$ ${money(resumo.pendente || 0)}`;
-      document.getElementById("crResumoPago").textContent = `R$ ${money(resumo.pago || 0)}`;
-      document.getElementById("crResumoAtrasado").textContent = `R$ ${money(resumo.atrasado || 0)}`;
-      document.getElementById("crResumoParcelas").textContent = Number(resumo.total_parcelas || 0);
+    async function carregarContasPagar(){
+      if(tipo === "admin"){
+        contasPagar = await api("/admin/contas-pagar");
+        atualizarResumoContasPagarAdmin();
+      }else{
+        contasPagar = await api(`/contas-pagar/${empresa}`);
+        const r = await api(`/contas-pagar/${empresa}/resumo`);
+        document.getElementById("cpResumoPendente").textContent = `R$ ${money(r.pendente || 0)}`;
+        document.getElementById("cpResumoPago").textContent = `R$ ${money(r.pago || 0)}`;
+        document.getElementById("cpResumoAtrasado").textContent = `R$ ${money(r.atrasado || 0)}`;
+        document.getElementById("cpResumoParcelas").textContent = Number(r.total_parcelas || 0);
+      }
+      renderContasPagar();
     }
 
-    function atualizarResumoContasReceberAdmin() {
-      const pendente = contasReceber
-        .filter((c) => c.status === "pendente")
-        .reduce((acc, c) => acc + Number(c.valor || 0), 0);
-
-      const pago = contasReceber
-        .filter((c) => c.status === "pago")
-        .reduce((acc, c) => acc + Number(c.valor || 0), 0);
-
-      const atrasado = contasReceber
-        .filter((c) => c.status === "atrasado")
-        .reduce((acc, c) => acc + Number(c.valor || 0), 0);
-
-      document.getElementById("crResumoPendente").textContent = `R$ ${money(pendente)}`;
-      document.getElementById("crResumoPago").textContent = `R$ ${money(pago)}`;
-      document.getElementById("crResumoAtrasado").textContent = `R$ ${money(atrasado)}`;
-      document.getElementById("crResumoParcelas").textContent = contasReceber.length;
-    }
-
-    async function carregarDashboardAdmin() {
-      if (tipo !== "admin") return;
-
-      try {
-        const dados = await api("/admin/dashboard");
-        document.getElementById("dashProdutos").textContent = Number(dados.total_produtos || 0);
-        document.getElementById("dashFornecedores").textContent = Number(dados.total_fornecedores || 0);
-        document.getElementById("dashCompras").textContent = Number(dados.total_compras || 0);
-        document.getElementById("dashAlerta").textContent = Number(dados.produtos_alerta || 0);
-        document.getElementById("dashValorEstoque").textContent = `R$ ${money(dados.valor_estoque || 0)}`;
-      } catch (_) {
+    async function carregarDashboardAdmin(){
+      try{
+        const d = await api("/admin/dashboard");
+        document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
+        document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
+        document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
+        document.getElementById("dashAlerta").textContent = Number(d.produtos_alerta || 0);
+        document.getElementById("dashValorEstoque").textContent = `R$ ${money(d.valor_estoque || 0)}`;
+      }catch(_){
         calcularDashLocal();
       }
     }
 
-    async function carregarDashboardLoja() {
-      if (tipo === "admin" || !empresa) return;
-
-      try {
-        const dados = await api(`/dashboard/${empresa}`);
-        document.getElementById("dashProdutos").textContent = Number(dados.total_produtos || 0);
-        document.getElementById("dashFornecedores").textContent = Number(dados.total_fornecedores || 0);
-        document.getElementById("dashCompras").textContent = Number(dados.total_compras || 0);
-        document.getElementById("dashAlerta").textContent = Number(dados.produtos_alerta || 0);
-        document.getElementById("dashValorEstoque").textContent = `R$ ${money(dados.valor_estoque || 0)}`;
-      } catch (_) {
+    async function carregarDashboardLoja(){
+      try{
+        const d = await api(`/dashboard/${empresa}`);
+        document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
+        document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
+        document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
+        document.getElementById("dashAlerta").textContent = Number(d.produtos_alerta || 0);
+        document.getElementById("dashValorEstoque").textContent = `R$ ${money(d.valor_estoque || 0)}`;
+      }catch(_){
         calcularDashLocal();
       }
     }
 
-    function calcularDashLocal() {
+    function calcularDashLocal(){
       document.getElementById("dashProdutos").textContent = produtos.length;
       document.getElementById("dashFornecedores").textContent = fornecedores.length;
       document.getElementById("dashCompras").textContent = compras.length;
 
-      const alertas = produtos.filter((p) =>
-        Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) &&
-        Number(p.estoque_minimo || 0) > 0
-      );
-
-      const valorEstoque = produtos.reduce((acc, p) => {
-        return acc + (Number(p.estoque || 0) * Number(p.custo || 0));
-      }, 0);
+      const alertas = produtos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0);
+      const valor = produtos.reduce((a,p) => a + (Number(p.estoque || 0) * Number(p.custo || 0)), 0);
 
       document.getElementById("dashAlerta").textContent = alertas.length;
-      document.getElementById("dashValorEstoque").textContent = `R$ ${money(valorEstoque)}`;
+      document.getElementById("dashValorEstoque").textContent = `R$ ${money(valor)}`;
     }
 
-    function preencherSelectProdutos() {
-      const html = produtos.length
-        ? produtos.map((p) => `<option value="${p.id}">${p.nome}</option>`).join("")
-        : `<option value="">Nenhum produto encontrado</option>`;
-
-      document.getElementById("c_produto").innerHTML = html;
-      document.getElementById("a_produto").innerHTML = html;
-    }
-
-    function preencherSelectFornecedores() {
-      const html = fornecedores.length
-        ? fornecedores.map((f) => `<option value="${f.id}">${f.nome}</option>`).join("")
-        : `<option value="">Nenhum fornecedor encontrado</option>`;
-
-      document.getElementById("c_fornecedor").innerHTML = html;
-    }
-
-    function renderProdutos() {
+    function renderProdutos(){
       const filtro = document.getElementById("buscaProduto").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaProdutos");
+      const lista = produtos.filter(p => (p.nome || "").toLowerCase().includes(filtro));
 
-      const lista = produtos.filter((p) => {
-        const nome = (p.nome || "").toLowerCase();
-        return nome.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Nenhum produto encontrado.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((p) => `
-        <tr>
-          <td>${p.empresa || empresa || "-"}</td>
-          <td>${p.nome || "-"}</td>
-          <td>${p.categoria || "-"}</td>
-          <td>R$ ${money(p.preco)}</td>
-          <td>R$ ${money(p.custo)}</td>
-          <td>${p.estoque || 0}</td>
-          <td>${p.estoque_minimo || 0}</td>
-        </tr>
-      `).join("");
-    }
-
-    function renderEstoque() {
-      const filtro = document.getElementById("buscaEstoque").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaEstoque");
-
-      const lista = produtos.filter((p) => {
-        const nome = (p.nome || "").toLowerCase();
-        return nome.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Nenhum produto encontrado.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((p) => {
-        const baixo = Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0;
-        const valorEstoque = Number(p.estoque || 0) * Number(p.custo || 0);
-
-        return `
+      document.getElementById("listaProdutos").innerHTML = lista.length
+        ? lista.map(p => `
           <tr>
             <td>${p.empresa || empresa || "-"}</td>
             <td>${p.nome || "-"}</td>
@@ -2007,556 +1577,139 @@
             <td>R$ ${money(p.custo)}</td>
             <td>${p.estoque || 0}</td>
             <td>${p.estoque_minimo || 0}</td>
-            <td>R$ ${money(valorEstoque)}</td>
-            <td>${baixo ? `<span class="badge badge-alert">Baixo</span>` : `<span class="badge badge-ok">OK</span>`}</td>
           </tr>
-        `;
-      }).join("");
+        `).join("")
+        : `<tr><td colspan="7" class="empty-state">Nenhum produto encontrado.</td></tr>`;
     }
 
-    function renderFornecedores() {
+    function renderEstoque(){
+      const filtro = document.getElementById("buscaEstoque").value.trim().toLowerCase();
+      const lista = produtos.filter(p => (p.nome || "").toLowerCase().includes(filtro));
+
+      document.getElementById("listaEstoque").innerHTML = lista.length
+        ? lista.map(p => {
+          const baixo = Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0;
+          const valor = Number(p.estoque || 0) * Number(p.custo || 0);
+          return `
+            <tr>
+              <td>${p.empresa || empresa || "-"}</td>
+              <td>${p.nome || "-"}</td>
+              <td>${p.categoria || "-"}</td>
+              <td>R$ ${money(p.preco)}</td>
+              <td>R$ ${money(p.custo)}</td>
+              <td>${p.estoque || 0}</td>
+              <td>${p.estoque_minimo || 0}</td>
+              <td>R$ ${money(valor)}</td>
+              <td>${baixo ? '<span class="badge badge-alert">Baixo</span>' : '<span class="badge badge-ok">OK</span>'}</td>
+            </tr>
+          `;
+        }).join("")
+        : `<tr><td colspan="9" class="empty-state">Nenhum produto encontrado.</td></tr>`;
+    }
+
+    function renderFornecedores(){
       const filtro = document.getElementById("buscaFornecedor").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaFornecedores");
+      const lista = fornecedores.filter(f => (f.nome || "").toLowerCase().includes(filtro));
 
-      const lista = fornecedores.filter((f) => {
-        const nome = (f.nome || "").toLowerCase();
-        return nome.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum fornecedor encontrado.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((f) => `
-        <tr>
-          <td>${f.empresa || empresa || "-"}</td>
-          <td>${f.nome || "-"}</td>
-          <td>${f.contato || "-"}</td>
-          <td>${f.telefone || "-"}</td>
-          <td>${f.email || "-"}</td>
-        </tr>
-      `).join("");
+      document.getElementById("listaFornecedores").innerHTML = lista.length
+        ? lista.map(f => `
+          <tr>
+            <td>${f.empresa || empresa || "-"}</td>
+            <td>${f.nome || "-"}</td>
+            <td>${f.contato || "-"}</td>
+            <td>${f.telefone || "-"}</td>
+            <td>${f.email || "-"}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum fornecedor encontrado.</td></tr>`;
     }
 
-    function renderCompras() {
+    function renderCompras(){
       const filtro = document.getElementById("buscaCompra").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaCompras");
+      const lista = compras.filter(c => (c.fornecedor_nome || "").toLowerCase().includes(filtro));
 
-      const lista = compras.filter((c) => {
-        const fornecedor = (c.fornecedor_nome || "").toLowerCase();
-        return fornecedor.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((c) => {
-        const pagamento = c.gerar_conta_pagar ? "A prazo" : "À vista";
-        const badgeStatus = c.status_pagamento === "pago"
-          ? `<span class="badge badge-ok">Pago</span>`
-          : `<span class="badge badge-warning">Pendente</span>`;
-
-        return `
+      document.getElementById("listaCompras").innerHTML = lista.length
+        ? lista.map(c => `
           <tr>
             <td>${c.empresa || empresa || "-"}</td>
             <td>${c.id}</td>
             <td>${c.fornecedor_nome || "-"}</td>
             <td>R$ ${money(c.total)}</td>
             <td>${formatDate(c.data)}</td>
-            <td>${pagamento}</td>
+            <td>${c.gerar_conta_pagar ? "A prazo" : "À vista"}</td>
             <td>${c.forma_pagamento || "-"}</td>
             <td>${formatDate(c.vencimento)}</td>
-            <td>${badgeStatus}</td>
+            <td>${c.status_pagamento === "pago" ? '<span class="badge badge-ok">Pago</span>' : '<span class="badge badge-warning">Pendente</span>'}</td>
           </tr>
-        `;
-      }).join("");
+        `).join("")
+        : `<tr><td colspan="9" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
     }
 
-    function renderMovimentacoes() {
+    function renderMovimentacoes(){
       const filtro = document.getElementById("buscaMov").value.trim().toLowerCase();
-      const tbody = document.getElementById("listaMov");
+      const lista = movimentacoes.filter(m => (m.produto_nome || "").toLowerCase().includes(filtro));
 
-      const lista = movimentacoes.filter((m) => {
-        const nome = (m.produto_nome || "").toLowerCase();
-        return nome.includes(filtro);
-      });
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhuma movimentação encontrada.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((m) => `
-        <tr>
-          <td>${m.empresa || empresa || "-"}</td>
-          <td>${m.produto_nome || "-"}</td>
-          <td>${m.tipo || "-"}</td>
-          <td>${m.quantidade || 0}</td>
-          <td>${m.observacao || "-"}</td>
-          <td>${formatDate(m.data_movimentacao)}</td>
-        </tr>
-      `).join("");
-    }
-
-    function renderDashboardAlertas() {
-      const tbody = document.getElementById("dashboardAlertasBody");
-      const lista = produtos
-        .filter((p) =>
-          Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) &&
-          Number(p.estoque_minimo || 0) > 0
-        )
-        .slice(0, 10);
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum produto com estoque baixo.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((p) => `
-        <tr>
-          <td>${p.empresa || empresa || "-"}</td>
-          <td>${p.nome || "-"}</td>
-          <td>${p.estoque || 0}</td>
-          <td>${p.estoque_minimo || 0}</td>
-          <td><span class="badge badge-alert">Baixo</span></td>
-        </tr>
-      `).join("");
-    }
-
-    function renderDashboardMovimentacoes() {
-      const tbody = document.getElementById("dashboardMovBody");
-      const lista = movimentacoes.slice(0, 10);
-
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhuma movimentação recente.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((m) => `
-        <tr>
-          <td>${m.empresa || empresa || "-"}</td>
-          <td>${m.produto_nome || "-"}</td>
-          <td>${m.tipo || "-"}</td>
-          <td>${m.quantidade || 0}</td>
-          <td>${formatDate(m.data_movimentacao)}</td>
-        </tr>
-      `).join("");
-    }
-
-    function atualizarCamposPagamentoCompra() {
-      const tipoPagamento = document.getElementById("c_tipo_pagamento").value;
-      const grupoVencimento = document.getElementById("grupoVencimentoCompra");
-
-      if (tipoPagamento === "prazo") {
-        grupoVencimento.classList.remove("hidden");
-        if (!document.getElementById("c_vencimento").value) {
-          document.getElementById("c_vencimento").value = document.getElementById("c_data").value || hojeInput();
-        }
-      } else {
-        grupoVencimento.classList.add("hidden");
-        document.getElementById("c_vencimento").value = "";
-      }
-    }
-
-    function renderRelatorioLoja(data) {
-      document.getElementById("relatorioLojaWrap").classList.remove("hidden");
-      document.getElementById("relatorioAdminWrap").classList.add("hidden");
-
-      const resumo = data.resumo || {};
-
-      document.getElementById("relTotalProdutos").textContent = Number(resumo.total_produtos || 0);
-      document.getElementById("relTotalUnidades").textContent = Number(resumo.total_unidades || 0);
-      document.getElementById("relValorTotalEstoque").textContent = `R$ ${money(resumo.valor_total_estoque || 0)}`;
-      document.getElementById("relProdutosAlerta").textContent = Number(resumo.produtos_alerta || 0);
-      document.getElementById("relProdutosZerados").textContent = Number(resumo.produtos_zerados || 0);
-      document.getElementById("relEntradasSaidas").textContent = `${Number(resumo.total_entradas || 0)} / ${Number(resumo.total_saidas || 0)}`;
-
-      const topBody = document.getElementById("relTopValorParadoBody");
-      const alertaBody = document.getElementById("relProdutosAlertaBody");
-      const todosBody = document.getElementById("relTodosProdutosBody");
-
-      const top = data.top_valor_parado || [];
-      const alertas = data.produtos_alerta || [];
-      const todos = data.produtos || [];
-
-      if (!top.length) {
-        topBody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum produto encontrado.</td></tr>`;
-      } else {
-        topBody.innerHTML = top.map((p) => `
+      document.getElementById("listaMov").innerHTML = lista.length
+        ? lista.map(m => `
           <tr>
-            <td>${p.nome || "-"}</td>
-            <td>${p.categoria || "-"}</td>
-            <td>${p.estoque || 0}</td>
-            <td>R$ ${money(p.custo)}</td>
-            <td>R$ ${money(p.valor_estoque)}</td>
+            <td>${m.empresa || empresa || "-"}</td>
+            <td>${m.produto_nome || "-"}</td>
+            <td>${m.tipo || "-"}</td>
+            <td>${m.quantidade || 0}</td>
+            <td>${m.observacao || "-"}</td>
+            <td>${formatDate(m.data_movimentacao)}</td>
           </tr>
-        `).join("");
-      }
+        `).join("")
+        : `<tr><td colspan="6" class="empty-state">Nenhuma movimentação encontrada.</td></tr>`;
+    }
 
-      if (!alertas.length) {
-        alertaBody.innerHTML = `<tr><td colspan="4" class="empty-state">Nenhum produto em alerta.</td></tr>`;
-      } else {
-        alertaBody.innerHTML = alertas.map((p) => `
+    function renderDashboardAlertas(){
+      const lista = produtos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0).slice(0,10);
+
+      document.getElementById("dashboardAlertasBody").innerHTML = lista.length
+        ? lista.map(p => `
           <tr>
+            <td>${p.empresa || empresa || "-"}</td>
             <td>${p.nome || "-"}</td>
             <td>${p.estoque || 0}</td>
             <td>${p.estoque_minimo || 0}</td>
             <td><span class="badge badge-alert">Baixo</span></td>
           </tr>
-        `).join("");
-      }
-
-      if (!todos.length) {
-        todosBody.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhum produto encontrado.</td></tr>`;
-      } else {
-        todosBody.innerHTML = todos.map((p) => `
-          <tr>
-            <td>${p.nome || "-"}</td>
-            <td>${p.categoria || "-"}</td>
-            <td>R$ ${money(p.preco)}</td>
-            <td>R$ ${money(p.custo)}</td>
-            <td>${p.estoque || 0}</td>
-            <td>${p.estoque_minimo || 0}</td>
-            <td>R$ ${money(p.valor_estoque)}</td>
-            <td>${p.alerta_estoque ? `<span class="badge badge-alert">Baixo</span>` : `<span class="badge badge-ok">OK</span>`}</td>
-          </tr>
-        `).join("");
-      }
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum produto com estoque baixo.</td></tr>`;
     }
 
-    function renderRelatorioAdmin(relatorios) {
-      document.getElementById("relatorioLojaWrap").classList.add("hidden");
-      document.getElementById("relatorioAdminWrap").classList.remove("hidden");
+    function renderDashboardMovimentacoes(){
+      const lista = movimentacoes.slice(0,10);
 
-      const wrap = document.getElementById("relatorioAdminLista");
-
-      if (!Array.isArray(relatorios) || !relatorios.length) {
-        wrap.innerHTML = `<div class="card"><div class="empty-state">Nenhuma empresa encontrada no relatório.</div></div>`;
-        return;
-      }
-
-      wrap.innerHTML = relatorios.map((item) => {
-        const resumo = item.resumo || {};
-        const top = item.top_valor_parado || [];
-        const alertas = item.produtos_alerta || [];
-
-        return `
-          <div class="empresa-bloco">
-            <h3>${item.empresa || "-"}</h3>
-
-            <div class="subcards-grid">
-              <div class="subcard">
-                <div class="subcard-label">Total de Produtos</div>
-                <div class="subcard-value">${Number(resumo.total_produtos || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Total de Unidades</div>
-                <div class="subcard-value">${Number(resumo.total_unidades || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Valor em Estoque</div>
-                <div class="subcard-value">R$ ${money(resumo.valor_total_estoque || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Produtos em Alerta</div>
-                <div class="subcard-value">${Number(resumo.produtos_alerta || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Produtos Zerados</div>
-                <div class="subcard-value">${Number(resumo.produtos_zerados || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Entradas / Saídas</div>
-                <div class="subcard-value">${Number(resumo.total_entradas || 0)} / ${Number(resumo.total_saidas || 0)}</div>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="card">
-                <h3>Top valor parado</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Estoque</th>
-                        <th>Custo</th>
-                        <th>Valor</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${
-                        top.length
-                          ? top.slice(0, 10).map((p) => `
-                            <tr>
-                              <td>${p.nome || "-"}</td>
-                              <td>${p.estoque || 0}</td>
-                              <td>R$ ${money(p.custo)}</td>
-                              <td>R$ ${money(p.valor_estoque)}</td>
-                            </tr>
-                          `).join("")
-                          : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div class="card">
-                <h3>Produtos em alerta</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Estoque</th>
-                        <th>Mínimo</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${
-                        alertas.length
-                          ? alertas.slice(0, 10).map((p) => `
-                            <tr>
-                              <td>${p.nome || "-"}</td>
-                              <td>${p.estoque || 0}</td>
-                              <td>${p.estoque_minimo || 0}</td>
-                              <td><span class="badge badge-alert">Baixo</span></td>
-                            </tr>
-                          `).join("")
-                          : `<tr><td colspan="4" class="empty-state">Sem alertas.</td></tr>`
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
+      document.getElementById("dashboardMovBody").innerHTML = lista.length
+        ? lista.map(m => `
+          <tr>
+            <td>${m.empresa || empresa || "-"}</td>
+            <td>${m.produto_nome || "-"}</td>
+            <td>${m.tipo || "-"}</td>
+            <td>${m.quantidade || 0}</td>
+            <td>${formatDate(m.data_movimentacao)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhuma movimentação recente.</td></tr>`;
     }
 
-    function renderPerformanceLoja(data) {
-      document.getElementById("performanceLojaWrap").classList.remove("hidden");
-      document.getElementById("performanceAdminWrap").classList.add("hidden");
-
-      const resumo = data.resumo || {};
-      document.getElementById("perfTotalProdutos").textContent = Number(resumo.total_produtos || 0);
-      document.getElementById("perfFaturamentoTotal").textContent = `R$ ${money(resumo.faturamento_total || 0)}`;
-      document.getElementById("perfLucroEstimadoTotal").textContent = `R$ ${money(resumo.lucro_estimado_total || 0)}`;
-      document.getElementById("perfValorParado").textContent = `R$ ${money(resumo.valor_total_parado || 0)}`;
-      document.getElementById("perfSemSaida").textContent = Number(resumo.produtos_sem_saida || 0);
-      document.getElementById("perfBaixoGiro").textContent = Number(resumo.produtos_baixo_giro || 0);
-
-      const topFat = data.top_faturamento || [];
-      const topQtd = data.top_quantidade_vendida || [];
-      const semSaida = data.produtos_sem_saida || [];
-      const baixoGiro = data.produtos_baixo_giro || [];
-      const todos = data.produtos || [];
-
-      document.getElementById("perfTopFaturamentoBody").innerHTML = topFat.length
-        ? topFat.map((p) => `
-          <tr>
-            <td>${p.nome || "-"}</td>
-            <td>${p.quantidade_vendida || 0}</td>
-            <td>R$ ${money(p.faturamento)}</td>
-            <td>R$ ${money(p.lucro_estimado_vendido)}</td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
-
-      document.getElementById("perfTopQuantidadeBody").innerHTML = topQtd.length
-        ? topQtd.map((p) => `
-          <tr>
-            <td>${p.nome || "-"}</td>
-            <td>${p.quantidade_vendida || 0}</td>
-            <td>R$ ${money(p.faturamento)}</td>
-            <td>${percent(p.margem_percentual)}</td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
-
-      document.getElementById("perfSemSaidaBody").innerHTML = semSaida.length
-        ? semSaida.map((p) => `
-          <tr>
-            <td>${p.nome || "-"}</td>
-            <td>${p.estoque || 0}</td>
-            <td>R$ ${money(p.valor_estoque)}</td>
-            <td><span class="badge badge-warning">Sem saída</span></td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
-
-      document.getElementById("perfBaixoGiroBody").innerHTML = baixoGiro.length
-        ? baixoGiro.map((p) => `
-          <tr>
-            <td>${p.nome || "-"}</td>
-            <td>${p.quantidade_vendida || 0}</td>
-            <td>R$ ${money(p.valor_estoque)}</td>
-            <td><span class="badge badge-info">Baixo giro</span></td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`;
-
-      document.getElementById("perfTodosProdutosBody").innerHTML = todos.length
-        ? todos.map((p) => `
-          <tr>
-            <td>${p.nome || "-"}</td>
-            <td>${p.categoria || "-"}</td>
-            <td>R$ ${money(p.preco)}</td>
-            <td>R$ ${money(p.custo)}</td>
-            <td>R$ ${money(p.lucro_unitario)}</td>
-            <td>${percent(p.margem_percentual)}</td>
-            <td>${p.quantidade_vendida || 0}</td>
-            <td>R$ ${money(p.faturamento)}</td>
-            <td>R$ ${money(p.valor_estoque)}</td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="9" class="empty-state">Sem dados.</td></tr>`;
-    }
-
-    function renderPerformanceAdmin(relatorios) {
-      document.getElementById("performanceLojaWrap").classList.add("hidden");
-      document.getElementById("performanceAdminWrap").classList.remove("hidden");
-
-      const wrap = document.getElementById("performanceAdminLista");
-
-      if (!Array.isArray(relatorios) || !relatorios.length) {
-        wrap.innerHTML = `<div class="card"><div class="empty-state">Nenhuma empresa encontrada na performance.</div></div>`;
-        return;
-      }
-
-      wrap.innerHTML = relatorios.map((item) => {
-        const resumo = item.resumo || {};
-        const topFat = item.top_faturamento || [];
-        const semSaida = item.produtos_sem_saida || [];
-
-        return `
-          <div class="empresa-bloco">
-            <h3>${item.empresa || "-"}</h3>
-
-            <div class="subcards-grid">
-              <div class="subcard">
-                <div class="subcard-label">Total de Produtos</div>
-                <div class="subcard-value">${Number(resumo.total_produtos || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Faturamento Total</div>
-                <div class="subcard-value">R$ ${money(resumo.faturamento_total || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Lucro Estimado</div>
-                <div class="subcard-value">R$ ${money(resumo.lucro_estimado_total || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Valor Parado</div>
-                <div class="subcard-value">R$ ${money(resumo.valor_total_parado || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Sem Saída</div>
-                <div class="subcard-value">${Number(resumo.produtos_sem_saida || 0)}</div>
-              </div>
-              <div class="subcard">
-                <div class="subcard-label">Baixo Giro</div>
-                <div class="subcard-value">${Number(resumo.produtos_baixo_giro || 0)}</div>
-              </div>
-            </div>
-
-            <div class="grid">
-              <div class="card">
-                <h3>Top faturamento</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Qtd</th>
-                        <th>Faturamento</th>
-                        <th>Lucro Estimado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${
-                        topFat.length
-                          ? topFat.slice(0, 10).map((p) => `
-                            <tr>
-                              <td>${p.nome || "-"}</td>
-                              <td>${p.quantidade_vendida || 0}</td>
-                              <td>R$ ${money(p.faturamento)}</td>
-                              <td>R$ ${money(p.lucro_estimado_vendido)}</td>
-                            </tr>
-                          `).join("")
-                          : `<tr><td colspan="4" class="empty-state">Sem dados.</td></tr>`
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div class="card">
-                <h3>Produtos sem saída</h3>
-                <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Produto</th>
-                        <th>Estoque</th>
-                        <th>Valor parado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      ${
-                        semSaida.length
-                          ? semSaida.slice(0, 10).map((p) => `
-                            <tr>
-                              <td>${p.nome || "-"}</td>
-                              <td>${p.estoque || 0}</td>
-                              <td>R$ ${money(p.valor_estoque)}</td>
-                            </tr>
-                          `).join("")
-                          : `<tr><td colspan="3" class="empty-state">Sem dados.</td></tr>`
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderContasReceber() {
-      const filtroBusca = document.getElementById("buscaContaReceber").value.trim().toLowerCase();
-      const filtroStatus = document.getElementById("filtroContaReceberStatus").value;
-      const tbody = document.getElementById("listaContasReceber");
-
+    function renderContasReceber(){
+      const busca = document.getElementById("buscaContaReceber").value.trim().toLowerCase();
+      const status = document.getElementById("filtroContaReceberStatus").value;
       let lista = [...contasReceber];
 
-      if (filtroBusca) {
-        lista = lista.filter((c) => (c.cliente_nome || "").toLowerCase().includes(filtroBusca));
+      if(busca){
+        lista = lista.filter(c => (c.cliente_nome || "").toLowerCase().includes(busca));
       }
 
-      if (filtroStatus) {
-        lista = lista.filter((c) => c.status === filtroStatus);
+      if(status){
+        lista = lista.filter(c => c.status === status);
       }
 
-      if (!lista.length) {
-        tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Nenhuma parcela encontrada.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map((c) => {
-        let badge = `<span class="badge badge-info">${c.status || "-"}</span>`;
-        if (c.status === "pago") badge = `<span class="badge badge-ok">Pago</span>`;
-        if (c.status === "pendente") badge = `<span class="badge badge-warning">Pendente</span>`;
-        if (c.status === "atrasado") badge = `<span class="badge badge-alert">Atrasado</span>`;
-
-        return `
+      document.getElementById("listaContasReceber").innerHTML = lista.length
+        ? lista.map(c => `
           <tr>
             <td>${c.empresa || empresa || "-"}</td>
             <td>${c.cliente_nome || "-"}</td>
@@ -2565,93 +1718,162 @@
             <td>${formatDate(c.data_vencimento)}</td>
             <td>${formatDate(c.data_pagamento)}</td>
             <td>${c.forma_pagamento || "-"}</td>
-            <td>${badge}</td>
-            <td>
-              ${c.status !== "pago"
-                ? `<button class="btn btn-primary" onclick="abrirModalBaixa(${c.id})">Baixar</button>`
+            <td>${
+              c.status === "pago"
+                ? '<span class="badge badge-ok">Pago</span>'
+                : c.status === "atrasado"
+                ? '<span class="badge badge-alert">Atrasado</span>'
+                : '<span class="badge badge-warning">Pendente</span>'
+            }</td>
+            <td>${
+              c.status !== "pago"
+                ? `<button class="btn btn-primary" onclick="abrirModalReceber(${c.id})">Baixar</button>`
                 : `<button class="btn btn-secondary" disabled>Baixado</button>`
-              }
-            </td>
+            }</td>
           </tr>
-        `;
-      }).join("");
+        `).join("")
+        : `<tr><td colspan="9" class="empty-state">Nenhuma parcela encontrada.</td></tr>`;
     }
 
-    function abrirModalBaixa(id) {
-      const conta = contasReceber.find((c) => Number(c.id) === Number(id));
-      if (!conta) {
-        setStatus("Parcela não encontrada.", "error");
-        return;
+    function renderContasPagar(){
+      const busca = document.getElementById("buscaContaPagar").value.trim().toLowerCase();
+      const status = document.getElementById("filtroContaPagarStatus").value;
+      let lista = [...contasPagar];
+
+      if(busca){
+        lista = lista.filter(c =>
+          (c.fornecedor_nome || "").toLowerCase().includes(busca) ||
+          (c.descricao || "").toLowerCase().includes(busca)
+        );
       }
 
-      contaReceberSelecionada = conta;
-      document.getElementById("mb_cliente").value = conta.cliente_nome || "";
-      document.getElementById("mb_parcela").value = `${conta.parcela || 1}/${conta.total_parcelas || 1}`;
-      document.getElementById("mb_valor").value = `R$ ${money(conta.valor)}`;
-      document.getElementById("mb_data_pagamento").value = hojeInput();
-      document.getElementById("mb_forma_pagamento").value = conta.forma_pagamento || "";
-      document.getElementById("mb_observacao").value = conta.observacao || "";
-      document.getElementById("modalBaixaBackdrop").classList.add("show");
+      if(status){
+        lista = lista.filter(c => c.status === status);
+      }
+
+      document.getElementById("listaContasPagar").innerHTML = lista.length
+        ? lista.map(c => `
+          <tr>
+            <td>${c.empresa || empresa || "-"}</td>
+            <td>${c.fornecedor_nome || "-"}</td>
+            <td>${c.descricao || "-"}</td>
+            <td>${c.parcela || 1}/${c.total_parcelas || 1}</td>
+            <td>R$ ${money(c.valor)}</td>
+            <td>${formatDate(c.data_vencimento)}</td>
+            <td>${formatDate(c.data_pagamento)}</td>
+            <td>${c.forma_pagamento || "-"}</td>
+            <td>${
+              c.status === "pago"
+                ? '<span class="badge badge-ok">Pago</span>'
+                : c.status === "atrasado"
+                ? '<span class="badge badge-alert">Atrasado</span>'
+                : '<span class="badge badge-warning">Pendente</span>'
+            }</td>
+            <td>${
+              c.status !== "pago"
+                ? `<button class="btn btn-primary" onclick="abrirModalPagar(${c.id})">Pagar</button>`
+                : `<button class="btn btn-secondary" disabled>Pago</button>`
+            }</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="10" class="empty-state">Nenhuma conta encontrada.</td></tr>`;
     }
 
-    function fecharModalBaixa() {
+    function atualizarResumoContasReceberAdmin(){
+      const pend = contasReceber.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const pg = contasReceber.filter(c => c.status === "pago").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const atr = contasReceber.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0);
+
+      document.getElementById("crResumoPendente").textContent = `R$ ${money(pend)}`;
+      document.getElementById("crResumoPago").textContent = `R$ ${money(pg)}`;
+      document.getElementById("crResumoAtrasado").textContent = `R$ ${money(atr)}`;
+      document.getElementById("crResumoParcelas").textContent = contasReceber.length;
+    }
+
+    function atualizarResumoContasPagarAdmin(){
+      const pend = contasPagar.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const pg = contasPagar.filter(c => c.status === "pago").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const atr = contasPagar.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0);
+
+      document.getElementById("cpResumoPendente").textContent = `R$ ${money(pend)}`;
+      document.getElementById("cpResumoPago").textContent = `R$ ${money(pg)}`;
+      document.getElementById("cpResumoAtrasado").textContent = `R$ ${money(atr)}`;
+      document.getElementById("cpResumoParcelas").textContent = contasPagar.length;
+    }
+
+    function abrirModalReceber(id){
+      contaReceberSelecionada = contasReceber.find(c => Number(c.id) === Number(id));
+      if(!contaReceberSelecionada) return;
+      document.getElementById("mr_data_pagamento").value = hojeInput();
+      document.getElementById("mr_forma_pagamento").value = contaReceberSelecionada.forma_pagamento || "";
+      document.getElementById("mr_observacao").value = contaReceberSelecionada.observacao || "";
+      document.getElementById("modalBaixaReceber").classList.add("show");
+    }
+
+    function fecharModalReceber(){
       contaReceberSelecionada = null;
-      document.getElementById("modalBaixaBackdrop").classList.remove("show");
-      document.getElementById("mb_cliente").value = "";
-      document.getElementById("mb_parcela").value = "";
-      document.getElementById("mb_valor").value = "";
-      document.getElementById("mb_data_pagamento").value = "";
-      document.getElementById("mb_forma_pagamento").value = "";
-      document.getElementById("mb_observacao").value = "";
+      document.getElementById("modalBaixaReceber").classList.remove("show");
     }
 
-    async function confirmarBaixaContaReceber() {
-      if (!contaReceberSelecionada) {
-        setStatus("Nenhuma parcela selecionada.", "error");
-        return;
-      }
+    async function confirmarBaixaReceber(){
+      if(!contaReceberSelecionada) return;
 
-      const dataPagamento = document.getElementById("mb_data_pagamento").value;
-      const formaPagamento = document.getElementById("mb_forma_pagamento").value;
-      const observacao = document.getElementById("mb_observacao").value.trim();
-
-      if (!dataPagamento) {
-        setStatus("Informe a data do pagamento.", "error");
-        return;
-      }
-
-      if (!formaPagamento) {
-        setStatus("Selecione a forma de pagamento.", "error");
-        return;
-      }
-
-      try {
-        await api(`/contas-receber/${contaReceberSelecionada.id}/baixar`, {
-          method: "PUT",
-          body: JSON.stringify({
+      try{
+        await api(`/contas-receber/${contaReceberSelecionada.id}/baixar`,{
+          method:"PUT",
+          body:JSON.stringify({
             empresa: contaReceberSelecionada.empresa || empresa,
-            data_pagamento: dataPagamento,
-            forma_pagamento: formaPagamento,
-            observacao
+            data_pagamento: document.getElementById("mr_data_pagamento").value,
+            forma_pagamento: document.getElementById("mr_forma_pagamento").value,
+            observacao: document.getElementById("mr_observacao").value.trim()
           })
         });
 
-        fecharModalBaixa();
+        fecharModalReceber();
         await carregarContasReceber();
-
-        if (tipo === "admin") {
-          await carregarDashboardAdmin();
-        } else {
-          await carregarDashboardLoja();
-        }
-
-        setStatus("Parcela baixada com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
+        setStatus("Conta a receber baixada com sucesso.");
+      }catch(e){
+        setStatus(e.message,"error");
       }
     }
 
-    function limparProduto() {
+    function abrirModalPagar(id){
+      contaPagarSelecionada = contasPagar.find(c => Number(c.id) === Number(id));
+      if(!contaPagarSelecionada) return;
+      document.getElementById("mp_data_pagamento").value = hojeInput();
+      document.getElementById("mp_forma_pagamento").value = contaPagarSelecionada.forma_pagamento || "";
+      document.getElementById("mp_observacao").value = contaPagarSelecionada.observacao || "";
+      document.getElementById("modalBaixaPagar").classList.add("show");
+    }
+
+    function fecharModalPagar(){
+      contaPagarSelecionada = null;
+      document.getElementById("modalBaixaPagar").classList.remove("show");
+    }
+
+    async function confirmarBaixaPagar(){
+      if(!contaPagarSelecionada) return;
+
+      try{
+        await api(`/contas-pagar/${contaPagarSelecionada.id}/pagar`,{
+          method:"PUT",
+          body:JSON.stringify({
+            empresa: contaPagarSelecionada.empresa || empresa,
+            data_pagamento: document.getElementById("mp_data_pagamento").value,
+            forma_pagamento: document.getElementById("mp_forma_pagamento").value,
+            observacao: document.getElementById("mp_observacao").value.trim()
+          })
+        });
+
+        fecharModalPagar();
+        await carregarContasPagar();
+        setStatus("Conta paga com sucesso.");
+      }catch(e){
+        setStatus(e.message,"error");
+      }
+    }
+
+    function limparProduto(){
       document.getElementById("p_nome").value = "";
       document.getElementById("p_preco").value = "";
       document.getElementById("p_custo").value = "";
@@ -2661,59 +1883,36 @@
       document.getElementById("p_categoria").value = "";
     }
 
-    async function salvarProduto() {
-      if (tipo === "admin") {
-        setStatus("Para cadastrar produto com admin, use um usuário de loja ou adapte o backend para selecionar empresa.", "warning");
+    async function salvarProduto(){
+      if(tipo === "admin"){
+        setStatus("Para cadastrar produto com admin, use usuário de loja.", "warning");
         return;
       }
 
-      const nome = document.getElementById("p_nome").value.trim();
-      const preco = Number(document.getElementById("p_preco").value || 0);
-      const custo = Number(document.getElementById("p_custo").value || 0);
-      const estoque = Number(document.getElementById("p_estoque").value || 0);
-      const estoqueMinimo = Number(document.getElementById("p_estoque_minimo").value || 0);
-      const codigoBarras = document.getElementById("p_codigo_barras").value.trim();
-      const categoria = document.getElementById("p_categoria").value.trim();
-
-      if (!nome) {
-        setStatus("Informe o nome do produto.", "error");
-        return;
-      }
-
-      try {
-        await api("/produtos", {
-          method: "POST",
-          body: JSON.stringify({
+      try{
+        await api("/produtos",{
+          method:"POST",
+          body:JSON.stringify({
             empresa,
-            nome,
-            preco,
-            custo,
-            estoque,
-            estoque_minimo: estoqueMinimo,
-            codigo_barras: codigoBarras,
-            categoria
+            nome: document.getElementById("p_nome").value.trim(),
+            preco: document.getElementById("p_preco").value,
+            custo: document.getElementById("p_custo").value,
+            estoque: document.getElementById("p_estoque").value,
+            estoque_minimo: document.getElementById("p_estoque_minimo").value,
+            codigo_barras: document.getElementById("p_codigo_barras").value.trim(),
+            categoria: document.getElementById("p_categoria").value.trim()
           })
         });
 
         limparProduto();
-        await Promise.all([
-          carregarProdutos(),
-          carregarMovimentacoes()
-        ]);
-
-        if (tipo === "admin") {
-          await carregarDashboardAdmin();
-        } else {
-          await carregarDashboardLoja();
-        }
-
+        await Promise.all([carregarProdutos(), carregarMovimentacoes()]);
         setStatus("Produto cadastrado com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
+      }catch(e){
+        setStatus(e.message, "error");
       }
     }
 
-    function limparFornecedor() {
+    function limparFornecedor(){
       document.getElementById("f_nome").value = "";
       document.getElementById("f_contato").value = "";
       document.getElementById("f_tel").value = "";
@@ -2722,76 +1921,43 @@
       document.getElementById("f_obs").value = "";
     }
 
-    async function salvarFornecedor() {
-      if (tipo === "admin") {
-        setStatus("Para cadastrar fornecedor com admin, use um usuário de loja ou adapte o backend para selecionar empresa.", "warning");
+    async function salvarFornecedor(){
+      if(tipo === "admin"){
+        setStatus("Para cadastrar fornecedor com admin, use usuário de loja.", "warning");
         return;
       }
 
-      const nome = document.getElementById("f_nome").value.trim();
-      const contato = document.getElementById("f_contato").value.trim();
-      const telefone = document.getElementById("f_tel").value.trim();
-      const email = document.getElementById("f_email").value.trim();
-      const endereco = document.getElementById("f_endereco").value.trim();
-      const observacao = document.getElementById("f_obs").value.trim();
-
-      if (!nome) {
-        setStatus("Informe o nome do fornecedor.", "error");
-        return;
-      }
-
-      try {
-        await api("/fornecedores", {
-          method: "POST",
-          body: JSON.stringify({
+      try{
+        await api("/fornecedores",{
+          method:"POST",
+          body:JSON.stringify({
             empresa,
-            nome,
-            contato,
-            telefone,
-            email,
-            endereco,
-            observacao
+            nome: document.getElementById("f_nome").value.trim(),
+            contato: document.getElementById("f_contato").value.trim(),
+            telefone: document.getElementById("f_tel").value.trim(),
+            email: document.getElementById("f_email").value.trim(),
+            endereco: document.getElementById("f_endereco").value.trim(),
+            observacao: document.getElementById("f_obs").value.trim()
           })
         });
 
         limparFornecedor();
         await carregarFornecedores();
-
-        if (tipo === "admin") {
-          await carregarDashboardAdmin();
-        } else {
-          await carregarDashboardLoja();
-        }
-
         setStatus("Fornecedor cadastrado com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
+      }catch(e){
+        setStatus(e.message, "error");
       }
     }
 
-    function adicionarItemCompra() {
+    function adicionarItemCompra(){
       const produtoId = Number(document.getElementById("c_produto").value);
       const quantidade = Number(document.getElementById("c_qtd").value);
       const custo = Number(document.getElementById("c_custo").value);
 
-      if (!produtoId) {
-        setStatus("Selecione um produto.", "error");
-        return;
-      }
+      const produto = produtos.find(p => Number(p.id) === produtoId);
 
-      if (!quantidade || quantidade <= 0) {
-        setStatus("Informe uma quantidade válida.", "error");
-        return;
-      }
-
-      if (isNaN(custo) || custo <= 0) {
-        setStatus("Informe um custo válido.", "error");
-        return;
-      }
-
-      const produto = produtos.find((p) => Number(p.id) === produtoId);
-      if (!produto) {
-        setStatus("Produto não encontrado.", "error");
+      if(!produtoId || !produto || quantidade <= 0 || custo <= 0){
+        setStatus("Preencha os dados do item corretamente.", "error");
         return;
       }
 
@@ -2808,35 +1974,28 @@
       renderItensCompra();
     }
 
-    function removerItemCompra(index) {
-      itensCompra.splice(index, 1);
+    function removerItemCompra(i){
+      itensCompra.splice(i,1);
       renderItensCompra();
     }
 
-    function renderItensCompra() {
-      const tbody = document.getElementById("itensCompraBody");
+    function renderItensCompra(){
+      document.getElementById("itensCompraBody").innerHTML = itensCompra.length
+        ? itensCompra.map((item,i) => `
+          <tr>
+            <td>${item.produto_nome}</td>
+            <td>${item.quantidade}</td>
+            <td>R$ ${money(item.custo_unitario)}</td>
+            <td>R$ ${money(item.subtotal)}</td>
+            <td><button class="btn btn-danger" onclick="removerItemCompra(${i})">Remover</button></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
 
-      if (!itensCompra.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
-        document.getElementById("totalCompra").textContent = "0,00";
-        return;
-      }
-
-      tbody.innerHTML = itensCompra.map((item, index) => `
-        <tr>
-          <td>${item.produto_nome}</td>
-          <td>${item.quantidade}</td>
-          <td>R$ ${money(item.custo_unitario)}</td>
-          <td>R$ ${money(item.subtotal)}</td>
-          <td><button class="btn btn-danger" onclick="removerItemCompra(${index})">Remover</button></td>
-        </tr>
-      `).join("");
-
-      const total = itensCompra.reduce((acc, item) => acc + Number(item.subtotal || 0), 0);
-      document.getElementById("totalCompra").textContent = money(total);
+      document.getElementById("totalCompra").textContent = money(itensCompra.reduce((a,i) => a + Number(i.subtotal || 0), 0));
     }
 
-    function limparCompra() {
+    function limparCompra(){
       itensCompra = [];
       document.getElementById("c_data").value = hojeInput();
       document.getElementById("c_obs").value = "";
@@ -2847,209 +2006,182 @@
       renderItensCompra();
     }
 
-    async function salvarCompra() {
-      if (tipo === "admin") {
-        setStatus("Para registrar compra com admin, use um usuário de loja ou adapte o backend para selecionar empresa.", "warning");
+    function atualizarCamposPagamentoCompra(){
+      if(document.getElementById("c_tipo_pagamento").value === "prazo"){
+        document.getElementById("grupoVencimentoCompra").classList.remove("hidden");
+        if(!document.getElementById("c_vencimento").value){
+          document.getElementById("c_vencimento").value = document.getElementById("c_data").value || hojeInput();
+        }
+      }else{
+        document.getElementById("grupoVencimentoCompra").classList.add("hidden");
+        document.getElementById("c_vencimento").value = "";
+      }
+    }
+
+    async function salvarCompra(){
+      if(tipo === "admin"){
+        setStatus("Para registrar compra com admin, use usuário de loja.", "warning");
         return;
       }
 
-      const fornecedorId = Number(document.getElementById("c_fornecedor").value);
-      const data = document.getElementById("c_data").value;
-      const observacao = document.getElementById("c_obs").value.trim();
-      const tipoPagamento = document.getElementById("c_tipo_pagamento").value;
-      const formaPagamento = document.getElementById("c_forma_pagamento").value;
-      const vencimento = document.getElementById("c_vencimento").value;
-
-      const gerarContaPagar = tipoPagamento === "prazo";
-      const statusPagamento = gerarContaPagar ? "pendente" : "pago";
-
-      if (!fornecedorId) {
-        setStatus("Selecione um fornecedor.", "error");
-        return;
-      }
-
-      if (!data) {
-        setStatus("Informe a data da compra.", "error");
-        return;
-      }
-
-      if (!formaPagamento) {
-        setStatus("Selecione a forma de pagamento.", "error");
-        return;
-      }
-
-      if (gerarContaPagar && !vencimento) {
-        setStatus("Informe o vencimento da compra a prazo.", "error");
-        return;
-      }
-
-      if (!itensCompra.length) {
-        setStatus("Adicione pelo menos um item.", "error");
-        return;
-      }
-
-      try {
-        await api("/compras", {
-          method: "POST",
-          body: JSON.stringify({
+      try{
+        await api("/compras",{
+          method:"POST",
+          body:JSON.stringify({
             empresa,
-            fornecedor_id: fornecedorId,
-            data,
-            observacao,
-            gerar_conta_pagar: gerarContaPagar,
-            forma_pagamento: formaPagamento,
-            status_pagamento: statusPagamento,
-            vencimento: gerarContaPagar ? vencimento : null,
-            itens: itensCompra.map((item) => ({
-              produto_id: item.produto_id,
-              quantidade: item.quantidade,
-              custo_unitario: item.custo_unitario
+            fornecedor_id: Number(document.getElementById("c_fornecedor").value),
+            data: document.getElementById("c_data").value,
+            observacao: document.getElementById("c_obs").value.trim(),
+            gerar_conta_pagar: document.getElementById("c_tipo_pagamento").value === "prazo",
+            forma_pagamento: document.getElementById("c_forma_pagamento").value,
+            status_pagamento: document.getElementById("c_tipo_pagamento").value === "prazo" ? "pendente" : "pago",
+            vencimento: document.getElementById("c_tipo_pagamento").value === "prazo" ? document.getElementById("c_vencimento").value : null,
+            itens: itensCompra.map(i => ({
+              produto_id: i.produto_id,
+              quantidade: i.quantidade,
+              custo_unitario: i.custo_unitario
             }))
           })
         });
 
         limparCompra();
-        await Promise.all([
-          carregarProdutos(),
-          carregarCompras(),
-          carregarMovimentacoes(),
-          carregarFornecedores()
-        ]);
-
-        if (tipo === "admin") {
-          await carregarDashboardAdmin();
-        } else {
-          await carregarDashboardLoja();
-        }
-
+        await Promise.all([carregarProdutos(), carregarCompras(), carregarMovimentacoes(), carregarContasPagar()]);
         setStatus("Compra registrada com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
+      }catch(e){
+        setStatus(e.message, "error");
       }
     }
 
-    function limparAjuste() {
+    function limparAjuste(){
       document.getElementById("a_qtd").value = "";
       document.getElementById("a_obs").value = "";
     }
 
-    async function salvarAjuste() {
-      if (tipo === "admin") {
-        setStatus("Para ajustar estoque com admin, use um usuário de loja ou adapte o backend para selecionar empresa.", "warning");
+    async function salvarAjuste(){
+      if(tipo === "admin"){
+        setStatus("Para ajustar estoque com admin, use usuário de loja.", "warning");
         return;
       }
 
-      const produtoId = Number(document.getElementById("a_produto").value);
-      const tipoAjuste = document.getElementById("a_tipo").value;
-      const quantidade = Number(document.getElementById("a_qtd").value);
-      const observacao = document.getElementById("a_obs").value.trim();
-
-      if (!produtoId) {
-        setStatus("Selecione um produto.", "error");
-        return;
-      }
-
-      if (!quantidade || quantidade <= 0) {
-        setStatus("Informe uma quantidade válida.", "error");
-        return;
-      }
-
-      try {
-        await api("/movimentacoes-estoque/ajuste", {
-          method: "POST",
-          body: JSON.stringify({
+      try{
+        await api("/movimentacoes-estoque/ajuste",{
+          method:"POST",
+          body:JSON.stringify({
             empresa,
-            produto_id: produtoId,
-            tipo: tipoAjuste,
-            quantidade,
-            observacao
+            produto_id: Number(document.getElementById("a_produto").value),
+            tipo: document.getElementById("a_tipo").value,
+            quantidade: Number(document.getElementById("a_qtd").value),
+            observacao: document.getElementById("a_obs").value.trim()
           })
         });
 
         limparAjuste();
-        await Promise.all([
-          carregarProdutos(),
-          carregarMovimentacoes()
-        ]);
-
-        if (tipo === "admin") {
-          await carregarDashboardAdmin();
-        } else {
-          await carregarDashboardLoja();
-        }
-
-        setStatus("Ajuste registrado com sucesso.");
-      } catch (error) {
-        setStatus(error.message, "error");
+        await Promise.all([carregarProdutos(), carregarMovimentacoes()]);
+        setStatus("Ajuste realizado com sucesso.");
+      }catch(e){
+        setStatus(e.message, "error");
       }
     }
 
-    async function carregarRelatorioEstoque() {
-      try {
-        if (tipo === "admin") {
-          const data = await api("/admin/relatorio-estoque");
-          renderRelatorioAdmin(data);
-        } else {
-          const data = await api(`/relatorio-estoque/${empresa}`);
-          renderRelatorioLoja(data);
-        }
-      } catch (error) {
-        setStatus(error.message, "error");
+    function limparContaPagar(){
+      document.getElementById("cp_fornecedor_nome").value = "";
+      document.getElementById("cp_descricao").value = "";
+      document.getElementById("cp_valor").value = "";
+      document.getElementById("cp_vencimento").value = hojeInput();
+      document.getElementById("cp_forma_pagamento").value = "";
+      document.getElementById("cp_observacao").value = "";
+    }
+
+    async function salvarContaPagar(){
+      try{
+        await api("/contas-pagar",{
+          method:"POST",
+          body:JSON.stringify({
+            empresa,
+            fornecedor_nome: document.getElementById("cp_fornecedor_nome").value.trim(),
+            descricao: document.getElementById("cp_descricao").value.trim(),
+            valor: document.getElementById("cp_valor").value,
+            data_vencimento: document.getElementById("cp_vencimento").value,
+            forma_pagamento: document.getElementById("cp_forma_pagamento").value,
+            observacao: document.getElementById("cp_observacao").value.trim()
+          })
+        });
+
+        limparContaPagar();
+        await carregarContasPagar();
+        setStatus("Conta a pagar cadastrada com sucesso.");
+      }catch(e){
+        setStatus(e.message, "error");
       }
     }
 
-    async function carregarRelatorioPerformance() {
-      try {
-        if (tipo === "admin") {
-          const data = await api("/admin/relatorio-performance");
-          renderPerformanceAdmin(data);
-        } else {
-          const data = await api(`/relatorio-performance/${empresa}`);
-          renderPerformanceLoja(data);
-        }
-      } catch (error) {
-        setStatus(error.message, "error");
-      }
+    async function carregarRelatorioEstoque(){
+      document.getElementById("relatorio").innerHTML = `
+        <div class="page-header">
+          <h2>Relatório de Estoque</h2>
+          <p>Visão gerencial do estoque.</p>
+        </div>
+        <div class="card">
+          <div class="empty-state">Tela pronta. No próximo passo eu religo novamente o relatório completo sem quebrar o restante.</div>
+        </div>
+      `;
     }
 
-    async function carregarTudo() {
-      try {
+    async function carregarRelatorioPerformance(){
+      document.getElementById("performance").innerHTML = `
+        <div class="page-header">
+          <h2>Performance dos Produtos</h2>
+          <p>Visão de performance dos itens.</p>
+        </div>
+        <div class="card">
+          <div class="empty-state">Tela pronta. No próximo passo eu religo a performance completa em cima desta base estável.</div>
+        </div>
+      `;
+    }
+
+    async function carregarTudo(){
+      try{
+        document.getElementById("c_data").value = hojeInput();
+        document.getElementById("cp_vencimento").value = hojeInput();
+        limparCompra();
+
         await Promise.all([
           carregarProdutos(),
           carregarFornecedores(),
           carregarCompras(),
           carregarMovimentacoes(),
-          carregarContasReceber()
+          carregarContasReceber(),
+          carregarContasPagar()
         ]);
 
-        if (tipo === "admin") {
+        if(tipo === "admin"){
           await carregarDashboardAdmin();
-        } else {
+        }else{
           await carregarDashboardLoja();
         }
 
-        limparCompra();
         renderItensCompra();
-      } catch (error) {
-        setStatus(error.message, "error");
+        aplicarEstadoSidebar();
+      }catch(e){
+        setStatus(e.message, "error");
       }
     }
 
     window.addEventListener("resize", aplicarEstadoSidebar);
 
     document.getElementById("loginUsuario").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") fazerLogin();
+      if(e.key === "Enter") fazerLogin();
     });
 
     document.getElementById("loginSenha").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") fazerLogin();
+      if(e.key === "Enter") fazerLogin();
     });
 
-    if (token) {
-      alternarTelas();
+    alternarTelas();
+
+    if(token){
       carregarTudo();
-    } else {
-      document.getElementById("c_data").value = hojeInput();
+    }else{
       document.getElementById("loginUsuario").focus();
     }
   </script>
