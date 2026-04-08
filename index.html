@@ -25,7 +25,7 @@
       --info-text:#1d4ed8;
       --radius:18px;
       --shadow:0 8px 24px rgba(0,0,0,0.08);
-      --sidebar-width:280px;
+      --sidebar-width:290px;
       --sidebar-collapsed-width:86px;
     }
 
@@ -130,6 +130,7 @@
       color:#fff;
       padding:18px 14px;
       overflow:hidden;
+      transition:all .2s ease;
     }
 
     .sidebar-header{
@@ -496,10 +497,12 @@
     .modal{
       background:#fff;
       width:100%;
-      max-width:520px;
+      max-width:620px;
       border-radius:22px;
       box-shadow:0 30px 60px rgba(0,0,0,.25);
       padding:20px;
+      max-height:90vh;
+      overflow:auto;
     }
 
     .modal-header{
@@ -524,6 +527,25 @@
       cursor:pointer;
       font-size:16px;
       font-weight:bold;
+    }
+
+    .venda-layout{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .venda-carrinho-total{
+      font-size:28px;
+      font-weight:bold;
+      color:var(--primary);
+    }
+
+    @media (max-width:1100px){
+      .venda-layout{
+        grid-template-columns:1fr;
+      }
     }
 
     @media (max-width:980px){
@@ -606,6 +628,12 @@
         <button class="menu-btn" onclick="mostrarPagina('produtos', this)">
           <span class="menu-icon">📦</span><span class="menu-text">Produtos</span>
         </button>
+        <button class="menu-btn" onclick="mostrarPagina('clientes', this)">
+          <span class="menu-icon">👥</span><span class="menu-text">Clientes</span>
+        </button>
+        <button class="menu-btn" onclick="mostrarPagina('vendas', this)">
+          <span class="menu-icon">💰</span><span class="menu-text">Vendas / PDV</span>
+        </button>
         <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)">
           <span class="menu-icon">🚚</span><span class="menu-text">Fornecedores</span>
         </button>
@@ -641,13 +669,14 @@
         <section id="dashboard" class="page active">
           <div class="page-header">
             <h2>Dashboard</h2>
-            <p>Resumo geral da operação de compras, estoque e financeiro.</p>
+            <p>Resumo geral da operação.</p>
           </div>
 
           <div class="summary-grid">
             <div class="summary-card"><div class="summary-label">Produtos</div><div class="summary-value" id="dashProdutos">0</div></div>
             <div class="summary-card"><div class="summary-label">Fornecedores</div><div class="summary-value" id="dashFornecedores">0</div></div>
             <div class="summary-card"><div class="summary-label">Compras</div><div class="summary-value" id="dashCompras">0</div></div>
+            <div class="summary-card"><div class="summary-label">Vendas</div><div class="summary-value" id="dashVendas">0</div></div>
             <div class="summary-card"><div class="summary-label">Estoque Baixo</div><div class="summary-value" id="dashAlerta">0</div></div>
             <div class="summary-card"><div class="summary-label">Valor em Estoque</div><div class="summary-value money" id="dashValorEstoque">R$ 0,00</div></div>
           </div>
@@ -752,6 +781,214 @@
                   <tbody id="listaProdutos"></tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="clientes" class="page">
+          <div class="page-header">
+            <h2>Clientes</h2>
+            <p>Cadastro de clientes para vendas e contas a receber.</p>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <h3>Novo cliente</h3>
+
+              <div class="form-group">
+                <label>Nome</label>
+                <input id="cl_nome" class="form-control" type="text" />
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Telefone</label>
+                  <input id="cl_telefone" class="form-control" type="text" />
+                </div>
+                <div class="form-group">
+                  <label>CPF</label>
+                  <input id="cl_cpf" class="form-control" type="text" />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Nascimento</label>
+                  <input id="cl_nascimento" class="form-control" type="date" />
+                </div>
+                <div class="form-group">
+                  <label>Endereço</label>
+                  <input id="cl_endereco" class="form-control" type="text" />
+                </div>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" onclick="salvarCliente()">Salvar cliente</button>
+                <button class="btn btn-secondary" onclick="limparCliente()">Limpar</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Lista de clientes</h3>
+
+              <div class="toolbar">
+                <div class="form-group">
+                  <label>Buscar</label>
+                  <input id="buscaCliente" class="form-control" type="text" placeholder="Digite o nome..." oninput="renderClientes()" />
+                </div>
+                <button class="btn btn-outline" onclick="carregarClientes()">Atualizar</button>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Empresa</th><th>Nome</th><th>Telefone</th><th>CPF</th><th>Nascimento</th><th>Endereço</th></tr>
+                  </thead>
+                  <tbody id="listaClientes"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="vendas" class="page">
+          <div class="page-header">
+            <h2>Vendas / PDV</h2>
+            <p>Registre vendas com baixa automática de estoque e geração de contas a receber.</p>
+          </div>
+
+          <div class="venda-layout">
+            <div class="card">
+              <h3>Nova venda</h3>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Cliente (opcional)</label>
+                  <select id="v_cliente" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                  <label>Data da venda</label>
+                  <input id="v_data" class="form-control" type="date" />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Produto</label>
+                  <select id="v_produto" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                  <label>Quantidade</label>
+                  <input id="v_qtd" class="form-control" type="number" min="1" />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Preço unitário</label>
+                  <input id="v_preco" class="form-control" type="number" min="0" step="0.01" />
+                </div>
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <button class="btn btn-primary" style="width:100%;" onclick="adicionarItemVenda()">Adicionar item</button>
+                </div>
+              </div>
+
+              <div class="table-wrap" style="margin-top:14px;">
+                <table>
+                  <thead>
+                    <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Ação</th></tr>
+                  </thead>
+                  <tbody id="itensVendaBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Fechamento</h3>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Pagamento</label>
+                  <select id="v_pagamento" class="form-control" onchange="atualizarCamposVenda()">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Pix">Pix</option>
+                    <option value="Cartão de Débito">Cartão de Débito</option>
+                    <option value="Cartão de Crédito">Cartão de Crédito</option>
+                    <option value="Crédito Parcelado">Crédito Parcelado</option>
+                    <option value="Promissória">Promissória</option>
+                    <option value="Transferência">Transferência</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Parcelas</label>
+                  <input id="v_parcelas" class="form-control" type="number" min="1" value="1" />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Desconto</label>
+                  <input id="v_desconto" class="form-control" type="number" min="0" step="0.01" value="0" oninput="renderResumoVenda()" />
+                </div>
+                <div class="form-group">
+                  <label>Acréscimo</label>
+                  <input id="v_acrescimo" class="form-control" type="number" min="0" step="0.01" value="0" oninput="renderResumoVenda()" />
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group" id="grupoPrimeiroVencimento">
+                  <label>Primeiro vencimento</label>
+                  <input id="v_primeiro_vencimento" class="form-control" type="date" />
+                </div>
+                <div class="form-group" id="grupoIntervaloDias">
+                  <label>Intervalo entre parcelas (dias)</label>
+                  <input id="v_intervalo_dias" class="form-control" type="number" min="1" value="30" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Observação</label>
+                <input id="v_observacao" class="form-control" type="text" />
+              </div>
+
+              <div class="summary-grid">
+                <div class="summary-card">
+                  <div class="summary-label">Subtotal</div>
+                  <div class="summary-value money" id="v_subtotal_label">R$ 0,00</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-label">Total final</div>
+                  <div class="venda-carrinho-total" id="v_total_label">R$ 0,00</div>
+                </div>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" onclick="salvarVenda()">Finalizar venda</button>
+                <button class="btn btn-secondary" onclick="limparVenda()">Limpar venda</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Histórico de vendas</h3>
+
+            <div class="toolbar">
+              <div class="form-group">
+                <label>Buscar cliente</label>
+                <input id="buscaVenda" class="form-control" type="text" placeholder="Digite o cliente..." oninput="renderVendas()" />
+              </div>
+              <button class="btn btn-outline" onclick="carregarVendas()">Atualizar</button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Empresa</th><th>ID</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Pagamento</th><th>Parcelas</th><th>Status</th><th>Data</th></tr>
+                </thead>
+                <tbody id="listaVendas"></tbody>
+              </table>
             </div>
           </div>
         </section>
@@ -1052,7 +1289,7 @@
             <p>Visão gerencial do estoque.</p>
           </div>
           <div class="card">
-            <div class="empty-state">Tela pronta. No próximo passo eu ligo novamente o relatório completo sem quebrar o restante.</div>
+            <div class="empty-state">Tela pronta. No próximo passo eu religo novamente o relatório completo sem quebrar o restante.</div>
           </div>
         </section>
 
@@ -1300,10 +1537,13 @@
     let nomeCompleto = localStorage.getItem("lf_nome_completo") || "";
 
     let produtos = [];
+    let clientes = [];
     let fornecedores = [];
     let compras = [];
+    let vendas = [];
     let movimentacoes = [];
     let itensCompra = [];
+    let itensVenda = [];
     let contasReceber = [];
     let contasPagar = [];
     let contaReceberSelecionada = null;
@@ -1467,10 +1707,27 @@
 
       document.getElementById("c_produto").innerHTML = options;
       document.getElementById("a_produto").innerHTML = options;
+      document.getElementById("v_produto").innerHTML = options;
 
       renderProdutos();
       renderEstoque();
       renderDashboardAlertas();
+      preencherPrecoVenda();
+    }
+
+    async function carregarClientes(){
+      if(tipo === "admin"){
+        clientes = [];
+      } else {
+        clientes = await api(`/clientes/${empresa}`);
+      }
+
+      const select = document.getElementById("v_cliente");
+      let html = `<option value="">Sem cliente</option>`;
+      html += clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join("");
+      select.innerHTML = html;
+
+      renderClientes();
     }
 
     async function carregarFornecedores(){
@@ -1487,6 +1744,11 @@
     async function carregarCompras(){
       compras = tipo === "admin" ? await api("/admin/compras") : await api(`/compras/${empresa}`);
       renderCompras();
+    }
+
+    async function carregarVendas(){
+      vendas = tipo === "admin" ? await api("/admin/vendas") : await api(`/vendas/${empresa}`);
+      renderVendas();
     }
 
     async function carregarMovimentacoes(){
@@ -1531,6 +1793,7 @@
         document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
         document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
         document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
+        document.getElementById("dashVendas").textContent = Number(d.total_vendas || 0);
         document.getElementById("dashAlerta").textContent = Number(d.produtos_alerta || 0);
         document.getElementById("dashValorEstoque").textContent = `R$ ${money(d.valor_estoque || 0)}`;
       }catch(_){
@@ -1544,6 +1807,7 @@
         document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
         document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
         document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
+        document.getElementById("dashVendas").textContent = Number(d.total_vendas || 0);
         document.getElementById("dashAlerta").textContent = Number(d.produtos_alerta || 0);
         document.getElementById("dashValorEstoque").textContent = `R$ ${money(d.valor_estoque || 0)}`;
       }catch(_){
@@ -1555,6 +1819,7 @@
       document.getElementById("dashProdutos").textContent = produtos.length;
       document.getElementById("dashFornecedores").textContent = fornecedores.length;
       document.getElementById("dashCompras").textContent = compras.length;
+      document.getElementById("dashVendas").textContent = vendas.length;
 
       const alertas = produtos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0);
       const valor = produtos.reduce((a,p) => a + (Number(p.estoque || 0) * Number(p.custo || 0)), 0);
@@ -1580,6 +1845,45 @@
           </tr>
         `).join("")
         : `<tr><td colspan="7" class="empty-state">Nenhum produto encontrado.</td></tr>`;
+    }
+
+    function renderClientes(){
+      const filtro = document.getElementById("buscaCliente").value.trim().toLowerCase();
+      const lista = clientes.filter(c => (c.nome || "").toLowerCase().includes(filtro));
+
+      document.getElementById("listaClientes").innerHTML = lista.length
+        ? lista.map(c => `
+          <tr>
+            <td>${c.empresa || empresa || "-"}</td>
+            <td>${c.nome || "-"}</td>
+            <td>${c.telefone || "-"}</td>
+            <td>${c.cpf || "-"}</td>
+            <td>${formatDate(c.nascimento)}</td>
+            <td>${c.endereco || "-"}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="6" class="empty-state">Nenhum cliente encontrado.</td></tr>`;
+    }
+
+    function renderVendas(){
+      const filtro = document.getElementById("buscaVenda").value.trim().toLowerCase();
+      const lista = vendas.filter(v => (v.cliente_nome || "").toLowerCase().includes(filtro));
+
+      document.getElementById("listaVendas").innerHTML = lista.length
+        ? lista.map(v => `
+          <tr>
+            <td>${v.empresa || empresa || "-"}</td>
+            <td>${v.id}</td>
+            <td>${v.cliente_nome || "Sem cliente"}</td>
+            <td>${v.total_itens || 0}</td>
+            <td>R$ ${money(v.total)}</td>
+            <td>${v.pagamento || "-"}</td>
+            <td>${v.parcelas || 1}</td>
+            <td>${v.status_pagamento === "pago" ? '<span class="badge badge-ok">Pago</span>' : '<span class="badge badge-warning">Pendente</span>'}</td>
+            <td>${formatDate(v.data)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="9" class="empty-state">Nenhuma venda encontrada.</td></tr>`;
     }
 
     function renderEstoque(){
@@ -1912,6 +2216,41 @@
       }
     }
 
+    function limparCliente(){
+      document.getElementById("cl_nome").value = "";
+      document.getElementById("cl_telefone").value = "";
+      document.getElementById("cl_cpf").value = "";
+      document.getElementById("cl_nascimento").value = "";
+      document.getElementById("cl_endereco").value = "";
+    }
+
+    async function salvarCliente(){
+      if(tipo === "admin"){
+        setStatus("Para cadastrar cliente com admin, use usuário de loja.", "warning");
+        return;
+      }
+
+      try{
+        await api("/clientes",{
+          method:"POST",
+          body:JSON.stringify({
+            empresa,
+            nome: document.getElementById("cl_nome").value.trim(),
+            telefone: document.getElementById("cl_telefone").value.trim(),
+            cpf: document.getElementById("cl_cpf").value.trim(),
+            nascimento: document.getElementById("cl_nascimento").value,
+            endereco: document.getElementById("cl_endereco").value.trim()
+          })
+        });
+
+        limparCliente();
+        await carregarClientes();
+        setStatus("Cliente cadastrado com sucesso.");
+      }catch(e){
+        setStatus(e.message, "error");
+      }
+    }
+
     function limparFornecedor(){
       document.getElementById("f_nome").value = "";
       document.getElementById("f_contato").value = "";
@@ -2115,6 +2454,166 @@
       }
     }
 
+    function preencherPrecoVenda(){
+      const produtoId = Number(document.getElementById("v_produto").value);
+      const produto = produtos.find(p => Number(p.id) === produtoId);
+      if(produto){
+        document.getElementById("v_preco").value = Number(produto.preco || 0).toFixed(2);
+      }
+    }
+
+    function atualizarCamposVenda(){
+      const pagamento = document.getElementById("v_pagamento").value;
+      const prazo = pagamento === "Promissória" || pagamento === "Crédito Parcelado";
+
+      document.getElementById("grupoPrimeiroVencimento").style.display = prazo ? "block" : "none";
+      document.getElementById("grupoIntervaloDias").style.display = prazo ? "block" : "none";
+
+      if(!prazo){
+        document.getElementById("v_parcelas").value = 1;
+      } else if(Number(document.getElementById("v_parcelas").value) < 1){
+        document.getElementById("v_parcelas").value = 1;
+      }
+
+      renderResumoVenda();
+    }
+
+    function adicionarItemVenda(){
+      const produtoId = Number(document.getElementById("v_produto").value);
+      const quantidade = Number(document.getElementById("v_qtd").value);
+      const preco = Number(document.getElementById("v_preco").value);
+      const produto = produtos.find(p => Number(p.id) === produtoId);
+
+      if(!produto || quantidade <= 0 || preco < 0){
+        setStatus("Preencha corretamente os dados do item da venda.", "error");
+        return;
+      }
+
+      if(Number(produto.estoque || 0) < quantidade){
+        setStatus("Estoque insuficiente para este produto.", "error");
+        return;
+      }
+
+      itensVenda.push({
+        produto_id: produtoId,
+        produto_nome: produto.nome,
+        quantidade,
+        preco_unitario: preco,
+        total: quantidade * preco
+      });
+
+      document.getElementById("v_qtd").value = "";
+      renderItensVenda();
+      renderResumoVenda();
+    }
+
+    function removerItemVenda(i){
+      itensVenda.splice(i,1);
+      renderItensVenda();
+      renderResumoVenda();
+    }
+
+    function renderItensVenda(){
+      document.getElementById("itensVendaBody").innerHTML = itensVenda.length
+        ? itensVenda.map((item,i) => `
+          <tr>
+            <td>${item.produto_nome}</td>
+            <td>${item.quantidade}</td>
+            <td>R$ ${money(item.preco_unitario)}</td>
+            <td>R$ ${money(item.total)}</td>
+            <td><button class="btn btn-danger" onclick="removerItemVenda(${i})">Remover</button></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
+    }
+
+    function renderResumoVenda(){
+      const subtotal = itensVenda.reduce((acc,item) => acc + Number(item.total || 0), 0);
+      const desconto = Number(document.getElementById("v_desconto").value || 0);
+      const acrescimo = Number(document.getElementById("v_acrescimo").value || 0);
+      const total = subtotal - desconto + acrescimo;
+
+      document.getElementById("v_subtotal_label").textContent = `R$ ${money(subtotal)}`;
+      document.getElementById("v_total_label").textContent = `R$ ${money(total < 0 ? 0 : total)}`;
+    }
+
+    function limparVenda(){
+      itensVenda = [];
+      document.getElementById("v_cliente").value = "";
+      document.getElementById("v_data").value = hojeInput();
+      document.getElementById("v_qtd").value = "";
+      document.getElementById("v_desconto").value = "0";
+      document.getElementById("v_acrescimo").value = "0";
+      document.getElementById("v_pagamento").value = "Dinheiro";
+      document.getElementById("v_parcelas").value = "1";
+      document.getElementById("v_primeiro_vencimento").value = hojeInput();
+      document.getElementById("v_intervalo_dias").value = "30";
+      document.getElementById("v_observacao").value = "";
+      preencherPrecoVenda();
+      atualizarCamposVenda();
+      renderItensVenda();
+      renderResumoVenda();
+    }
+
+    async function salvarVenda(){
+      if(tipo === "admin"){
+        setStatus("Para registrar venda com admin, use usuário de loja.", "warning");
+        return;
+      }
+
+      if(itensVenda.length === 0){
+        setStatus("Adicione pelo menos um item na venda.", "error");
+        return;
+      }
+
+      const clienteId = document.getElementById("v_cliente").value;
+      const cliente = clientes.find(c => Number(c.id) === Number(clienteId));
+      const pagamento = document.getElementById("v_pagamento").value;
+      const parcelas = Number(document.getElementById("v_parcelas").value || 1);
+
+      try{
+        await api("/vendas",{
+          method:"POST",
+          body:JSON.stringify({
+            empresa,
+            cliente_id: clienteId ? Number(clienteId) : null,
+            cliente_nome: cliente ? cliente.nome : "",
+            itens: itensVenda.map(i => ({
+              produto_id: i.produto_id,
+              quantidade: i.quantidade,
+              preco_unitario: i.preco_unitario
+            })),
+            pagamento,
+            parcelas,
+            desconto: Number(document.getElementById("v_desconto").value || 0),
+            acrescimo: Number(document.getElementById("v_acrescimo").value || 0),
+            data: document.getElementById("v_data").value,
+            observacao: document.getElementById("v_observacao").value.trim(),
+            data_primeiro_vencimento: document.getElementById("v_primeiro_vencimento").value,
+            intervalo_dias: Number(document.getElementById("v_intervalo_dias").value || 30)
+          })
+        });
+
+        limparVenda();
+        await Promise.all([
+          carregarProdutos(),
+          carregarVendas(),
+          carregarMovimentacoes(),
+          carregarContasReceber()
+        ]);
+
+        if(tipo === "admin"){
+          await carregarDashboardAdmin();
+        } else {
+          await carregarDashboardLoja();
+        }
+
+        setStatus("Venda registrada com sucesso.");
+      }catch(e){
+        setStatus(e.message, "error");
+      }
+    }
+
     async function carregarRelatorioEstoque(){
       document.getElementById("relatorio").innerHTML = `
         <div class="page-header">
@@ -2143,12 +2642,18 @@
       try{
         document.getElementById("c_data").value = hojeInput();
         document.getElementById("cp_vencimento").value = hojeInput();
+        document.getElementById("v_data").value = hojeInput();
+        document.getElementById("v_primeiro_vencimento").value = hojeInput();
+
         limparCompra();
+        limparVenda();
 
         await Promise.all([
           carregarProdutos(),
+          carregarClientes(),
           carregarFornecedores(),
           carregarCompras(),
+          carregarVendas(),
           carregarMovimentacoes(),
           carregarContasReceber(),
           carregarContasPagar()
@@ -2161,6 +2666,8 @@
         }
 
         renderItensCompra();
+        renderItensVenda();
+        renderResumoVenda();
         aplicarEstadoSidebar();
       }catch(e){
         setStatus(e.message, "error");
@@ -2176,6 +2683,8 @@
     document.getElementById("loginSenha").addEventListener("keydown", (e) => {
       if(e.key === "Enter") fazerLogin();
     });
+
+    document.getElementById("v_produto").addEventListener("change", preencherPrecoVenda);
 
     alternarTelas();
 
