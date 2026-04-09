@@ -114,10 +114,29 @@
       font-weight:bold;
     }
 
+    .period-toolbar{
+      background:#ffffff;
+      border-bottom:1px solid var(--border);
+      padding:14px 24px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      align-items:end;
+    }
+
+    .period-resume{
+      padding:10px 14px;
+      border-radius:12px;
+      background:var(--info-bg);
+      color:var(--info-text);
+      font-weight:bold;
+      font-size:13px;
+    }
+
     .layout{
       display:grid;
       grid-template-columns:var(--sidebar-width) 1fr;
-      min-height:calc(100vh - 84px);
+      min-height:calc(100vh - 160px);
       transition:grid-template-columns .25s ease;
     }
 
@@ -614,6 +633,25 @@
         <button class="btn btn-danger" onclick="sair()">Sair</button>
       </div>
     </header>
+
+    <section class="period-toolbar">
+      <div class="form-group">
+        <label>Data inicial</label>
+        <input id="periodoInicial" class="form-control" type="date" />
+      </div>
+
+      <div class="form-group">
+        <label>Data final</label>
+        <input id="periodoFinal" class="form-control" type="date" />
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-primary" onclick="aplicarFiltroPeriodo()">Aplicar período</button>
+        <button class="btn btn-outline" onclick="limparFiltroPeriodo()">Limpar</button>
+      </div>
+
+      <div id="periodoResumo" class="period-resume">Período: sem filtro</div>
+    </section>
 
     <div id="layout" class="layout">
       <aside class="sidebar">
@@ -1180,8 +1218,7 @@
             </div>
           </div>
         </section>
-
-        <section id="estoque" class="page">
+                <section id="estoque" class="page">
           <div class="page-header">
             <h2>Estoque</h2>
             <p>Acompanhe custo, preço, estoque atual e estoque mínimo.</p>
@@ -1288,18 +1325,78 @@
             <h2>Relatório de Estoque</h2>
             <p>Visão gerencial do estoque.</p>
           </div>
-          <div class="card">
-            <div class="empty-state">Tela pronta. No próximo passo eu religo novamente o relatório completo sem quebrar o restante.</div>
+
+          <div class="summary-grid">
+            <div class="summary-card"><div class="summary-label">Produtos</div><div class="summary-value" id="re_total_produtos">0</div></div>
+            <div class="summary-card"><div class="summary-label">Unidades</div><div class="summary-value" id="re_total_unidades">0</div></div>
+            <div class="summary-card"><div class="summary-label">Valor Estoque</div><div class="summary-value money" id="re_valor_total_estoque">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Alertas</div><div class="summary-value" id="re_produtos_alerta">0</div></div>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <h3>Produtos em alerta</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Produto</th><th>Categoria</th><th>Estoque</th><th>Mínimo</th><th>Valor</th></tr>
+                  </thead>
+                  <tbody id="relatorioAlertaBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Maior valor parado</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Produto</th><th>Categoria</th><th>Estoque</th><th>Custo</th><th>Valor</th></tr>
+                  </thead>
+                  <tbody id="relatorioValorParadoBody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </section>
 
         <section id="performance" class="page">
           <div class="page-header">
             <h2>Performance dos Produtos</h2>
-            <p>Visão de performance dos itens.</p>
+            <p>Visão de faturamento, giro e margem dos itens.</p>
           </div>
-          <div class="card">
-            <div class="empty-state">Tela pronta. No próximo passo eu religo a performance completa em cima desta base estável.</div>
+
+          <div class="summary-grid">
+            <div class="summary-card"><div class="summary-label">Produtos</div><div class="summary-value" id="pf_total_produtos">0</div></div>
+            <div class="summary-card"><div class="summary-label">Sem saída</div><div class="summary-value" id="pf_sem_saida">0</div></div>
+            <div class="summary-card"><div class="summary-label">Baixo giro</div><div class="summary-value" id="pf_baixo_giro">0</div></div>
+            <div class="summary-card"><div class="summary-label">Faturamento</div><div class="summary-value money" id="pf_faturamento_total">R$ 0,00</div></div>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <h3>Top faturamento</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Produto</th><th>Qtd vendida</th><th>Faturamento</th><th>Margem</th></tr>
+                  </thead>
+                  <tbody id="performanceTopFaturamentoBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Sem saída</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Produto</th><th>Estoque</th><th>Valor parado</th><th>Status</th></tr>
+                  </thead>
+                  <tbody id="performanceSemSaidaBody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -1548,6 +1645,8 @@
     let contasPagar = [];
     let contaReceberSelecionada = null;
     let contaPagarSelecionada = null;
+    let relatorioEstoqueAtual = null;
+    let relatorioPerformanceAtual = null;
 
     function money(v){
       return Number(v || 0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1555,8 +1654,9 @@
 
     function formatDate(value){
       if(!value) return "-";
-      if(typeof value === "string" && value.length === 10 && value.includes("-")){
-        const [a,m,d] = value.split("-");
+      if(typeof value === "string" && value.length >= 10 && value.includes("-")){
+        const base = value.slice(0, 10);
+        const [a,m,d] = base.split("-");
         return `${d}/${m}/${a}`;
       }
       const dt = new Date(value);
@@ -1603,6 +1703,60 @@
       document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
       document.getElementById(id).classList.add("active");
       if(button) button.classList.add("active");
+    }
+
+    function carregarPeriodoSalvo(){
+      const di = localStorage.getItem("lf_periodo_inicial") || "";
+      const df = localStorage.getItem("lf_periodo_final") || "";
+      document.getElementById("periodoInicial").value = di;
+      document.getElementById("periodoFinal").value = df;
+      atualizarResumoPeriodo();
+    }
+
+    function atualizarResumoPeriodo(){
+      const di = document.getElementById("periodoInicial").value;
+      const df = document.getElementById("periodoFinal").value;
+      const box = document.getElementById("periodoResumo");
+
+      if(!di && !df){
+        box.textContent = "Período: sem filtro";
+        return;
+      }
+
+      const inicio = di ? formatDate(di) : "início livre";
+      const fim = df ? formatDate(df) : "fim livre";
+      box.textContent = `Período: ${inicio} até ${fim}`;
+    }
+
+    function aplicarFiltroPeriodo(){
+      const di = document.getElementById("periodoInicial").value;
+      const df = document.getElementById("periodoFinal").value;
+
+      localStorage.setItem("lf_periodo_inicial", di || "");
+      localStorage.setItem("lf_periodo_final", df || "");
+      atualizarResumoPeriodo();
+      carregarTudo();
+      setStatus("Filtro de período aplicado.", "success");
+    }
+
+    function limparFiltroPeriodo(){
+      document.getElementById("periodoInicial").value = "";
+      document.getElementById("periodoFinal").value = "";
+      localStorage.removeItem("lf_periodo_inicial");
+      localStorage.removeItem("lf_periodo_final");
+      atualizarResumoPeriodo();
+      carregarTudo();
+      setStatus("Filtro de período removido.", "info");
+    }
+
+    function queryPeriodo(){
+      const di = localStorage.getItem("lf_periodo_inicial") || "";
+      const df = localStorage.getItem("lf_periodo_final") || "";
+      const params = new URLSearchParams();
+      if(di) params.set("data_inicial", di);
+      if(df) params.set("data_final", df);
+      const qs = params.toString();
+      return qs ? `?${qs}` : "";
     }
 
     async function api(url, options={}){
@@ -1692,6 +1846,7 @@
         document.getElementById("empresaLabel").textContent = tipo === "admin" ? "Administrador geral" : `Loja: ${empresa}`;
         document.getElementById("usuarioInfo").textContent = `${nomeCompleto || usuario || "Usuário"} • ${tipo || "-"}`;
         aplicarEstadoSidebar();
+        carregarPeriodoSalvo();
       }else{
         document.getElementById("app").classList.add("hidden");
         document.getElementById("loginScreen").classList.remove("hidden");
@@ -1699,7 +1854,9 @@
     }
 
     async function carregarProdutos(){
-      produtos = tipo === "admin" ? await api("/admin/produtos") : await api(`/produtos/${empresa}`);
+      produtos = tipo === "admin"
+        ? await api(`/admin/produtos${queryPeriodo()}`)
+        : await api(`/produtos/${empresa}`);
 
       const options = produtos.length
         ? produtos.map(p => `<option value="${p.id}">${p.nome}</option>`).join("")
@@ -1717,24 +1874,33 @@
 
     async function carregarClientes(){
       if(tipo === "admin"){
-        clientes = [];
+        clientes = await api(`/admin/clientes${queryPeriodo()}`);
       } else {
         clientes = await api(`/clientes/${empresa}`);
       }
 
       const select = document.getElementById("v_cliente");
       let html = `<option value="">Sem cliente</option>`;
-      html += clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join("");
+      html += clientes
+        .filter(c => tipo === "admin" || c.empresa === empresa)
+        .map(c => `<option value="${c.id}">${c.nome}</option>`)
+        .join("");
       select.innerHTML = html;
 
       renderClientes();
     }
 
     async function carregarFornecedores(){
-      fornecedores = tipo === "admin" ? await api("/admin/fornecedores") : await api(`/fornecedores/${empresa}`);
+      fornecedores = tipo === "admin"
+        ? await api(`/admin/fornecedores${queryPeriodo()}`)
+        : await api(`/fornecedores/${empresa}`);
 
-      const options = fornecedores.length
-        ? fornecedores.map(f => `<option value="${f.id}">${f.nome}</option>`).join("")
+      const listaEmpresa = tipo === "admin"
+        ? fornecedores.filter(f => f.empresa === empresa)
+        : fornecedores;
+
+      const options = listaEmpresa.length
+        ? listaEmpresa.map(f => `<option value="${f.id}">${f.nome}</option>`).join("")
         : `<option value="">Nenhum fornecedor encontrado</option>`;
 
       document.getElementById("c_fornecedor").innerHTML = options;
@@ -1742,28 +1908,34 @@
     }
 
     async function carregarCompras(){
-      compras = tipo === "admin" ? await api("/admin/compras") : await api(`/compras/${empresa}`);
+      compras = tipo === "admin"
+        ? await api(`/admin/compras${queryPeriodo()}`)
+        : await api(`/compras/${empresa}${queryPeriodo()}`);
       renderCompras();
     }
 
     async function carregarVendas(){
-      vendas = tipo === "admin" ? await api("/admin/vendas") : await api(`/vendas/${empresa}`);
+      vendas = tipo === "admin"
+        ? await api(`/admin/vendas${queryPeriodo()}`)
+        : await api(`/vendas/${empresa}${queryPeriodo()}`);
       renderVendas();
     }
 
     async function carregarMovimentacoes(){
-      movimentacoes = tipo === "admin" ? await api("/admin/movimentacoes-estoque") : await api(`/movimentacoes-estoque/${empresa}`);
+      movimentacoes = tipo === "admin"
+        ? await api(`/admin/movimentacoes-estoque${queryPeriodo()}`)
+        : await api(`/movimentacoes-estoque/${empresa}${queryPeriodo()}`);
       renderMovimentacoes();
       renderDashboardMovimentacoes();
     }
 
     async function carregarContasReceber(){
       if(tipo === "admin"){
-        contasReceber = await api("/admin/contas-receber");
+        contasReceber = await api(`/admin/contas-receber${queryPeriodo()}`);
         atualizarResumoContasReceberAdmin();
       }else{
-        contasReceber = await api(`/contas-receber/${empresa}`);
-        const r = await api(`/contas-receber/${empresa}/resumo`);
+        contasReceber = await api(`/contas-receber/${empresa}${queryPeriodo()}`);
+        const r = await api(`/contas-receber/${empresa}/resumo${queryPeriodo()}`);
         document.getElementById("crResumoPendente").textContent = `R$ ${money(r.pendente || 0)}`;
         document.getElementById("crResumoPago").textContent = `R$ ${money(r.pago || 0)}`;
         document.getElementById("crResumoAtrasado").textContent = `R$ ${money(r.atrasado || 0)}`;
@@ -1774,11 +1946,11 @@
 
     async function carregarContasPagar(){
       if(tipo === "admin"){
-        contasPagar = await api("/admin/contas-pagar");
+        contasPagar = await api(`/admin/contas-pagar${queryPeriodo()}`);
         atualizarResumoContasPagarAdmin();
       }else{
-        contasPagar = await api(`/contas-pagar/${empresa}`);
-        const r = await api(`/contas-pagar/${empresa}/resumo`);
+        contasPagar = await api(`/contas-pagar/${empresa}${queryPeriodo()}`);
+        const r = await api(`/contas-pagar/${empresa}/resumo${queryPeriodo()}`);
         document.getElementById("cpResumoPendente").textContent = `R$ ${money(r.pendente || 0)}`;
         document.getElementById("cpResumoPago").textContent = `R$ ${money(r.pago || 0)}`;
         document.getElementById("cpResumoAtrasado").textContent = `R$ ${money(r.atrasado || 0)}`;
@@ -1789,7 +1961,7 @@
 
     async function carregarDashboardAdmin(){
       try{
-        const d = await api("/admin/dashboard");
+        const d = await api(`/admin/dashboard${queryPeriodo()}`);
         document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
         document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
         document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
@@ -1803,7 +1975,7 @@
 
     async function carregarDashboardLoja(){
       try{
-        const d = await api(`/dashboard/${empresa}`);
+        const d = await api(`/dashboard/${empresa}${queryPeriodo()}`);
         document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
         document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
         document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
@@ -1816,16 +1988,53 @@
     }
 
     function calcularDashLocal(){
-      document.getElementById("dashProdutos").textContent = produtos.length;
-      document.getElementById("dashFornecedores").textContent = fornecedores.length;
-      document.getElementById("dashCompras").textContent = compras.length;
-      document.getElementById("dashVendas").textContent = vendas.length;
+      const baseProdutos = tipo === "admin" ? produtos : produtos.filter(p => p.empresa === empresa);
+      const baseFornecedores = tipo === "admin" ? fornecedores : fornecedores.filter(f => f.empresa === empresa);
+      const baseCompras = tipo === "admin" ? compras : compras.filter(c => c.empresa === empresa);
+      const baseVendas = tipo === "admin" ? vendas : vendas.filter(v => v.empresa === empresa);
 
-      const alertas = produtos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0);
-      const valor = produtos.reduce((a,p) => a + (Number(p.estoque || 0) * Number(p.custo || 0)), 0);
+      document.getElementById("dashProdutos").textContent = baseProdutos.length;
+      document.getElementById("dashFornecedores").textContent = baseFornecedores.length;
+      document.getElementById("dashCompras").textContent = baseCompras.length;
+      document.getElementById("dashVendas").textContent = baseVendas.length;
+
+      const alertas = baseProdutos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0);
+      const valor = baseProdutos.reduce((a,p) => a + (Number(p.estoque || 0) * Number(p.custo || 0)), 0);
 
       document.getElementById("dashAlerta").textContent = alertas.length;
       document.getElementById("dashValorEstoque").textContent = `R$ ${money(valor)}`;
+    }
+
+    function renderDashboardAlertas(){
+      const base = (tipo === "admin" ? produtos : produtos.filter(p => p.empresa === empresa))
+        .filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0);
+
+      document.getElementById("dashboardAlertasBody").innerHTML = base.length
+        ? base.slice(0, 10).map(p => `
+          <tr>
+            <td>${p.empresa || empresa || "-"}</td>
+            <td>${p.nome || "-"}</td>
+            <td>${p.estoque || 0}</td>
+            <td>${p.estoque_minimo || 0}</td>
+            <td><span class="badge badge-alert">Baixo</span></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum alerta encontrado.</td></tr>`;
+    }
+
+    function renderDashboardMovimentacoes(){
+      const base = [...movimentacoes];
+      document.getElementById("dashboardMovBody").innerHTML = base.length
+        ? base.slice(0, 10).map(m => `
+          <tr>
+            <td>${m.empresa || empresa || "-"}</td>
+            <td>${m.produto_nome || "-"}</td>
+            <td>${m.tipo || "-"}</td>
+            <td>${m.quantidade || 0}</td>
+            <td>${formatDate(m.data_movimentacao)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhuma movimentação encontrada.</td></tr>`;
     }
 
     function renderProdutos(){
@@ -1940,10 +2149,10 @@
             <td>${c.fornecedor_nome || "-"}</td>
             <td>R$ ${money(c.total)}</td>
             <td>${formatDate(c.data)}</td>
-            <td>${c.gerar_conta_pagar ? "A prazo" : "À vista"}</td>
+            <td>${c.status_pagamento || "-"}</td>
             <td>${c.forma_pagamento || "-"}</td>
             <td>${formatDate(c.vencimento)}</td>
-            <td>${c.status_pagamento === "pago" ? '<span class="badge badge-ok">Pago</span>' : '<span class="badge badge-warning">Pendente</span>'}</td>
+            <td>${c.status || "-"}</td>
           </tr>
         `).join("")
         : `<tr><td colspan="9" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
@@ -1967,50 +2176,34 @@
         : `<tr><td colspan="6" class="empty-state">Nenhuma movimentação encontrada.</td></tr>`;
     }
 
-    function renderDashboardAlertas(){
-      const lista = produtos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0).slice(0,10);
+    function atualizarResumoContasReceberAdmin(){
+      const pendente = contasReceber.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const pago = contasReceber.filter(c => c.status === "pago").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const atrasado = contasReceber.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0);
 
-      document.getElementById("dashboardAlertasBody").innerHTML = lista.length
-        ? lista.map(p => `
-          <tr>
-            <td>${p.empresa || empresa || "-"}</td>
-            <td>${p.nome || "-"}</td>
-            <td>${p.estoque || 0}</td>
-            <td>${p.estoque_minimo || 0}</td>
-            <td><span class="badge badge-alert">Baixo</span></td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="5" class="empty-state">Nenhum produto com estoque baixo.</td></tr>`;
+      document.getElementById("crResumoPendente").textContent = `R$ ${money(pendente)}`;
+      document.getElementById("crResumoPago").textContent = `R$ ${money(pago)}`;
+      document.getElementById("crResumoAtrasado").textContent = `R$ ${money(atrasado)}`;
+      document.getElementById("crResumoParcelas").textContent = contasReceber.length;
     }
 
-    function renderDashboardMovimentacoes(){
-      const lista = movimentacoes.slice(0,10);
+    function atualizarResumoContasPagarAdmin(){
+      const pendente = contasPagar.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const pago = contasPagar.filter(c => c.status === "pago").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const atrasado = contasPagar.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0);
 
-      document.getElementById("dashboardMovBody").innerHTML = lista.length
-        ? lista.map(m => `
-          <tr>
-            <td>${m.empresa || empresa || "-"}</td>
-            <td>${m.produto_nome || "-"}</td>
-            <td>${m.tipo || "-"}</td>
-            <td>${m.quantidade || 0}</td>
-            <td>${formatDate(m.data_movimentacao)}</td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="5" class="empty-state">Nenhuma movimentação recente.</td></tr>`;
+      document.getElementById("cpResumoPendente").textContent = `R$ ${money(pendente)}`;
+      document.getElementById("cpResumoPago").textContent = `R$ ${money(pago)}`;
+      document.getElementById("cpResumoAtrasado").textContent = `R$ ${money(atrasado)}`;
+      document.getElementById("cpResumoParcelas").textContent = contasPagar.length;
     }
 
     function renderContasReceber(){
       const busca = document.getElementById("buscaContaReceber").value.trim().toLowerCase();
       const status = document.getElementById("filtroContaReceberStatus").value;
-      let lista = [...contasReceber];
 
-      if(busca){
-        lista = lista.filter(c => (c.cliente_nome || "").toLowerCase().includes(busca));
-      }
-
-      if(status){
-        lista = lista.filter(c => c.status === status);
-      }
+      let lista = contasReceber.filter(c => (c.cliente_nome || "").toLowerCase().includes(busca));
+      if(status) lista = lista.filter(c => c.status === status);
 
       document.getElementById("listaContasReceber").innerHTML = lista.length
         ? lista.map(c => `
@@ -2026,34 +2219,28 @@
               c.status === "pago"
                 ? '<span class="badge badge-ok">Pago</span>'
                 : c.status === "atrasado"
-                ? '<span class="badge badge-alert">Atrasado</span>'
-                : '<span class="badge badge-warning">Pendente</span>'
+                  ? '<span class="badge badge-alert">Atrasado</span>'
+                  : '<span class="badge badge-warning">Pendente</span>'
             }</td>
-            <td>${
-              c.status !== "pago"
+            <td>
+              ${c.status !== "pago"
                 ? `<button class="btn btn-primary" onclick="abrirModalReceber(${c.id})">Baixar</button>`
-                : `<button class="btn btn-secondary" disabled>Baixado</button>`
-            }</td>
+                : '-'}
+            </td>
           </tr>
         `).join("")
-        : `<tr><td colspan="9" class="empty-state">Nenhuma parcela encontrada.</td></tr>`;
+        : `<tr><td colspan="9" class="empty-state">Nenhuma conta a receber encontrada.</td></tr>`;
     }
 
     function renderContasPagar(){
       const busca = document.getElementById("buscaContaPagar").value.trim().toLowerCase();
       const status = document.getElementById("filtroContaPagarStatus").value;
-      let lista = [...contasPagar];
 
-      if(busca){
-        lista = lista.filter(c =>
-          (c.fornecedor_nome || "").toLowerCase().includes(busca) ||
-          (c.descricao || "").toLowerCase().includes(busca)
-        );
-      }
-
-      if(status){
-        lista = lista.filter(c => c.status === status);
-      }
+      let lista = contasPagar.filter(c =>
+        (c.fornecedor_nome || "").toLowerCase().includes(busca) ||
+        (c.descricao || "").toLowerCase().includes(busca)
+      );
+      if(status) lista = lista.filter(c => c.status === status);
 
       document.getElementById("listaContasPagar").innerHTML = lista.length
         ? lista.map(c => `
@@ -2070,39 +2257,504 @@
               c.status === "pago"
                 ? '<span class="badge badge-ok">Pago</span>'
                 : c.status === "atrasado"
-                ? '<span class="badge badge-alert">Atrasado</span>'
-                : '<span class="badge badge-warning">Pendente</span>'
+                  ? '<span class="badge badge-alert">Atrasado</span>'
+                  : '<span class="badge badge-warning">Pendente</span>'
             }</td>
-            <td>${
-              c.status !== "pago"
+            <td>
+              ${c.status !== "pago"
                 ? `<button class="btn btn-primary" onclick="abrirModalPagar(${c.id})">Pagar</button>`
-                : `<button class="btn btn-secondary" disabled>Pago</button>`
-            }</td>
+                : '-'}
+            </td>
           </tr>
         `).join("")
-        : `<tr><td colspan="10" class="empty-state">Nenhuma conta encontrada.</td></tr>`;
+        : `<tr><td colspan="10" class="empty-state">Nenhuma conta a pagar encontrada.</td></tr>`;
     }
 
-    function atualizarResumoContasReceberAdmin(){
-      const pend = contasReceber.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
-      const pg = contasReceber.filter(c => c.status === "pago").reduce((a,c) => a + Number(c.valor || 0), 0);
-      const atr = contasReceber.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0);
+    async function carregarRelatorioEstoque(){
+      if(tipo === "admin"){
+        setStatus("Relatório por período disponível por loja. Entre em uma loja para detalhamento.", "info");
+        return;
+      }
 
-      document.getElementById("crResumoPendente").textContent = `R$ ${money(pend)}`;
-      document.getElementById("crResumoPago").textContent = `R$ ${money(pg)}`;
-      document.getElementById("crResumoAtrasado").textContent = `R$ ${money(atr)}`;
-      document.getElementById("crResumoParcelas").textContent = contasReceber.length;
+      const data = await api(`/relatorios/estoque/${empresa}`);
+      relatorioEstoqueAtual = data;
+
+      document.getElementById("re_total_produtos").textContent = Number(data.resumo?.total_produtos || 0);
+      document.getElementById("re_total_unidades").textContent = Number(data.resumo?.total_unidades || 0);
+      document.getElementById("re_valor_total_estoque").textContent = `R$ ${money(data.resumo?.valor_total_estoque || 0)}`;
+      document.getElementById("re_produtos_alerta").textContent = Number(data.resumo?.produtos_alerta || 0);
+
+      document.getElementById("relatorioAlertaBody").innerHTML = (data.produtos_alerta || []).length
+        ? data.produtos_alerta.map(p => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.categoria || "-"}</td>
+            <td>${p.estoque || 0}</td>
+            <td>${p.estoque_minimo || 0}</td>
+            <td>R$ ${money(p.valor_estoque || 0)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum produto em alerta.</td></tr>`;
+
+      document.getElementById("relatorioValorParadoBody").innerHTML = (data.top_valor_parado || []).length
+        ? data.top_valor_parado.map(p => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.categoria || "-"}</td>
+            <td>${p.estoque || 0}</td>
+            <td>R$ ${money(p.custo || 0)}</td>
+            <td>R$ ${money(p.valor_estoque || 0)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum dado encontrado.</td></tr>`;
     }
 
-    function atualizarResumoContasPagarAdmin(){
-      const pend = contasPagar.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
-      const pg = contasPagar.filter(c => c.status === "pago").reduce((a,c) => a + Number(c.valor || 0), 0);
-      const atr = contasPagar.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0);
+    async function carregarRelatorioPerformance(){
+      if(tipo === "admin"){
+        setStatus("Performance por período disponível por loja. Entre em uma loja para detalhamento.", "info");
+        return;
+      }
 
-      document.getElementById("cpResumoPendente").textContent = `R$ ${money(pend)}`;
-      document.getElementById("cpResumoPago").textContent = `R$ ${money(pg)}`;
-      document.getElementById("cpResumoAtrasado").textContent = `R$ ${money(atr)}`;
-      document.getElementById("cpResumoParcelas").textContent = contasPagar.length;
+      const data = await api(`/relatorios/performance/${empresa}`);
+      relatorioPerformanceAtual = data;
+
+      document.getElementById("pf_total_produtos").textContent = Number(data.resumo?.total_produtos || 0);
+      document.getElementById("pf_sem_saida").textContent = Number(data.resumo?.produtos_sem_saida || 0);
+      document.getElementById("pf_baixo_giro").textContent = Number(data.resumo?.produtos_baixo_giro || 0);
+      document.getElementById("pf_faturamento_total").textContent = `R$ ${money(data.resumo?.faturamento_total || 0)}`;
+
+      document.getElementById("performanceTopFaturamentoBody").innerHTML = (data.top_faturamento || []).length
+        ? data.top_faturamento.map(p => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.quantidade_vendida || 0}</td>
+            <td>R$ ${money(p.faturamento || 0)}</td>
+            <td>${Number(p.margem_percentual || 0).toFixed(2)}%</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="4" class="empty-state">Nenhum dado encontrado.</td></tr>`;
+
+      document.getElementById("performanceSemSaidaBody").innerHTML = (data.produtos_sem_saida || []).length
+        ? data.produtos_sem_saida.slice(0, 20).map(p => `
+          <tr>
+            <td>${p.nome || "-"}</td>
+            <td>${p.estoque || 0}</td>
+            <td>R$ ${money(p.valor_estoque || 0)}</td>
+            <td><span class="badge badge-alert">Sem saída</span></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="4" class="empty-state">Nenhum produto sem saída.</td></tr>`;
+    }
+
+    function preencherPrecoVenda(){
+      const id = Number(document.getElementById("v_produto").value || 0);
+      const produto = produtos.find(p => Number(p.id) === id);
+      document.getElementById("v_preco").value = produto ? Number(produto.preco || 0) : "";
+    }
+
+    function adicionarItemVenda(){
+      const produtoId = Number(document.getElementById("v_produto").value || 0);
+      const quantidade = Number(document.getElementById("v_qtd").value || 0);
+      const preco = Number(document.getElementById("v_preco").value || 0);
+
+      if(!produtoId || quantidade <= 0 || preco < 0){
+        setStatus("Preencha corretamente os dados do item da venda.", "error");
+        return;
+      }
+
+      const produto = produtos.find(p => Number(p.id) === produtoId);
+      if(!produto){
+        setStatus("Produto não encontrado.", "error");
+        return;
+      }
+
+      itensVenda.push({
+        produto_id: produto.id,
+        produto_nome: produto.nome,
+        quantidade,
+        preco_unitario: preco,
+        total: quantidade * preco
+      });
+
+      renderItensVenda();
+      renderResumoVenda();
+      document.getElementById("v_qtd").value = "";
+    }
+
+    function renderItensVenda(){
+      document.getElementById("itensVendaBody").innerHTML = itensVenda.length
+        ? itensVenda.map((item, index) => `
+          <tr>
+            <td>${item.produto_nome}</td>
+            <td>${item.quantidade}</td>
+            <td>R$ ${money(item.preco_unitario)}</td>
+            <td>R$ ${money(item.total)}</td>
+            <td><button class="btn btn-danger" onclick="removerItemVenda(${index})">Remover</button></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
+    }
+
+    function removerItemVenda(index){
+      itensVenda.splice(index, 1);
+      renderItensVenda();
+      renderResumoVenda();
+    }
+
+    function renderResumoVenda(){
+      const subtotal = itensVenda.reduce((a, i) => a + Number(i.total || 0), 0);
+      const desconto = Number(document.getElementById("v_desconto").value || 0);
+      const acrescimo = Number(document.getElementById("v_acrescimo").value || 0);
+      const total = subtotal - desconto + acrescimo;
+
+      document.getElementById("v_subtotal_label").textContent = `R$ ${money(subtotal)}`;
+      document.getElementById("v_total_label").textContent = `R$ ${money(total)}`;
+    }
+
+    function atualizarCamposVenda(){
+      const pagamento = document.getElementById("v_pagamento").value;
+      const prazo = ["Promissória", "Promissoria", "Crédito Parcelado", "Credito Parcelado"].includes(pagamento);
+
+      document.getElementById("grupoPrimeiroVencimento").style.display = prazo ? "block" : "none";
+      document.getElementById("grupoIntervaloDias").style.display = prazo ? "block" : "none";
+
+      if(!prazo){
+        document.getElementById("v_parcelas").value = 1;
+      }
+    }
+
+    async function salvarVenda(){
+      try{
+        if(!itensVenda.length){
+          setStatus("Adicione pelo menos um item na venda.", "error");
+          return;
+        }
+
+        const clienteSelect = document.getElementById("v_cliente");
+        const clienteId = Number(clienteSelect.value || 0);
+        const cliente = clientes.find(c => Number(c.id) === clienteId);
+
+        const payload = {
+          empresa,
+          cliente_id: clienteId || null,
+          cliente_nome: cliente ? cliente.nome : "",
+          itens: itensVenda,
+          pagamento: document.getElementById("v_pagamento").value,
+          parcelas: Number(document.getElementById("v_parcelas").value || 1),
+          desconto: Number(document.getElementById("v_desconto").value || 0),
+          acrescimo: Number(document.getElementById("v_acrescimo").value || 0),
+          data: document.getElementById("v_data").value || hojeInput(),
+          observacao: document.getElementById("v_observacao").value || "",
+          data_primeiro_vencimento: document.getElementById("v_primeiro_vencimento").value || "",
+          intervalo_dias: Number(document.getElementById("v_intervalo_dias").value || 30)
+        };
+
+        await api("/vendas", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        limparVenda();
+        await carregarTudo();
+        setStatus("Venda registrada com sucesso.");
+      }catch(error){
+        setStatus(error.message || "Erro ao salvar venda.", "error");
+      }
+    }
+
+    function limparVenda(){
+      itensVenda = [];
+      renderItensVenda();
+      document.getElementById("v_cliente").value = "";
+      document.getElementById("v_data").value = hojeInput();
+      document.getElementById("v_qtd").value = "";
+      document.getElementById("v_preco").value = "";
+      document.getElementById("v_pagamento").value = "Dinheiro";
+      document.getElementById("v_parcelas").value = 1;
+      document.getElementById("v_desconto").value = 0;
+      document.getElementById("v_acrescimo").value = 0;
+      document.getElementById("v_primeiro_vencimento").value = hojeInput();
+      document.getElementById("v_intervalo_dias").value = 30;
+      document.getElementById("v_observacao").value = "";
+      atualizarCamposVenda();
+      renderResumoVenda();
+      preencherPrecoVenda();
+    }
+
+    function adicionarItemCompra(){
+      const produtoId = Number(document.getElementById("c_produto").value || 0);
+      const quantidade = Number(document.getElementById("c_qtd").value || 0);
+      const custo = Number(document.getElementById("c_custo").value || 0);
+
+      if(!produtoId || quantidade <= 0 || custo <= 0){
+        setStatus("Preencha corretamente os dados do item da compra.", "error");
+        return;
+      }
+
+      const produto = produtos.find(p => Number(p.id) === produtoId);
+      if(!produto){
+        setStatus("Produto não encontrado.", "error");
+        return;
+      }
+
+      itensCompra.push({
+        produto_id: produto.id,
+        produto_nome: produto.nome,
+        quantidade,
+        custo_unitario: custo,
+        subtotal: quantidade * custo
+      });
+
+      renderItensCompra();
+      document.getElementById("c_qtd").value = "";
+      document.getElementById("c_custo").value = "";
+    }
+
+    function renderItensCompra(){
+      const total = itensCompra.reduce((a, i) => a + Number(i.subtotal || 0), 0);
+
+      document.getElementById("itensCompraBody").innerHTML = itensCompra.length
+        ? itensCompra.map((item, index) => `
+          <tr>
+            <td>${item.produto_nome}</td>
+            <td>${item.quantidade}</td>
+            <td>R$ ${money(item.custo_unitario)}</td>
+            <td>R$ ${money(item.subtotal)}</td>
+            <td><button class="btn btn-danger" onclick="removerItemCompra(${index})">Remover</button></td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
+
+      document.getElementById("totalCompra").textContent = money(total);
+    }
+
+    function removerItemCompra(index){
+      itensCompra.splice(index, 1);
+      renderItensCompra();
+    }
+
+    function atualizarCamposPagamentoCompra(){
+      const tipoPagamento = document.getElementById("c_tipo_pagamento").value;
+      document.getElementById("grupoVencimentoCompra").style.display = tipoPagamento === "prazo" ? "block" : "none";
+    }
+
+    async function salvarCompra(){
+      try{
+        if(!itensCompra.length){
+          setStatus("Adicione pelo menos um item na compra.", "error");
+          return;
+        }
+
+        const payload = {
+          empresa,
+          fornecedor_id: Number(document.getElementById("c_fornecedor").value || 0),
+          data: document.getElementById("c_data").value || hojeInput(),
+          observacao: document.getElementById("c_obs").value || "",
+          gerar_conta_pagar: document.getElementById("c_tipo_pagamento").value === "prazo",
+          forma_pagamento: document.getElementById("c_forma_pagamento").value || "",
+          status_pagamento: document.getElementById("c_tipo_pagamento").value === "prazo" ? "pendente" : "pago",
+          vencimento: document.getElementById("c_vencimento").value || "",
+          itens: itensCompra
+        };
+
+        await api("/compras", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        limparCompra();
+        await carregarTudo();
+        setStatus("Compra registrada com sucesso.");
+      }catch(error){
+        setStatus(error.message || "Erro ao salvar compra.", "error");
+      }
+    }
+
+    function limparCompra(){
+      itensCompra = [];
+      renderItensCompra();
+      document.getElementById("c_data").value = hojeInput();
+      document.getElementById("c_tipo_pagamento").value = "vista";
+      document.getElementById("c_forma_pagamento").value = "";
+      document.getElementById("c_vencimento").value = hojeInput();
+      document.getElementById("c_obs").value = "";
+      document.getElementById("c_qtd").value = "";
+      document.getElementById("c_custo").value = "";
+      atualizarCamposPagamentoCompra();
+    }
+
+    async function salvarProduto(){
+      try{
+        const payload = {
+          empresa,
+          nome: document.getElementById("p_nome").value.trim(),
+          preco: Number(document.getElementById("p_preco").value || 0),
+          estoque: Number(document.getElementById("p_estoque").value || 0),
+          custo: Number(document.getElementById("p_custo").value || 0),
+          estoque_minimo: Number(document.getElementById("p_estoque_minimo").value || 0),
+          codigo_barras: document.getElementById("p_codigo_barras").value.trim(),
+          categoria: document.getElementById("p_categoria").value.trim()
+        };
+
+        await api("/produtos", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        limparProduto();
+        await carregarProdutos();
+        await carregarMovimentacoes();
+        await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
+        setStatus("Produto salvo com sucesso.");
+      }catch(error){
+        setStatus(error.message || "Erro ao salvar produto.", "error");
+      }
+    }
+
+    function limparProduto(){
+      document.getElementById("p_nome").value = "";
+      document.getElementById("p_preco").value = "";
+      document.getElementById("p_custo").value = "";
+      document.getElementById("p_estoque").value = 0;
+      document.getElementById("p_estoque_minimo").value = 0;
+      document.getElementById("p_codigo_barras").value = "";
+      document.getElementById("p_categoria").value = "";
+    }
+
+    async function salvarCliente(){
+      try{
+        const payload = {
+          empresa,
+          nome: document.getElementById("cl_nome").value.trim(),
+          telefone: document.getElementById("cl_telefone").value.trim(),
+          cpf: document.getElementById("cl_cpf").value.trim(),
+          nascimento: document.getElementById("cl_nascimento").value,
+          endereco: document.getElementById("cl_endereco").value.trim()
+        };
+
+        await api("/clientes", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        limparCliente();
+        await carregarClientes();
+        setStatus("Cliente salvo com sucesso.");
+      }catch(error){
+        setStatus(error.message || "Erro ao salvar cliente.", "error");
+      }
+    }
+
+    function limparCliente(){
+      document.getElementById("cl_nome").value = "";
+      document.getElementById("cl_telefone").value = "";
+      document.getElementById("cl_cpf").value = "";
+      document.getElementById("cl_nascimento").value = "";
+      document.getElementById("cl_endereco").value = "";
+    }
+
+    async function salvarFornecedor(){
+      try{
+        const payload = {
+          empresa,
+          nome: document.getElementById("f_nome").value.trim(),
+          contato: document.getElementById("f_contato").value.trim(),
+          telefone: document.getElementById("f_tel").value.trim(),
+          email: document.getElementById("f_email").value.trim(),
+          endereco: document.getElementById("f_endereco").value.trim(),
+          observacao: document.getElementById("f_obs").value.trim()
+        };
+
+        await api("/fornecedores", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        limparFornecedor();
+        await carregarFornecedores();
+        await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
+        setStatus("Fornecedor salvo com sucesso.");
+      }catch(error){
+        setStatus(error.message || "Erro ao salvar fornecedor.", "error");
+      }
+    }
+
+    function limparFornecedor(){
+      document.getElementById("f_nome").value = "";
+      document.getElementById("f_contato").value = "";
+      document.getElementById("f_tel").value = "";
+      document.getElementById("f_email").value = "";
+      document.getElementById("f_endereco").value = "";
+      document.getElementById("f_obs").value = "";
+    }
+
+    async function salvarAjuste(){
+      try{
+        const payload = {
+          empresa,
+          produto_id: Number(document.getElementById("a_produto").value || 0),
+          tipo: document.getElementById("a_tipo").value,
+          quantidade: Number(document.getElementById("a_qtd").value || 0),
+          observacao: document.getElementById("a_obs").value.trim()
+        };
+
+        await api("/movimentacoes-estoque/ajuste", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        limparAjuste();
+        await carregarProdutos();
+        await carregarMovimentacoes();
+        await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
+        setStatus("Ajuste salvo com sucesso.");
+      }catch(error){
+        setStatus(error.message || "Erro ao salvar ajuste.", "error");
+      }
+    }
+
+    function limparAjuste(){
+      document.getElementById("a_qtd").value = "";
+      document.getElementById("a_obs").value = "";
+      document.getElementById("a_tipo").value = "ajuste_entrada";
+    }
+
+    async function salvarContaPagar(){
+      try{
+        const payload = {
+          empresa,
+          fornecedor_nome: document.getElementById("cp_fornecedor_nome").value.trim(),
+          descricao: document.getElementById("cp_descricao").value.trim(),
+          parcela: 1,
+          total_parcelas: 1,
+          valor: Number(document.getElementById("cp_valor").value || 0),
+          data_vencimento: document.getElementById("cp_vencimento").value || hojeInput(),
+          data_pagamento: null,
+          status: "pendente",
+          forma_pagamento: document.getElementById("cp_forma_pagamento").value || "",
+          observacao: document.getElementById("cp_observacao").value.trim()
+        };
+
+        await api("/contas-pagar", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        limparContaPagar();
+        await carregarContasPagar();
+        setStatus("Conta a pagar salva com sucesso.");
+      }catch(error){
+        setStatus(error.message || "Erro ao salvar conta a pagar.", "error");
+      }
+    }
+
+    function limparContaPagar(){
+      document.getElementById("cp_fornecedor_nome").value = "";
+      document.getElementById("cp_descricao").value = "";
+      document.getElementById("cp_valor").value = "";
+      document.getElementById("cp_vencimento").value = hojeInput();
+      document.getElementById("cp_forma_pagamento").value = "";
+      document.getElementById("cp_observacao").value = "";
     }
 
     function abrirModalReceber(id){
@@ -2120,24 +2772,24 @@
     }
 
     async function confirmarBaixaReceber(){
-      if(!contaReceberSelecionada) return;
-
       try{
-        await api(`/contas-receber/${contaReceberSelecionada.id}/baixar`,{
-          method:"PUT",
-          body:JSON.stringify({
+        if(!contaReceberSelecionada) return;
+
+        await api(`/contas-receber/${contaReceberSelecionada.id}/receber`, {
+          method: "PATCH",
+          body: JSON.stringify({
             empresa: contaReceberSelecionada.empresa || empresa,
-            data_pagamento: document.getElementById("mr_data_pagamento").value,
-            forma_pagamento: document.getElementById("mr_forma_pagamento").value,
-            observacao: document.getElementById("mr_observacao").value.trim()
+            data_pagamento: document.getElementById("mr_data_pagamento").value || hojeInput(),
+            forma_pagamento: document.getElementById("mr_forma_pagamento").value || "",
+            observacao: document.getElementById("mr_observacao").value || ""
           })
         });
 
         fecharModalReceber();
         await carregarContasReceber();
         setStatus("Conta a receber baixada com sucesso.");
-      }catch(e){
-        setStatus(e.message,"error");
+      }catch(error){
+        setStatus(error.message || "Erro ao baixar conta a receber.", "error");
       }
     }
 
@@ -2156,497 +2808,34 @@
     }
 
     async function confirmarBaixaPagar(){
-      if(!contaPagarSelecionada) return;
-
       try{
-        await api(`/contas-pagar/${contaPagarSelecionada.id}/pagar`,{
-          method:"PUT",
-          body:JSON.stringify({
+        if(!contaPagarSelecionada) return;
+
+        await api(`/contas-pagar/${contaPagarSelecionada.id}/pagar`, {
+          method: "PATCH",
+          body: JSON.stringify({
             empresa: contaPagarSelecionada.empresa || empresa,
-            data_pagamento: document.getElementById("mp_data_pagamento").value,
-            forma_pagamento: document.getElementById("mp_forma_pagamento").value,
-            observacao: document.getElementById("mp_observacao").value.trim()
+            data_pagamento: document.getElementById("mp_data_pagamento").value || hojeInput(),
+            forma_pagamento: document.getElementById("mp_forma_pagamento").value || "",
+            observacao: document.getElementById("mp_observacao").value || ""
           })
         });
 
         fecharModalPagar();
         await carregarContasPagar();
         setStatus("Conta paga com sucesso.");
-      }catch(e){
-        setStatus(e.message,"error");
+      }catch(error){
+        setStatus(error.message || "Erro ao pagar conta.", "error");
       }
-    }
-
-    function limparProduto(){
-      document.getElementById("p_nome").value = "";
-      document.getElementById("p_preco").value = "";
-      document.getElementById("p_custo").value = "";
-      document.getElementById("p_estoque").value = "0";
-      document.getElementById("p_estoque_minimo").value = "0";
-      document.getElementById("p_codigo_barras").value = "";
-      document.getElementById("p_categoria").value = "";
-    }
-
-    async function salvarProduto(){
-      if(tipo === "admin"){
-        setStatus("Para cadastrar produto com admin, use usuário de loja.", "warning");
-        return;
-      }
-
-      try{
-        await api("/produtos",{
-          method:"POST",
-          body:JSON.stringify({
-            empresa,
-            nome: document.getElementById("p_nome").value.trim(),
-            preco: document.getElementById("p_preco").value,
-            custo: document.getElementById("p_custo").value,
-            estoque: document.getElementById("p_estoque").value,
-            estoque_minimo: document.getElementById("p_estoque_minimo").value,
-            codigo_barras: document.getElementById("p_codigo_barras").value.trim(),
-            categoria: document.getElementById("p_categoria").value.trim()
-          })
-        });
-
-        limparProduto();
-        await Promise.all([carregarProdutos(), carregarMovimentacoes()]);
-        setStatus("Produto cadastrado com sucesso.");
-      }catch(e){
-        setStatus(e.message, "error");
-      }
-    }
-
-    function limparCliente(){
-      document.getElementById("cl_nome").value = "";
-      document.getElementById("cl_telefone").value = "";
-      document.getElementById("cl_cpf").value = "";
-      document.getElementById("cl_nascimento").value = "";
-      document.getElementById("cl_endereco").value = "";
-    }
-
-    async function salvarCliente(){
-      if(tipo === "admin"){
-        setStatus("Para cadastrar cliente com admin, use usuário de loja.", "warning");
-        return;
-      }
-
-      try{
-        await api("/clientes",{
-          method:"POST",
-          body:JSON.stringify({
-            empresa,
-            nome: document.getElementById("cl_nome").value.trim(),
-            telefone: document.getElementById("cl_telefone").value.trim(),
-            cpf: document.getElementById("cl_cpf").value.trim(),
-            nascimento: document.getElementById("cl_nascimento").value,
-            endereco: document.getElementById("cl_endereco").value.trim()
-          })
-        });
-
-        limparCliente();
-        await carregarClientes();
-        setStatus("Cliente cadastrado com sucesso.");
-      }catch(e){
-        setStatus(e.message, "error");
-      }
-    }
-
-    function limparFornecedor(){
-      document.getElementById("f_nome").value = "";
-      document.getElementById("f_contato").value = "";
-      document.getElementById("f_tel").value = "";
-      document.getElementById("f_email").value = "";
-      document.getElementById("f_endereco").value = "";
-      document.getElementById("f_obs").value = "";
-    }
-
-    async function salvarFornecedor(){
-      if(tipo === "admin"){
-        setStatus("Para cadastrar fornecedor com admin, use usuário de loja.", "warning");
-        return;
-      }
-
-      try{
-        await api("/fornecedores",{
-          method:"POST",
-          body:JSON.stringify({
-            empresa,
-            nome: document.getElementById("f_nome").value.trim(),
-            contato: document.getElementById("f_contato").value.trim(),
-            telefone: document.getElementById("f_tel").value.trim(),
-            email: document.getElementById("f_email").value.trim(),
-            endereco: document.getElementById("f_endereco").value.trim(),
-            observacao: document.getElementById("f_obs").value.trim()
-          })
-        });
-
-        limparFornecedor();
-        await carregarFornecedores();
-        setStatus("Fornecedor cadastrado com sucesso.");
-      }catch(e){
-        setStatus(e.message, "error");
-      }
-    }
-
-    function adicionarItemCompra(){
-      const produtoId = Number(document.getElementById("c_produto").value);
-      const quantidade = Number(document.getElementById("c_qtd").value);
-      const custo = Number(document.getElementById("c_custo").value);
-
-      const produto = produtos.find(p => Number(p.id) === produtoId);
-
-      if(!produtoId || !produto || quantidade <= 0 || custo <= 0){
-        setStatus("Preencha os dados do item corretamente.", "error");
-        return;
-      }
-
-      itensCompra.push({
-        produto_id: produtoId,
-        produto_nome: produto.nome,
-        quantidade,
-        custo_unitario: custo,
-        subtotal: quantidade * custo
-      });
-
-      document.getElementById("c_qtd").value = "";
-      document.getElementById("c_custo").value = "";
-      renderItensCompra();
-    }
-
-    function removerItemCompra(i){
-      itensCompra.splice(i,1);
-      renderItensCompra();
-    }
-
-    function renderItensCompra(){
-      document.getElementById("itensCompraBody").innerHTML = itensCompra.length
-        ? itensCompra.map((item,i) => `
-          <tr>
-            <td>${item.produto_nome}</td>
-            <td>${item.quantidade}</td>
-            <td>R$ ${money(item.custo_unitario)}</td>
-            <td>R$ ${money(item.subtotal)}</td>
-            <td><button class="btn btn-danger" onclick="removerItemCompra(${i})">Remover</button></td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
-
-      document.getElementById("totalCompra").textContent = money(itensCompra.reduce((a,i) => a + Number(i.subtotal || 0), 0));
-    }
-
-    function limparCompra(){
-      itensCompra = [];
-      document.getElementById("c_data").value = hojeInput();
-      document.getElementById("c_obs").value = "";
-      document.getElementById("c_tipo_pagamento").value = "vista";
-      document.getElementById("c_forma_pagamento").value = "";
-      document.getElementById("c_vencimento").value = "";
-      atualizarCamposPagamentoCompra();
-      renderItensCompra();
-    }
-
-    function atualizarCamposPagamentoCompra(){
-      if(document.getElementById("c_tipo_pagamento").value === "prazo"){
-        document.getElementById("grupoVencimentoCompra").classList.remove("hidden");
-        if(!document.getElementById("c_vencimento").value){
-          document.getElementById("c_vencimento").value = document.getElementById("c_data").value || hojeInput();
-        }
-      }else{
-        document.getElementById("grupoVencimentoCompra").classList.add("hidden");
-        document.getElementById("c_vencimento").value = "";
-      }
-    }
-
-    async function salvarCompra(){
-      if(tipo === "admin"){
-        setStatus("Para registrar compra com admin, use usuário de loja.", "warning");
-        return;
-      }
-
-      try{
-        await api("/compras",{
-          method:"POST",
-          body:JSON.stringify({
-            empresa,
-            fornecedor_id: Number(document.getElementById("c_fornecedor").value),
-            data: document.getElementById("c_data").value,
-            observacao: document.getElementById("c_obs").value.trim(),
-            gerar_conta_pagar: document.getElementById("c_tipo_pagamento").value === "prazo",
-            forma_pagamento: document.getElementById("c_forma_pagamento").value,
-            status_pagamento: document.getElementById("c_tipo_pagamento").value === "prazo" ? "pendente" : "pago",
-            vencimento: document.getElementById("c_tipo_pagamento").value === "prazo" ? document.getElementById("c_vencimento").value : null,
-            itens: itensCompra.map(i => ({
-              produto_id: i.produto_id,
-              quantidade: i.quantidade,
-              custo_unitario: i.custo_unitario
-            }))
-          })
-        });
-
-        limparCompra();
-        await Promise.all([carregarProdutos(), carregarCompras(), carregarMovimentacoes(), carregarContasPagar()]);
-        setStatus("Compra registrada com sucesso.");
-      }catch(e){
-        setStatus(e.message, "error");
-      }
-    }
-
-    function limparAjuste(){
-      document.getElementById("a_qtd").value = "";
-      document.getElementById("a_obs").value = "";
-    }
-
-    async function salvarAjuste(){
-      if(tipo === "admin"){
-        setStatus("Para ajustar estoque com admin, use usuário de loja.", "warning");
-        return;
-      }
-
-      try{
-        await api("/movimentacoes-estoque/ajuste",{
-          method:"POST",
-          body:JSON.stringify({
-            empresa,
-            produto_id: Number(document.getElementById("a_produto").value),
-            tipo: document.getElementById("a_tipo").value,
-            quantidade: Number(document.getElementById("a_qtd").value),
-            observacao: document.getElementById("a_obs").value.trim()
-          })
-        });
-
-        limparAjuste();
-        await Promise.all([carregarProdutos(), carregarMovimentacoes()]);
-        setStatus("Ajuste realizado com sucesso.");
-      }catch(e){
-        setStatus(e.message, "error");
-      }
-    }
-
-    function limparContaPagar(){
-      document.getElementById("cp_fornecedor_nome").value = "";
-      document.getElementById("cp_descricao").value = "";
-      document.getElementById("cp_valor").value = "";
-      document.getElementById("cp_vencimento").value = hojeInput();
-      document.getElementById("cp_forma_pagamento").value = "";
-      document.getElementById("cp_observacao").value = "";
-    }
-
-    async function salvarContaPagar(){
-      try{
-        await api("/contas-pagar",{
-          method:"POST",
-          body:JSON.stringify({
-            empresa,
-            fornecedor_nome: document.getElementById("cp_fornecedor_nome").value.trim(),
-            descricao: document.getElementById("cp_descricao").value.trim(),
-            valor: document.getElementById("cp_valor").value,
-            data_vencimento: document.getElementById("cp_vencimento").value,
-            forma_pagamento: document.getElementById("cp_forma_pagamento").value,
-            observacao: document.getElementById("cp_observacao").value.trim()
-          })
-        });
-
-        limparContaPagar();
-        await carregarContasPagar();
-        setStatus("Conta a pagar cadastrada com sucesso.");
-      }catch(e){
-        setStatus(e.message, "error");
-      }
-    }
-
-    function preencherPrecoVenda(){
-      const produtoId = Number(document.getElementById("v_produto").value);
-      const produto = produtos.find(p => Number(p.id) === produtoId);
-      if(produto){
-        document.getElementById("v_preco").value = Number(produto.preco || 0).toFixed(2);
-      }
-    }
-
-    function atualizarCamposVenda(){
-      const pagamento = document.getElementById("v_pagamento").value;
-      const prazo = pagamento === "Promissória" || pagamento === "Crédito Parcelado";
-
-      document.getElementById("grupoPrimeiroVencimento").style.display = prazo ? "block" : "none";
-      document.getElementById("grupoIntervaloDias").style.display = prazo ? "block" : "none";
-
-      if(!prazo){
-        document.getElementById("v_parcelas").value = 1;
-      } else if(Number(document.getElementById("v_parcelas").value) < 1){
-        document.getElementById("v_parcelas").value = 1;
-      }
-
-      renderResumoVenda();
-    }
-
-    function adicionarItemVenda(){
-      const produtoId = Number(document.getElementById("v_produto").value);
-      const quantidade = Number(document.getElementById("v_qtd").value);
-      const preco = Number(document.getElementById("v_preco").value);
-      const produto = produtos.find(p => Number(p.id) === produtoId);
-
-      if(!produto || quantidade <= 0 || preco < 0){
-        setStatus("Preencha corretamente os dados do item da venda.", "error");
-        return;
-      }
-
-      if(Number(produto.estoque || 0) < quantidade){
-        setStatus("Estoque insuficiente para este produto.", "error");
-        return;
-      }
-
-      itensVenda.push({
-        produto_id: produtoId,
-        produto_nome: produto.nome,
-        quantidade,
-        preco_unitario: preco,
-        total: quantidade * preco
-      });
-
-      document.getElementById("v_qtd").value = "";
-      renderItensVenda();
-      renderResumoVenda();
-    }
-
-    function removerItemVenda(i){
-      itensVenda.splice(i,1);
-      renderItensVenda();
-      renderResumoVenda();
-    }
-
-    function renderItensVenda(){
-      document.getElementById("itensVendaBody").innerHTML = itensVenda.length
-        ? itensVenda.map((item,i) => `
-          <tr>
-            <td>${item.produto_nome}</td>
-            <td>${item.quantidade}</td>
-            <td>R$ ${money(item.preco_unitario)}</td>
-            <td>R$ ${money(item.total)}</td>
-            <td><button class="btn btn-danger" onclick="removerItemVenda(${i})">Remover</button></td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
-    }
-
-    function renderResumoVenda(){
-      const subtotal = itensVenda.reduce((acc,item) => acc + Number(item.total || 0), 0);
-      const desconto = Number(document.getElementById("v_desconto").value || 0);
-      const acrescimo = Number(document.getElementById("v_acrescimo").value || 0);
-      const total = subtotal - desconto + acrescimo;
-
-      document.getElementById("v_subtotal_label").textContent = `R$ ${money(subtotal)}`;
-      document.getElementById("v_total_label").textContent = `R$ ${money(total < 0 ? 0 : total)}`;
-    }
-
-    function limparVenda(){
-      itensVenda = [];
-      document.getElementById("v_cliente").value = "";
-      document.getElementById("v_data").value = hojeInput();
-      document.getElementById("v_qtd").value = "";
-      document.getElementById("v_desconto").value = "0";
-      document.getElementById("v_acrescimo").value = "0";
-      document.getElementById("v_pagamento").value = "Dinheiro";
-      document.getElementById("v_parcelas").value = "1";
-      document.getElementById("v_primeiro_vencimento").value = hojeInput();
-      document.getElementById("v_intervalo_dias").value = "30";
-      document.getElementById("v_observacao").value = "";
-      preencherPrecoVenda();
-      atualizarCamposVenda();
-      renderItensVenda();
-      renderResumoVenda();
-    }
-
-    async function salvarVenda(){
-      if(tipo === "admin"){
-        setStatus("Para registrar venda com admin, use usuário de loja.", "warning");
-        return;
-      }
-
-      if(itensVenda.length === 0){
-        setStatus("Adicione pelo menos um item na venda.", "error");
-        return;
-      }
-
-      const clienteId = document.getElementById("v_cliente").value;
-      const cliente = clientes.find(c => Number(c.id) === Number(clienteId));
-      const pagamento = document.getElementById("v_pagamento").value;
-      const parcelas = Number(document.getElementById("v_parcelas").value || 1);
-
-      try{
-        await api("/vendas",{
-          method:"POST",
-          body:JSON.stringify({
-            empresa,
-            cliente_id: clienteId ? Number(clienteId) : null,
-            cliente_nome: cliente ? cliente.nome : "",
-            itens: itensVenda.map(i => ({
-              produto_id: i.produto_id,
-              quantidade: i.quantidade,
-              preco_unitario: i.preco_unitario
-            })),
-            pagamento,
-            parcelas,
-            desconto: Number(document.getElementById("v_desconto").value || 0),
-            acrescimo: Number(document.getElementById("v_acrescimo").value || 0),
-            data: document.getElementById("v_data").value,
-            observacao: document.getElementById("v_observacao").value.trim(),
-            data_primeiro_vencimento: document.getElementById("v_primeiro_vencimento").value,
-            intervalo_dias: Number(document.getElementById("v_intervalo_dias").value || 30)
-          })
-        });
-
-        limparVenda();
-        await Promise.all([
-          carregarProdutos(),
-          carregarVendas(),
-          carregarMovimentacoes(),
-          carregarContasReceber()
-        ]);
-
-        if(tipo === "admin"){
-          await carregarDashboardAdmin();
-        } else {
-          await carregarDashboardLoja();
-        }
-
-        setStatus("Venda registrada com sucesso.");
-      }catch(e){
-        setStatus(e.message, "error");
-      }
-    }
-
-    async function carregarRelatorioEstoque(){
-      document.getElementById("relatorio").innerHTML = `
-        <div class="page-header">
-          <h2>Relatório de Estoque</h2>
-          <p>Visão gerencial do estoque.</p>
-        </div>
-        <div class="card">
-          <div class="empty-state">Tela pronta. No próximo passo eu religo novamente o relatório completo sem quebrar o restante.</div>
-        </div>
-      `;
-    }
-
-    async function carregarRelatorioPerformance(){
-      document.getElementById("performance").innerHTML = `
-        <div class="page-header">
-          <h2>Performance dos Produtos</h2>
-          <p>Visão de performance dos itens.</p>
-        </div>
-        <div class="card">
-          <div class="empty-state">Tela pronta. No próximo passo eu religo a performance completa em cima desta base estável.</div>
-        </div>
-      `;
     }
 
     async function carregarTudo(){
       try{
-        document.getElementById("c_data").value = hojeInput();
-        document.getElementById("cp_vencimento").value = hojeInput();
         document.getElementById("v_data").value = hojeInput();
         document.getElementById("v_primeiro_vencimento").value = hojeInput();
-
-        limparCompra();
-        limparVenda();
+        document.getElementById("c_data").value = hojeInput();
+        document.getElementById("c_vencimento").value = hojeInput();
+        document.getElementById("cp_vencimento").value = hojeInput();
 
         await Promise.all([
           carregarProdutos(),
@@ -2656,42 +2845,35 @@
           carregarVendas(),
           carregarMovimentacoes(),
           carregarContasReceber(),
-          carregarContasPagar()
+          carregarContasPagar(),
+          tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja()
         ]);
 
-        if(tipo === "admin"){
-          await carregarDashboardAdmin();
-        }else{
-          await carregarDashboardLoja();
-        }
-
+        atualizarCamposVenda();
+        atualizarCamposPagamentoCompra();
         renderItensCompra();
         renderItensVenda();
         renderResumoVenda();
-        aplicarEstadoSidebar();
-      }catch(e){
-        setStatus(e.message, "error");
+      } catch(error){
+        setStatus(error.message || "Erro ao carregar dados do sistema.", "error");
       }
     }
 
-    window.addEventListener("resize", aplicarEstadoSidebar);
-
-    document.getElementById("loginUsuario").addEventListener("keydown", (e) => {
+    document.getElementById("loginSenha").addEventListener("keydown", function(e){
       if(e.key === "Enter") fazerLogin();
     });
 
-    document.getElementById("loginSenha").addEventListener("keydown", (e) => {
+    document.getElementById("loginUsuario").addEventListener("keydown", function(e){
       if(e.key === "Enter") fazerLogin();
     });
 
     document.getElementById("v_produto").addEventListener("change", preencherPrecoVenda);
 
-    alternarTelas();
+    window.addEventListener("resize", aplicarEstadoSidebar);
 
+    alternarTelas();
     if(token){
       carregarTudo();
-    }else{
-      document.getElementById("loginUsuario").focus();
     }
   </script>
 </body>
