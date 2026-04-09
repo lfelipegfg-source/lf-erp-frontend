@@ -482,7 +482,6 @@
       grid-template-columns:2fr 1fr 1fr auto;
       gap:10px;
       align-items:end;
-      margin-top:8px;
     }
 
     .totals-box{
@@ -717,6 +716,12 @@
             <div class="summary-card"><div class="summary-label">Vendas</div><div class="summary-value" id="dashVendas">0</div></div>
             <div class="summary-card"><div class="summary-label">Estoque Baixo</div><div class="summary-value" id="dashAlerta">0</div></div>
             <div class="summary-card"><div class="summary-label">Valor em Estoque</div><div class="summary-value money" id="dashValorEstoque">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Faturamento</div><div class="summary-value money" id="dashFaturamento">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Lucro Estimado</div><div class="summary-value money" id="dashLucroEstimado">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Ticket Médio</div><div class="summary-value money" id="dashTicketMedio">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Receber Pendente</div><div class="summary-value money" id="dashReceberPendente">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Pagar Pendente</div><div class="summary-value money" id="dashPagarPendente">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Contas Atrasadas</div><div class="summary-value money" id="dashContasAtrasadas">R$ 0,00</div></div>
           </div>
 
           <div class="grid">
@@ -1645,8 +1650,6 @@
     let contasPagar = [];
     let contaReceberSelecionada = null;
     let contaPagarSelecionada = null;
-    let relatorioEstoqueAtual = null;
-    let relatorioPerformanceAtual = null;
 
     function money(v){
       return Number(v || 0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1962,12 +1965,7 @@
     async function carregarDashboardAdmin(){
       try{
         const d = await api(`/admin/dashboard${queryPeriodo()}`);
-        document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
-        document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
-        document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
-        document.getElementById("dashVendas").textContent = Number(d.total_vendas || 0);
-        document.getElementById("dashAlerta").textContent = Number(d.produtos_alerta || 0);
-        document.getElementById("dashValorEstoque").textContent = `R$ ${money(d.valor_estoque || 0)}`;
+        preencherDashboard(d);
       }catch(_){
         calcularDashLocal();
       }
@@ -1976,15 +1974,25 @@
     async function carregarDashboardLoja(){
       try{
         const d = await api(`/dashboard/${empresa}${queryPeriodo()}`);
-        document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
-        document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
-        document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
-        document.getElementById("dashVendas").textContent = Number(d.total_vendas || 0);
-        document.getElementById("dashAlerta").textContent = Number(d.produtos_alerta || 0);
-        document.getElementById("dashValorEstoque").textContent = `R$ ${money(d.valor_estoque || 0)}`;
+        preencherDashboard(d);
       }catch(_){
         calcularDashLocal();
       }
+    }
+
+    function preencherDashboard(d){
+      document.getElementById("dashProdutos").textContent = Number(d.total_produtos || 0);
+      document.getElementById("dashFornecedores").textContent = Number(d.total_fornecedores || 0);
+      document.getElementById("dashCompras").textContent = Number(d.total_compras || 0);
+      document.getElementById("dashVendas").textContent = Number(d.total_vendas || 0);
+      document.getElementById("dashAlerta").textContent = Number(d.produtos_alerta || 0);
+      document.getElementById("dashValorEstoque").textContent = `R$ ${money(d.valor_estoque || 0)}`;
+      document.getElementById("dashFaturamento").textContent = `R$ ${money(d.faturamento || 0)}`;
+      document.getElementById("dashLucroEstimado").textContent = `R$ ${money(d.lucro_estimado || 0)}`;
+      document.getElementById("dashTicketMedio").textContent = `R$ ${money(d.ticket_medio || 0)}`;
+      document.getElementById("dashReceberPendente").textContent = `R$ ${money(d.receber_pendente || 0)}`;
+      document.getElementById("dashPagarPendente").textContent = `R$ ${money(d.pagar_pendente || 0)}`;
+      document.getElementById("dashContasAtrasadas").textContent = `R$ ${money((d.receber_atrasado || 0) + (d.pagar_atrasado || 0))}`;
     }
 
     function calcularDashLocal(){
@@ -1992,6 +2000,8 @@
       const baseFornecedores = tipo === "admin" ? fornecedores : fornecedores.filter(f => f.empresa === empresa);
       const baseCompras = tipo === "admin" ? compras : compras.filter(c => c.empresa === empresa);
       const baseVendas = tipo === "admin" ? vendas : vendas.filter(v => v.empresa === empresa);
+      const baseReceber = tipo === "admin" ? contasReceber : contasReceber.filter(c => c.empresa === empresa);
+      const basePagar = tipo === "admin" ? contasPagar : contasPagar.filter(c => c.empresa === empresa);
 
       document.getElementById("dashProdutos").textContent = baseProdutos.length;
       document.getElementById("dashFornecedores").textContent = baseFornecedores.length;
@@ -2000,9 +2010,23 @@
 
       const alertas = baseProdutos.filter(p => Number(p.estoque || 0) <= Number(p.estoque_minimo || 0) && Number(p.estoque_minimo || 0) > 0);
       const valor = baseProdutos.reduce((a,p) => a + (Number(p.estoque || 0) * Number(p.custo || 0)), 0);
+      const faturamento = baseVendas.reduce((a,v) => a + Number(v.total || 0), 0);
+      const custoCompras = baseCompras.reduce((a,c) => a + Number(c.total || 0), 0);
+      const lucro = faturamento - custoCompras;
+      const ticket = baseVendas.length ? faturamento / baseVendas.length : 0;
+      const receberPendente = baseReceber.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const pagarPendente = basePagar.filter(c => c.status === "pendente").reduce((a,c) => a + Number(c.valor || 0), 0);
+      const atrasadas = baseReceber.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0) +
+        basePagar.filter(c => c.status === "atrasado").reduce((a,c) => a + Number(c.valor || 0), 0);
 
       document.getElementById("dashAlerta").textContent = alertas.length;
       document.getElementById("dashValorEstoque").textContent = `R$ ${money(valor)}`;
+      document.getElementById("dashFaturamento").textContent = `R$ ${money(faturamento)}`;
+      document.getElementById("dashLucroEstimado").textContent = `R$ ${money(lucro)}`;
+      document.getElementById("dashTicketMedio").textContent = `R$ ${money(ticket)}`;
+      document.getElementById("dashReceberPendente").textContent = `R$ ${money(receberPendente)}`;
+      document.getElementById("dashPagarPendente").textContent = `R$ ${money(pagarPendente)}`;
+      document.getElementById("dashContasAtrasadas").textContent = `R$ ${money(atrasadas)}`;
     }
 
     function renderDashboardAlertas(){
@@ -2272,12 +2296,11 @@
 
     async function carregarRelatorioEstoque(){
       if(tipo === "admin"){
-        setStatus("Relatório por período disponível por loja. Entre em uma loja para detalhamento.", "info");
+        setStatus("Relatório disponível por loja. Entre em uma loja para detalhamento.", "info");
         return;
       }
 
       const data = await api(`/relatorios/estoque/${empresa}`);
-      relatorioEstoqueAtual = data;
 
       document.getElementById("re_total_produtos").textContent = Number(data.resumo?.total_produtos || 0);
       document.getElementById("re_total_unidades").textContent = Number(data.resumo?.total_unidades || 0);
@@ -2311,12 +2334,11 @@
 
     async function carregarRelatorioPerformance(){
       if(tipo === "admin"){
-        setStatus("Performance por período disponível por loja. Entre em uma loja para detalhamento.", "info");
+        setStatus("Performance disponível por loja. Entre em uma loja para detalhamento.", "info");
         return;
       }
 
       const data = await api(`/relatorios/performance/${empresa}`);
-      relatorioPerformanceAtual = data;
 
       document.getElementById("pf_total_produtos").textContent = Number(data.resumo?.total_produtos || 0);
       document.getElementById("pf_sem_saida").textContent = Number(data.resumo?.produtos_sem_saida || 0);
@@ -2787,6 +2809,7 @@
 
         fecharModalReceber();
         await carregarContasReceber();
+        await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
         setStatus("Conta a receber baixada com sucesso.");
       }catch(error){
         setStatus(error.message || "Erro ao baixar conta a receber.", "error");
@@ -2823,6 +2846,7 @@
 
         fecharModalPagar();
         await carregarContasPagar();
+        await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
         setStatus("Conta paga com sucesso.");
       }catch(error){
         setStatus(error.message || "Erro ao pagar conta.", "error");
