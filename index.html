@@ -464,6 +464,26 @@
     .badge-warning{background:var(--warning-bg);color:var(--warning-text);}
     .badge-info{background:var(--info-bg);color:var(--info-text);}
 
+    .fluxo-entrada{
+      color:#166534;
+      font-weight:bold;
+    }
+
+    .fluxo-saida{
+      color:#991b1b;
+      font-weight:bold;
+    }
+
+    .fluxo-saldo-positivo{
+      color:#166534;
+      font-weight:bold;
+    }
+
+    .fluxo-saldo-negativo{
+      color:#991b1b;
+      font-weight:bold;
+    }
+
     .toolbar{
       display:flex;
       gap:10px;
@@ -475,26 +495,6 @@
     .toolbar .form-group{
       margin-bottom:0;
       min-width:180px;
-    }
-
-    .item-row{
-      display:grid;
-      grid-template-columns:2fr 1fr 1fr auto;
-      gap:10px;
-      align-items:end;
-    }
-
-    .totals-box{
-      display:flex;
-      justify-content:flex-end;
-      margin-top:14px;
-      font-size:18px;
-      font-weight:bold;
-    }
-
-    .muted{
-      color:var(--muted);
-      font-size:13px;
     }
 
     .modal-overlay{
@@ -547,25 +547,6 @@
       font-weight:bold;
     }
 
-    .venda-layout{
-      display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:18px;
-      align-items:start;
-    }
-
-    .venda-carrinho-total{
-      font-size:28px;
-      font-weight:bold;
-      color:var(--primary);
-    }
-
-    @media (max-width:1100px){
-      .venda-layout{
-        grid-template-columns:1fr;
-      }
-    }
-
     @media (max-width:980px){
       .layout,
       .layout.sidebar-collapsed{
@@ -588,10 +569,6 @@
         justify-content:flex-start;
         padding-left:14px;
         padding-right:14px;
-      }
-
-      .item-row{
-        grid-template-columns:1fr;
       }
     }
   </style>
@@ -661,6 +638,9 @@
 
         <button class="menu-btn active" onclick="mostrarPagina('dashboard', this)">
           <span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span>
+        </button>
+        <button class="menu-btn" onclick="mostrarPagina('fluxoCaixa', this); carregarFluxoCaixa()">
+          <span class="menu-icon">💵</span><span class="menu-text">Fluxo de Caixa</span>
         </button>
         <button class="menu-btn" onclick="mostrarPagina('produtos', this)">
           <span class="menu-icon">📦</span><span class="menu-text">Produtos</span>
@@ -745,6 +725,100 @@
                     <tr><th>Empresa</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Data</th></tr>
                   </thead>
                   <tbody id="dashboardMovBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="fluxoCaixa" class="page">
+          <div class="page-header">
+            <h2>Fluxo de Caixa</h2>
+            <p>Visualize entradas, saídas, saldo do período e evolução diária do caixa.</p>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="summary-label">Entradas no período</div>
+              <div class="summary-value money fluxo-entrada" id="fcTotalEntradas">R$ 0,00</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Saídas no período</div>
+              <div class="summary-value money fluxo-saida" id="fcTotalSaidas">R$ 0,00</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Saldo final</div>
+              <div class="summary-value money" id="fcSaldoFinal">R$ 0,00</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Lançamentos</div>
+              <div class="summary-value" id="fcQuantidadeLancamentos">0</div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <h3>Resumo diário</h3>
+
+              <div class="toolbar">
+                <div class="form-group">
+                  <label>Buscar data</label>
+                  <input id="buscaFluxoDia" class="form-control" type="text" placeholder="Ex.: 08/04/2026" oninput="renderFluxoResumoDia()" />
+                </div>
+                <button class="btn btn-outline" onclick="carregarFluxoCaixa()">Atualizar</button>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Entradas</th>
+                      <th>Saídas</th>
+                      <th>Saldo do Dia</th>
+                      <th>Saldo Acumulado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fluxoResumoDiaBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Lançamentos do período</h3>
+
+              <div class="toolbar">
+                <div class="form-group">
+                  <label>Buscar descrição</label>
+                  <input id="buscaFluxoLancamento" class="form-control" type="text" placeholder="Digite a descrição..." oninput="renderFluxoLancamentos()" />
+                </div>
+
+                <div class="form-group">
+                  <label>Tipo</label>
+                  <select id="filtroFluxoTipo" class="form-control" onchange="renderFluxoLancamentos()">
+                    <option value="">Todos</option>
+                    <option value="entrada">Entradas</option>
+                    <option value="saida">Saídas</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Tipo</th>
+                      <th>Descrição</th>
+                      <th>Categoria</th>
+                      <th>Forma</th>
+                      <th>Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fluxoLancamentosBody"></tbody>
                 </table>
               </div>
             </div>
@@ -893,24 +967,23 @@
             </div>
           </div>
         </section>
-
-        <section id="vendas" class="page">
+                <section id="vendas" class="page">
           <div class="page-header">
             <h2>Vendas / PDV</h2>
             <p>Registre vendas com baixa automática de estoque e geração de contas a receber.</p>
           </div>
 
-          <div class="venda-layout">
+          <div class="grid">
             <div class="card">
               <h3>Nova venda</h3>
 
               <div class="form-grid">
                 <div class="form-group">
-                  <label>Cliente (opcional)</label>
+                  <label>Cliente</label>
                   <select id="v_cliente" class="form-control"></select>
                 </div>
                 <div class="form-group">
-                  <label>Data da venda</label>
+                  <label>Data</label>
                   <input id="v_data" class="form-control" type="date" />
                 </div>
               </div>
@@ -1003,7 +1076,7 @@
                 </div>
                 <div class="summary-card">
                   <div class="summary-label">Total final</div>
-                  <div class="venda-carrinho-total" id="v_total_label">R$ 0,00</div>
+                  <div class="summary-value money" id="v_total_label">R$ 0,00</div>
                 </div>
               </div>
 
@@ -1032,76 +1105,6 @@
                 </thead>
                 <tbody id="listaVendas"></tbody>
               </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="fornecedores" class="page">
-          <div class="page-header">
-            <h2>Fornecedores</h2>
-            <p>Cadastre e acompanhe os fornecedores da operação.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Novo fornecedor</h3>
-
-              <div class="form-group">
-                <label>Nome</label>
-                <input id="f_nome" class="form-control" type="text" />
-              </div>
-
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Contato</label>
-                  <input id="f_contato" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>Telefone</label>
-                  <input id="f_tel" class="form-control" type="text" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>Email</label>
-                <input id="f_email" class="form-control" type="email" />
-              </div>
-
-              <div class="form-group">
-                <label>Endereço</label>
-                <input id="f_endereco" class="form-control" type="text" />
-              </div>
-
-              <div class="form-group">
-                <label>Observação</label>
-                <input id="f_obs" class="form-control" type="text" />
-              </div>
-
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarFornecedor()">Salvar fornecedor</button>
-                <button class="btn btn-secondary" onclick="limparFornecedor()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Lista de fornecedores</h3>
-
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar</label>
-                  <input id="buscaFornecedor" class="form-control" type="text" placeholder="Digite o nome..." oninput="renderFornecedores()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarFornecedores()">Atualizar</button>
-              </div>
-
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Empresa</th><th>Nome</th><th>Contato</th><th>Telefone</th><th>Email</th></tr>
-                  </thead>
-                  <tbody id="listaFornecedores"></tbody>
-                </table>
-              </div>
             </div>
           </div>
         </section>
@@ -1161,9 +1164,7 @@
                 </div>
               </div>
 
-              <h3 style="margin-top:16px;">Adicionar item</h3>
-
-              <div class="item-row">
+              <div class="form-grid">
                 <div class="form-group">
                   <label>Produto</label>
                   <select id="c_produto" class="form-control"></select>
@@ -1172,32 +1173,38 @@
                   <label>Quantidade</label>
                   <input id="c_qtd" class="form-control" type="number" min="1" />
                 </div>
+              </div>
+
+              <div class="form-grid">
                 <div class="form-group">
-                  <label>Custo Unitário</label>
-                  <input id="c_custo" class="form-control" type="number" step="0.01" min="0" />
+                  <label>Custo unitário</label>
+                  <input id="c_custo" class="form-control" type="number" min="0" step="0.01" />
                 </div>
                 <div class="form-group">
                   <label>&nbsp;</label>
-                  <button class="btn btn-primary" style="width:100%;" onclick="adicionarItemCompra()">Adicionar</button>
+                  <button class="btn btn-primary" style="width:100%;" onclick="adicionarItemCompra()">Adicionar item</button>
                 </div>
               </div>
 
               <div class="table-wrap" style="margin-top:14px;">
                 <table>
                   <thead>
-                    <tr><th>Produto</th><th>Quantidade</th><th>Custo</th><th>Subtotal</th><th>Ação</th></tr>
+                    <tr><th>Produto</th><th>Qtd</th><th>Custo</th><th>Subtotal</th><th>Ação</th></tr>
                   </thead>
                   <tbody id="itensCompraBody"></tbody>
                 </table>
               </div>
 
-              <div class="totals-box">
-                Total da compra: R$ <span id="totalCompra" style="margin-left:6px;">0,00</span>
+              <div class="summary-grid">
+                <div class="summary-card">
+                  <div class="summary-label">Total da compra</div>
+                  <div class="summary-value money" id="totalCompra">R$ 0,00</div>
+                </div>
               </div>
 
               <div class="actions-row">
                 <button class="btn btn-primary" onclick="salvarCompra()">Salvar compra</button>
-                <button class="btn btn-secondary" onclick="limparCompra()">Limpar</button>
+                <button class="btn btn-secondary" onclick="limparCompra()">Limpar compra</button>
               </div>
             </div>
 
@@ -1206,7 +1213,7 @@
 
               <div class="toolbar">
                 <div class="form-group">
-                  <label>Buscar por fornecedor</label>
+                  <label>Buscar fornecedor</label>
                   <input id="buscaCompra" class="form-control" type="text" placeholder="Digite o fornecedor..." oninput="renderCompras()" />
                 </div>
                 <button class="btn btn-outline" onclick="carregarCompras()">Atualizar</button>
@@ -1215,7 +1222,7 @@
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr><th>Empresa</th><th>ID</th><th>Fornecedor</th><th>Total</th><th>Data</th><th>Pagamento</th><th>Forma</th><th>Vencimento</th><th>Status</th></tr>
+                    <tr><th>Empresa</th><th>ID</th><th>Fornecedor</th><th>Total</th><th>Data</th><th>Status</th><th>Forma</th></tr>
                   </thead>
                   <tbody id="listaCompras"></tbody>
                 </table>
@@ -1223,7 +1230,8 @@
             </div>
           </div>
         </section>
-                <section id="estoque" class="page">
+
+        <section id="estoque" class="page">
           <div class="page-header">
             <h2>Estoque</h2>
             <p>Acompanhe custo, preço, estoque atual e estoque mínimo.</p>
@@ -1316,11 +1324,6 @@
                 <button class="btn btn-primary" onclick="salvarAjuste()">Salvar ajuste</button>
                 <button class="btn btn-secondary" onclick="limparAjuste()">Limpar</button>
               </div>
-            </div>
-
-            <div class="card">
-              <h3>Orientação</h3>
-              <p class="muted">Use esta tela apenas para correções operacionais, inventário, perda, avaria ou acerto manual. Toda movimentação fica registrada no histórico.</p>
             </div>
           </div>
         </section>
@@ -1455,6 +1458,13 @@
             <p>Controle de contas, despesas futuras, atrasos e baixas de pagamento.</p>
           </div>
 
+          <div class="summary-grid">
+            <div class="summary-card"><div class="summary-label">Pendente</div><div class="summary-value money" id="cpResumoPendente">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Pago</div><div class="summary-value money" id="cpResumoPago">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Atrasado</div><div class="summary-value money" id="cpResumoAtrasado">R$ 0,00</div></div>
+            <div class="summary-card"><div class="summary-label">Parcelas</div><div class="summary-value" id="cpResumoParcelas">0</div></div>
+          </div>
+
           <div class="grid">
             <div class="card">
               <h3>Nova conta a pagar</h3>
@@ -1462,11 +1472,11 @@
               <div class="form-grid">
                 <div class="form-group">
                   <label>Fornecedor</label>
-                  <input id="cp_fornecedor_nome" class="form-control" type="text" placeholder="Nome do fornecedor" />
+                  <input id="cp_fornecedor_nome" class="form-control" type="text" />
                 </div>
                 <div class="form-group">
                   <label>Descrição</label>
-                  <input id="cp_descricao" class="form-control" type="text" placeholder="Descrição da conta" />
+                  <input id="cp_descricao" class="form-control" type="text" />
                 </div>
               </div>
 
@@ -1508,43 +1518,35 @@
             </div>
 
             <div class="card">
-              <h3>Resumo</h3>
-              <div class="summary-grid">
-                <div class="summary-card"><div class="summary-label">Pendente</div><div class="summary-value money" id="cpResumoPendente">R$ 0,00</div></div>
-                <div class="summary-card"><div class="summary-label">Pago</div><div class="summary-value money" id="cpResumoPago">R$ 0,00</div></div>
-                <div class="summary-card"><div class="summary-label">Atrasado</div><div class="summary-value money" id="cpResumoAtrasado">R$ 0,00</div></div>
-                <div class="summary-card"><div class="summary-label">Parcelas</div><div class="summary-value" id="cpResumoParcelas">0</div></div>
-              </div>
-            </div>
-          </div>
+              <h3>Lista de contas</h3>
 
-          <div class="card">
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar fornecedor / descrição</label>
-                <input id="buscaContaPagar" class="form-control" type="text" placeholder="Digite o fornecedor ou descrição..." oninput="renderContasPagar()" />
-              </div>
+              <div class="toolbar">
+                <div class="form-group">
+                  <label>Buscar</label>
+                  <input id="buscaContaPagar" class="form-control" type="text" placeholder="Fornecedor ou descrição..." oninput="renderContasPagar()" />
+                </div>
 
-              <div class="form-group">
-                <label>Status</label>
-                <select id="filtroContaPagarStatus" class="form-control" onchange="renderContasPagar()">
-                  <option value="">Todos</option>
-                  <option value="pendente">Pendente</option>
-                  <option value="pago">Pago</option>
-                  <option value="atrasado">Atrasado</option>
-                </select>
+                <div class="form-group">
+                  <label>Status</label>
+                  <select id="filtroContaPagarStatus" class="form-control" onchange="renderContasPagar()">
+                    <option value="">Todos</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="pago">Pago</option>
+                    <option value="atrasado">Atrasado</option>
+                  </select>
+                </div>
+
+                <button class="btn btn-outline" onclick="carregarContasPagar()">Atualizar</button>
               </div>
 
-              <button class="btn btn-outline" onclick="carregarContasPagar()">Atualizar</button>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Empresa</th><th>Fornecedor</th><th>Descrição</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Forma</th><th>Status</th><th>Ação</th></tr>
-                </thead>
-                <tbody id="listaContasPagar"></tbody>
-              </table>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Empresa</th><th>Fornecedor</th><th>Descrição</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Forma</th><th>Status</th><th>Ação</th></tr>
+                  </thead>
+                  <tbody id="listaContasPagar"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
@@ -1648,6 +1650,7 @@
     let itensVenda = [];
     let contasReceber = [];
     let contasPagar = [];
+    let fluxoCaixa = { resumo: {}, resumo_por_dia: [], lancamentos: [] };
     let contaReceberSelecionada = null;
     let contaPagarSelecionada = null;
 
@@ -1865,9 +1868,13 @@
         ? produtos.map(p => `<option value="${p.id}">${p.nome}</option>`).join("")
         : `<option value="">Nenhum produto encontrado</option>`;
 
-      document.getElementById("c_produto").innerHTML = options;
-      document.getElementById("a_produto").innerHTML = options;
-      document.getElementById("v_produto").innerHTML = options;
+      const vProduto = document.getElementById("v_produto");
+      const cProduto = document.getElementById("c_produto");
+      const aProduto = document.getElementById("a_produto");
+
+      if(vProduto) vProduto.innerHTML = options;
+      if(cProduto) cProduto.innerHTML = options;
+      if(aProduto) aProduto.innerHTML = options;
 
       renderProdutos();
       renderEstoque();
@@ -1876,19 +1883,19 @@
     }
 
     async function carregarClientes(){
-      if(tipo === "admin"){
-        clientes = await api(`/admin/clientes${queryPeriodo()}`);
-      } else {
-        clientes = await api(`/clientes/${empresa}`);
-      }
+      clientes = tipo === "admin"
+        ? await api(`/admin/clientes${queryPeriodo()}`)
+        : await api(`/clientes/${empresa}`);
 
       const select = document.getElementById("v_cliente");
-      let html = `<option value="">Sem cliente</option>`;
-      html += clientes
-        .filter(c => tipo === "admin" || c.empresa === empresa)
-        .map(c => `<option value="${c.id}">${c.nome}</option>`)
-        .join("");
-      select.innerHTML = html;
+      if(select){
+        let html = `<option value="">Sem cliente</option>`;
+        html += clientes
+          .filter(c => tipo === "admin" || c.empresa === empresa)
+          .map(c => `<option value="${c.id}">${c.nome}</option>`)
+          .join("");
+        select.innerHTML = html;
+      }
 
       renderClientes();
     }
@@ -1898,15 +1905,14 @@
         ? await api(`/admin/fornecedores${queryPeriodo()}`)
         : await api(`/fornecedores/${empresa}`);
 
-      const listaEmpresa = tipo === "admin"
-        ? fornecedores.filter(f => f.empresa === empresa)
-        : fornecedores;
-
-      const options = listaEmpresa.length
-        ? listaEmpresa.map(f => `<option value="${f.id}">${f.nome}</option>`).join("")
+      const base = tipo === "admin" ? fornecedores.filter(f => f.empresa === empresa) : fornecedores;
+      const options = base.length
+        ? base.map(f => `<option value="${f.id}">${f.nome}</option>`).join("")
         : `<option value="">Nenhum fornecedor encontrado</option>`;
 
-      document.getElementById("c_fornecedor").innerHTML = options;
+      const select = document.getElementById("c_fornecedor");
+      if(select) select.innerHTML = options;
+
       renderFornecedores();
     }
 
@@ -1960,6 +1966,90 @@
         document.getElementById("cpResumoParcelas").textContent = Number(r.total_parcelas || 0);
       }
       renderContasPagar();
+    }
+
+    async function carregarFluxoCaixa(){
+      try{
+        if(tipo === "admin"){
+          setStatus("Fluxo de caixa detalhado é exibido por loja. Entre em uma loja para analisar.", "info");
+          fluxoCaixa = { resumo: {}, resumo_por_dia: [], lancamentos: [] };
+          renderFluxoCaixa();
+          return;
+        }
+
+        fluxoCaixa = await api(`/fluxo-caixa/${empresa}${queryPeriodo()}`);
+        renderFluxoCaixa();
+      }catch(error){
+        setStatus(error.message || "Erro ao carregar fluxo de caixa.", "error");
+      }
+    }
+
+    function renderFluxoCaixa(){
+      const resumo = fluxoCaixa.resumo || {};
+      const saldoFinal = Number(resumo.saldo_final || 0);
+
+      document.getElementById("fcTotalEntradas").textContent = `R$ ${money(resumo.total_entradas || 0)}`;
+      document.getElementById("fcTotalSaidas").textContent = `R$ ${money(resumo.total_saidas || 0)}`;
+      document.getElementById("fcSaldoFinal").textContent = `R$ ${money(saldoFinal)}`;
+      document.getElementById("fcQuantidadeLancamentos").textContent = Number(resumo.quantidade_lancamentos || 0);
+
+      document.getElementById("fcSaldoFinal").className =
+        `summary-value money ${saldoFinal >= 0 ? "fluxo-saldo-positivo" : "fluxo-saldo-negativo"}`;
+
+      renderFluxoResumoDia();
+      renderFluxoLancamentos();
+    }
+
+    function renderFluxoResumoDia(){
+      const busca = (document.getElementById("buscaFluxoDia")?.value || "").trim().toLowerCase();
+      let lista = [...(fluxoCaixa.resumo_por_dia || [])];
+
+      if(busca){
+        lista = lista.filter(item => formatDate(item.data).toLowerCase().includes(busca));
+      }
+
+      document.getElementById("fluxoResumoDiaBody").innerHTML = lista.length
+        ? lista.map(item => `
+          <tr>
+            <td>${formatDate(item.data)}</td>
+            <td class="fluxo-entrada">R$ ${money(item.entradas)}</td>
+            <td class="fluxo-saida">R$ ${money(item.saidas)}</td>
+            <td class="${Number(item.saldo_dia || 0) >= 0 ? "fluxo-saldo-positivo" : "fluxo-saldo-negativo"}">R$ ${money(item.saldo_dia)}</td>
+            <td class="${Number(item.saldo_acumulado || 0) >= 0 ? "fluxo-saldo-positivo" : "fluxo-saldo-negativo"}">R$ ${money(item.saldo_acumulado)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="5" class="empty-state">Nenhum resumo diário encontrado.</td></tr>`;
+    }
+
+    function renderFluxoLancamentos(){
+      const busca = (document.getElementById("buscaFluxoLancamento")?.value || "").trim().toLowerCase();
+      const tipoFiltro = document.getElementById("filtroFluxoTipo")?.value || "";
+
+      let lista = [...(fluxoCaixa.lancamentos || [])];
+
+      if(busca){
+        lista = lista.filter(item =>
+          (item.descricao || "").toLowerCase().includes(busca) ||
+          (item.categoria || "").toLowerCase().includes(busca)
+        );
+      }
+
+      if(tipoFiltro){
+        lista = lista.filter(item => item.tipo === tipoFiltro);
+      }
+
+      document.getElementById("fluxoLancamentosBody").innerHTML = lista.length
+        ? lista.map(item => `
+          <tr>
+            <td>${formatDate(item.data)}</td>
+            <td>${item.tipo === "entrada" ? '<span class="badge badge-ok">Entrada</span>' : '<span class="badge badge-alert">Saída</span>'}</td>
+            <td>${item.descricao || "-"}</td>
+            <td>${item.categoria || "-"}</td>
+            <td>${item.forma_pagamento || "-"}</td>
+            <td class="${item.tipo === "entrada" ? "fluxo-entrada" : "fluxo-saida"}">R$ ${money(item.valor)}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="6" class="empty-state">Nenhum lançamento encontrado.</td></tr>`;
     }
 
     async function carregarDashboardAdmin(){
@@ -2047,9 +2137,8 @@
     }
 
     function renderDashboardMovimentacoes(){
-      const base = [...movimentacoes];
-      document.getElementById("dashboardMovBody").innerHTML = base.length
-        ? base.slice(0, 10).map(m => `
+      document.getElementById("dashboardMovBody").innerHTML = movimentacoes.length
+        ? movimentacoes.slice(0, 10).map(m => `
           <tr>
             <td>${m.empresa || empresa || "-"}</td>
             <td>${m.produto_nome || "-"}</td>
@@ -2062,7 +2151,7 @@
     }
 
     function renderProdutos(){
-      const filtro = document.getElementById("buscaProduto").value.trim().toLowerCase();
+      const filtro = (document.getElementById("buscaProduto")?.value || "").trim().toLowerCase();
       const lista = produtos.filter(p => (p.nome || "").toLowerCase().includes(filtro));
 
       document.getElementById("listaProdutos").innerHTML = lista.length
@@ -2081,7 +2170,7 @@
     }
 
     function renderClientes(){
-      const filtro = document.getElementById("buscaCliente").value.trim().toLowerCase();
+      const filtro = (document.getElementById("buscaCliente")?.value || "").trim().toLowerCase();
       const lista = clientes.filter(c => (c.nome || "").toLowerCase().includes(filtro));
 
       document.getElementById("listaClientes").innerHTML = lista.length
@@ -2099,7 +2188,7 @@
     }
 
     function renderVendas(){
-      const filtro = document.getElementById("buscaVenda").value.trim().toLowerCase();
+      const filtro = (document.getElementById("buscaVenda")?.value || "").trim().toLowerCase();
       const lista = vendas.filter(v => (v.cliente_nome || "").toLowerCase().includes(filtro));
 
       document.getElementById("listaVendas").innerHTML = lista.length
@@ -2119,8 +2208,27 @@
         : `<tr><td colspan="9" class="empty-state">Nenhuma venda encontrada.</td></tr>`;
     }
 
+    function renderCompras(){
+      const filtro = (document.getElementById("buscaCompra")?.value || "").trim().toLowerCase();
+      const lista = compras.filter(c => (c.fornecedor_nome || "").toLowerCase().includes(filtro));
+
+      document.getElementById("listaCompras").innerHTML = lista.length
+        ? lista.map(c => `
+          <tr>
+            <td>${c.empresa || empresa || "-"}</td>
+            <td>${c.id}</td>
+            <td>${c.fornecedor_nome || "-"}</td>
+            <td>R$ ${money(c.total)}</td>
+            <td>${formatDate(c.data)}</td>
+            <td>${c.status_pagamento || "-"}</td>
+            <td>${c.forma_pagamento || "-"}</td>
+          </tr>
+        `).join("")
+        : `<tr><td colspan="7" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
+    }
+
     function renderEstoque(){
-      const filtro = document.getElementById("buscaEstoque").value.trim().toLowerCase();
+      const filtro = (document.getElementById("buscaEstoque")?.value || "").trim().toLowerCase();
       const lista = produtos.filter(p => (p.nome || "").toLowerCase().includes(filtro));
 
       document.getElementById("listaEstoque").innerHTML = lista.length
@@ -2145,10 +2253,11 @@
     }
 
     function renderFornecedores(){
-      const filtro = document.getElementById("buscaFornecedor").value.trim().toLowerCase();
-      const lista = fornecedores.filter(f => (f.nome || "").toLowerCase().includes(filtro));
-
-      document.getElementById("listaFornecedores").innerHTML = lista.length
+      const lista = fornecedores;
+      const corpo = document.createElement("tbody");
+      const tabela = document.getElementById("listaFornecedores");
+      if(!tabela) return;
+      tabela.innerHTML = lista.length
         ? lista.map(f => `
           <tr>
             <td>${f.empresa || empresa || "-"}</td>
@@ -2161,29 +2270,8 @@
         : `<tr><td colspan="5" class="empty-state">Nenhum fornecedor encontrado.</td></tr>`;
     }
 
-    function renderCompras(){
-      const filtro = document.getElementById("buscaCompra").value.trim().toLowerCase();
-      const lista = compras.filter(c => (c.fornecedor_nome || "").toLowerCase().includes(filtro));
-
-      document.getElementById("listaCompras").innerHTML = lista.length
-        ? lista.map(c => `
-          <tr>
-            <td>${c.empresa || empresa || "-"}</td>
-            <td>${c.id}</td>
-            <td>${c.fornecedor_nome || "-"}</td>
-            <td>R$ ${money(c.total)}</td>
-            <td>${formatDate(c.data)}</td>
-            <td>${c.status_pagamento || "-"}</td>
-            <td>${c.forma_pagamento || "-"}</td>
-            <td>${formatDate(c.vencimento)}</td>
-            <td>${c.status || "-"}</td>
-          </tr>
-        `).join("")
-        : `<tr><td colspan="9" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
-    }
-
     function renderMovimentacoes(){
-      const filtro = document.getElementById("buscaMov").value.trim().toLowerCase();
+      const filtro = (document.getElementById("buscaMov")?.value || "").trim().toLowerCase();
       const lista = movimentacoes.filter(m => (m.produto_nome || "").toLowerCase().includes(filtro));
 
       document.getElementById("listaMov").innerHTML = lista.length
@@ -2223,8 +2311,8 @@
     }
 
     function renderContasReceber(){
-      const busca = document.getElementById("buscaContaReceber").value.trim().toLowerCase();
-      const status = document.getElementById("filtroContaReceberStatus").value;
+      const busca = (document.getElementById("buscaContaReceber")?.value || "").trim().toLowerCase();
+      const status = document.getElementById("filtroContaReceberStatus")?.value || "";
 
       let lista = contasReceber.filter(c => (c.cliente_nome || "").toLowerCase().includes(busca));
       if(status) lista = lista.filter(c => c.status === status);
@@ -2257,8 +2345,8 @@
     }
 
     function renderContasPagar(){
-      const busca = document.getElementById("buscaContaPagar").value.trim().toLowerCase();
-      const status = document.getElementById("filtroContaPagarStatus").value;
+      const busca = (document.getElementById("buscaContaPagar")?.value || "").trim().toLowerCase();
+      const status = document.getElementById("filtroContaPagarStatus")?.value || "";
 
       let lista = contasPagar.filter(c =>
         (c.fornecedor_nome || "").toLowerCase().includes(busca) ||
@@ -2369,9 +2457,10 @@
     }
 
     function preencherPrecoVenda(){
-      const id = Number(document.getElementById("v_produto").value || 0);
+      const id = Number(document.getElementById("v_produto")?.value || 0);
       const produto = produtos.find(p => Number(p.id) === id);
-      document.getElementById("v_preco").value = produto ? Number(produto.preco || 0) : "";
+      const input = document.getElementById("v_preco");
+      if(input) input.value = produto ? Number(produto.preco || 0) : "";
     }
 
     function adicionarItemVenda(){
@@ -2425,8 +2514,8 @@
 
     function renderResumoVenda(){
       const subtotal = itensVenda.reduce((a, i) => a + Number(i.total || 0), 0);
-      const desconto = Number(document.getElementById("v_desconto").value || 0);
-      const acrescimo = Number(document.getElementById("v_acrescimo").value || 0);
+      const desconto = Number(document.getElementById("v_desconto")?.value || 0);
+      const acrescimo = Number(document.getElementById("v_acrescimo")?.value || 0);
       const total = subtotal - desconto + acrescimo;
 
       document.getElementById("v_subtotal_label").textContent = `R$ ${money(subtotal)}`;
@@ -2434,7 +2523,7 @@
     }
 
     function atualizarCamposVenda(){
-      const pagamento = document.getElementById("v_pagamento").value;
+      const pagamento = document.getElementById("v_pagamento")?.value || "";
       const prazo = ["Promissória", "Promissoria", "Crédito Parcelado", "Credito Parcelado"].includes(pagamento);
 
       document.getElementById("grupoPrimeiroVencimento").style.display = prazo ? "block" : "none";
@@ -2547,7 +2636,7 @@
         `).join("")
         : `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
 
-      document.getElementById("totalCompra").textContent = money(total);
+      document.getElementById("totalCompra").textContent = `R$ ${money(total)}`;
     }
 
     function removerItemCompra(index){
@@ -2675,41 +2764,6 @@
       document.getElementById("cl_endereco").value = "";
     }
 
-    async function salvarFornecedor(){
-      try{
-        const payload = {
-          empresa,
-          nome: document.getElementById("f_nome").value.trim(),
-          contato: document.getElementById("f_contato").value.trim(),
-          telefone: document.getElementById("f_tel").value.trim(),
-          email: document.getElementById("f_email").value.trim(),
-          endereco: document.getElementById("f_endereco").value.trim(),
-          observacao: document.getElementById("f_obs").value.trim()
-        };
-
-        await api("/fornecedores", {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-
-        limparFornecedor();
-        await carregarFornecedores();
-        await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
-        setStatus("Fornecedor salvo com sucesso.");
-      }catch(error){
-        setStatus(error.message || "Erro ao salvar fornecedor.", "error");
-      }
-    }
-
-    function limparFornecedor(){
-      document.getElementById("f_nome").value = "";
-      document.getElementById("f_contato").value = "";
-      document.getElementById("f_tel").value = "";
-      document.getElementById("f_email").value = "";
-      document.getElementById("f_endereco").value = "";
-      document.getElementById("f_obs").value = "";
-    }
-
     async function salvarAjuste(){
       try{
         const payload = {
@@ -2764,6 +2818,7 @@
 
         limparContaPagar();
         await carregarContasPagar();
+        await carregarFluxoCaixa();
         setStatus("Conta a pagar salva com sucesso.");
       }catch(error){
         setStatus(error.message || "Erro ao salvar conta a pagar.", "error");
@@ -2809,6 +2864,7 @@
 
         fecharModalReceber();
         await carregarContasReceber();
+        await carregarFluxoCaixa();
         await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
         setStatus("Conta a receber baixada com sucesso.");
       }catch(error){
@@ -2846,6 +2902,7 @@
 
         fecharModalPagar();
         await carregarContasPagar();
+        await carregarFluxoCaixa();
         await (tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja());
         setStatus("Conta paga com sucesso.");
       }catch(error){
@@ -2855,11 +2912,19 @@
 
     async function carregarTudo(){
       try{
-        document.getElementById("v_data").value = hojeInput();
-        document.getElementById("v_primeiro_vencimento").value = hojeInput();
-        document.getElementById("c_data").value = hojeInput();
-        document.getElementById("c_vencimento").value = hojeInput();
-        document.getElementById("cp_vencimento").value = hojeInput();
+        const hoje = hojeInput();
+
+        const vData = document.getElementById("v_data");
+        const vPrimeiro = document.getElementById("v_primeiro_vencimento");
+        const cData = document.getElementById("c_data");
+        const cVenc = document.getElementById("c_vencimento");
+        const cpVenc = document.getElementById("cp_vencimento");
+
+        if(vData) vData.value = hoje;
+        if(vPrimeiro) vPrimeiro.value = hoje;
+        if(cData) cData.value = hoje;
+        if(cVenc) cVenc.value = hoje;
+        if(cpVenc) cpVenc.value = hoje;
 
         await Promise.all([
           carregarProdutos(),
@@ -2870,6 +2935,7 @@
           carregarMovimentacoes(),
           carregarContasReceber(),
           carregarContasPagar(),
+          carregarFluxoCaixa(),
           tipo === "admin" ? carregarDashboardAdmin() : carregarDashboardLoja()
         ]);
 
@@ -2891,7 +2957,10 @@
       if(e.key === "Enter") fazerLogin();
     });
 
-    document.getElementById("v_produto").addEventListener("change", preencherPrecoVenda);
+    const vProduto = document.getElementById("v_produto");
+    if(vProduto){
+      vProduto.addEventListener("change", preencherPrecoVenda);
+    }
 
     window.addEventListener("resize", aplicarEstadoSidebar);
 
