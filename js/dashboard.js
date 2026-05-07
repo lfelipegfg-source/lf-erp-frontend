@@ -66,6 +66,7 @@ function normalizeDashboardPayload(data = {}) {
     totalComprasValor: Number(data.total_compras_valor ?? 0),
     topProdutos: Array.isArray(data.top_produtos) ? data.top_produtos : [],
     alertas: Array.isArray(data.alertas) ? data.alertas : [],
+    recomendacoes: Array.isArray(data.recomendacoes) ? data.recomendacoes : [],
 
     estoqueInvestido: Number(data.estoque_investido ?? 0),
     lucroPotencial: Number(data.lucro_potencial ?? 0),
@@ -321,6 +322,10 @@ function renderTopProdutos(payload) {
 
 function buildAlertas(payload, financeiro) {
   const alertas = [];
+
+  if (Array.isArray(payload.recomendacoes) && payload.recomendacoes.length) {
+    alertas.push(...payload.recomendacoes);
+  }
 
   if (financeiro.contasReceberAtrasado > 0) {
     alertas.push({
