@@ -300,20 +300,56 @@ function renderTopProdutos(payload) {
     return;
   }
 
+  const maiorQuantidade = Math.max(
+    ...payload.topProdutos.map((item) => Number(item.quantidade || item.qtd || 0))
+  );
+
   setHtml(
     'dashboardTopProdutos',
     `
-      <div class="simple-ranking">
+      <div class="top-products-premium">
         ${payload.topProdutos
           .slice(0, 5)
-          .map(
-            (item, index) => `
-              <div class="simple-ranking__item">
-                <span>${index + 1}. ${safeText(item.nome || item.produto, 'Produto')}</span>
-                <strong>${Number(item.quantidade || item.qtd || 0)}</strong>
+          .map((item, index) => {
+            const quantidade = Number(item.quantidade || item.qtd || 0);
+
+            const percentual = maiorQuantidade > 0 ? (quantidade / maiorQuantidade) * 100 : 0;
+
+            const classe = index === 0 ? 'A' : index <= 2 ? 'B' : 'C';
+
+            return `
+              <div class="top-product-card">
+                <div class="top-product-card__header">
+                  <div>
+                    <div class="top-product-card__title">
+                      ${safeText(item.nome || item.produto, 'Produto')}
+                    </div>
+
+                    <div class="top-product-card__meta">
+                      ${quantidade} venda(s)
+                    </div>
+                  </div>
+
+                  <div class="badge ${
+                    classe === 'A'
+                      ? 'badge--success'
+                      : classe === 'B'
+                        ? 'badge--warning'
+                        : 'badge--danger'
+                  }">
+                    ${classe}
+                  </div>
+                </div>
+
+                <div class="top-product-progress">
+                  <div
+                    class="top-product-progress__fill"
+                    style="width:${percentual}%"
+                  ></div>
+                </div>
               </div>
-            `
-          )
+            `;
+          })
           .join('')}
       </div>
     `
