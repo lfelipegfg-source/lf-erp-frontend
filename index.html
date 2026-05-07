@@ -1,3605 +1,900 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LF ERP</title>
-  <style>
-    :root{
-      --primary:#b30000;
-      --primary-dark:#8a0000;
-      --sidebar:#111827;
-      --sidebar-hover:#1f2937;
-      --sidebar-active:#374151;
-      --bg:#f3f4f6;
-      --card:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --border:#e5e7eb;
-      --success-bg:#dcfce7;
-      --success-text:#166534;
-      --error-bg:#fee2e2;
-      --error-text:#991b1b;
-      --warning-bg:#fef3c7;
-      --warning-text:#92400e;
-      --info-bg:#dbeafe;
-      --info-text:#1d4ed8;
-      --radius:18px;
-      --shadow:0 8px 24px rgba(0,0,0,0.08);
-      --sidebar-width:290px;
-      --sidebar-collapsed-width:88px;
-    }
-
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-      font-family:Arial, Helvetica, sans-serif;
-    }
-
-    body{
-      background:var(--bg);
-      color:var(--text);
-    }
-
-    .hidden{display:none !important;}
-
-    .login-screen{
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:20px;
-      background:linear-gradient(135deg,#7f0000,#d10000);
-    }
-
-    .login-card{
-      width:100%;
-      max-width:440px;
-      background:#fff;
-      border-radius:28px;
-      padding:32px;
-      box-shadow:0 24px 40px rgba(0,0,0,0.18);
-    }
-
-    .login-card h1{
-      color:var(--primary);
-      font-size:40px;
-      margin-bottom:10px;
-    }
-
-    .login-card p{
-      color:var(--muted);
-      margin-bottom:24px;
-      font-size:16px;
-    }
-
-    .app{min-height:100vh;}
-
-    .topbar{
-      background:var(--primary);
-      color:#fff;
-      padding:16px 24px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-    }
-
-    .topbar-left h1{
-      font-size:28px;
-      margin-bottom:4px;
-    }
-
-    .topbar-left small{
-      opacity:.95;
-      font-size:14px;
-    }
-
-    .topbar-right{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .user-pill{
-      background:rgba(255,255,255,0.12);
-      border-radius:999px;
-      padding:12px 16px;
-      font-weight:bold;
-    }
-
-    .filter-bar{
-      background:#fff;
-      border-bottom:1px solid var(--border);
-      padding:12px 24px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-
-    .filter-left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-
-    .filter-right{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .filter-toggle{
-      border:none;
-      background:#f3f4f6;
-      color:#111827;
-      border-radius:12px;
-      padding:10px 14px;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    .filter-panel{
-      display:none;
-      width:100%;
-      margin-top:8px;
-      padding-top:10px;
-      border-top:1px solid var(--border);
-    }
-
-    .filter-panel.show{display:block;}
-
-    .filter-grid{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:end;
-    }
-
-    .period-resume{
-      padding:10px 14px;
-      border-radius:12px;
-      background:var(--info-bg);
-      color:var(--info-text);
-      font-weight:bold;
-      font-size:13px;
-    }
-
-    .layout{
-      display:grid;
-      grid-template-columns:var(--sidebar-width) 1fr;
-      min-height:calc(100vh - 132px);
-      transition:grid-template-columns .25s ease;
-    }
-
-    .layout.sidebar-collapsed{
-      grid-template-columns:var(--sidebar-collapsed-width) 1fr;
-    }
-
-    .sidebar{
-      background:var(--sidebar);
-      color:#fff;
-      padding:16px 12px;
-      overflow:hidden;
-      transition:all .2s ease;
-    }
-
-    .sidebar-header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:18px;
-    }
-
-    .sidebar h2{
-      font-size:16px;
-      padding-left:8px;
-      white-space:nowrap;
-    }
-
-    .sidebar-toggle{
-      border:none;
-      background:rgba(255,255,255,0.12);
-      color:#fff;
-      width:38px;
-      height:38px;
-      border-radius:12px;
-      cursor:pointer;
-      font-size:18px;
-      font-weight:bold;
-      flex-shrink:0;
-    }
-
-    .sidebar-section{margin-bottom:10px;}
-
-    .menu-btn{
-      width:100%;
-      border:none;
-      background:transparent;
-      color:#fff;
-      text-align:left;
-      padding:13px 14px;
-      border-radius:14px;
-      cursor:pointer;
-      margin-bottom:8px;
-      font-size:15px;
-      transition:.2s;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      white-space:nowrap;
-      overflow:hidden;
-    }
-
-    .menu-btn:hover,.menu-btn.active{background:var(--sidebar-hover);}
-
-    .menu-group-header{
-      width:100%;
-      border:none;
-      background:transparent;
-      color:#fff;
-      text-align:left;
-      padding:13px 14px;
-      border-radius:14px;
-      cursor:pointer;
-      margin-bottom:8px;
-      font-size:15px;
-      transition:.2s;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      white-space:nowrap;
-      overflow:hidden;
-    }
-
-    .menu-group-header:hover,.menu-group-header.open{background:var(--sidebar-hover);}
-
-    .menu-group-left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-    }
-
-    .menu-icon{
-      min-width:28px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-size:18px;
-    }
-
-    .menu-text,.sidebar-title-text,.submenu-arrow{
-      transition:opacity .2s ease, width .2s ease;
-    }
-
-    .submenu{
-      display:none;
-      padding-left:16px;
-      margin-top:-2px;
-      margin-bottom:8px;
-    }
-
-    .submenu.show{display:block;}
-
-    .submenu .menu-btn{
-      background:rgba(255,255,255,0.03);
-      font-size:14px;
-      padding:11px 12px;
-    }
-
-    .submenu .menu-btn.active{background:var(--sidebar-active);}
-
-    .layout.sidebar-collapsed .sidebar{
-      padding-left:10px;
-      padding-right:10px;
-    }
-
-    .layout.sidebar-collapsed .sidebar h2{padding-left:0;}
-
-    .layout.sidebar-collapsed .sidebar-title-text,
-    .layout.sidebar-collapsed .menu-text,
-    .layout.sidebar-collapsed .submenu-arrow{
-      opacity:0;
-      width:0;
-      overflow:hidden;
-      pointer-events:none;
-    }
-
-    .layout.sidebar-collapsed .menu-btn,
-    .layout.sidebar-collapsed .menu-group-header{
-      justify-content:center;
-      padding-left:10px;
-      padding-right:10px;
-    }
-
-    .layout.sidebar-collapsed .menu-group-left{justify-content:center;}
-    .layout.sidebar-collapsed .submenu{display:none !important;}
-    .layout.sidebar-collapsed .menu-icon{min-width:auto;}
-
-    .content{
-      padding:24px;
-      min-width:0;
-    }
-
-    .page{display:none;}
-    .page.active{display:block;}
-
-    .page-header{
-      margin-bottom:18px;
-    }
-
-    .page-header h2{
-      font-size:24px;
-      margin-bottom:6px;
-    }
-
-    .page-header p{
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .summary-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-      gap:16px;
-      margin-bottom:18px;
-    }
-
-    .summary-card{
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:20px;
-      box-shadow:var(--shadow);
-    }
-
-    .summary-label{
-      color:var(--muted);
-      font-size:14px;
-      margin-bottom:10px;
-    }
-
-    .summary-value{
-      font-size:34px;
-      font-weight:bold;
-    }
-
-    .summary-value.money{
-      font-size:24px;
-      line-height:1.25;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
-      gap:18px;
-      margin-bottom:18px;
-    }
-
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:18px;
-      box-shadow:var(--shadow);
-    }
-
-    .card h3{
-      font-size:18px;
-      margin-bottom:14px;
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-      gap:14px;
-    }
-
-    .form-group{margin-bottom:12px;}
-
-    .form-group label{
-      display:block;
-      margin-bottom:6px;
-      font-size:14px;
-      font-weight:bold;
-      color:#374151;
-    }
-
-    .form-control{
-      width:100%;
-      border:1px solid #d1d5db;
-      background:#fff;
-      border-radius:12px;
-      padding:11px 12px;
-      outline:none;
-      font-size:14px;
-    }
-
-    .form-control:focus{
-      border-color:var(--primary);
-      box-shadow:0 0 0 4px rgba(179,0,0,0.08);
-    }
-
-    .actions-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-
-    .btn{
-      border:none;
-      border-radius:12px;
-      padding:11px 16px;
-      font-weight:bold;
-      cursor:pointer;
-      transition:.2s;
-    }
-
-    .btn-primary{
-      background:var(--primary);
-      color:#fff;
-    }
-
-    .btn-primary:hover{background:var(--primary-dark);}
-
-    .btn-secondary{
-      background:#374151;
-      color:#fff;
-    }
-
-    .btn-danger{
-      background:#dc2626;
-      color:#fff;
-    }
-
-    .btn-outline{
-      background:#fff;
-      color:var(--primary);
-      border:1px solid var(--primary);
-    }
-
-    .status-box{
-      margin-bottom:16px;
-      padding:12px 14px;
-      border-radius:12px;
-      display:none;
-      font-size:14px;
-      font-weight:bold;
-    }
-
-    .status-success{display:block;background:var(--success-bg);color:var(--success-text);}
-    .status-error{display:block;background:var(--error-bg);color:var(--error-text);}
-    .status-warning{display:block;background:var(--warning-bg);color:var(--warning-text);}
-    .status-info{display:block;background:var(--info-bg);color:var(--info-text);}
-
-    .table-wrap{overflow-x:auto;}
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-    }
-
-    th,td{
-      padding:12px;
-      border-bottom:1px solid var(--border);
-      text-align:left;
-      font-size:14px;
-      vertical-align:middle;
-      white-space:nowrap;
-    }
-
-    th{background:#f9fafb;}
-
-    .empty-state{
-      padding:20px;
-      text-align:center;
-      color:var(--muted);
-    }
-
-    .badge{
-      display:inline-block;
-      padding:5px 8px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:bold;
-    }
-
-    .badge-ok{background:var(--success-bg);color:var(--success-text);}
-    .badge-alert{background:var(--error-bg);color:var(--error-text);}
-    .badge-warning{background:var(--warning-bg);color:var(--warning-text);}
-    .badge-info{background:var(--info-bg);color:var(--info-text);}
-
-    .fluxo-entrada{color:#166534;font-weight:bold;}
-    .fluxo-saida{color:#991b1b;font-weight:bold;}
-    .fluxo-saldo-positivo{color:#166534;font-weight:bold;}
-    .fluxo-saldo-negativo{color:#991b1b;font-weight:bold;}
-
-    .toolbar{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:end;
-      margin-bottom:16px;
-    }
-
-    .toolbar .form-group{
-      margin-bottom:0;
-      min-width:180px;
-    }
-
-    .modal-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(17,24,39,.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-      padding:20px;
-    }
-
-    .modal-overlay.show{display:flex;}
-
-    .modal{
-      background:#fff;
-      width:100%;
-      max-width:700px;
-      border-radius:22px;
-      box-shadow:0 30px 60px rgba(0,0,0,.25);
-      padding:20px;
-      max-height:90vh;
-      overflow:auto;
-    }
-
-    .modal-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:14px;
-    }
-
-    .modal-header h3{
-      margin:0;
-      font-size:20px;
-    }
-
-    .close-btn{
-      border:none;
-      background:#f3f4f6;
-      color:#111827;
-      width:36px;
-      height:36px;
-      border-radius:10px;
-      cursor:pointer;
-      font-size:16px;
-      font-weight:bold;
-    }
-
-    @media (max-width:980px){
-      .layout,.layout.sidebar-collapsed{grid-template-columns:1fr;}
-      .sidebar,.layout.sidebar-collapsed .sidebar{padding:14px;}
-      .layout.sidebar-collapsed .sidebar-title-text,
-      .layout.sidebar-collapsed .menu-text,
-      .layout.sidebar-collapsed .submenu-arrow{
-        opacity:1;
-        width:auto;
-        pointer-events:auto;
-      }
-      .layout.sidebar-collapsed .menu-btn,
-      .layout.sidebar-collapsed .menu-group-header{
-        justify-content:flex-start;
-        padding-left:14px;
-        padding-right:14px;
-      }
-      .layout.sidebar-collapsed .submenu{display:none !important;}
-    }
-  </style>
-</head>
-<body>
-
-  <div id="loginScreen" class="login-screen">
-    <div class="login-card">
-      <h1>LF ERP</h1>
-      <p>Entre com seu usuário e senha para acessar o sistema.</p>
-
-      <div id="loginStatus" class="status-box"></div>
-
-      <div class="form-group">
-        <label>Usuário</label>
-        <input id="loginUsuario" class="form-control" type="text" placeholder="Seu usuário" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>LF ERP</title>
+    <meta
+      name="description"
+      content="LF ERP - Sistema profissional de gestão empresarial multiempresa"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      referrerpolicy="no-referrer"
+    />
+
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <!-- LOADER GLOBAL -->
+      <div id="globalLoading" class="global-loading hidden" aria-live="polite" aria-busy="true">
+        <div class="global-loading__box">
+          <div class="spinner"></div>
+          <p>Carregando sistema...</p>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>Senha</label>
-        <input id="loginSenha" class="form-control" type="password" placeholder="Sua senha" />
+      <!-- TELA DE LOGIN -->
+      <section id="loginScreen" class="login-screen">
+        <div class="login-screen__left">
+          <div class="login-brand">
+            <div class="login-brand__badge">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+              <h1>LF ERP</h1>
+              <p>Gestão empresarial profissional</p>
+            </div>
+          </div>
+
+          <div class="login-highlight">
+            <span class="login-highlight__tag">SaaS Multiempresa</span>
+            <h2>Controle completo da sua operação em um só lugar</h2>
+            <p>
+              Plataforma profissional com dashboard, PDV, compras, vendas, financeiro, relatórios e
+              gestão por empresa com segurança.
+            </p>
+
+            <div class="login-highlight__cards">
+              <article class="login-mini-card">
+                <i class="fa-solid fa-chart-line"></i>
+                <div>
+                  <strong>Dashboard inteligente</strong>
+                  <small>Indicadores e visão gerencial em tempo real</small>
+                </div>
+              </article>
+
+              <article class="login-mini-card">
+                <i class="fa-solid fa-cash-register"></i>
+                <div>
+                  <strong>PDV ágil</strong>
+                  <small>Venda rápida com foco em operação profissional</small>
+                </div>
+              </article>
+
+              <article class="login-mini-card">
+                <i class="fa-solid fa-building"></i>
+                <div>
+                  <strong>Multiempresa</strong>
+                  <small>Isolamento por empresa com empresa_id</small>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-screen__right">
+          <div class="login-card">
+            <div class="login-card__header">
+              <h3>Acessar sistema</h3>
+              <p>Entre com seu usuário e senha</p>
+            </div>
+
+            <form id="loginForm" class="login-form" autocomplete="on">
+              <div class="form-group">
+                <label for="loginUsuario">Usuário</label>
+                <div class="input-icon">
+                  <i class="fa-solid fa-user"></i>
+                  <input
+                    type="text"
+                    id="loginUsuario"
+                    name="usuario"
+                    placeholder="Digite seu usuário"
+                    autocomplete="username"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="loginSenha">Senha</label>
+                <div class="input-icon">
+                  <i class="fa-solid fa-lock"></i>
+                  <input
+                    type="password"
+                    id="loginSenha"
+                    name="senha"
+                    placeholder="Digite sua senha"
+                    autocomplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="input-action"
+                    id="togglePasswordBtn"
+                    aria-label="Mostrar ou ocultar senha"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="login-form__options">
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="rememberSession" />
+                  <span>Lembrar acesso</span>
+                </label>
+
+                <button type="button" id="loginHelpBtn" class="link-button">
+                  Precisa de ajuda?
+                </button>
+              </div>
+
+              <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-block">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                Entrar
+              </button>
+
+              <div id="loginMessage" class="form-message" role="alert"></div>
+            </form>
+
+            <div class="login-card__footer">
+              <small> Ambiente seguro • Controle por perfil • Operação multiempresa </small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ÁREA LOGADA -->
+      <section id="mainScreen" class="main-screen hidden">
+        <aside id="sidebar" class="sidebar expanded">
+          <div class="sidebar__top">
+            <div class="brand">
+              <div class="brand__icon">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+              <div class="brand__text">
+                <strong>LF ERP</strong>
+                <span id="sidebarCompanyName">Carregando empresa...</span>
+              </div>
+            </div>
+
+            <button
+              id="sidebarToggleBtn"
+              class="icon-btn"
+              type="button"
+              aria-label="Recolher menu"
+              title="Recolher menu"
+            >
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+
+          <nav class="sidebar__nav">
+            <button class="nav-item active" data-view="dashboard">
+              <span class="nav-item__icon"><i class="fa-solid fa-chart-pie"></i></span>
+              <span class="nav-item__label">Dashboard</span>
+            </button>
+
+            <button class="nav-item" data-view="pdv">
+              <span class="nav-item__icon"><i class="fa-solid fa-cash-register"></i></span>
+              <span class="nav-item__label">PDV</span>
+            </button>
+
+            <div class="nav-group" data-group="cadastros">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"><i class="fa-solid fa-database"></i></span>
+                  <span class="nav-item__label">Cadastros</span>
+                </span>
+                <span class="nav-group__arrow">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="produtos">
+                  <i class="fa-solid fa-box-open"></i>
+                  <span>Produtos</span>
+                </button>
+                <button class="nav-subitem" data-view="clientes">
+                  <i class="fa-solid fa-users"></i>
+                  <span>Clientes</span>
+                </button>
+                <button class="nav-subitem" data-view="fornecedores">
+                  <i class="fa-solid fa-truck-field"></i>
+                  <span>Fornecedores</span>
+                </button>
+                <button class="nav-subitem" data-view="usuarios">
+                  <i class="fa-solid fa-user-shield"></i>
+                  <span>Usuários</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="nav-group" data-group="movimentacoes">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"
+                    ><i class="fa-solid fa-arrow-right-arrow-left"></i
+                  ></span>
+                  <span class="nav-item__label">Movimentações</span>
+                </span>
+                <span class="nav-group__arrow">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="vendas">
+                  <i class="fa-solid fa-cart-shopping"></i>
+                  <span>Vendas</span>
+                </button>
+                <button class="nav-subitem" data-view="compras">
+                  <i class="fa-solid fa-basket-shopping"></i>
+                  <span>Compras</span>
+                </button>
+                <button class="nav-subitem" data-view="estoque">
+                  <i class="fa-solid fa-warehouse"></i>
+                  <span>Estoque</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="nav-group" data-group="financeiro">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"><i class="fa-solid fa-wallet"></i></span>
+                  <span class="nav-item__label">Financeiro</span>
+                </span>
+                <span class="nav-group__arrow">
+                  <i class="fa-solid fa-chevron-down"></i>
+                </span>
+              </button>
+
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="contas-receber">
+                  <i class="fa-solid fa-money-bill-trend-up"></i>
+                  <span>Contas a Receber</span>
+                </button>
+                <button class="nav-subitem" data-view="contas-pagar">
+                  <i class="fa-solid fa-money-bill-transfer"></i>
+                  <span>Contas a Pagar</span>
+                </button>
+                <button class="nav-subitem" data-view="fluxo-caixa">
+                  <i class="fa-solid fa-cash-register"></i>
+                  <span>Fluxo de Caixa</span>
+                </button>
+              </div>
+            </div>
+
+            <button class="nav-item" data-view="relatorios">
+              <span class="nav-item__icon"><i class="fa-solid fa-file-lines"></i></span>
+              <span class="nav-item__label">Relatórios</span>
+            </button>
+
+            <button class="nav-item" data-view="configuracoes">
+              <span class="nav-item__icon"><i class="fa-solid fa-gear"></i></span>
+              <span class="nav-item__label">Configurações</span>
+            </button>
+          </nav>
+
+          <div class="sidebar__footer">
+            <div class="sidebar-user">
+              <div class="sidebar-user__avatar" id="sidebarUserAvatar">LF</div>
+              <div class="sidebar-user__info">
+                <strong id="sidebarUserName">Usuário</strong>
+                <span id="sidebarUserRole">Perfil</span>
+              </div>
+            </div>
+
+            <button id="logoutBtn" class="btn btn-danger btn-block" type="button">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Sair
+            </button>
+          </div>
+        </aside>
+
+        <div class="main-content">
+          <header class="topbar">
+            <div class="topbar__left">
+              <button
+                id="mobileSidebarBtn"
+                class="icon-btn topbar-mobile-btn"
+                type="button"
+                aria-label="Abrir menu"
+              >
+                <i class="fa-solid fa-bars"></i>
+              </button>
+
+              <div class="page-title">
+                <h1 id="pageTitle">Dashboard</h1>
+                <p id="pageSubtitle">Visão geral do sistema</p>
+              </div>
+            </div>
+
+            <div class="topbar__right">
+              <button id="refreshDataBtn" class="btn btn-light" type="button">
+                <i class="fa-solid fa-rotate"></i>
+                Atualizar
+              </button>
+
+              <div class="topbar-company">
+                <span class="topbar-company__label">Empresa</span>
+                <strong id="topbarCompanyName">Carregando...</strong>
+              </div>
+            </div>
+          </header>
+
+          <!-- FILTRO GLOBAL COMPACTO -->
+          <section id="globalFiltersBar" class="global-filter-mini">
+            <button id="toggleFiltersBtn" class="global-filter-mini__button" type="button">
+              <i class="fa-solid fa-filter"></i>
+              Filtros
+            </button>
+
+            <span id="globalFilterSummary" class="global-filter-mini__summary">
+              Período: Últimos 7 dias
+            </span>
+
+            <div id="globalFiltersContent" class="global-filter-popover hidden">
+              <div class="global-filter-popover__header">
+                <strong>Filtros globais</strong>
+                <button type="button" id="closeGlobalFiltersBtn" class="icon-button">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <div class="global-filter-popover__grid">
+                <div class="form-group">
+                  <label for="filtroPeriodo">Período</label>
+                  <select id="filtroPeriodo">
+                    <option value="hoje">Hoje</option>
+                    <option value="ontem">Ontem</option>
+                    <option value="7dias" selected>Últimos 7 dias</option>
+                    <option value="30dias">Últimos 30 dias</option>
+                    <option value="mesAtual">Mês atual</option>
+                    <option value="mesAnterior">Mês anterior</option>
+                    <option value="personalizado">Personalizado</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="filtroDataInicial">Data inicial</label>
+                  <input type="date" id="filtroDataInicial" />
+                </div>
+
+                <div class="form-group">
+                  <label for="filtroDataFinal">Data final</label>
+                  <input type="date" id="filtroDataFinal" />
+                </div>
+
+                <div class="form-group form-group--full">
+                  <label for="filtroBuscaGlobal">Busca geral</label>
+                  <input
+                    type="text"
+                    id="filtroBuscaGlobal"
+                    placeholder="Buscar cliente, produto, documento..."
+                  />
+                </div>
+              </div>
+
+              <div class="global-filter-popover__actions">
+                <button id="applyGlobalFiltersBtn" class="btn btn-primary" type="button">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  Aplicar
+                </button>
+
+                <button id="clearGlobalFiltersBtn" class="btn btn-light" type="button">
+                  <i class="fa-solid fa-eraser"></i>
+                  Limpar
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ALERTAS / MENSAGENS -->
+          <section id="alertContainer" class="alert-container"></section>
+
+          <!-- CONTEÚDO DINÂMICO -->
+          <main id="viewContainer" class="view-container">
+            <!-- DASHBOARD -->
+            <section class="view-section active" data-view="dashboard">
+              <div class="section-header">
+                <div>
+                  <h2>Painel gerencial</h2>
+                  <p>Resumo executivo da operação</p>
+                </div>
+                <div class="section-header__actions">
+                  <button class="btn btn-light" type="button" id="dashboardExportBtn">
+                    <i class="fa-solid fa-download"></i>
+                    Exportar
+                  </button>
+                </div>
+              </div>
+
+              <div class="kpi-grid">
+                <article class="kpi-card">
+                  <div class="kpi-card__icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                  <div class="kpi-card__content">
+                    <span>Faturamento</span>
+                    <strong id="kpiFaturamento">R$ 0,00</strong>
+                    <small id="kpiFaturamentoMeta">Carregando...</small>
+                  </div>
+                </article>
+
+                <article class="kpi-card">
+                  <div class="kpi-card__icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                  <div class="kpi-card__content">
+                    <span>Vendas</span>
+                    <strong id="kpiVendas">0</strong>
+                    <small id="kpiVendasInfo">Carregando...</small>
+                  </div>
+                </article>
+
+                <article class="kpi-card">
+                  <div class="kpi-card__icon"><i class="fa-solid fa-money-check-dollar"></i></div>
+                  <div class="kpi-card__content">
+                    <span>A Receber</span>
+                    <strong id="kpiReceber">R$ 0,00</strong>
+                    <small id="kpiReceberInfo">Carregando...</small>
+                  </div>
+                </article>
+
+                <article class="kpi-card">
+                  <div class="kpi-card__icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                  <div class="kpi-card__content">
+                    <span>A Pagar</span>
+                    <strong id="kpiPagar">R$ 0,00</strong>
+                    <small id="kpiPagarInfo">Carregando...</small>
+                  </div>
+                </article>
+
+                <article class="kpi-card">
+                  <div class="kpi-card__icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                  <div class="kpi-card__content">
+                    <span>Estoque</span>
+                    <strong id="kpiEstoque">0</strong>
+                    <small id="kpiEstoqueInfo">Carregando...</small>
+                  </div>
+                </article>
+
+                <article class="kpi-card">
+                  <div class="kpi-card__icon"><i class="fa-solid fa-user-group"></i></div>
+                  <div class="kpi-card__content">
+                    <span>Clientes</span>
+                    <strong id="kpiClientes">0</strong>
+                    <small id="kpiClientesInfo">Carregando...</small>
+                  </div>
+                </article>
+              </div>
+
+              <div class="dashboard-grid">
+                <article class="panel-card panel-card--large">
+                  <div class="panel-card__header">
+                    <div>
+                      <h3>Resumo de performance</h3>
+                      <p>Indicadores consolidados do período</p>
+                    </div>
+                  </div>
+                  <div id="dashboardResumo" class="panel-card__body empty-state">
+                    Dados ainda não carregados.
+                  </div>
+                </article>
+
+                <article class="panel-card">
+                  <div class="panel-card__header">
+                    <div>
+                      <h3>Top produtos</h3>
+                      <p>Mais vendidos no período</p>
+                    </div>
+                  </div>
+                  <div id="dashboardTopProdutos" class="panel-card__body empty-state">
+                    Dados ainda não carregados.
+                  </div>
+                </article>
+
+                <article class="panel-card">
+                  <div class="panel-card__header">
+                    <div>
+                      <h3>Alertas financeiros</h3>
+                      <p>Títulos e pendências</p>
+                    </div>
+                  </div>
+                  <div id="dashboardAlertas" class="panel-card__body empty-state">
+                    Dados ainda não carregados.
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <!-- PDV -->
+            <section class="view-section" data-view="pdv">
+              <div class="section-header">
+                <div>
+                  <h2>PDV</h2>
+                  <p>Ponto de venda rápido e profissional</p>
+                </div>
+              </div>
+              <div id="pdvContainer" class="module-placeholder">
+                Estrutura do PDV será carregada pelo módulo correspondente.
+              </div>
+            </section>
+
+            <!-- CADASTROS -->
+            <section class="view-section" data-view="cadastros">
+              <div class="section-header">
+                <div>
+                  <h2>Cadastros</h2>
+                  <p>Resumo dos módulos de cadastro do sistema</p>
+                </div>
+              </div>
+
+              <div id="cadastrosContainer" class="module-placeholder">
+                <div class="module-card">
+                  <div class="module-card__header">
+                    <div>
+                      <h3>Cadastros</h3>
+                      <p>Acesse produtos, clientes, fornecedores e usuários</p>
+                    </div>
+                  </div>
+
+                  <div class="dashboard-grid">
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Produtos</h3></div>
+                      <div class="panel-card__body">
+                        <p>Cadastro, edição e controle de itens.</p>
+                        <button class="btn btn-primary nav-shortcut" data-view="produtos">
+                          Abrir Produtos
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Clientes</h3></div>
+                      <div class="panel-card__body">
+                        <p>Relacionamento comercial e base de clientes.</p>
+                        <button class="btn btn-primary nav-shortcut" data-view="clientes">
+                          Abrir Clientes
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Fornecedores</h3></div>
+                      <div class="panel-card__body">
+                        <p>Base de fornecedores para compras.</p>
+                        <button class="btn btn-primary nav-shortcut" data-view="fornecedores">
+                          Abrir Fornecedores
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Usuários</h3></div>
+                      <div class="panel-card__body">
+                        <p>Gestão de acessos e perfis.</p>
+                        <button class="btn btn-primary nav-shortcut" data-view="usuarios">
+                          Abrir Usuários
+                        </button>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- PRODUTOS -->
+            <section class="view-section" data-view="produtos">
+              <div class="section-header">
+                <div>
+                  <h2>Produtos</h2>
+                  <p>Cadastro, edição, estoque e consulta</p>
+                </div>
+              </div>
+              <div id="produtosContainer" class="module-placeholder">
+                Estrutura do módulo de produtos será carregada pelo arquivo produtos.js
+              </div>
+            </section>
+
+            <!-- CLIENTES -->
+            <section class="view-section" data-view="clientes">
+              <div class="section-header">
+                <div>
+                  <h2>Clientes</h2>
+                  <p>Cadastro e relacionamento comercial</p>
+                </div>
+              </div>
+              <div id="clientesContainer" class="module-placeholder">
+                Estrutura do módulo de clientes será carregada pelo arquivo clientes.js
+              </div>
+            </section>
+
+            <!-- FORNECEDORES -->
+            <section class="view-section" data-view="fornecedores">
+              <div class="section-header">
+                <div>
+                  <h2>Fornecedores</h2>
+                  <p>Base completa de fornecedores e compras</p>
+                </div>
+              </div>
+              <div id="fornecedoresContainer" class="module-placeholder">
+                Estrutura do módulo de fornecedores será carregada pelo arquivo fornecedores.js
+              </div>
+            </section>
+
+            <!-- USUÁRIOS -->
+            <section class="view-section" data-view="usuarios">
+              <div class="section-header">
+                <div>
+                  <h2>Usuários</h2>
+                  <p>Gestão de acessos, perfis e permissões</p>
+                </div>
+              </div>
+              <div id="usuariosContainer" class="module-placeholder">
+                Estrutura do módulo de usuários será carregada posteriormente.
+              </div>
+            </section>
+
+            <!-- MOVIMENTAÇÕES -->
+            <section class="view-section" data-view="movimentacoes">
+              <div class="section-header">
+                <div>
+                  <h2>Movimentações</h2>
+                  <p>Resumo dos módulos de operação</p>
+                </div>
+              </div>
+
+              <div id="movimentacoesContainer" class="module-placeholder">
+                <div class="module-card">
+                  <div class="module-card__header">
+                    <div>
+                      <h3>Movimentações</h3>
+                      <p>Acesse vendas, compras e estoque</p>
+                    </div>
+                  </div>
+
+                  <div class="dashboard-grid">
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Vendas</h3></div>
+                      <div class="panel-card__body">
+                        <p>Consulta e gestão comercial.</p>
+                        <button class="btn btn-primary nav-shortcut" data-view="vendas">
+                          Abrir Vendas
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Compras</h3></div>
+                      <div class="panel-card__body">
+                        <p>Lançamentos e histórico de aquisições.</p>
+                        <button class="btn btn-primary nav-shortcut" data-view="compras">
+                          Abrir Compras
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Estoque</h3></div>
+                      <div class="panel-card__body">
+                        <p>Posição atual e alertas de estoque.</p>
+                        <button class="btn btn-primary nav-shortcut" data-view="estoque">
+                          Abrir Estoque
+                        </button>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- VENDAS -->
+            <section class="view-section" data-view="vendas">
+              <div class="section-header">
+                <div>
+                  <h2>Vendas</h2>
+                  <p>Consulta, filtros e gestão das vendas realizadas</p>
+                </div>
+              </div>
+              <div id="vendasContainer" class="module-placeholder">
+                Estrutura do módulo de vendas será carregada pelo arquivo vendas.js
+              </div>
+            </section>
+
+            <!-- COMPRAS -->
+            <section class="view-section" data-view="compras">
+              <div class="section-header">
+                <div>
+                  <h2>Compras</h2>
+                  <p>Lançamento, histórico e controle de aquisições</p>
+                </div>
+              </div>
+              <div id="comprasContainer" class="module-placeholder">
+                Estrutura do módulo de compras será carregada pelo arquivo compras.js
+              </div>
+            </section>
+
+            <!-- ESTOQUE -->
+            <section class="view-section" data-view="estoque">
+              <div class="section-header">
+                <div>
+                  <h2>Estoque</h2>
+                  <p>Movimentações, posição e conferência</p>
+                </div>
+              </div>
+              <div id="estoqueContainer" class="module-placeholder">
+                Estrutura do módulo de estoque será carregada posteriormente.
+              </div>
+            </section>
+
+            <!-- FINANCEIRO -->
+            <section class="view-section" data-view="financeiro">
+              <div class="section-header">
+                <div>
+                  <h2>Financeiro</h2>
+                  <p>Resumo dos módulos financeiros</p>
+                </div>
+              </div>
+
+              <div id="financeiroContainer" class="module-placeholder">
+                <div class="module-card">
+                  <div class="module-card__header">
+                    <div>
+                      <h3>Financeiro</h3>
+                      <p>Acesse contas, fluxo de caixa e lançamentos</p>
+                    </div>
+                  </div>
+
+                  <div class="dashboard-grid">
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Contas a Receber</h3></div>
+                      <div class="panel-card__body">
+                        <button class="btn btn-primary nav-shortcut" data-view="contas-receber">
+                          Abrir
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Contas a Pagar</h3></div>
+                      <div class="panel-card__body">
+                        <button class="btn btn-primary nav-shortcut" data-view="contas-pagar">
+                          Abrir
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Fluxo de Caixa</h3></div>
+                      <div class="panel-card__body">
+                        <button class="btn btn-primary nav-shortcut" data-view="fluxo-caixa">
+                          Abrir
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="panel-card">
+                      <div class="panel-card__header"><h3>Lançamentos</h3></div>
+                      <div class="panel-card__body">
+                        <button class="btn btn-primary nav-shortcut" data-view="lancamentos">
+                          Abrir
+                        </button>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- CONTAS A RECEBER -->
+            <section class="view-section" data-view="contas-receber">
+              <div class="section-header">
+                <div>
+                  <h2>Contas a Receber</h2>
+                  <p>Títulos pendentes, recebidos e vencimentos</p>
+                </div>
+              </div>
+              <div id="contasReceberContainer" class="module-placeholder">
+                Estrutura financeira será carregada pelo arquivo financeiro.js
+              </div>
+            </section>
+
+            <!-- CONTAS A PAGAR -->
+            <section class="view-section" data-view="contas-pagar">
+              <div class="section-header">
+                <div>
+                  <h2>Contas a Pagar</h2>
+                  <p>Despesas, vencimentos e quitações</p>
+                </div>
+              </div>
+              <div id="contasPagarContainer" class="module-placeholder">
+                Estrutura financeira será carregada pelo arquivo financeiro.js
+              </div>
+            </section>
+
+            <!-- FLUXO DE CAIXA -->
+            <section class="view-section" data-view="fluxo-caixa">
+              <div class="section-header">
+                <div>
+                  <h2>Fluxo de Caixa</h2>
+                  <p>Entradas, saídas e saldo consolidado</p>
+                </div>
+              </div>
+              <div id="fluxoCaixaContainer" class="module-placeholder">
+                Estrutura financeira será carregada pelo arquivo financeiro.js
+              </div>
+            </section>
+
+            <!-- RELATÓRIOS -->
+            <section class="view-section" data-view="relatorios">
+              <div class="section-header">
+                <div>
+                  <h2>Relatórios</h2>
+                  <p>Relatórios gerenciais e operacionais</p>
+                </div>
+              </div>
+              <div id="relatoriosContainer" class="module-placeholder">
+                Estrutura do módulo de relatórios será carregada posteriormente.
+              </div>
+            </section>
+
+            <!-- CONFIGURAÇÕES -->
+            <section class="view-section" data-view="configuracoes">
+              <div class="section-header">
+                <div>
+                  <h2>Configurações</h2>
+                  <p>Preferências, parâmetros e ambiente</p>
+                </div>
+              </div>
+              <div id="configuracoesContainer" class="module-placeholder">
+                Estrutura do módulo de configurações será carregada posteriormente.
+              </div>
+            </section>
+          </main>
+        </div>
+      </section>
+
+      <!-- OVERLAY MENU MOBILE -->
+      <div id="sidebarOverlay" class="sidebar-overlay hidden"></div>
+
+      <!-- MODAL GLOBAL -->
+      <div id="globalModal" class="modal hidden" aria-hidden="true">
+        <div class="modal__backdrop" data-close-modal="true"></div>
+        <div class="modal__dialog">
+          <div class="modal__header">
+            <h3 id="globalModalTitle">Título</h3>
+            <button
+              type="button"
+              class="icon-btn"
+              id="closeGlobalModalBtn"
+              aria-label="Fechar modal"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="globalModalBody" class="modal__body"></div>
+          <div id="globalModalFooter" class="modal__footer"></div>
+        </div>
       </div>
 
-      <div class="actions-row">
-        <button class="btn btn-primary" style="width:100%;" onclick="fazerLogin()">Entrar</button>
-      </div>
+      <!-- TOAST -->
+      <div id="toastContainer" class="toast-container"></div>
     </div>
-  </div>
 
-  <div id="app" class="app hidden">
-    <header class="topbar">
-      <div class="topbar-left">
-        <h1>LF ERP</h1>
-        <small id="empresaLabel">Ambiente administrativo</small>
-      </div>
-      <div class="topbar-right">
-        <div class="user-pill" id="usuarioInfo">Usuário</div>
-        <button class="btn btn-danger" onclick="sair()">Sair</button>
-      </div>
-    </header>
-
-    <section class="filter-bar">
-      <div class="filter-left">
-        <button class="filter-toggle" onclick="alternarFiltroPeriodo()">📅 Filtro por período</button>
-        <div id="periodoResumo" class="period-resume">Período: sem filtro</div>
-      </div>
-
-      <div class="filter-right">
-        <button class="btn btn-outline" onclick="limparFiltroPeriodo()">Limpar</button>
-      </div>
-
-      <div id="filterPanel" class="filter-panel">
-        <div class="filter-grid">
-          <div class="form-group">
-            <label>Data inicial</label>
-            <input id="periodoInicial" class="form-control" type="date" />
-          </div>
-
-          <div class="form-group">
-            <label>Data final</label>
-            <input id="periodoFinal" class="form-control" type="date" />
-          </div>
-
-          <div class="actions-row">
-            <button class="btn btn-primary" onclick="aplicarFiltroPeriodo()">Aplicar período</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div id="layout" class="layout">
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <h2><span class="sidebar-title-text">Menu</span></h2>
-          <button id="sidebarToggle" class="sidebar-toggle" onclick="alternarSidebar()" title="Minimizar menu">☰</button>
-        </div>
-
-        <div class="sidebar-section">
-          <button class="menu-btn active" onclick="mostrarPagina('dashboard', this); fecharTodosSubmenus()">
-            <span class="menu-icon">🏠</span><span class="menu-text">Dashboard</span>
-          </button>
-
-          <button class="menu-btn" onclick="mostrarPagina('vendas', this); fecharTodosSubmenus()">
-            <span class="menu-icon">💰</span><span class="menu-text">PDV</span>
-          </button>
-
-          <button class="menu-group-header" onclick="alternarSubmenu('submenuCadastros', this)">
-            <div class="menu-group-left">
-              <span class="menu-icon">🗂️</span><span class="menu-text">Cadastros</span>
-            </div>
-            <span class="submenu-arrow">▾</span>
-          </button>
-          <div id="submenuCadastros" class="submenu">
-            <button class="menu-btn" onclick="mostrarPagina('produtos', this)">📦 <span class="menu-text">Produtos</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('clientes', this)">👥 <span class="menu-text">Clientes</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('fornecedores', this)">🚚 <span class="menu-text">Fornecedores</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('usuarios', this); carregarUsuarios()">👤 <span class="menu-text">Usuários</span></button>
-          </div>
-
-          <button class="menu-btn" onclick="mostrarPagina('compras', this); fecharTodosSubmenus()">
-            <span class="menu-icon">🛒</span><span class="menu-text">Compras</span>
-          </button>
-
-          <button class="menu-group-header" onclick="alternarSubmenu('submenuEstoque', this)">
-            <div class="menu-group-left">
-              <span class="menu-icon">🏬</span><span class="menu-text">Estoque</span>
-            </div>
-            <span class="submenu-arrow">▾</span>
-          </button>
-          <div id="submenuEstoque" class="submenu">
-            <button class="menu-btn" onclick="mostrarPagina('estoque', this)">📋 <span class="menu-text">Visão de Estoque</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('movimentacoes', this)">🔄 <span class="menu-text">Movimentações</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('ajuste', this)">🛠️ <span class="menu-text">Ajuste de Estoque</span></button>
-          </div>
-
-          <button class="menu-group-header" onclick="alternarSubmenu('submenuFinanceiro', this)">
-            <div class="menu-group-left">
-              <span class="menu-icon">💵</span><span class="menu-text">Financeiro</span>
-            </div>
-            <span class="submenu-arrow">▾</span>
-          </button>
-          <div id="submenuFinanceiro" class="submenu">
-            <button class="menu-btn" onclick="mostrarPagina('fluxoCaixa', this); carregarFluxoCaixa()">💸 <span class="menu-text">Fluxo de Caixa</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('contasReceber', this); carregarContasReceber()">💳 <span class="menu-text">Contas a Receber</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('contasPagar', this); carregarContasPagar()">💰 <span class="menu-text">Contas a Pagar</span></button>
-          </div>
-
-          <button class="menu-group-header" onclick="alternarSubmenu('submenuRelatorios', this)">
-            <div class="menu-group-left">
-              <span class="menu-icon">📊</span><span class="menu-text">Relatórios</span>
-            </div>
-            <span class="submenu-arrow">▾</span>
-          </button>
-          <div id="submenuRelatorios" class="submenu">
-            <button class="menu-btn" onclick="mostrarPagina('relatorio', this); carregarRelatorioEstoque()">📦 <span class="menu-text">Relatório de Estoque</span></button>
-            <button class="menu-btn" onclick="mostrarPagina('performance', this); carregarRelatorioPerformance()">📈 <span class="menu-text">Performance dos Produtos</span></button>
-          </div>
-        </div>
-      </aside>
-
-      <main class="content">
-        <div id="appStatus" class="status-box"></div>
-
-        <section id="dashboard" class="page active">
-          <div class="page-header">
-            <h2>Dashboard</h2>
-            <p>Resumo geral da operação.</p>
-          </div>
-
-          <div class="summary-grid">
-            <div class="summary-card"><div class="summary-label">Produtos</div><div class="summary-value" id="dashProdutos">0</div></div>
-            <div class="summary-card"><div class="summary-label">Fornecedores</div><div class="summary-value" id="dashFornecedores">0</div></div>
-            <div class="summary-card"><div class="summary-label">Compras</div><div class="summary-value" id="dashCompras">0</div></div>
-            <div class="summary-card"><div class="summary-label">Vendas</div><div class="summary-value" id="dashVendas">0</div></div>
-            <div class="summary-card"><div class="summary-label">Estoque Baixo</div><div class="summary-value" id="dashAlerta">0</div></div>
-            <div class="summary-card"><div class="summary-label">Valor em Estoque</div><div class="summary-value money" id="dashValorEstoque">R$ 0,00</div></div>
-            <div class="summary-card"><div class="summary-label">Faturamento</div><div class="summary-value money" id="dashFaturamento">R$ 0,00</div></div>
-            <div class="summary-card"><div class="summary-label">Lucro Estimado</div><div class="summary-value money" id="dashLucroEstimado">R$ 0,00</div></div>
-            <div class="summary-card"><div class="summary-label">Ticket Médio</div><div class="summary-value money" id="dashTicketMedio">R$ 0,00</div></div>
-            <div class="summary-card"><div class="summary-label">Receber Pendente</div><div class="summary-value money" id="dashReceberPendente">R$ 0,00</div></div>
-            <div class="summary-card"><div class="summary-label">Pagar Pendente</div><div class="summary-value money" id="dashPagarPendente">R$ 0,00</div></div>
-            <div class="summary-card"><div class="summary-label">Contas Atrasadas</div><div class="summary-value money" id="dashContasAtrasadas">R$ 0,00</div></div>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Produtos com alerta</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Empresa</th><th>Produto</th><th>Estoque</th><th>Mínimo</th><th>Status</th></tr>
-                  </thead>
-                  <tbody id="dashboardAlertasBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Últimas movimentações</h3>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Empresa</th><th>Produto</th><th>Tipo</th><th>Qtd</th><th>Data</th></tr>
-                  </thead>
-                  <tbody id="dashboardMovBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="fluxoCaixa" class="page">
-          <div class="page-header">
-            <h2>Fluxo de Caixa</h2>
-            <p>Visualize entradas, saídas, saldo do período e evolução diária do caixa.</p>
-          </div>
-
-          <div class="summary-grid">
-            <div class="summary-card">
-              <div class="summary-label">Entradas no período</div>
-              <div class="summary-value money fluxo-entrada" id="fcTotalEntradas">R$ 0,00</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Saídas no período</div>
-              <div class="summary-value money fluxo-saida" id="fcTotalSaidas">R$ 0,00</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Saldo final</div>
-              <div class="summary-value money" id="fcSaldoFinal">R$ 0,00</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-label">Lançamentos</div>
-              <div class="summary-value" id="fcQuantidadeLancamentos">0</div>
-            </div>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Resumo diário</h3>
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar data</label>
-                  <input id="buscaFluxoDia" class="form-control" type="text" placeholder="Ex.: 08/04/2026" oninput="renderFluxoResumoDia()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarFluxoCaixa()">Atualizar</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Data</th><th>Entradas</th><th>Saídas</th><th>Saldo do Dia</th><th>Saldo Acumulado</th></tr>
-                  </thead>
-                  <tbody id="fluxoResumoDiaBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Lançamentos do período</h3>
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar descrição</label>
-                  <input id="buscaFluxoLancamento" class="form-control" type="text" placeholder="Digite a descrição..." oninput="renderFluxoLancamentos()" />
-                </div>
-                <div class="form-group">
-                  <label>Tipo</label>
-                  <select id="filtroFluxoTipo" class="form-control" onchange="renderFluxoLancamentos()">
-                    <option value="">Todos</option>
-                    <option value="entrada">Entradas</option>
-                    <option value="saida">Saídas</option>
-                  </select>
-                </div>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Valor</th></tr>
-                  </thead>
-                  <tbody id="fluxoLancamentosBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="produtos" class="page">
-          <div class="page-header">
-            <h2>Produtos</h2>
-            <p>Cadastre e acompanhe os produtos da operação.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Novo produto</h3>
-              <div class="form-group">
-                <label>Empresa</label>
-                <input id="p_empresa" class="form-control" type="text" placeholder="Ex.: Unidade 01" />
-              </div>
-              <div class="form-group">
-                <label>Nome</label>
-                <input id="p_nome" class="form-control" type="text" />
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Preço</label>
-                  <input id="p_preco" class="form-control" type="number" min="0" step="0.01" />
-                </div>
-                <div class="form-group">
-                  <label>Custo</label>
-                  <input id="p_custo" class="form-control" type="number" min="0" step="0.01" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Estoque inicial</label>
-                  <input id="p_estoque" class="form-control" type="number" min="0" step="1" value="0" />
-                </div>
-                <div class="form-group">
-                  <label>Estoque mínimo</label>
-                  <input id="p_estoque_minimo" class="form-control" type="number" min="0" step="1" value="0" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Código de barras</label>
-                  <input id="p_codigo_barras" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>Categoria</label>
-                  <input id="p_categoria" class="form-control" type="text" />
-                </div>
-              </div>
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarProduto()">Salvar produto</button>
-                <button class="btn btn-secondary" onclick="limparProduto()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Lista de produtos</h3>
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar</label>
-                  <input id="buscaProduto" class="form-control" type="text" placeholder="Digite o nome..." oninput="renderProdutos()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarProdutos()">Atualizar</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Empresa</th><th>Nome</th><th>Categoria</th><th>Preço</th><th>Custo</th><th>Estoque</th><th>Mínimo</th><th>Ações</th></tr>
-                  </thead>
-                  <tbody id="listaProdutos"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="clientes" class="page">
-          <div class="page-header">
-            <h2>Clientes</h2>
-            <p>Cadastro de clientes para vendas e contas a receber.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Novo cliente</h3>
-              <div class="form-group">
-                <label>Empresa</label>
-                <input id="cl_empresa" class="form-control" type="text" placeholder="Ex.: Unidade 01" />
-              </div>
-              <div class="form-group">
-                <label>Nome</label>
-                <input id="cl_nome" class="form-control" type="text" />
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Telefone</label>
-                  <input id="cl_telefone" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>CPF</label>
-                  <input id="cl_cpf" class="form-control" type="text" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Nascimento</label>
-                  <input id="cl_nascimento" class="form-control" type="date" />
-                </div>
-                <div class="form-group">
-                  <label>Endereço</label>
-                  <input id="cl_endereco" class="form-control" type="text" />
-                </div>
-              </div>
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarCliente()">Salvar cliente</button>
-                <button class="btn btn-secondary" onclick="limparCliente()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Lista de clientes</h3>
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar</label>
-                  <input id="buscaCliente" class="form-control" type="text" placeholder="Digite o nome..." oninput="renderClientes()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarClientes()">Atualizar</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Empresa</th><th>Nome</th><th>Telefone</th><th>CPF</th><th>Nascimento</th><th>Endereço</th><th>Ações</th></tr>
-                  </thead>
-                  <tbody id="listaClientes"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="usuarios" class="page">
-          <div class="page-header">
-            <h2>Usuários</h2>
-            <p>Gerencie acessos do sistema conforme o perfil.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Novo usuário</h3>
-              <div class="form-group">
-                <label>Usuário</label>
-                <input id="u_usuario" class="form-control" type="text" />
-              </div>
-              <div class="form-group">
-                <label>Senha</label>
-                <input id="u_senha" class="form-control" type="password" />
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Nome completo</label>
-                  <input id="u_nome_completo" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>Tipo</label>
-                  <select id="u_tipo" class="form-control">
-                    <option value="funcionario">Funcionário</option>
-                    <option value="gerente">Gerente</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Empresa</label>
-                  <input id="u_empresa" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>CPF</label>
-                  <input id="u_cpf" class="form-control" type="text" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Nascimento</label>
-                <input id="u_nascimento" class="form-control" type="date" />
-              </div>
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarUsuario()">Salvar usuário</button>
-                <button class="btn btn-secondary" onclick="limparUsuario()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Lista de usuários</h3>
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar</label>
-                  <input id="buscaUsuario" class="form-control" type="text" placeholder="Digite nome ou usuário..." oninput="renderUsuarios()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarUsuarios()">Atualizar</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Usuário</th><th>Nome</th><th>Tipo</th><th>Empresa</th><th>Ações</th></tr>
-                  </thead>
-                  <tbody id="listaUsuarios"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="vendas" class="page">
-          <div class="page-header">
-            <h2>PDV</h2>
-            <p>Registre vendas com baixa automática de estoque e geração de contas a receber.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Nova venda</h3>
-              <div class="form-group">
-                <label>Empresa</label>
-                <input id="v_empresa" class="form-control" type="text" placeholder="Ex.: Unidade 01" />
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Cliente</label>
-                  <select id="v_cliente" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                  <label>Data</label>
-                  <input id="v_data" class="form-control" type="date" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Produto</label>
-                  <select id="v_produto" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                  <label>Quantidade</label>
-                  <input id="v_qtd" class="form-control" type="number" min="1" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Preço unitário</label>
-                  <input id="v_preco" class="form-control" type="number" min="0" step="0.01" />
-                </div>
-                <div class="form-group">
-                  <label>&nbsp;</label>
-                  <button class="btn btn-primary" style="width:100%;" onclick="adicionarItemVenda()">Adicionar item</button>
-                </div>
-              </div>
-              <div class="table-wrap" style="margin-top:14px;">
-                <table>
-                  <thead>
-                    <tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Ação</th></tr>
-                  </thead>
-                  <tbody id="itensVendaBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Fechamento</h3>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Pagamento</label>
-                  <select id="v_pagamento" class="form-control" onchange="atualizarCamposVenda()">
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Pix">Pix</option>
-                    <option value="Cartão de Débito">Cartão de Débito</option>
-                    <option value="Cartão de Crédito">Cartão de Crédito</option>
-                    <option value="Crédito Parcelado">Crédito Parcelado</option>
-                    <option value="Promissória">Promissória</option>
-                    <option value="Transferência">Transferência</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Parcelas</label>
-                  <input id="v_parcelas" class="form-control" type="number" min="1" value="1" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group" id="grupoPrimeiroVencimento">
-                  <label>Primeiro vencimento</label>
-                  <input id="v_primeiro_vencimento" class="form-control" type="date" />
-                </div>
-                <div class="form-group" id="grupoIntervaloDias">
-                  <label>Intervalo entre parcelas (dias)</label>
-                  <input id="v_intervalo_dias" class="form-control" type="number" min="1" value="30" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Desconto</label>
-                  <input id="v_desconto" class="form-control" type="number" min="0" step="0.01" value="0" oninput="renderResumoVenda()" />
-                </div>
-                <div class="form-group">
-                  <label>Acréscimo</label>
-                  <input id="v_acrescimo" class="form-control" type="number" min="0" step="0.01" value="0" oninput="renderResumoVenda()" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Observação</label>
-                <input id="v_observacao" class="form-control" type="text" />
-              </div>
-              <div class="summary-grid">
-                <div class="summary-card">
-                  <div class="summary-label">Subtotal</div>
-                  <div class="summary-value money" id="v_subtotal_label">R$ 0,00</div>
-                </div>
-                <div class="summary-card">
-                  <div class="summary-label">Total final</div>
-                  <div class="summary-value money" id="v_total_label">R$ 0,00</div>
-                </div>
-              </div>
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarVenda()">Finalizar venda</button>
-                <button class="btn btn-secondary" onclick="limparVenda()">Limpar venda</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Histórico de vendas</h3>
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar cliente</label>
-                <input id="buscaVenda" class="form-control" type="text" placeholder="Digite o cliente..." oninput="renderVendas()" />
-              </div>
-              <button class="btn btn-outline" onclick="carregarVendas()">Atualizar</button>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Empresa</th><th>ID</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Pagamento</th><th>Parcelas</th><th>Status</th><th>Data</th><th>Ações</th></tr>
-                </thead>
-                <tbody id="listaVendas"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="compras" class="page">
-          <div class="page-header">
-            <h2>Compras</h2>
-            <p>Registre compras, atualize o estoque e reflita corretamente no financeiro.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Nova compra</h3>
-              <div class="form-group">
-                <label>Empresa</label>
-                <input id="c_empresa" class="form-control" type="text" placeholder="Ex.: Unidade 01" />
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Fornecedor</label>
-                  <select id="c_fornecedor" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                  <label>Data</label>
-                  <input id="c_data" class="form-control" type="date" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Tipo de pagamento</label>
-                  <select id="c_tipo_pagamento" class="form-control" onchange="atualizarCamposPagamentoCompra()">
-                    <option value="vista">À vista</option>
-                    <option value="prazo">A prazo</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Forma de pagamento</label>
-                  <select id="c_forma_pagamento" class="form-control">
-                    <option value="">Selecione</option>
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Pix">Pix</option>
-                    <option value="Cartão de Débito">Cartão de Débito</option>
-                    <option value="Cartão de Crédito">Cartão de Crédito</option>
-                    <option value="Transferência">Transferência</option>
-                    <option value="Boleto">Boleto</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-grid" id="compraPrazoBox">
-                <div class="form-group">
-                  <label>Vencimento</label>
-                  <input id="c_vencimento" class="form-control" type="date" />
-                </div>
-                <div class="form-group">
-                  <label>Status do pagamento</label>
-                  <select id="c_status_pagamento" class="form-control">
-                    <option value="pendente">Pendente</option>
-                    <option value="pago">Pago</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Produto</label>
-                  <select id="c_produto" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                  <label>Quantidade</label>
-                  <input id="c_qtd" class="form-control" type="number" min="1" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Custo unitário</label>
-                  <input id="c_custo" class="form-control" type="number" min="0" step="0.01" />
-                </div>
-                <div class="form-group">
-                  <label>&nbsp;</label>
-                  <button class="btn btn-primary" style="width:100%;" onclick="adicionarItemCompra()">Adicionar item</button>
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Observação</label>
-                <input id="c_observacao" class="form-control" type="text" />
-              </div>
-              <div class="table-wrap" style="margin-top:14px;">
-                <table>
-                  <thead>
-                    <tr><th>Produto</th><th>Qtd</th><th>Custo</th><th>Subtotal</th><th>Ação</th></tr>
-                  </thead>
-                  <tbody id="itensCompraBody"></tbody>
-                </table>
-              </div>
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarCompra()">Salvar compra</button>
-                <button class="btn btn-secondary" onclick="limparCompra()">Limpar compra</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Histórico de compras</h3>
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar fornecedor</label>
-                  <input id="buscaCompra" class="form-control" type="text" placeholder="Digite o fornecedor..." oninput="renderCompras()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarCompras()">Atualizar</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Empresa</th><th>ID</th><th>Fornecedor</th><th>Total</th><th>Forma</th><th>Status</th><th>Data</th><th>Ações</th></tr>
-                  </thead>
-                  <tbody id="listaCompras"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="fornecedores" class="page">
-          <div class="page-header">
-            <h2>Fornecedores</h2>
-            <p>Gerencie os fornecedores vinculados às compras.</p>
-          </div>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Novo fornecedor</h3>
-              <div class="form-group">
-                <label>Empresa</label>
-                <input id="f_empresa" class="form-control" type="text" placeholder="Ex.: Unidade 01" />
-              </div>
-              <div class="form-group">
-                <label>Nome</label>
-                <input id="f_nome" class="form-control" type="text" />
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Contato</label>
-                  <input id="f_contato" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>Telefone</label>
-                  <input id="f_telefone" class="form-control" type="text" />
-                </div>
-              </div>
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Email</label>
-                  <input id="f_email" class="form-control" type="text" />
-                </div>
-                <div class="form-group">
-                  <label>Endereço</label>
-                  <input id="f_endereco" class="form-control" type="text" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Observação</label>
-                <input id="f_observacao" class="form-control" type="text" />
-              </div>
-              <div class="actions-row">
-                <button class="btn btn-primary" onclick="salvarFornecedor()">Salvar fornecedor</button>
-                <button class="btn btn-secondary" onclick="limparFornecedor()">Limpar</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3>Lista de fornecedores</h3>
-              <div class="toolbar">
-                <div class="form-group">
-                  <label>Buscar</label>
-                  <input id="buscaFornecedor" class="form-control" type="text" placeholder="Digite o nome..." oninput="renderFornecedores()" />
-                </div>
-                <button class="btn btn-outline" onclick="carregarFornecedores()">Atualizar</button>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Empresa</th><th>Nome</th><th>Contato</th><th>Telefone</th><th>Email</th><th>Ações</th></tr>
-                  </thead>
-                  <tbody id="listaFornecedores"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="estoque" class="page">
-          <div class="page-header">
-            <h2>Visão de Estoque</h2>
-            <p>Acompanhe os produtos, quantidades e alertas.</p>
-          </div>
-
-          <div class="card">
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar produto</label>
-                <input id="buscaEstoque" class="form-control" type="text" placeholder="Digite o produto..." oninput="renderEstoque()" />
-              </div>
-              <button class="btn btn-outline" onclick="carregarProdutos()">Atualizar</button>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Empresa</th><th>Produto</th><th>Categoria</th><th>Estoque</th><th>Mínimo</th><th>Status</th></tr>
-                </thead>
-                <tbody id="listaEstoque"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="movimentacoes" class="page">
-          <div class="page-header">
-            <h2>Movimentações</h2>
-            <p>Histórico de entradas e saídas do estoque.</p>
-          </div>
-
-          <div class="card">
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar produto</label>
-                <input id="buscaMovimentacao" class="form-control" type="text" placeholder="Digite o produto..." oninput="renderMovimentacoes()" />
-              </div>
-              <div class="form-group">
-                <label>Tipo</label>
-                <select id="filtroTipoMovimentacao" class="form-control" onchange="renderMovimentacoes()">
-                  <option value="">Todos</option>
-                  <option value="entrada_compra">Entrada compra</option>
-                  <option value="saida_venda">Saída venda</option>
-                  <option value="ajuste_entrada">Ajuste entrada</option>
-                  <option value="ajuste_saida">Ajuste saída</option>
-                  <option value="cadastro_inicial">Cadastro inicial</option>
-                  <option value="estorno_venda">Estorno venda</option>
-                </select>
-              </div>
-              <button class="btn btn-outline" onclick="carregarMovimentacoes()">Atualizar</button>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Empresa</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Observação</th><th>Data</th></tr>
-                </thead>
-                <tbody id="listaMovimentacoes"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="ajuste" class="page">
-          <div class="page-header">
-            <h2>Ajuste de Estoque</h2>
-            <p>Corrija o estoque atual de um produto.</p>
-          </div>
-
-          <div class="card">
-            <div class="form-group">
-              <label>Empresa</label>
-              <input id="a_empresa" class="form-control" type="text" placeholder="Ex.: Unidade 01" />
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Produto</label>
-                <select id="a_produto" class="form-control"></select>
-              </div>
-              <div class="form-group">
-                <label>Novo estoque</label>
-                <input id="a_novo_estoque" class="form-control" type="number" min="0" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Observação</label>
-              <input id="a_observacao" class="form-control" type="text" />
-            </div>
-
-            <div class="actions-row">
-              <button class="btn btn-primary" onclick="salvarAjusteEstoque()">Salvar ajuste</button>
-            </div>
-          </div>
-        </section>
-
-        <section id="relatorio" class="page">
-          <div class="page-header">
-            <h2>Relatório de Estoque</h2>
-            <p>Resumo detalhado do estoque por empresa.</p>
-          </div>
-          <div id="relatorioEstoqueContainer"></div>
-        </section>
-
-        <section id="performance" class="page">
-          <div class="page-header">
-            <h2>Performance dos Produtos</h2>
-            <p>Veja giro, faturamento e valor parado dos produtos.</p>
-          </div>
-          <div id="relatorioPerformanceContainer"></div>
-        </section>
-
-        <section id="contasReceber" class="page">
-          <div class="page-header">
-            <h2>Contas a Receber</h2>
-            <p>Acompanhe parcelas, baixas e atrasos.</p>
-          </div>
-
-          <div class="card">
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar cliente</label>
-                <input id="buscaReceber" class="form-control" type="text" placeholder="Digite o cliente..." oninput="renderContasReceber()" />
-              </div>
-              <div class="form-group">
-                <label>Status</label>
-                <select id="filtroReceberStatus" class="form-control" onchange="renderContasReceber()">
-                  <option value="">Todos</option>
-                  <option value="pendente">Pendente</option>
-                  <option value="pago">Pago</option>
-                  <option value="atrasado">Atrasado</option>
-                </select>
-              </div>
-              <button class="btn btn-outline" onclick="carregarContasReceber()">Atualizar</button>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Empresa</th><th>Cliente</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr>
-                </thead>
-                <tbody id="listaContasReceber"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="contasPagar" class="page">
-          <div class="page-header">
-            <h2>Contas a Pagar</h2>
-            <p>Acompanhe compromissos financeiros, vencimentos e baixas.</p>
-          </div>
-
-          <div class="card">
-            <div class="toolbar">
-              <div class="form-group">
-                <label>Buscar fornecedor</label>
-                <input id="buscaPagar" class="form-control" type="text" placeholder="Digite o fornecedor..." oninput="renderContasPagar()" />
-              </div>
-              <div class="form-group">
-                <label>Status</label>
-                <select id="filtroPagarStatus" class="form-control" onchange="renderContasPagar()">
-                  <option value="">Todos</option>
-                  <option value="pendente">Pendente</option>
-                  <option value="pago">Pago</option>
-                  <option value="atrasado">Atrasado</option>
-                </select>
-              </div>
-              <button class="btn btn-outline" onclick="carregarContasPagar()">Atualizar</button>
-            </div>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Empresa</th><th>Fornecedor</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr>
-                </thead>
-                <tbody id="listaContasPagar"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
-
-  <div id="modalOverlay" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="modalTitle">Editar registro</h3>
-        <button class="close-btn" onclick="fecharModal()">✕</button>
-      </div>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <script>
-    const API_BASE = "https://lf-erp-backend.onrender.com";
-
-    let token = localStorage.getItem("lf_token") || "";
-    let usuarioLogado = JSON.parse(localStorage.getItem("lf_usuario") || "null");
-
-    let periodoFiltro = {
-      data_inicial: localStorage.getItem("lf_periodo_inicial") || "",
-      data_final: localStorage.getItem("lf_periodo_final") || ""
-    };
-
-    let produtos = [];
-    let clientes = [];
-    let fornecedores = [];
-    let compras = [];
-    let vendas = [];
-    let usuarios = [];
-    let movimentacoes = [];
-    let contasReceber = [];
-    let contasPagar = [];
-    let relatorioEstoque = null;
-    let relatorioPerformance = null;
-    let fluxoCaixa = null;
-
-    let itensVenda = [];
-    let itensCompra = [];
-
-    function qs(params = {}) {
-      const query = new URLSearchParams();
-      if (periodoFiltro.data_inicial) query.set("data_inicial", periodoFiltro.data_inicial);
-      if (periodoFiltro.data_final) query.set("data_final", periodoFiltro.data_final);
-
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") query.set(key, value);
-      });
-
-      const str = query.toString();
-      return str ? `?${str}` : "";
-    }
-
-    async function apiFetch(url, options = {}) {
-      const headers = options.headers || {};
-      if (token) headers.Authorization = token;
-      if (!headers["Content-Type"] && options.body && !(options.body instanceof FormData)) {
-        headers["Content-Type"] = "application/json";
-      }
-
-      const response = await fetch(`${API_BASE}${url}`, {
-        ...options,
-        headers
-      });
-
-      if (response.status === 403 || response.status === 401) {
-        localStorage.removeItem("lf_token");
-        localStorage.removeItem("lf_usuario");
-        token = "";
-        usuarioLogado = null;
-        location.reload();
-        return null;
-      }
-
-      return response;
-    }
-
-    function formatarMoeda(valor) {
-      return Number(valor || 0).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-      });
-    }
-
-    function formatarData(data) {
-      if (!data) return "-";
-      const d = new Date(`${data}T00:00:00`);
-      if (Number.isNaN(d.getTime())) return data;
-      return d.toLocaleDateString("pt-BR");
-    }
-
-    function formatarDataHora(data) {
-      if (!data) return "-";
-      const d = new Date(data);
-      if (Number.isNaN(d.getTime())) return data;
-      return d.toLocaleString("pt-BR");
-    }
-
-    function mostrarStatus(id, mensagem, tipo = "info") {
-      const box = document.getElementById(id);
-      if (!box) return;
-      box.className = `status-box status-${tipo}`;
-      box.textContent = mensagem;
-
-      setTimeout(() => {
-        box.className = "status-box";
-        box.textContent = "";
-      }, 4000);
-    }
-
-    function alternarSidebar() {
-      document.getElementById("layout").classList.toggle("sidebar-collapsed");
-    }
-
-    function alternarFiltroPeriodo() {
-      document.getElementById("filterPanel").classList.toggle("show");
-    }
-
-    function fecharTodosSubmenus() {
-      document.querySelectorAll(".submenu").forEach((submenu) => submenu.classList.remove("show"));
-      document.querySelectorAll(".menu-group-header").forEach((btn) => btn.classList.remove("open"));
-    }
-
-    function alternarSubmenu(id, botao) {
-      if (document.getElementById("layout").classList.contains("sidebar-collapsed")) return;
-
-      const submenu = document.getElementById(id);
-      const aberto = submenu.classList.contains("show");
-
-      fecharTodosSubmenus();
-
-      if (!aberto) {
-        submenu.classList.add("show");
-        botao.classList.add("open");
-      }
-    }
-
-    function mostrarPagina(id, botao = null) {
-      document.querySelectorAll(".page").forEach((page) => page.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-
-      document.querySelectorAll(".menu-btn").forEach((btn) => btn.classList.remove("active"));
-      if (botao) botao.classList.add("active");
-
-      if (id === "dashboard") carregarDashboard();
-      if (id === "produtos") carregarProdutos();
-      if (id === "clientes") carregarClientes();
-      if (id === "usuarios") carregarUsuarios();
-      if (id === "fornecedores") carregarFornecedores();
-      if (id === "compras") carregarCompras();
-      if (id === "vendas") carregarVendas();
-      if (id === "estoque") carregarProdutos();
-      if (id === "movimentacoes") carregarMovimentacoes();
-      if (id === "fluxoCaixa") carregarFluxoCaixa();
-      if (id === "contasReceber") carregarContasReceber();
-      if (id === "contasPagar") carregarContasPagar();
-      if (id === "relatorio") carregarRelatorioEstoque();
-      if (id === "performance") carregarRelatorioPerformance();
-    }
-
-    function atualizarTopo() {
-      const empresaLabel = document.getElementById("empresaLabel");
-      const usuarioInfo = document.getElementById("usuarioInfo");
-
-      if (!usuarioLogado) {
-        empresaLabel.textContent = "Ambiente administrativo";
-        usuarioInfo.textContent = "Usuário";
-        return;
-      }
-
-      empresaLabel.textContent = usuarioLogado.empresa
-        ? `Empresa padrão: ${usuarioLogado.empresa}`
-        : "Ambiente administrativo";
-
-      usuarioInfo.textContent = `${usuarioLogado.nome_completo || usuarioLogado.usuario || "Usuário"} • ${usuarioLogado.tipo}`;
-    }
-
-    function atualizarResumoPeriodo() {
-      const resumo = document.getElementById("periodoResumo");
-
-      if (periodoFiltro.data_inicial || periodoFiltro.data_final) {
-        resumo.textContent = `Período: ${periodoFiltro.data_inicial || "..."} até ${periodoFiltro.data_final || "..."}`;
-      } else {
-        resumo.textContent = "Período: sem filtro";
-      }
-
-      document.getElementById("periodoInicial").value = periodoFiltro.data_inicial || "";
-      document.getElementById("periodoFinal").value = periodoFiltro.data_final || "";
-    }
-
-    function aplicarFiltroPeriodo() {
-      periodoFiltro.data_inicial = document.getElementById("periodoInicial").value || "";
-      periodoFiltro.data_final = document.getElementById("periodoFinal").value || "";
-
-      localStorage.setItem("lf_periodo_inicial", periodoFiltro.data_inicial);
-      localStorage.setItem("lf_periodo_final", periodoFiltro.data_final);
-
-      atualizarResumoPeriodo();
-
-      const paginaAtual = document.querySelector(".page.active")?.id || "dashboard";
-      mostrarPagina(paginaAtual);
-    }
-
-    function limparFiltroPeriodo() {
-      periodoFiltro = { data_inicial: "", data_final: "" };
-      localStorage.removeItem("lf_periodo_inicial");
-      localStorage.removeItem("lf_periodo_final");
-      atualizarResumoPeriodo();
-
-      const paginaAtual = document.querySelector(".page.active")?.id || "dashboard";
-      mostrarPagina(paginaAtual);
-    }
-
-    async function fazerLogin() {
-      const usuario = document.getElementById("loginUsuario").value.trim();
-      const senha = document.getElementById("loginSenha").value.trim();
-
-      const response = await fetch(`${API_BASE}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, senha })
-      });
-
-      if (!response.ok) {
-        const msg = await response.text();
-        mostrarStatus("loginStatus", msg || "Erro ao entrar", "error");
-        return;
-      }
-
-      const data = await response.json();
-      token = data.token;
-      usuarioLogado = data.usuario;
-
-      localStorage.setItem("lf_token", token);
-      localStorage.setItem("lf_usuario", JSON.stringify(usuarioLogado));
-
-      document.getElementById("loginScreen").classList.add("hidden");
-      document.getElementById("app").classList.remove("hidden");
-
-      atualizarTopo();
-      atualizarResumoPeriodo();
-      preencherDatasPadrao();
-      mostrarPagina("dashboard");
-    }
-
-    function sair() {
-      localStorage.removeItem("lf_token");
-      localStorage.removeItem("lf_usuario");
-      token = "";
-      usuarioLogado = null;
-      location.reload();
-    }
-
-    function preencherDatasPadrao() {
-      const hojeStr = new Date().toISOString().slice(0, 10);
-      if (!document.getElementById("v_data").value) document.getElementById("v_data").value = hojeStr;
-      if (!document.getElementById("c_data").value) document.getElementById("c_data").value = hojeStr;
-      if (!document.getElementById("v_primeiro_vencimento").value) document.getElementById("v_primeiro_vencimento").value = hojeStr;
-      if (!document.getElementById("c_vencimento").value) document.getElementById("c_vencimento").value = hojeStr;
-    }
-
-    function abrirModal(titulo, html) {
-      document.getElementById("modalTitle").textContent = titulo;
-      document.getElementById("modalBody").innerHTML = html;
-      document.getElementById("modalOverlay").classList.add("show");
-    }
-
-    function fecharModal() {
-      document.getElementById("modalOverlay").classList.remove("show");
-      document.getElementById("modalBody").innerHTML = "";
-    }
-
-    function limparProduto() {
-      ["p_empresa","p_nome","p_preco","p_custo","p_estoque","p_estoque_minimo","p_codigo_barras","p_categoria"].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.value = id === "p_estoque" || id === "p_estoque_minimo" ? "0" : "";
-      });
-    }
-
-    function limparCliente() {
-      ["cl_empresa","cl_nome","cl_telefone","cl_cpf","cl_nascimento","cl_endereco"].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-      });
-    }
-
-    function limparFornecedor() {
-      ["f_empresa","f_nome","f_contato","f_telefone","f_email","f_endereco","f_observacao"].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-      });
-    }
-
-    function limparUsuario() {
-      ["u_usuario","u_senha","u_nome_completo","u_empresa","u_cpf","u_nascimento"].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-      });
-      document.getElementById("u_tipo").value = "funcionario";
-    }
-
-    function limparVenda() {
-      itensVenda = [];
-      document.getElementById("v_cliente").value = "";
-      document.getElementById("v_produto").value = "";
-      document.getElementById("v_qtd").value = "";
-      document.getElementById("v_preco").value = "";
-      document.getElementById("v_pagamento").value = "Dinheiro";
-      document.getElementById("v_parcelas").value = "1";
-      document.getElementById("v_desconto").value = "0";
-      document.getElementById("v_acrescimo").value = "0";
-      document.getElementById("v_observacao").value = "";
-      preencherDatasPadrao();
-      atualizarCamposVenda();
-      renderItensVenda();
-      renderResumoVenda();
-    }
-
-    function limparCompra() {
-      itensCompra = [];
-      document.getElementById("c_fornecedor").value = "";
-      document.getElementById("c_produto").value = "";
-      document.getElementById("c_qtd").value = "";
-      document.getElementById("c_custo").value = "";
-      document.getElementById("c_tipo_pagamento").value = "vista";
-      document.getElementById("c_forma_pagamento").value = "";
-      document.getElementById("c_status_pagamento").value = "pendente";
-      document.getElementById("c_observacao").value = "";
-      preencherDatasPadrao();
-      atualizarCamposPagamentoCompra();
-      renderItensCompra();
-    }
-
-    function atualizarCamposVenda() {
-      const pagamento = document.getElementById("v_pagamento").value;
-      const mostrarParcelas = pagamento === "Promissória" || pagamento === "Crédito Parcelado";
-
-      document.getElementById("grupoPrimeiroVencimento").style.display = mostrarParcelas ? "block" : "none";
-      document.getElementById("grupoIntervaloDias").style.display = mostrarParcelas ? "block" : "none";
-
-      if (!mostrarParcelas) {
-        document.getElementById("v_parcelas").value = 1;
-      }
-    }
-
-    function atualizarCamposPagamentoCompra() {
-      const tipo = document.getElementById("c_tipo_pagamento").value;
-      document.getElementById("compraPrazoBox").style.display = tipo === "prazo" ? "grid" : "none";
-    }
-
-    async function carregarUsuarios() {
-      const response = await apiFetch("/usuarios");
-      if (!response || !response.ok) return;
-      usuarios = await response.json();
-      renderUsuarios();
-    }
-
-    function renderUsuarios() {
-      const termo = (document.getElementById("buscaUsuario")?.value || "").toLowerCase();
-      const body = document.getElementById("listaUsuarios");
-
-      const filtrados = usuarios.filter((u) =>
-        `${u.usuario} ${u.nome_completo || ""} ${u.empresa || ""}`.toLowerCase().includes(termo)
-      );
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum usuário encontrado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((u) => `
-        <tr>
-          <td>${u.usuario}</td>
-          <td>${u.nome_completo || "-"}</td>
-          <td>${u.tipo}</td>
-          <td>${u.empresa || "-"}</td>
-          <td>
-            <button class="btn btn-outline" onclick='editarUsuario(${JSON.stringify(u)})'>Editar</button>
-            <button class="btn btn-danger" onclick="excluirUsuario(${u.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    async function salvarUsuario() {
-      const payload = {
-        usuario: document.getElementById("u_usuario").value.trim(),
-        senha: document.getElementById("u_senha").value.trim(),
-        tipo: document.getElementById("u_tipo").value,
-        empresa: document.getElementById("u_empresa").value.trim() || null,
-        nome_completo: document.getElementById("u_nome_completo").value.trim(),
-        cpf: document.getElementById("u_cpf").value.trim(),
-        nascimento: document.getElementById("u_nascimento").value
-      };
-
-      const response = await apiFetch("/usuarios", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Usuário salvo com sucesso.", "success");
-      limparUsuario();
-      carregarUsuarios();
-    }
-
-    function editarUsuario(usuario) {
-      abrirModal("Editar usuário", `
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Usuário</label>
-            <input id="edit_u_usuario" class="form-control" type="text" value="${usuario.usuario || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Nova senha</label>
-            <input id="edit_u_senha" class="form-control" type="password" placeholder="Deixe em branco para manter" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nome completo</label>
-            <input id="edit_u_nome" class="form-control" type="text" value="${usuario.nome_completo || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Tipo</label>
-            <select id="edit_u_tipo" class="form-control">
-              <option value="funcionario" ${usuario.tipo === "funcionario" ? "selected" : ""}>Funcionário</option>
-              <option value="gerente" ${usuario.tipo === "gerente" ? "selected" : ""}>Gerente</option>
-              <option value="admin" ${usuario.tipo === "admin" ? "selected" : ""}>Admin</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Empresa</label>
-            <input id="edit_u_empresa" class="form-control" type="text" value="${usuario.empresa || ""}" />
-          </div>
-          <div class="form-group">
-            <label>CPF</label>
-            <input id="edit_u_cpf" class="form-control" type="text" value="${usuario.cpf || ""}" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Nascimento</label>
-          <input id="edit_u_nascimento" class="form-control" type="date" value="${usuario.nascimento || ""}" />
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarUsuario(${usuario.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarUsuario(id) {
-      const payload = {
-        usuario: document.getElementById("edit_u_usuario").value.trim(),
-        senha: document.getElementById("edit_u_senha").value.trim(),
-        tipo: document.getElementById("edit_u_tipo").value,
-        empresa: document.getElementById("edit_u_empresa").value.trim() || null,
-        nome_completo: document.getElementById("edit_u_nome").value.trim(),
-        cpf: document.getElementById("edit_u_cpf").value.trim(),
-        nascimento: document.getElementById("edit_u_nascimento").value
-      };
-
-      const response = await apiFetch(`/usuarios/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Usuário atualizado com sucesso.", "success");
-      carregarUsuarios();
-    }
-
-    async function excluirUsuario(id) {
-      if (!confirm("Deseja excluir este usuário?")) return;
-
-      const response = await apiFetch(`/usuarios/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Usuário excluído com sucesso.", "success");
-      carregarUsuarios();
-    }
-
-    async function carregarProdutos() {
-      const empresa = document.getElementById("p_empresa")?.value.trim() || document.getElementById("a_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/produtos/${encodeURIComponent(empresa)}`);
-      if (!response || !response.ok) return;
-      produtos = await response.json();
-
-      preencherSelectProdutos();
-      renderProdutos();
-      renderEstoque();
-    }
-
-    function preencherSelectProdutos() {
-      const options = ['<option value="">Selecione</option>']
-        .concat(produtos.map((p) => `<option value="${p.id}" data-preco="${p.preco}" data-custo="${p.custo}" data-estoque="${p.estoque}">${p.nome}</option>`))
-        .join("");
-
-      ["v_produto", "c_produto", "a_produto"].forEach((id) => {
-        const select = document.getElementById(id);
-        if (select) select.innerHTML = options;
-      });
-    }
-
-    function renderProdutos() {
-      const termo = (document.getElementById("buscaProduto").value || "").toLowerCase();
-      const body = document.getElementById("listaProdutos");
-
-      const filtrados = produtos.filter((p) =>
-        `${p.nome} ${p.categoria || ""}`.toLowerCase().includes(termo)
-      );
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhum produto encontrado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((p) => `
-        <tr>
-          <td>${p.empresa}</td>
-          <td>${p.nome}</td>
-          <td>${p.categoria || "-"}</td>
-          <td>${formatarMoeda(p.preco)}</td>
-          <td>${formatarMoeda(p.custo)}</td>
-          <td>${p.estoque}</td>
-          <td>${p.estoque_minimo}</td>
-          <td>
-            <button class="btn btn-outline" onclick='editarProduto(${JSON.stringify(p)})'>Editar</button>
-            <button class="btn btn-danger" onclick="excluirProduto(${p.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function renderEstoque() {
-      const termo = (document.getElementById("buscaEstoque").value || "").toLowerCase();
-      const body = document.getElementById("listaEstoque");
-
-      const filtrados = produtos.filter((p) =>
-        `${p.nome} ${p.categoria || ""}`.toLowerCase().includes(termo)
-      );
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhum item de estoque encontrado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((p) => `
-        <tr>
-          <td>${p.empresa}</td>
-          <td>${p.nome}</td>
-          <td>${p.categoria || "-"}</td>
-          <td>${p.estoque}</td>
-          <td>${p.estoque_minimo}</td>
-          <td><span class="badge ${Number(p.estoque) <= Number(p.estoque_minimo) && Number(p.estoque_minimo) > 0 ? "badge-alert" : "badge-ok"}">${Number(p.estoque) <= Number(p.estoque_minimo) && Number(p.estoque_minimo) > 0 ? "Alerta" : "OK"}</span></td>
-        </tr>
-      `).join("");
-    }
-
-    async function salvarProduto() {
-      const payload = {
-        empresa: document.getElementById("p_empresa").value.trim(),
-        nome: document.getElementById("p_nome").value.trim(),
-        preco: document.getElementById("p_preco").value,
-        custo: document.getElementById("p_custo").value,
-        estoque: document.getElementById("p_estoque").value,
-        estoque_minimo: document.getElementById("p_estoque_minimo").value,
-        codigo_barras: document.getElementById("p_codigo_barras").value.trim(),
-        categoria: document.getElementById("p_categoria").value.trim()
-      };
-
-      const response = await apiFetch("/produtos", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Produto salvo com sucesso.", "success");
-      carregarProdutos();
-    }
-
-    function editarProduto(produto) {
-      abrirModal("Editar produto", `
-        <div class="form-group">
-          <label>Empresa</label>
-          <input id="edit_p_empresa" class="form-control" type="text" value="${produto.empresa || ""}" />
-        </div>
-        <div class="form-group">
-          <label>Nome</label>
-          <input id="edit_p_nome" class="form-control" type="text" value="${produto.nome || ""}" />
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Preço</label>
-            <input id="edit_p_preco" class="form-control" type="number" step="0.01" value="${produto.preco || 0}" />
-          </div>
-          <div class="form-group">
-            <label>Custo</label>
-            <input id="edit_p_custo" class="form-control" type="number" step="0.01" value="${produto.custo || 0}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Estoque mínimo</label>
-            <input id="edit_p_estoque_minimo" class="form-control" type="number" value="${produto.estoque_minimo || 0}" />
-          </div>
-          <div class="form-group">
-            <label>Código de barras</label>
-            <input id="edit_p_codigo_barras" class="form-control" type="text" value="${produto.codigo_barras || ""}" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Categoria</label>
-          <input id="edit_p_categoria" class="form-control" type="text" value="${produto.categoria || ""}" />
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarProduto(${produto.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarProduto(id) {
-      const payload = {
-        empresa: document.getElementById("edit_p_empresa").value.trim(),
-        nome: document.getElementById("edit_p_nome").value.trim(),
-        preco: document.getElementById("edit_p_preco").value,
-        custo: document.getElementById("edit_p_custo").value,
-        estoque_minimo: document.getElementById("edit_p_estoque_minimo").value,
-        codigo_barras: document.getElementById("edit_p_codigo_barras").value.trim(),
-        categoria: document.getElementById("edit_p_categoria").value.trim()
-      };
-
-      const response = await apiFetch(`/produtos/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Produto atualizado com sucesso.", "success");
-      carregarProdutos();
-    }
-
-    async function excluirProduto(id) {
-      if (!confirm("Deseja excluir este produto?")) return;
-
-      const response = await apiFetch(`/produtos/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Produto excluído com sucesso.", "success");
-      carregarProdutos();
-    }
-
-    async function carregarClientes() {
-      const empresa = document.getElementById("cl_empresa")?.value.trim() || document.getElementById("v_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/clientes/${encodeURIComponent(empresa)}`);
-      if (!response || !response.ok) return;
-      clientes = await response.json();
-
-      preencherSelectClientes();
-      renderClientes();
-    }
-
-    function preencherSelectClientes() {
-      const select = document.getElementById("v_cliente");
-      if (!select) return;
-      select.innerHTML = `<option value="">Selecione</option>${clientes.map((c) => `<option value="${c.id}">${c.nome}</option>`).join("")}`;
-    }
-
-    function renderClientes() {
-      const termo = (document.getElementById("buscaCliente").value || "").toLowerCase();
-      const body = document.getElementById("listaClientes");
-
-      const filtrados = clientes.filter((c) =>
-        `${c.nome} ${c.telefone || ""} ${c.cpf || ""}`.toLowerCase().includes(termo)
-      );
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="7" class="empty-state">Nenhum cliente encontrado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((c) => `
-        <tr>
-          <td>${c.empresa}</td>
-          <td>${c.nome}</td>
-          <td>${c.telefone || "-"}</td>
-          <td>${c.cpf || "-"}</td>
-          <td>${formatarData(c.nascimento)}</td>
-          <td>${c.endereco || "-"}</td>
-          <td>
-            <button class="btn btn-outline" onclick='editarCliente(${JSON.stringify(c)})'>Editar</button>
-            <button class="btn btn-danger" onclick="excluirCliente(${c.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    async function salvarCliente() {
-      const payload = {
-        empresa: document.getElementById("cl_empresa").value.trim(),
-        nome: document.getElementById("cl_nome").value.trim(),
-        telefone: document.getElementById("cl_telefone").value.trim(),
-        cpf: document.getElementById("cl_cpf").value.trim(),
-        nascimento: document.getElementById("cl_nascimento").value,
-        endereco: document.getElementById("cl_endereco").value.trim()
-      };
-
-      const response = await apiFetch("/clientes", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Cliente salvo com sucesso.", "success");
-      carregarClientes();
-    }
-
-    function editarCliente(cliente) {
-      abrirModal("Editar cliente", `
-        <div class="form-group">
-          <label>Nome</label>
-          <input id="edit_cl_nome" class="form-control" type="text" value="${cliente.nome || ""}" />
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Telefone</label>
-            <input id="edit_cl_telefone" class="form-control" type="text" value="${cliente.telefone || ""}" />
-          </div>
-          <div class="form-group">
-            <label>CPF</label>
-            <input id="edit_cl_cpf" class="form-control" type="text" value="${cliente.cpf || ""}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Nascimento</label>
-            <input id="edit_cl_nascimento" class="form-control" type="date" value="${cliente.nascimento || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Endereço</label>
-            <input id="edit_cl_endereco" class="form-control" type="text" value="${cliente.endereco || ""}" />
-          </div>
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarCliente(${cliente.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarCliente(id) {
-      const payload = {
-        nome: document.getElementById("edit_cl_nome").value.trim(),
-        telefone: document.getElementById("edit_cl_telefone").value.trim(),
-        cpf: document.getElementById("edit_cl_cpf").value.trim(),
-        nascimento: document.getElementById("edit_cl_nascimento").value,
-        endereco: document.getElementById("edit_cl_endereco").value.trim()
-      };
-
-      const response = await apiFetch(`/clientes/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Cliente atualizado com sucesso.", "success");
-      carregarClientes();
-    }
-
-    async function excluirCliente(id) {
-      if (!confirm("Deseja excluir este cliente?")) return;
-
-      const response = await apiFetch(`/clientes/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Cliente excluído com sucesso.", "success");
-      carregarClientes();
-    }
-
-    async function carregarFornecedores() {
-      const empresa = document.getElementById("f_empresa")?.value.trim() || document.getElementById("c_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/fornecedores/${encodeURIComponent(empresa)}`);
-      if (!response || !response.ok) return;
-      fornecedores = await response.json();
-
-      preencherSelectFornecedores();
-      renderFornecedores();
-    }
-
-    function preencherSelectFornecedores() {
-      const select = document.getElementById("c_fornecedor");
-      if (!select) return;
-      select.innerHTML = `<option value="">Selecione</option>${fornecedores.map((f) => `<option value="${f.id}">${f.nome}</option>`).join("")}`;
-    }
-
-    function renderFornecedores() {
-      const termo = (document.getElementById("buscaFornecedor").value || "").toLowerCase();
-      const body = document.getElementById("listaFornecedores");
-
-      const filtrados = fornecedores.filter((f) =>
-        `${f.nome} ${f.contato || ""} ${f.telefone || ""} ${f.email || ""}`.toLowerCase().includes(termo)
-      );
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhum fornecedor encontrado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((f) => `
-        <tr>
-          <td>${f.empresa}</td>
-          <td>${f.nome}</td>
-          <td>${f.contato || "-"}</td>
-          <td>${f.telefone || "-"}</td>
-          <td>${f.email || "-"}</td>
-          <td>
-            <button class="btn btn-outline" onclick='editarFornecedor(${JSON.stringify(f)})'>Editar</button>
-            <button class="btn btn-danger" onclick="excluirFornecedor(${f.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    async function salvarFornecedor() {
-      const payload = {
-        empresa: document.getElementById("f_empresa").value.trim(),
-        nome: document.getElementById("f_nome").value.trim(),
-        contato: document.getElementById("f_contato").value.trim(),
-        telefone: document.getElementById("f_telefone").value.trim(),
-        email: document.getElementById("f_email").value.trim(),
-        endereco: document.getElementById("f_endereco").value.trim(),
-        observacao: document.getElementById("f_observacao").value.trim()
-      };
-
-      const response = await apiFetch("/fornecedores", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Fornecedor salvo com sucesso.", "success");
-      carregarFornecedores();
-    }
-
-    function editarFornecedor(fornecedor) {
-      abrirModal("Editar fornecedor", `
-        <div class="form-group">
-          <label>Nome</label>
-          <input id="edit_f_nome" class="form-control" type="text" value="${fornecedor.nome || ""}" />
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Contato</label>
-            <input id="edit_f_contato" class="form-control" type="text" value="${fornecedor.contato || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Telefone</label>
-            <input id="edit_f_telefone" class="form-control" type="text" value="${fornecedor.telefone || ""}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Email</label>
-            <input id="edit_f_email" class="form-control" type="text" value="${fornecedor.email || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Endereço</label>
-            <input id="edit_f_endereco" class="form-control" type="text" value="${fornecedor.endereco || ""}" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Observação</label>
-          <input id="edit_f_observacao" class="form-control" type="text" value="${fornecedor.observacao || ""}" />
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarFornecedor(${fornecedor.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarFornecedor(id) {
-      const payload = {
-        nome: document.getElementById("edit_f_nome").value.trim(),
-        contato: document.getElementById("edit_f_contato").value.trim(),
-        telefone: document.getElementById("edit_f_telefone").value.trim(),
-        email: document.getElementById("edit_f_email").value.trim(),
-        endereco: document.getElementById("edit_f_endereco").value.trim(),
-        observacao: document.getElementById("edit_f_observacao").value.trim()
-      };
-
-      const response = await apiFetch(`/fornecedores/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Fornecedor atualizado com sucesso.", "success");
-      carregarFornecedores();
-    }
-
-    async function excluirFornecedor(id) {
-      if (!confirm("Deseja excluir este fornecedor?")) return;
-
-      const response = await apiFetch(`/fornecedores/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Fornecedor excluído com sucesso.", "success");
-      carregarFornecedores();
-    }
-        async function carregarDashboard() {
-      const empresa = usuarioLogado?.empresa || document.getElementById("v_empresa")?.value.trim() || document.getElementById("c_empresa")?.value.trim() || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/dashboard/${encodeURIComponent(empresa)}${qs()}`);
-      if (!response || !response.ok) return;
-
-      const data = await response.json();
-
-      document.getElementById("dashProdutos").textContent = data.total_produtos || 0;
-      document.getElementById("dashFornecedores").textContent = data.total_fornecedores || 0;
-      document.getElementById("dashCompras").textContent = data.total_compras || 0;
-      document.getElementById("dashVendas").textContent = data.total_vendas || 0;
-      document.getElementById("dashAlerta").textContent = data.estoque_baixo || 0;
-      document.getElementById("dashValorEstoque").textContent = formatarMoeda(data.valor_estoque || 0);
-      document.getElementById("dashFaturamento").textContent = formatarMoeda(data.faturamento || 0);
-      document.getElementById("dashLucroEstimado").textContent = formatarMoeda(data.lucro_estimado || 0);
-      document.getElementById("dashTicketMedio").textContent = formatarMoeda(data.ticket_medio || 0);
-      document.getElementById("dashReceberPendente").textContent = formatarMoeda(data.receber_pendente || 0);
-      document.getElementById("dashPagarPendente").textContent = formatarMoeda(data.pagar_pendente || 0);
-      document.getElementById("dashContasAtrasadas").textContent = formatarMoeda(data.contas_atrasadas || 0);
-
-      const alertasBody = document.getElementById("dashboardAlertasBody");
-      const movBody = document.getElementById("dashboardMovBody");
-
-      const alertas = data.produtos_alerta || [];
-      const movs = data.ultimas_movimentacoes || [];
-
-      alertasBody.innerHTML = alertas.length
-        ? alertas.map((p) => `
-            <tr>
-              <td>${p.empresa || "-"}</td>
-              <td>${p.nome || "-"}</td>
-              <td>${p.estoque ?? 0}</td>
-              <td>${p.estoque_minimo ?? 0}</td>
-              <td><span class="badge badge-alert">Alerta</span></td>
-            </tr>
-          `).join("")
-        : `<tr><td colspan="5" class="empty-state">Nenhum alerta de estoque.</td></tr>`;
-
-      movBody.innerHTML = movs.length
-        ? movs.map((m) => `
-            <tr>
-              <td>${m.empresa || "-"}</td>
-              <td>${m.produto_nome || "-"}</td>
-              <td>${m.tipo || "-"}</td>
-              <td>${m.quantidade ?? 0}</td>
-              <td>${formatarDataHora(m.data_movimentacao)}</td>
-            </tr>
-          `).join("")
-        : `<tr><td colspan="5" class="empty-state">Nenhuma movimentação recente.</td></tr>`;
-    }
-
-    function adicionarItemVenda() {
-      const produtoId = Number(document.getElementById("v_produto").value);
-      const quantidade = Number(document.getElementById("v_qtd").value);
-      const preco = Number(document.getElementById("v_preco").value);
-
-      const produto = produtos.find((p) => Number(p.id) === produtoId);
-      if (!produto || !quantidade || quantidade <= 0) {
-        mostrarStatus("appStatus", "Selecione produto e quantidade válida.", "warning");
-        return;
-      }
-
-      const precoFinal = preco || Number(produto.preco || 0);
-
-      itensVenda.push({
-        produto_id: produto.id,
-        produto_nome: produto.nome,
-        quantidade,
-        preco_unitario: precoFinal,
-        total: quantidade * precoFinal
-      });
-
-      document.getElementById("v_qtd").value = "";
-      document.getElementById("v_preco").value = "";
-      renderItensVenda();
-      renderResumoVenda();
-    }
-
-    function removerItemVenda(index) {
-      itensVenda.splice(index, 1);
-      renderItensVenda();
-      renderResumoVenda();
-    }
-
-    function renderItensVenda() {
-      const body = document.getElementById("itensVendaBody");
-
-      if (!itensVenda.length) {
-        body.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = itensVenda.map((item, index) => `
-        <tr>
-          <td>${item.produto_nome}</td>
-          <td>${item.quantidade}</td>
-          <td>${formatarMoeda(item.preco_unitario)}</td>
-          <td>${formatarMoeda(item.total)}</td>
-          <td><button class="btn btn-danger" onclick="removerItemVenda(${index})">Remover</button></td>
-        </tr>
-      `).join("");
-    }
-
-    function renderResumoVenda() {
-      const subtotal = itensVenda.reduce((acc, item) => acc + Number(item.total || 0), 0);
-      const desconto = Number(document.getElementById("v_desconto").value || 0);
-      const acrescimo = Number(document.getElementById("v_acrescimo").value || 0);
-      const total = subtotal - desconto + acrescimo;
-
-      document.getElementById("v_subtotal_label").textContent = formatarMoeda(subtotal);
-      document.getElementById("v_total_label").textContent = formatarMoeda(total);
-    }
-
-    async function salvarVenda() {
-      if (!itensVenda.length) {
-        mostrarStatus("appStatus", "Adicione ao menos um item na venda.", "warning");
-        return;
-      }
-
-      const clienteId = document.getElementById("v_cliente").value;
-      const cliente = clientes.find((c) => String(c.id) === String(clienteId));
-
-      const payload = {
-        empresa: document.getElementById("v_empresa").value.trim(),
-        cliente_id: clienteId || null,
-        cliente_nome: cliente ? cliente.nome : "",
-        itens: itensVenda,
-        pagamento: document.getElementById("v_pagamento").value,
-        parcelas: document.getElementById("v_parcelas").value,
-        desconto: document.getElementById("v_desconto").value,
-        acrescimo: document.getElementById("v_acrescimo").value,
-        observacao: document.getElementById("v_observacao").value.trim(),
-        data: document.getElementById("v_data").value,
-        data_primeiro_vencimento: document.getElementById("v_primeiro_vencimento").value,
-        intervalo_dias: document.getElementById("v_intervalo_dias").value
-      };
-
-      const response = await apiFetch("/vendas", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Venda registrada com sucesso.", "success");
-      limparVenda();
-      await carregarVendas();
-      await carregarProdutos();
-      await carregarContasReceber();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    }
-
-    async function carregarVendas() {
-      const empresa = document.getElementById("v_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/vendas/${encodeURIComponent(empresa)}${qs()}`);
-      if (!response || !response.ok) return;
-      vendas = await response.json();
-      renderVendas();
-    }
-
-    function renderVendas() {
-      const termo = (document.getElementById("buscaVenda").value || "").toLowerCase();
-      const body = document.getElementById("listaVendas");
-
-      const filtrados = vendas.filter((v) =>
-        `${v.cliente_nome || ""} ${v.pagamento || ""}`.toLowerCase().includes(termo)
-      );
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="10" class="empty-state">Nenhuma venda encontrada.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((v) => `
-        <tr>
-          <td>${v.empresa}</td>
-          <td>${v.id}</td>
-          <td>${v.cliente_nome || "-"}</td>
-          <td>${v.total_itens}</td>
-          <td>${formatarMoeda(v.total)}</td>
-          <td>${v.pagamento || "-"}</td>
-          <td>${v.parcelas}</td>
-          <td><span class="badge ${v.status_pagamento === "pago" ? "badge-ok" : "badge-warning"}">${v.status_pagamento}</span></td>
-          <td>${formatarData(v.data)}</td>
-          <td>
-            <button class="btn btn-outline" onclick='editarVenda(${JSON.stringify(v)})'>Editar</button>
-            <button class="btn btn-danger" onclick="excluirVenda(${v.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function editarVenda(venda) {
-      abrirModal("Editar venda", `
-        <div class="form-group">
-          <label>Cliente</label>
-          <input id="edit_v_cliente_nome" class="form-control" type="text" value="${venda.cliente_nome || ""}" />
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Pagamento</label>
-            <input id="edit_v_pagamento" class="form-control" type="text" value="${venda.pagamento || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Parcelas</label>
-            <input id="edit_v_parcelas" class="form-control" type="number" value="${venda.parcelas || 1}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Desconto</label>
-            <input id="edit_v_desconto" class="form-control" type="number" step="0.01" value="${venda.desconto || 0}" />
-          </div>
-          <div class="form-group">
-            <label>Acréscimo</label>
-            <input id="edit_v_acrescimo" class="form-control" type="number" step="0.01" value="${venda.acrescimo || 0}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Data</label>
-            <input id="edit_v_data" class="form-control" type="date" value="${venda.data || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Observação</label>
-            <input id="edit_v_observacao" class="form-control" type="text" value="${venda.observacao || ""}" />
-          </div>
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarVenda(${venda.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarVenda(id) {
-      const payload = {
-        cliente_nome: document.getElementById("edit_v_cliente_nome").value.trim(),
-        pagamento: document.getElementById("edit_v_pagamento").value.trim(),
-        parcelas: document.getElementById("edit_v_parcelas").value,
-        desconto: document.getElementById("edit_v_desconto").value,
-        acrescimo: document.getElementById("edit_v_acrescimo").value,
-        observacao: document.getElementById("edit_v_observacao").value.trim(),
-        data: document.getElementById("edit_v_data").value
-      };
-
-      const response = await apiFetch(`/vendas/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Venda atualizada com sucesso.", "success");
-      await carregarVendas();
-      await carregarDashboard();
-    }
-
-    async function excluirVenda(id) {
-      if (!confirm("Deseja excluir esta venda?")) return;
-
-      const response = await apiFetch(`/vendas/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Venda excluída com sucesso.", "success");
-      await carregarVendas();
-      await carregarProdutos();
-      await carregarContasReceber();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    }
-
-    function adicionarItemCompra() {
-      const produtoId = Number(document.getElementById("c_produto").value);
-      const quantidade = Number(document.getElementById("c_qtd").value);
-      const custo = Number(document.getElementById("c_custo").value);
-
-      const produto = produtos.find((p) => Number(p.id) === produtoId);
-      if (!produto || !quantidade || quantidade <= 0 || !custo || custo <= 0) {
-        mostrarStatus("appStatus", "Selecione produto, quantidade e custo válidos.", "warning");
-        return;
-      }
-
-      itensCompra.push({
-        produto_id: produto.id,
-        produto_nome: produto.nome,
-        quantidade,
-        custo_unitario: custo,
-        subtotal: quantidade * custo
-      });
-
-      document.getElementById("c_qtd").value = "";
-      document.getElementById("c_custo").value = "";
-      renderItensCompra();
-    }
-
-    function removerItemCompra(index) {
-      itensCompra.splice(index, 1);
-      renderItensCompra();
-    }
-
-    function renderItensCompra() {
-      const body = document.getElementById("itensCompraBody");
-
-      if (!itensCompra.length) {
-        body.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum item adicionado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = itensCompra.map((item, index) => `
-        <tr>
-          <td>${item.produto_nome}</td>
-          <td>${item.quantidade}</td>
-          <td>${formatarMoeda(item.custo_unitario)}</td>
-          <td>${formatarMoeda(item.subtotal)}</td>
-          <td><button class="btn btn-danger" onclick="removerItemCompra(${index})">Remover</button></td>
-        </tr>
-      `).join("");
-    }
-
-    async function salvarCompra() {
-      if (!itensCompra.length) {
-        mostrarStatus("appStatus", "Adicione ao menos um item na compra.", "warning");
-        return;
-      }
-
-      const payload = {
-        empresa: document.getElementById("c_empresa").value.trim(),
-        fornecedor_id: document.getElementById("c_fornecedor").value,
-        data: document.getElementById("c_data").value,
-        observacao: document.getElementById("c_observacao").value.trim(),
-        gerar_conta_pagar: document.getElementById("c_tipo_pagamento").value === "prazo",
-        forma_pagamento: document.getElementById("c_forma_pagamento").value,
-        status_pagamento: document.getElementById("c_tipo_pagamento").value === "prazo"
-          ? document.getElementById("c_status_pagamento").value
-          : "pago",
-        vencimento: document.getElementById("c_tipo_pagamento").value === "prazo"
-          ? document.getElementById("c_vencimento").value
-          : null,
-        itens: itensCompra
-      };
-
-      const response = await apiFetch("/compras", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Compra registrada com sucesso.", "success");
-      limparCompra();
-      await carregarCompras();
-      await carregarProdutos();
-      await carregarContasPagar();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    }
-
-    async function carregarCompras() {
-      const empresa = document.getElementById("c_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/compras/${encodeURIComponent(empresa)}${qs()}`);
-      if (!response || !response.ok) return;
-      compras = await response.json();
-      renderCompras();
-    }
-
-    function renderCompras() {
-      const termo = (document.getElementById("buscaCompra").value || "").toLowerCase();
-      const body = document.getElementById("listaCompras");
-
-      const filtrados = compras.filter((c) =>
-        `${c.fornecedor_nome || ""} ${c.forma_pagamento || ""}`.toLowerCase().includes(termo)
-      );
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhuma compra encontrada.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((c) => `
-        <tr>
-          <td>${c.empresa}</td>
-          <td>${c.id}</td>
-          <td>${c.fornecedor_nome || "-"}</td>
-          <td>${formatarMoeda(c.total)}</td>
-          <td>${c.forma_pagamento || "-"}</td>
-          <td><span class="badge ${c.status_pagamento === "pago" ? "badge-ok" : "badge-warning"}">${c.status_pagamento}</span></td>
-          <td>${formatarData(c.data)}</td>
-          <td>
-            <button class="btn btn-outline" onclick='editarCompra(${JSON.stringify(c)})'>Editar</button>
-            <button class="btn btn-danger" onclick="excluirCompra(${c.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function editarCompra(compra) {
-      abrirModal("Editar compra", `
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Data</label>
-            <input id="edit_c_data" class="form-control" type="date" value="${compra.data || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Vencimento</label>
-            <input id="edit_c_vencimento" class="form-control" type="date" value="${compra.vencimento || ""}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Forma de pagamento</label>
-            <input id="edit_c_forma_pagamento" class="form-control" type="text" value="${compra.forma_pagamento || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Status do pagamento</label>
-            <select id="edit_c_status_pagamento" class="form-control">
-              <option value="pago" ${compra.status_pagamento === "pago" ? "selected" : ""}>Pago</option>
-              <option value="pendente" ${compra.status_pagamento === "pendente" ? "selected" : ""}>Pendente</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Observação</label>
-          <input id="edit_c_observacao" class="form-control" type="text" value="${compra.observacao || ""}" />
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarCompra(${compra.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarCompra(id) {
-      const payload = {
-        data: document.getElementById("edit_c_data").value,
-        observacao: document.getElementById("edit_c_observacao").value.trim(),
-        forma_pagamento: document.getElementById("edit_c_forma_pagamento").value.trim(),
-        status_pagamento: document.getElementById("edit_c_status_pagamento").value,
-        vencimento: document.getElementById("edit_c_vencimento").value
-      };
-
-      const response = await apiFetch(`/compras/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Compra atualizada com sucesso.", "success");
-      await carregarCompras();
-      await carregarContasPagar();
-      await carregarDashboard();
-    }
-
-    async function excluirCompra(id) {
-      if (!confirm("Deseja excluir esta compra?")) return;
-
-      const response = await apiFetch(`/compras/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Compra excluída com sucesso.", "success");
-      await carregarCompras();
-      await carregarProdutos();
-      await carregarContasPagar();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    }
-
-    async function carregarMovimentacoes() {
-      const empresa = document.getElementById("a_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/movimentacoes-estoque/${encodeURIComponent(empresa)}${qs()}`);
-      if (!response || !response.ok) return;
-      movimentacoes = await response.json();
-      renderMovimentacoes();
-    }
-
-    function renderMovimentacoes() {
-      const termo = (document.getElementById("buscaMovimentacao").value || "").toLowerCase();
-      const tipo = document.getElementById("filtroTipoMovimentacao").value;
-      const body = document.getElementById("listaMovimentacoes");
-
-      const filtrados = movimentacoes.filter((m) => {
-        const passaTermo = `${m.produto_nome || ""} ${m.observacao || ""}`.toLowerCase().includes(termo);
-        const passaTipo = !tipo || m.tipo === tipo;
-        return passaTermo && passaTipo;
-      });
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhuma movimentação encontrada.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((m) => `
-        <tr>
-          <td>${m.empresa}</td>
-          <td>${m.produto_nome || "-"}</td>
-          <td>${m.tipo}</td>
-          <td>${m.quantidade}</td>
-          <td>${m.observacao || "-"}</td>
-          <td>${formatarDataHora(m.data_movimentacao)}</td>
-        </tr>
-      `).join("");
-    }
-
-    async function salvarAjusteEstoque() {
-      const payload = {
-        empresa: document.getElementById("a_empresa").value.trim(),
-        produto_id: document.getElementById("a_produto").value,
-        novo_estoque: document.getElementById("a_novo_estoque").value,
-        observacao: document.getElementById("a_observacao").value.trim()
-      };
-
-      const response = await apiFetch("/ajuste-estoque", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Ajuste salvo com sucesso.", "success");
-      await carregarProdutos();
-      await carregarMovimentacoes();
-      await carregarDashboard();
-    }
-
-    async function carregarContasReceber() {
-      const empresa = document.getElementById("v_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/contas-receber/${encodeURIComponent(empresa)}${qs()}`);
-      if (!response || !response.ok) return;
-      contasReceber = await response.json();
-      renderContasReceber();
-    }
-
-    function renderContasReceber() {
-      const termo = (document.getElementById("buscaReceber").value || "").toLowerCase();
-      const status = document.getElementById("filtroReceberStatus").value;
-      const body = document.getElementById("listaContasReceber");
-
-      const filtrados = contasReceber.filter((c) => {
-        const passaTermo = `${c.cliente_nome || ""}`.toLowerCase().includes(termo);
-        const passaStatus = !status || c.status === status;
-        return passaTermo && passaStatus;
-      });
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhuma conta a receber encontrada.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((c) => `
-        <tr>
-          <td>${c.empresa}</td>
-          <td>${c.cliente_nome || "-"}</td>
-          <td>${c.parcela}/${c.total_parcelas}</td>
-          <td>${formatarMoeda(c.valor)}</td>
-          <td>${formatarData(c.data_vencimento)}</td>
-          <td>${formatarData(c.data_pagamento)}</td>
-          <td><span class="badge ${c.status === "pago" ? "badge-ok" : c.status === "atrasado" ? "badge-alert" : "badge-warning"}">${c.status}</span></td>
-          <td>
-            <button class="btn btn-outline" onclick='editarContaReceber(${JSON.stringify(c)})'>Editar</button>
-            <button class="btn btn-primary" onclick="baixarContaReceber(${c.id})">Baixar</button>
-            <button class="btn btn-danger" onclick="excluirContaReceber(${c.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function editarContaReceber(conta) {
-      abrirModal("Editar conta a receber", `
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Cliente</label>
-            <input id="edit_cr_cliente" class="form-control" type="text" value="${conta.cliente_nome || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Valor</label>
-            <input id="edit_cr_valor" class="form-control" type="number" step="0.01" value="${conta.valor || 0}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Vencimento</label>
-            <input id="edit_cr_vencimento" class="form-control" type="date" value="${conta.data_vencimento || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Forma de pagamento</label>
-            <input id="edit_cr_forma" class="form-control" type="text" value="${conta.forma_pagamento || ""}" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Observação</label>
-          <input id="edit_cr_observacao" class="form-control" type="text" value="${conta.observacao || ""}" />
-        </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select id="edit_cr_status" class="form-control">
-            <option value="pendente" ${conta.status === "pendente" ? "selected" : ""}>Pendente</option>
-            <option value="pago" ${conta.status === "pago" ? "selected" : ""}>Pago</option>
-            <option value="atrasado" ${conta.status === "atrasado" ? "selected" : ""}>Atrasado</option>
-          </select>
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarContaReceber(${conta.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarContaReceber(id) {
-      const payload = {
-        cliente_nome: document.getElementById("edit_cr_cliente").value.trim(),
-        valor: document.getElementById("edit_cr_valor").value,
-        data_vencimento: document.getElementById("edit_cr_vencimento").value,
-        forma_pagamento: document.getElementById("edit_cr_forma").value.trim(),
-        observacao: document.getElementById("edit_cr_observacao").value.trim(),
-        status: document.getElementById("edit_cr_status").value
-      };
-
-      const response = await apiFetch(`/contas-receber/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Conta a receber atualizada com sucesso.", "success");
-      await carregarContasReceber();
-      await carregarDashboard();
-    }
-
-    async function baixarContaReceber(id) {
-      const response = await apiFetch(`/contas-receber/${id}/pagar`, {
-        method: "PUT",
-        body: JSON.stringify({ data_pagamento: new Date().toISOString().slice(0, 10) })
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Conta a receber baixada com sucesso.", "success");
-      await carregarContasReceber();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    }
-
-    async function excluirContaReceber(id) {
-      if (!confirm("Deseja excluir esta conta a receber?")) return;
-
-      const response = await apiFetch(`/contas-receber/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Conta a receber excluída com sucesso.", "success");
-      await carregarContasReceber();
-      await carregarDashboard();
-    }
-
-    async function carregarContasPagar() {
-      const empresa = document.getElementById("c_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/contas-pagar/${encodeURIComponent(empresa)}${qs()}`);
-      if (!response || !response.ok) return;
-      contasPagar = await response.json();
-      renderContasPagar();
-    }
-
-    function renderContasPagar() {
-      const termo = (document.getElementById("buscaPagar").value || "").toLowerCase();
-      const status = document.getElementById("filtroPagarStatus").value;
-      const body = document.getElementById("listaContasPagar");
-
-      const filtrados = contasPagar.filter((c) => {
-        const passaTermo = `${c.fornecedor_nome || ""} ${c.descricao || ""}`.toLowerCase().includes(termo);
-        const passaStatus = !status || c.status === status;
-        return passaTermo && passaStatus;
-      });
-
-      if (!filtrados.length) {
-        body.innerHTML = `<tr><td colspan="8" class="empty-state">Nenhuma conta a pagar encontrada.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = filtrados.map((c) => `
-        <tr>
-          <td>${c.empresa}</td>
-          <td>${c.fornecedor_nome || "-"}</td>
-          <td>${c.descricao || "-"}</td>
-          <td>${formatarMoeda(c.valor)}</td>
-          <td>${formatarData(c.data_vencimento)}</td>
-          <td>${formatarData(c.data_pagamento)}</td>
-          <td><span class="badge ${c.status === "pago" ? "badge-ok" : c.status === "atrasado" ? "badge-alert" : "badge-warning"}">${c.status}</span></td>
-          <td>
-            <button class="btn btn-outline" onclick='editarContaPagar(${JSON.stringify(c)})'>Editar</button>
-            <button class="btn btn-primary" onclick="baixarContaPagar(${c.id})">Baixar</button>
-            <button class="btn btn-danger" onclick="excluirContaPagar(${c.id})">Excluir</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function editarContaPagar(conta) {
-      abrirModal("Editar conta a pagar", `
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Fornecedor</label>
-            <input id="edit_cp_fornecedor" class="form-control" type="text" value="${conta.fornecedor_nome || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Descrição</label>
-            <input id="edit_cp_descricao" class="form-control" type="text" value="${conta.descricao || ""}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Valor</label>
-            <input id="edit_cp_valor" class="form-control" type="number" step="0.01" value="${conta.valor || 0}" />
-          </div>
-          <div class="form-group">
-            <label>Vencimento</label>
-            <input id="edit_cp_vencimento" class="form-control" type="date" value="${conta.data_vencimento || ""}" />
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Forma de pagamento</label>
-            <input id="edit_cp_forma" class="form-control" type="text" value="${conta.forma_pagamento || ""}" />
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="edit_cp_status" class="form-control">
-              <option value="pendente" ${conta.status === "pendente" ? "selected" : ""}>Pendente</option>
-              <option value="pago" ${conta.status === "pago" ? "selected" : ""}>Pago</option>
-              <option value="atrasado" ${conta.status === "atrasado" ? "selected" : ""}>Atrasado</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Observação</label>
-          <input id="edit_cp_observacao" class="form-control" type="text" value="${conta.observacao || ""}" />
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-primary" onclick="atualizarContaPagar(${conta.id})">Salvar alterações</button>
-        </div>
-      `);
-    }
-
-    async function atualizarContaPagar(id) {
-      const payload = {
-        fornecedor_nome: document.getElementById("edit_cp_fornecedor").value.trim(),
-        descricao: document.getElementById("edit_cp_descricao").value.trim(),
-        valor: document.getElementById("edit_cp_valor").value,
-        data_vencimento: document.getElementById("edit_cp_vencimento").value,
-        forma_pagamento: document.getElementById("edit_cp_forma").value.trim(),
-        observacao: document.getElementById("edit_cp_observacao").value.trim(),
-        status: document.getElementById("edit_cp_status").value
-      };
-
-      const response = await apiFetch(`/contas-pagar/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload)
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      fecharModal();
-      mostrarStatus("appStatus", "Conta a pagar atualizada com sucesso.", "success");
-      await carregarContasPagar();
-      await carregarDashboard();
-    }
-
-    async function baixarContaPagar(id) {
-      const response = await apiFetch(`/contas-pagar/${id}/pagar`, {
-        method: "PUT",
-        body: JSON.stringify({ data_pagamento: new Date().toISOString().slice(0, 10) })
-      });
-
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Conta a pagar baixada com sucesso.", "success");
-      await carregarContasPagar();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    }
-
-    async function excluirContaPagar(id) {
-      if (!confirm("Deseja excluir esta conta a pagar?")) return;
-
-      const response = await apiFetch(`/contas-pagar/${id}`, { method: "DELETE" });
-      if (!response || !response.ok) {
-        mostrarStatus("appStatus", await response.text(), "error");
-        return;
-      }
-
-      mostrarStatus("appStatus", "Conta a pagar excluída com sucesso.", "success");
-      await carregarContasPagar();
-      await carregarDashboard();
-    }
-
-    async function carregarFluxoCaixa() {
-      const empresa = usuarioLogado?.empresa || document.getElementById("v_empresa")?.value.trim() || document.getElementById("c_empresa")?.value.trim() || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/fluxo-caixa/${encodeURIComponent(empresa)}${qs()}`);
-      if (!response || !response.ok) return;
-      fluxoCaixa = await response.json();
-
-      document.getElementById("fcTotalEntradas").textContent = formatarMoeda(fluxoCaixa.resumo.total_entradas);
-      document.getElementById("fcTotalSaidas").textContent = formatarMoeda(fluxoCaixa.resumo.total_saidas);
-      document.getElementById("fcSaldoFinal").textContent = formatarMoeda(fluxoCaixa.resumo.saldo_final);
-      document.getElementById("fcQuantidadeLancamentos").textContent = fluxoCaixa.resumo.quantidade_lancamentos;
-
-      renderFluxoResumoDia();
-      renderFluxoLancamentos();
-    }
-
-    function renderFluxoResumoDia() {
-      const termo = (document.getElementById("buscaFluxoDia").value || "").toLowerCase();
-      const body = document.getElementById("fluxoResumoDiaBody");
-      if (!fluxoCaixa) return;
-
-      const lista = fluxoCaixa.resumo_por_dia.filter((d) =>
-        formatarData(d.data).toLowerCase().includes(termo)
-      );
-
-      if (!lista.length) {
-        body.innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum resumo diário encontrado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = lista.map((d) => `
-        <tr>
-          <td>${formatarData(d.data)}</td>
-          <td class="fluxo-entrada">${formatarMoeda(d.entradas)}</td>
-          <td class="fluxo-saida">${formatarMoeda(d.saidas)}</td>
-          <td class="${d.saldo_dia >= 0 ? "fluxo-saldo-positivo" : "fluxo-saldo-negativo"}">${formatarMoeda(d.saldo_dia)}</td>
-          <td class="${d.saldo_acumulado >= 0 ? "fluxo-saldo-positivo" : "fluxo-saldo-negativo"}">${formatarMoeda(d.saldo_acumulado)}</td>
-        </tr>
-      `).join("");
-    }
-
-    function renderFluxoLancamentos() {
-      const termo = (document.getElementById("buscaFluxoLancamento").value || "").toLowerCase();
-      const tipo = document.getElementById("filtroFluxoTipo").value;
-      const body = document.getElementById("fluxoLancamentosBody");
-      if (!fluxoCaixa) return;
-
-      const lista = fluxoCaixa.lancamentos.filter((l) => {
-        const passaTermo = `${l.descricao || ""} ${l.categoria || ""}`.toLowerCase().includes(termo);
-        const passaTipo = !tipo || l.tipo === tipo;
-        return passaTermo && passaTipo;
-      });
-
-      if (!lista.length) {
-        body.innerHTML = `<tr><td colspan="6" class="empty-state">Nenhum lançamento encontrado.</td></tr>`;
-        return;
-      }
-
-      body.innerHTML = lista.map((l) => `
-        <tr>
-          <td>${formatarData(l.data)}</td>
-          <td>${l.tipo}</td>
-          <td>${l.descricao || "-"}</td>
-          <td>${l.categoria || "-"}</td>
-          <td>${l.forma_pagamento || "-"}</td>
-          <td class="${l.tipo === "entrada" ? "fluxo-entrada" : "fluxo-saida"}">${formatarMoeda(l.valor)}</td>
-        </tr>
-      `).join("");
-    }
-
-    async function carregarRelatorioEstoque() {
-      const empresa = document.getElementById("p_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/relatorio-estoque/${encodeURIComponent(empresa)}`);
-      if (!response || !response.ok) return;
-      relatorioEstoque = await response.json();
-
-      const c = document.getElementById("relatorioEstoqueContainer");
-      c.innerHTML = `
-        <div class="summary-grid">
-          <div class="summary-card"><div class="summary-label">Produtos</div><div class="summary-value">${relatorioEstoque.resumo.total_produtos}</div></div>
-          <div class="summary-card"><div class="summary-label">Unidades</div><div class="summary-value">${relatorioEstoque.resumo.total_unidades}</div></div>
-          <div class="summary-card"><div class="summary-label">Valor em Estoque</div><div class="summary-value money">${formatarMoeda(relatorioEstoque.resumo.valor_total_estoque)}</div></div>
-          <div class="summary-card"><div class="summary-label">Produtos em Alerta</div><div class="summary-value">${relatorioEstoque.resumo.produtos_alerta}</div></div>
-        </div>
-        <div class="card">
-          <h3>Produtos em alerta</h3>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Produto</th><th>Estoque</th><th>Mínimo</th><th>Valor em Estoque</th></tr>
-              </thead>
-              <tbody>
-                ${(relatorioEstoque.produtos_alerta || []).length
-                  ? relatorioEstoque.produtos_alerta.map((p) => `
-                      <tr>
-                        <td>${p.nome}</td>
-                        <td>${p.estoque}</td>
-                        <td>${p.estoque_minimo}</td>
-                        <td>${formatarMoeda(p.valor_estoque)}</td>
-                      </tr>
-                    `).join("")
-                  : `<tr><td colspan="4" class="empty-state">Nenhum produto em alerta.</td></tr>`
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    async function carregarRelatorioPerformance() {
-      const empresa = document.getElementById("p_empresa")?.value.trim() || usuarioLogado?.empresa || "";
-      if (!empresa && usuarioLogado?.tipo !== "admin") return;
-
-      const response = await apiFetch(`/relatorio-performance/${encodeURIComponent(empresa)}`);
-      if (!response || !response.ok) return;
-      relatorioPerformance = await response.json();
-
-      const c = document.getElementById("relatorioPerformanceContainer");
-      c.innerHTML = `
-        <div class="summary-grid">
-          <div class="summary-card"><div class="summary-label">Produtos</div><div class="summary-value">${relatorioPerformance.resumo.total_produtos}</div></div>
-          <div class="summary-card"><div class="summary-label">Sem saída</div><div class="summary-value">${relatorioPerformance.resumo.produtos_sem_saida}</div></div>
-          <div class="summary-card"><div class="summary-label">Baixo giro</div><div class="summary-value">${relatorioPerformance.resumo.produtos_baixo_giro}</div></div>
-          <div class="summary-card"><div class="summary-label">Faturamento</div><div class="summary-value money">${formatarMoeda(relatorioPerformance.resumo.faturamento_total)}</div></div>
-        </div>
-        <div class="card">
-          <h3>Top faturamento</h3>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Produto</th><th>Qtd vendida</th><th>Faturamento</th><th>Lucro estimado</th></tr>
-              </thead>
-              <tbody>
-                ${(relatorioPerformance.top_faturamento || []).length
-                  ? relatorioPerformance.top_faturamento.map((p) => `
-                      <tr>
-                        <td>${p.nome}</td>
-                        <td>${p.quantidade_vendida}</td>
-                        <td>${formatarMoeda(p.faturamento)}</td>
-                        <td>${formatarMoeda(p.lucro_estimado_vendido)}</td>
-                      </tr>
-                    `).join("")
-                  : `<tr><td colspan="4" class="empty-state">Nenhum dado de performance.</td></tr>`
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    document.getElementById("v_produto")?.addEventListener("change", (e) => {
-      const produto = produtos.find((p) => String(p.id) === e.target.value);
-      if (produto) document.getElementById("v_preco").value = produto.preco || 0;
-    });
-
-    document.getElementById("c_produto")?.addEventListener("change", (e) => {
-      const produto = produtos.find((p) => String(p.id) === e.target.value);
-      if (produto) document.getElementById("c_custo").value = produto.custo || 0;
-    });
-
-    document.getElementById("v_empresa")?.addEventListener("change", async () => {
-      await carregarClientes();
-      await carregarProdutos();
-      await carregarVendas();
-      await carregarContasReceber();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    });
-
-    document.getElementById("c_empresa")?.addEventListener("change", async () => {
-      await carregarFornecedores();
-      await carregarProdutos();
-      await carregarCompras();
-      await carregarContasPagar();
-      await carregarFluxoCaixa();
-      await carregarDashboard();
-    });
-
-    document.getElementById("p_empresa")?.addEventListener("change", async () => {
-      await carregarProdutos();
-      await carregarRelatorioEstoque();
-      await carregarRelatorioPerformance();
-    });
-
-    document.getElementById("cl_empresa")?.addEventListener("change", carregarClientes);
-    document.getElementById("f_empresa")?.addEventListener("change", carregarFornecedores);
-    document.getElementById("a_empresa")?.addEventListener("change", async () => {
-      await carregarProdutos();
-      await carregarMovimentacoes();
-    });
-
-    document.getElementById("loginSenha")?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") fazerLogin();
-    });
-
-    if (token && usuarioLogado) {
-      document.getElementById("loginScreen").classList.add("hidden");
-      document.getElementById("app").classList.remove("hidden");
-      atualizarTopo();
-      atualizarResumoPeriodo();
-      preencherDatasPadrao();
-      atualizarCamposVenda();
-      atualizarCamposPagamentoCompra();
-      renderItensVenda();
-      renderItensCompra();
-      mostrarPagina("dashboard");
-    } else {
-      atualizarResumoPeriodo();
-      preencherDatasPadrao();
-      atualizarCamposVenda();
-      atualizarCamposPagamentoCompra();
-    }
-  </script>
-</body>
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>

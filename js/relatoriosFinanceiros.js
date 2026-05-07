@@ -1,0 +1,455 @@
+import api from './api.js';
+
+const state = {
+  resumo: null,
+  receber: [],
+  pagar: [],
+  fluxo: [],
+  aba: 'resumo'
+};
+
+export async function initRelatoriosFinanceirosModule() {
+  try {
+    renderLoading();
+    await carregarDados();
+    render();
+  } catch (error) {
+    console.error('Erro ao iniciar relatórios financeiros:', error);
+    renderErro('Não foi possível carregar os relatórios financeiros.');
+  }
+}
+
+async function carregarDados() {
+  const filtros = getFiltrosGlobais();
+
+  const [resumoResult, receberResult, pagarResult, fluxoResult] = await Promise.allSettled([
+    api.getRelatorioFinanceiroResumo(filtros),
+    api.getRelatorioFinanceiroContasReceber(filtros),
+    api.getRelatorioFinanceiroContasPagar(filtros),
+    api.getRelatorioFinanceiroFluxoCaixa(filtros)
+  ]);
+
+  state.resumo = resumoResult.status === 'fulfilled' ? resumoResult.value : null;
+
+  state.receber =
+    receberResult.status === 'fulfilled' && Array.isArray(receberResult.value)
+      ? receberResult.value
+      : [];
+
+  state.pagar =
+    pagarResult.status === 'fulfilled' && Array.isArray(pagarResult.value) ? pagarResult.value : [];
+
+  const fluxoData = fluxoResult.status === 'fulfilled' ? fluxoResult.value : null;
+
+  state.fluxo = Array.isArray(fluxoData)
+    ? fluxoData
+    : Array.isArray(fluxoData?.movimentos)
+      ? fluxoData.movimentos
+      : [];
+}
+
+function getFiltrosGlobais() {
+  return {
+    data_inicial: document.getElementById('filtroDataInicial')?.value || '',
+    data_final: document.getElementById('filtroDataFinal')?.value || '',
+    busca: document.getElementById('filtroBuscaGlobal')?.value?.trim() || ''
+  };
+}
+
+function renderLoading() {
+  const c = document.getElementById('relatoriosContainer');
+  if (!c) return;
+
+  c.innerHTML = `
+    <div class="module-card">
+      <div class="module-feedback module-feedback--info">
+        Carregando relatórios financeiros...
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const c = document.getElementById('relatoriosContainer');
+  if (!c) return;
+
+  c.innerHTML = `
+    <div class="module-card">
+      <div id="relatoriosFeedback" class="module-feedback"></div>
+
+      <div class="module-card__header">
+        <div>
+          <h3>Relatórios Financeiros</h3>
+          <p>Resumo gerencial e detalhamento financeiro do período</p>
+        </div>
+
+        <div class="module-card__actions">
+          <button class="btn btn-light" id="btnAtualizarRelatoriosFinanceiros">
+            Atualizar
+          </button>
+        </div>
+      </div>
+
+      <div class="module-toolbar">
+        <div class="module-toolbar__stats">
+          <div class="mini-stat">
+            <span>Contas a receber</span>
+            <strong>${state.receber.length}</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Contas a pagar</span>
+            <strong>${state.pagar.length}</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Movimentos fluxo</span>
+            <strong>${state.fluxo.length}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="module-toolbar">
+        <div class="table-actions">
+          <button class="btn-inline ${state.aba === 'resumo' ? 'btn-inline--active' : ''}" data-aba="resumo">
+            Resumo
+          </button>
+          <button class="btn-inline ${state.aba === 'receber' ? 'btn-inline--active' : ''}" data-aba="receber">
+            Contas a Receber
+          </button>
+          <button class="btn-inline ${state.aba === 'pagar' ? 'btn-inline--active' : ''}" data-aba="pagar">
+            Contas a Pagar
+          </button>
+          <button class="btn-inline ${state.aba === 'fluxo' ? 'btn-inline--active' : ''}" data-aba="fluxo">
+            Fluxo de Caixa
+          </button>
+        </div>
+      </div>
+
+      ${renderConteudoAba()}
+    </div>
+  `;
+
+  bindEventos();
+}
+
+function renderConteudoAba() {
+  if (state.aba === 'resumo') return renderResumo();
+  if (state.aba === 'receber') return renderTabelaReceber();
+  if (state.aba === 'pagar') return renderTabelaPagar();
+  return renderTabelaFluxo();
+}
+
+function renderResumo() {
+  const r = state.resumo || {
+    contas_receber: { pago: 0, pendente: 0, atrasado: 0 },
+    contas_pagar: { pago: 0, pendente: 0, atrasado: 0 },
+    lancamentos: { receitas: 0, despesas: 0, receitas_pagas: 0, despesas_pagas: 0 },
+    fluxo: { entradas: 0, saidas: 0, saldo: 0 }
+  };
+
+  return `
+    <div class="kpi-grid" style="margin-top: 8px;">
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+        <div class="kpi-card__content">
+          <span>A Receber Pendente</span>
+          <strong>${formatCurrency(r.contas_receber.pendente)}</strong>
+          <small>Atrasado: ${formatCurrency(r.contas_receber.atrasado)}</small>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="kpi-card__content">
+          <span>A Pagar Pendente</span>
+          <strong>${formatCurrency(r.contas_pagar.pendente)}</strong>
+          <small>Atrasado: ${formatCurrency(r.contas_pagar.atrasado)}</small>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="kpi-card__content">
+          <span>Saldo do Fluxo</span>
+          <strong>${formatCurrency(r.fluxo.saldo)}</strong>
+          <small>Entradas: ${formatCurrency(r.fluxo.entradas)} | Saídas: ${formatCurrency(r.fluxo.saidas)}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid" style="margin-top: 20px;">
+      <div class="panel-card panel-card--large">
+        <div class="panel-card__header">
+          <div>
+            <h3>Resumo financeiro</h3>
+            <p>Visão consolidada do período aplicado</p>
+          </div>
+        </div>
+        <div class="panel-card__body">
+          <div class="dashboard-list">
+            <div class="dashboard-list__item">
+              <strong>Contas a receber pagas</strong>
+              <span>${formatCurrency(r.contas_receber.pago)}</span>
+            </div>
+            <div class="dashboard-list__item">
+              <strong>Contas a pagar pagas</strong>
+              <span>${formatCurrency(r.contas_pagar.pago)}</span>
+            </div>
+            <div class="dashboard-list__item">
+              <strong>Receitas lançadas</strong>
+              <span>${formatCurrency(r.lancamentos.receitas)}</span>
+            </div>
+            <div class="dashboard-list__item">
+              <strong>Despesas lançadas</strong>
+              <span>${formatCurrency(r.lancamentos.despesas)}</span>
+            </div>
+            <div class="dashboard-list__item">
+              <strong>Receitas pagas</strong>
+              <span>${formatCurrency(r.lancamentos.receitas_pagas)}</span>
+            </div>
+            <div class="dashboard-list__item">
+              <strong>Despesas pagas</strong>
+              <span>${formatCurrency(r.lancamentos.despesas_pagas)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-card__header">
+          <div>
+            <h3>Leitura rápida</h3>
+            <p>Interpretação gerencial</p>
+          </div>
+        </div>
+        <div class="panel-card__body">
+          <div class="alert-list">
+            <div class="alert-list__item info">
+              O relatório respeita o período global aplicado no topo.
+            </div>
+            <div class="alert-list__item ${r.fluxo.saldo >= 0 ? 'warning' : 'danger'}">
+              ${
+                r.fluxo.saldo >= 0
+                  ? 'Resultado financeiro equilibrado ou positivo.'
+                  : 'Resultado financeiro negativo no período.'
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTabelaReceber() {
+  if (!state.receber.length) {
+    return `<div class="module-feedback module-feedback--info">Nenhum registro de contas a receber no período.</div>`;
+  }
+
+  return `
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Parcela</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th class="text-right">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${state.receber
+            .map(
+              (item) => `
+            <tr>
+              <td>${escapeHtml(item.cliente_nome || '-')}</td>
+              <td>${Number(item.parcela || 1)}/${Number(item.total_parcelas || 1)}</td>
+              <td>${formatDate(item.data_vencimento)}</td>
+              <td>${escapeHtml(item.status || '-')}</td>
+              <td class="text-right"><strong>${formatCurrency(item.valor)}</strong></td>
+            </tr>
+          `
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderTabelaPagar() {
+  if (!state.pagar.length) {
+    return `<div class="module-feedback module-feedback--info">Nenhum registro de contas a pagar no período.</div>`;
+  }
+
+  return `
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fornecedor</th>
+            <th>Parcela</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th class="text-right">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${state.pagar
+            .map(
+              (item) => `
+            <tr>
+              <td>${escapeHtml(item.fornecedor_nome || '-')}</td>
+              <td>${Number(item.parcela || 1)}/${Number(item.total_parcelas || 1)}</td>
+              <td>${formatDate(item.data_vencimento)}</td>
+              <td>${escapeHtml(item.status || '-')}</td>
+              <td class="text-right"><strong>${formatCurrency(item.valor)}</strong></td>
+            </tr>
+          `
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderTabelaFluxo() {
+  if (!state.fluxo.length) {
+    return `<div class="module-feedback module-feedback--info">Nenhum movimento de fluxo de caixa no período.</div>`;
+  }
+
+  return `
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th>Origem</th>
+            <th>Descrição</th>
+            <th>Referência</th>
+            <th class="text-right">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${state.fluxo
+            .map(
+              (item) => `
+            <tr>
+              <td>${formatDate(item.data_movimento || item.data)}</td>
+              <td>${escapeHtml(item.tipo || '-')}</td>
+              <td>${formatOrigem(item.origem)}</td>
+              <td>${escapeHtml(item.descricao || '-')}</td>
+              <td>${formatReferencia(item)}</td>
+              <td class="text-right"><strong>${formatCurrency(item.valor)}</strong></td>
+            </tr>
+          `
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function bindEventos() {
+  document
+    .getElementById('btnAtualizarRelatoriosFinanceiros')
+    ?.addEventListener('click', async () => {
+      await recarregarModulo('Relatórios atualizados.');
+    });
+
+  document.querySelectorAll('[data-aba]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.aba = btn.dataset.aba;
+      render();
+    });
+  });
+}
+
+async function recarregarModulo(mensagem = '') {
+  try {
+    renderLoading();
+    await carregarDados();
+    render();
+    if (mensagem) renderFeedback(mensagem, 'success');
+  } catch (error) {
+    console.error(error);
+    renderErro('Não foi possível atualizar os relatórios financeiros.');
+  }
+}
+
+function renderFeedback(message, type = 'success') {
+  const feedback = document.getElementById('relatoriosFeedback');
+  if (!feedback) return;
+
+  feedback.className = `module-feedback module-feedback--${type}`;
+  feedback.textContent = message;
+
+  setTimeout(() => {
+    const current = document.getElementById('relatoriosFeedback');
+    if (current) {
+      current.className = 'module-feedback';
+      current.textContent = '';
+    }
+  }, 3500);
+}
+
+function renderErro(message) {
+  const c = document.getElementById('relatoriosContainer');
+  if (!c) return;
+
+  c.innerHTML = `
+    <div class="module-card">
+      <div class="module-feedback module-feedback--error">
+        ${escapeHtml(message)}
+      </div>
+    </div>
+  `;
+}
+
+function formatOrigem(origem) {
+  const mapa = {
+    conta_receber: 'Conta a Receber',
+    conta_pagar: 'Conta a Pagar',
+    lancamento_financeiro: 'Lançamento Financeiro',
+    investimento: 'Investimento'
+  };
+  return mapa[origem] || origem || '-';
+}
+
+function formatReferencia(item) {
+  if (!item?.referencia_id) return '-';
+  if (item.origem === 'conta_receber') return `Venda #${item.referencia_id}`;
+  if (item.origem === 'conta_pagar') return `Compra #${item.referencia_id}`;
+  return `#${item.referencia_id}`;
+}
+
+function formatCurrency(value) {
+  return Number(value || 0).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+}
+
+function formatDate(value) {
+  if (!value) return '-';
+  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(String(value))) {
+    const [ano, mes, dia] = String(value).split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleDateString('pt-BR');
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
