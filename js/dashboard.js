@@ -278,6 +278,27 @@ function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = 
 </div>
       </div>
 
+        <div class="dashboard-abc-card">
+  <div class="dashboard-abc-card__header">
+    <strong>Curva ABC</strong>
+    <span>Distribuição estratégica dos produtos</span>
+  </div>
+
+  <div class="dashboard-abc-bars">
+    <div class="dashboard-abc-bar dashboard-abc-bar--a" style="width:${Math.max(8, payload.classeA * 12)}%">
+      A ${payload.classeA}
+    </div>
+
+    <div class="dashboard-abc-bar dashboard-abc-bar--b" style="width:${Math.max(8, payload.classeB * 12)}%">
+      B ${payload.classeB}
+    </div>
+
+    <div class="dashboard-abc-bar dashboard-abc-bar--c" style="width:${Math.max(8, payload.classeC * 12)}%">
+      C ${payload.classeC}
+    </div>
+  </div>
+</div>
+
         <div class="dashboard-note dashboard-note--premium">
         ${
           empresaStatus?.empresa?.bloqueada

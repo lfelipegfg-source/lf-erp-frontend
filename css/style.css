@@ -2954,3 +2954,66 @@ select {
 .kpi-grid {
   margin-bottom: 6px;
 }
+
+/* =========================
+   DASHBOARD — MINI GRÁFICO ABC
+========================= */
+
+.dashboard-abc-card {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
+}
+
+.dashboard-abc-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.dashboard-abc-card__header strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.dashboard-abc-card__header span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.dashboard-abc-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-abc-bar {
+  min-width: 42px;
+  height: 34px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-weight: 900;
+  font-size: 0.82rem;
+}
+
+.dashboard-abc-bar--a {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.dashboard-abc-bar--b {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.dashboard-abc-bar--c {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
