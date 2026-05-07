@@ -71,7 +71,11 @@ function normalizeDashboardPayload(data = {}) {
     lucroPotencial: Number(data.lucro_potencial ?? 0),
     margemMedia: Number(data.margem_media ?? 0),
     produtosPromocao: Number(data.produtos_promocao ?? 0),
-    produtosPrejuizo: Number(data.produtos_prejuizo ?? 0)
+    produtosPrejuizo: Number(data.produtos_prejuizo ?? 0),
+
+    classeA: Number(data.classe_a ?? 0),
+    classeB: Number(data.classe_b ?? 0),
+    classeC: Number(data.classe_c ?? 0)
   };
 }
 
@@ -250,6 +254,27 @@ function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = 
     ${payload.produtosPrejuizo}
   </span>
 </div>
+
+<div class="dashboard-list__item">
+  <strong>Produtos Classe A</strong>
+  <span class="badge badge--success">
+    ${payload.classeA}
+  </span>
+</div>
+
+<div class="dashboard-list__item">
+  <strong>Produtos Classe B</strong>
+  <span class="badge badge--warning">
+    ${payload.classeB}
+  </span>
+</div>
+
+<div class="dashboard-list__item">
+  <strong>Produtos Classe C</strong>
+  <span class="badge badge--danger">
+    ${payload.classeC}
+  </span>
+</div>
       </div>
 
       <div class="dashboard-note">
@@ -343,6 +368,13 @@ function buildAlertas(payload, financeiro) {
     alertas.push({
       tipo: 'info',
       texto: `${payload.produtosPromocao} produto(s) em promoção ativa`
+    });
+  }
+
+  if (payload.classeC > payload.classeA && payload.totalProdutos > 0) {
+    alertas.push({
+      tipo: 'warning',
+      texto: 'Quantidade elevada de produtos Classe C'
     });
   }
 
