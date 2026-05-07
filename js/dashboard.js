@@ -65,7 +65,13 @@ function normalizeDashboardPayload(data = {}) {
     totalCompras: Number(data.total_compras ?? 0),
     totalComprasValor: Number(data.total_compras_valor ?? 0),
     topProdutos: Array.isArray(data.top_produtos) ? data.top_produtos : [],
-    alertas: Array.isArray(data.alertas) ? data.alertas : []
+    alertas: Array.isArray(data.alertas) ? data.alertas : [],
+
+    estoqueInvestido: Number(data.estoque_investido ?? 0),
+    lucroPotencial: Number(data.lucro_potencial ?? 0),
+    margemMedia: Number(data.margem_media ?? 0),
+    produtosPromocao: Number(data.produtos_promocao ?? 0),
+    produtosPrejuizo: Number(data.produtos_prejuizo ?? 0)
   };
 }
 
@@ -213,6 +219,37 @@ function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = 
           <strong>Saldo do fluxo</strong>
           <span>${toCurrency(financeiro.fluxoSaldo)}</span>
         </div>
+
+        <div class="dashboard-list__item">
+  <strong>Estoque investido</strong>
+  <span>${toCurrency(payload.estoqueInvestido)}</span>
+</div>
+
+<div class="dashboard-list__item">
+  <strong>Lucro potencial</strong>
+  <span class="${payload.lucroPotencial >= 0 ? 'text-success' : 'text-danger'}">
+    ${toCurrency(payload.lucroPotencial)}
+  </span>
+</div>
+
+<div class="dashboard-list__item">
+  <strong>Margem média</strong>
+  <span>
+    ${Number(payload.margemMedia || 0).toFixed(2)}%
+  </span>
+</div>
+
+<div class="dashboard-list__item">
+  <strong>Produtos em promoção</strong>
+  <span>${payload.produtosPromocao}</span>
+</div>
+
+<div class="dashboard-list__item">
+  <strong>Produtos em prejuízo</strong>
+  <span class="${payload.produtosPrejuizo > 0 ? 'text-danger' : ''}">
+    ${payload.produtosPrejuizo}
+  </span>
+</div>
       </div>
 
       <div class="dashboard-note">
@@ -292,6 +329,27 @@ function buildAlertas(payload, financeiro) {
     alertas.push({
       tipo: 'info',
       texto: 'Nenhuma venda registrada no período aplicado.'
+    });
+  }
+
+  if (payload.produtosPrejuizo > 0) {
+    alertas.push({
+      tipo: 'danger',
+      texto: `${payload.produtosPrejuizo} produto(s) operando com prejuízo`
+    });
+  }
+
+  if (payload.produtosPromocao > 0) {
+    alertas.push({
+      tipo: 'info',
+      texto: `${payload.produtosPromocao} produto(s) em promoção ativa`
+    });
+  }
+
+  if (payload.margemMedia < 15 && payload.totalProdutos > 0) {
+    alertas.push({
+      tipo: 'warning',
+      texto: `Margem média baixa: ${Number(payload.margemMedia).toFixed(2)}%`
     });
   }
 
