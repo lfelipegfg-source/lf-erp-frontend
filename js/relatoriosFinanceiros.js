@@ -5,6 +5,7 @@ const state = {
   receber: [],
   pagar: [],
   fluxo: [],
+  lucratividade: [],
   aba: 'resumo'
 };
 
@@ -22,12 +23,14 @@ export async function initRelatoriosFinanceirosModule() {
 async function carregarDados() {
   const filtros = getFiltrosGlobais();
 
-  const [resumoResult, receberResult, pagarResult, fluxoResult] = await Promise.allSettled([
-    api.getRelatorioFinanceiroResumo(filtros),
-    api.getRelatorioFinanceiroContasReceber(filtros),
-    api.getRelatorioFinanceiroContasPagar(filtros),
-    api.getRelatorioFinanceiroFluxoCaixa(filtros)
-  ]);
+  const [resumoResult, receberResult, pagarResult, fluxoResult, lucratividadeResult] =
+    await Promise.allSettled([
+      api.getRelatorioFinanceiroResumo(filtros),
+      api.getRelatorioFinanceiroContasReceber(filtros),
+      api.getRelatorioFinanceiroContasPagar(filtros),
+      api.getRelatorioFinanceiroFluxoCaixa(filtros),
+      api.getRelatorioFinanceiroLucratividade(filtros)
+    ]);
 
   state.resumo = resumoResult.status === 'fulfilled' ? resumoResult.value : null;
 
@@ -45,6 +48,11 @@ async function carregarDados() {
     ? fluxoData
     : Array.isArray(fluxoData?.movimentos)
       ? fluxoData.movimentos
+      : [];
+
+  state.lucratividade =
+    lucratividadeResult.status === 'fulfilled' && Array.isArray(lucratividadeResult.value)
+      ? lucratividadeResult.value
       : [];
 }
 
@@ -104,6 +112,10 @@ function render() {
             <span>Movimentos fluxo</span>
             <strong>${state.fluxo.length}</strong>
           </div>
+          <div class="mini-stat">
+            <span>Lucratividade</span>
+            <strong>${state.lucratividade.length}</strong>
+          </div>
         </div>
       </div>
 
@@ -121,6 +133,9 @@ function render() {
           <button class="btn-inline ${state.aba === 'fluxo' ? 'btn-inline--active' : ''}" data-aba="fluxo">
             Fluxo de Caixa
           </button>
+          <button class="btn-inline ${state.aba === 'lucratividade' ? 'btn-inline--active' : ''}" data-aba="lucratividade">
+            Lucratividade
+          </button>
         </div>
       </div>
 
@@ -135,7 +150,8 @@ function renderConteudoAba() {
   if (state.aba === 'resumo') return renderResumo();
   if (state.aba === 'receber') return renderTabelaReceber();
   if (state.aba === 'pagar') return renderTabelaPagar();
-  return renderTabelaFluxo();
+  if (state.aba === 'fluxo') return renderTabelaFluxo();
+  return renderTabelaLucratividade();
 }
 
 function renderResumo() {
@@ -304,6 +320,98 @@ function renderTabelaPagar() {
               <td>${formatDate(item.data_vencimento)}</td>
               <td>${escapeHtml(item.status || '-')}</td>
               <td class="text-right"><strong>${formatCurrency(item.valor)}</strong></td>
+            </tr>
+          `
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderTabelaLucratividade() {
+  if (!state.lucratividade.length) {
+    return `
+      <div class="module-feedback module-feedback--info">
+        Nenhum dado de lucratividade encontrado no período.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Qtd.</th>
+            <th>Faturamento</th>
+            <th>Custo Médio</th>
+            <th>Lucro Unitário</th>
+            <th>Margem</th>
+            <th>Lucro Total</th>
+            <th>Estoque Investido</th>
+            <th>Lucro Potencial</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${state.lucratividade
+            .map(
+              (item) => `
+            <tr>
+              <td>
+                <strong>${escapeHtml(item.produto_nome || '-')}</strong>
+              </td>
+
+              <td>
+                ${Number(item.quantidade_vendida || 0)}
+              </td>
+
+              <td>
+                ${formatCurrency(item.faturamento_total)}
+              </td>
+
+              <td>
+                ${formatCurrency(item.custo_medio)}
+              </td>
+
+              <td class="${Number(item.lucro_unitario || 0) >= 0 ? 'text-success' : 'text-danger'}">
+                <strong>
+                  ${formatCurrency(item.lucro_unitario)}
+                </strong>
+              </td>
+
+              <td>
+                <span class="badge ${
+                  Number(item.margem_lucro || 0) >= 30
+                    ? 'badge--success'
+                    : Number(item.margem_lucro || 0) >= 10
+                      ? 'badge--warning'
+                      : 'badge--danger'
+                }">
+                  ${Number(item.margem_lucro || 0).toFixed(2)}%
+                </span>
+              </td>
+
+              <td class="${Number(item.lucro_total || 0) >= 0 ? 'text-success' : 'text-danger'}">
+                <strong>
+                  ${formatCurrency(item.lucro_total)}
+                </strong>
+              </td>
+
+              <td>
+                ${formatCurrency(item.estoque_investido)}
+              </td>
+
+              <td class="${
+                Number(item.lucro_potencial || 0) >= 0 ? 'text-success' : 'text-danger'
+              }">
+                <strong>
+                  ${formatCurrency(item.lucro_potencial)}
+                </strong>
+              </td>
             </tr>
           `
             )
