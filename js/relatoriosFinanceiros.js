@@ -344,6 +344,7 @@ function renderTabelaLucratividade() {
       <table class="data-table">
         <thead>
           <tr>
+            <th>ABC</th>
             <th>Produto</th>
             <th>Qtd.</th>
             <th>Faturamento</th>
@@ -363,9 +364,25 @@ function renderTabelaLucratividade() {
             .map(
               (item) => `
             <tr>
-              <td>
-                <strong>${escapeHtml(item.produto_nome || '-')}</strong>
-              </td>
+              <tr>
+  <td>
+    <span class="badge ${
+      item.classe_abc === 'A'
+        ? 'badge--success'
+        : item.classe_abc === 'B'
+          ? 'badge--warning'
+          : 'badge--danger'
+    }">
+      ${escapeHtml(item.classe_abc || 'C')}
+    </span>
+  </td>
+
+  <td>
+    <strong>${escapeHtml(item.produto_nome || '-')}</strong>
+    <div class="table-muted">
+      ${Number(item.participacao_lucro || 0).toFixed(2)}% do lucro
+    </div>
+  </td>
 
               <td>
                 ${Number(item.quantidade_vendida || 0)}
