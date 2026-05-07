@@ -353,6 +353,8 @@ function renderTabelaLucratividade() {
             <th>Lucro Total</th>
             <th>Estoque Investido</th>
             <th>Lucro Potencial</th>
+            <th>Capital Parado</th>
+            <th>Última Venda</th>
           </tr>
         </thead>
 
@@ -411,6 +413,13 @@ function renderTabelaLucratividade() {
                 <strong>
                   ${formatCurrency(item.lucro_potencial)}
                 </strong>
+              </td>
+              <td>
+                <strong>${formatCurrency(item.capital_parado || 0)}</strong>
+              </td>
+
+              <td>
+                ${formatDate(item.ultima_venda)}
               </td>
             </tr>
           `
