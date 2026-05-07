@@ -419,8 +419,32 @@ function renderTabelaLucratividade() {
               </td>
 
               <td>
-                ${formatDate(item.ultima_venda)}
-              </td>
+  <div class="stock-alert-stack">
+    <span>
+      ${formatDate(item.ultima_venda)}
+    </span>
+
+    ${
+      Number(item.capital_parado || 0) >= 500
+        ? `
+          <span class="badge badge--warning">
+            Capital alto parado
+          </span>
+        `
+        : ''
+    }
+
+    ${
+      Number(item.estoque_parado || 0) >= 20
+        ? `
+          <span class="badge badge--danger">
+            Estoque elevado
+          </span>
+        `
+        : ''
+    }
+  </div>
+</td>
             </tr>
           `
             )
