@@ -784,6 +784,17 @@ async function getRelatorioFinanceiroFluxoCaixa(params = {}) {
   });
 }
 
+async function getRelatorioFinanceiroLucratividade(params = {}) {
+  const empresa = ensureEmpresa();
+
+  return request(`/relatorios/financeiro/lucratividade/${empresa}`, {
+    method: 'GET',
+    query: {
+      ...params
+    }
+  });
+}
+
 function setApiBaseUrl(url) {
   if (!url || typeof url !== 'string') {
     throw new Error('Informe uma URL válida para a API.');
@@ -869,6 +880,7 @@ const api = {
   getRelatorioFinanceiroContasReceber,
   getRelatorioFinanceiroContasPagar,
   getRelatorioFinanceiroFluxoCaixa,
+  getRelatorioFinanceiroLucratividade,
 
   getAuthToken,
   getEmpresaId,
