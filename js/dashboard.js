@@ -177,7 +177,7 @@ function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = 
   setHtml(
     'dashboardResumo',
     `
-      <div class="dashboard-list">
+      <div class="dashboard-grid-executive">
         <div class="dashboard-list__item">
           <strong>Empresa</strong>
           <span>${safeText(empresaNome)}</span>
@@ -278,7 +278,7 @@ function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = 
 </div>
       </div>
 
-      <div class="dashboard-note">
+        <div class="dashboard-note dashboard-note--premium">
         ${
           empresaStatus?.empresa?.bloqueada
             ? `Empresa bloqueada: ${safeText(empresaStatus?.empresa?.motivo_bloqueio, 'sem motivo informado')}`
