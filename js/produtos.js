@@ -49,6 +49,8 @@ const ProdutosModule = {
       codigoBarras: document.getElementById('produtoCodigoBarras'),
       preco: document.getElementById('produtoPreco'),
       custo: document.getElementById('produtoCusto'),
+      precoPromocional: document.getElementById('produtoPrecoPromocional'),
+      promocaoAtiva: document.getElementById('produtoPromocaoAtiva'),
       estoque: document.getElementById('produtoEstoque'),
       estoqueMinimo: document.getElementById('produtoEstoqueMinimo'),
       saveBtn: document.getElementById('produtoSaveBtn'),
@@ -220,7 +222,9 @@ const ProdutosModule = {
                 <th>Categoria</th>
                 <th>Código</th>
                 <th>Preço</th>
-                <th>Custo</th>
+                <th>Custo Médio</th>
+                <th>Lucro</th>
+                <th>Margem</th>
                 <th>Estoque</th>
                 <th>Mínimo</th>
                 <th>Status</th>
@@ -283,6 +287,23 @@ const ProdutosModule = {
             </div>
 
             <div class="form-field">
+              <label for="produtoPrecoPromocional">Preço promocional</label>
+              <input
+                type="number"
+                id="produtoPrecoPromocional"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div class="form-field form-field--checkbox">
+              <label class="checkbox-wrapper">
+                <input type="checkbox" id="produtoPromocaoAtiva" />
+                <span>Promoção ativa</span>
+              </label>
+            </div>
+
+            <div class="form-field">
               <label for="produtoEstoque">Estoque</label>
               <input type="number" id="produtoEstoque" min="0" step="1" required />
             </div>
@@ -342,9 +363,40 @@ const ProdutosModule = {
             </td>
             <td>${escapeHtml(item.categoria || '-')}</td>
             <td>${escapeHtml(item.codigo_barras || '-')}</td>
-            <td>${toCurrency(item.preco)}</td>
-            <td>${toCurrency(item.custo)}</td>
-            <td>${Number(item.estoque || 0)}</td>
+            <td>
+  ${
+    item.promocao_ativa && Number(item.preco_promocional || 0) > 0
+      ? `
+        <div class="price-stack">
+          <small class="price-old">${toCurrency(item.preco)}</small>
+          <strong class="price-promo">
+            ${toCurrency(item.preco_promocional)}
+          </strong>
+        </div>
+      `
+      : toCurrency(item.preco)
+  }
+</td>
+
+<td>${toCurrency(item.custo_medio || item.custo)}</td>
+
+<td class="${Number(item.lucro_unitario || 0) >= 0 ? 'text-success' : 'text-danger'}">
+  ${toCurrency(item.lucro_unitario || 0)}
+</td>
+
+<td>
+  <span class="badge ${
+    Number(item.margem_lucro || 0) >= 30
+      ? 'badge--success'
+      : Number(item.margem_lucro || 0) >= 10
+        ? 'badge--warning'
+        : 'badge--danger'
+  }">
+    ${Number(item.margem_lucro || 0).toFixed(2)}%
+  </span>
+</td>
+
+<td>${Number(item.estoque || 0)}</td>
             <td>${Number(item.estoque_minimo || 0)}</td>
             <td><span class="${statusClass}">${statusText}</span></td>
             <td class="text-right">
@@ -431,6 +483,13 @@ const ProdutosModule = {
     if (this.el.codigoBarras) this.el.codigoBarras.value = item.codigo_barras || '';
     if (this.el.preco) this.el.preco.value = Number(item.preco || 0);
     if (this.el.custo) this.el.custo.value = Number(item.custo || 0);
+    if (this.el.precoPromocional) {
+      this.el.precoPromocional.value = Number(item.preco_promocional || 0);
+    }
+
+    if (this.el.promocaoAtiva) {
+      this.el.promocaoAtiva.checked = Boolean(item.promocao_ativa);
+    }
     if (this.el.estoque) this.el.estoque.value = Number(item.estoque || 0);
     if (this.el.estoqueMinimo) this.el.estoqueMinimo.value = Number(item.estoque_minimo || 0);
 
@@ -460,6 +519,8 @@ const ProdutosModule = {
       codigo_barras: this.el.codigoBarras?.value?.trim() || '',
       preco: Number(this.el.preco?.value || 0),
       custo: Number(this.el.custo?.value || 0),
+      preco_promocional: Number(this.el.precoPromocional?.value || 0),
+      promocao_ativa: Boolean(this.el.promocaoAtiva?.checked),
       estoque: Number(this.el.estoque?.value || 0),
       estoque_minimo: Number(this.el.estoqueMinimo?.value || 0)
     };

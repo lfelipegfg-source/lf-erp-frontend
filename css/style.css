@@ -2684,3 +2684,107 @@ select {
     transform: translateX(0);
   }
 }
+
+/* =========================
+   PRODUTOS — INTELIGÊNCIA COMERCIAL
+========================= */
+
+.price-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.price-old {
+  color: var(--text-light);
+  text-decoration: line-through;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.price-promo {
+  color: var(--danger);
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+
+.text-success {
+  color: var(--success);
+  font-weight: 800;
+}
+
+.text-danger {
+  color: var(--danger);
+  font-weight: 800;
+}
+
+/* BADGE WARNING */
+
+.badge--warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+/* CHECKBOX PROFISSIONAL */
+
+.form-field--checkbox {
+  display: flex;
+  align-items: center;
+  padding-top: 28px;
+}
+
+.checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.checkbox-wrapper input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* TABELA PRODUTOS MAIS PROFISSIONAL */
+
+#produtosContainer .data-table td {
+  vertical-align: middle;
+}
+
+#produtosContainer .badge {
+  min-width: 84px;
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* LUCRO NEGATIVO */
+
+.text-danger {
+  color: #dc2626;
+}
+
+.text-success {
+  color: #16a34a;
+}
+
+/* PROMOÇÃO ATIVA */
+
+.price-promo::before {
+  content: 'PROMO';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--danger);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
