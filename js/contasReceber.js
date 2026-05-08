@@ -1477,14 +1477,17 @@ async function salvarContaManual(modal) {
       return;
     }
 
-    await api.post('/contas-receber/manual', {
-      cliente_id: clienteId || null,
-      cliente_nome: nomeManual,
-      valor,
-      data_vencimento: vencimento,
-      descricao,
-      observacao,
-      forma_pagamento: 'promissoria'
+    await api.request('/contas-receber/manual', {
+      method: 'POST',
+      body: {
+        cliente_id: clienteId || null,
+        cliente_nome: nomeManual,
+        valor,
+        data_vencimento: vencimento,
+        descricao,
+        observacao,
+        forma_pagamento: 'promissoria'
+      }
     });
 
     showMessage('Conta manual cadastrada com sucesso.', 'success');
