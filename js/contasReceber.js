@@ -505,9 +505,18 @@ async function estornarConta(id) {
 }
 
 async function baixarConta(id) {
-  const confirmar = window.confirm('Confirmar baixa desta conta como recebida?');
+  const conta = state.contas.find((item) => String(item.id) === String(id));
+  const valorAtual = Number(conta?.valor || 0);
+
+  const confirmar = window.confirm(
+    `Confirmar recebimento desta conta?\n\nSaldo atual: ${formatCurrency(valorAtual)}`
+  );
 
   if (!confirmar) return;
+
+  const valorPago = window.prompt(
+    `Informe o valor recebido.\n\nSaldo atual: ${formatCurrency(valorAtual)}\nDeixe em branco para baixar o valor total:`
+  );
 
   const dataPagamento = window.prompt(
     'Informe a data do recebimento no formato AAAA-MM-DD.\nDeixe em branco para usar a data de hoje:'
@@ -515,10 +524,11 @@ async function baixarConta(id) {
 
   try {
     await api.baixarContaReceber(id, {
+      valor_pago: valorPago || undefined,
       data_pagamento: dataPagamento || undefined
     });
 
-    showMessage('Conta baixada com sucesso.', 'success');
+    showMessage('Recebimento registrado com sucesso.', 'success');
 
     await recarregar();
   } catch (error) {
