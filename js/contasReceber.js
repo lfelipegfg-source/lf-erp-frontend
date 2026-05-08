@@ -339,6 +339,16 @@ function renderLinhas() {
 
         <td class="text-right">
           <div class="table-actions">
+          ${
+            conta.cliente_id
+              ? `
+      <button class="btn-inline" type="button" data-action="historico-cliente-cr" data-id="${conta.cliente_id}">
+        <i class="fa-solid fa-user-clock"></i>
+        Cliente
+      </button>
+    `
+              : ''
+          }
             <button class="btn-inline" type="button" data-action="detalhe-cr" data-id="${conta.id}">
               <i class="fa-solid fa-eye"></i>
               Detalhes
@@ -432,6 +442,12 @@ function bindEventos() {
   document.querySelectorAll("[data-action='baixar-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
       await baixarConta(button.dataset.id);
+    });
+  });
+
+  document.querySelectorAll("[data-action='historico-cliente-cr']").forEach((button) => {
+    button.addEventListener('click', async () => {
+      await abrirHistoricoCliente(button.dataset.id);
     });
   });
 
@@ -1503,5 +1519,124 @@ async function salvarContaManual(modal) {
     const message = buildFriendlyError(error);
 
     showMessage(message, 'error');
+  }
+}
+
+async function abrirHistoricoCliente(clienteId) {
+  try {
+    const data = await api.getHistoricoFinanceiroCliente(clienteId);
+
+    const modalExistente = document.getElementById('crHistoricoClienteModal');
+    if (modalExistente) modalExistente.remove();
+
+    const cliente = data?.cliente || {};
+    const resumo = data?.resumo || {};
+    const contas = Array.isArray(data?.contas) ? data.contas : [];
+
+    const modal = document.createElement('div');
+    modal.id = 'crHistoricoClienteModal';
+    modal.className = 'modal-overlay cr-detail-overlay';
+
+    modal.innerHTML = `
+      <div class="modal-card cr-detail-card">
+        <div class="cr-detail-header">
+          <div>
+            <span class="cr-detail-eyebrow">Histórico do cliente</span>
+            <h3>${escapeHtml(cliente.nome || 'Cliente')}</h3>
+            <p>${escapeHtml(cliente.telefone || 'Sem telefone informado')}</p>
+          </div>
+
+          <button class="icon-button" type="button" id="fecharHistoricoCliente">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="cr-detail-body">
+          <section class="cr-detail-summary">
+            <article class="cr-detail-summary__main">
+              <span>Saldo em aberto</span>
+              <strong>${formatCurrency(Number(resumo.total_pendente || 0) + Number(resumo.total_atrasado || 0))}</strong>
+              <small>${contas.length} título(s)</small>
+            </article>
+
+            <article>
+              <span>Pago</span>
+              <strong>${formatCurrency(resumo.total_pago || 0)}</strong>
+            </article>
+
+            <article>
+              <span>Atrasado</span>
+              <strong>${formatCurrency(resumo.total_atrasado || 0)}</strong>
+            </article>
+
+            <article>
+              <span>Total histórico</span>
+              <strong>${formatCurrency(resumo.total || 0)}</strong>
+            </article>
+          </section>
+
+          <section class="cr-detail-section">
+            <div class="cr-detail-section__header">
+              <div>
+                <h4>Últimos títulos</h4>
+                <p>Contas vinculadas ao cliente</p>
+              </div>
+            </div>
+
+            <div class="cr-detail-list">
+              ${
+                contas.length
+                  ? contas
+                      .slice(0, 10)
+                      .map(
+                        (conta) => `
+                          <div class="cr-detail-row">
+                            <div>
+                              <strong>#${escapeHtml(conta.id)}</strong>
+                              <small>${escapeHtml(conta.observacao || 'Conta a receber')}</small>
+                            </div>
+
+                            <div>
+                              <span>Vencimento</span>
+                              <strong>${formatDate(conta.data_vencimento)}</strong>
+                            </div>
+
+                            <div>
+                              <span>Valor</span>
+                              <strong>${formatCurrency(conta.valor || 0)}</strong>
+                            </div>
+                          </div>
+                        `
+                      )
+                      .join('')
+                  : `<div class="empty-detail-state">Nenhum título encontrado.</div>`
+              }
+            </div>
+          </section>
+        </div>
+
+        <div class="cr-detail-footer">
+          <button class="btn btn-light" type="button" id="fecharHistoricoClienteFooter">
+            Fechar
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document
+      .getElementById('fecharHistoricoCliente')
+      ?.addEventListener('click', () => modal.remove());
+    document
+      .getElementById('fecharHistoricoClienteFooter')
+      ?.addEventListener('click', () => modal.remove());
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.remove();
+    });
+  } catch (error) {
+    console.error('Erro ao abrir histórico do cliente:', error);
+    showMessage(buildFriendlyError(error), 'error');
   }
 }

@@ -595,6 +595,12 @@ async function getContasReceber(params = {}) {
   });
 }
 
+async function getHistoricoFinanceiroCliente(clienteId) {
+  return request(`/contas-receber/cliente-historico/${clienteId}`, {
+    method: 'GET'
+  });
+}
+
 async function getContaReceberDetalhe(id) {
   return request(`/contas-receber/detalhe/${id}`, {
     method: 'GET'
@@ -854,6 +860,7 @@ const api = {
   deleteCompra,
 
   getContasReceber,
+  getHistoricoFinanceiroCliente,
   getContaReceberDetalhe,
   getContasReceberClientes,
   baixarContaReceber,
