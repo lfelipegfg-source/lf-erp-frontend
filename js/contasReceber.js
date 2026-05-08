@@ -158,6 +158,12 @@ function render() {
         </div>
 
         <div class="module-card__actions">
+
+          <button class="btn btn-primary" id="btnNovaContaManual" type="button">
+            <i class="fa-solid fa-plus"></i>
+            Conta manual
+          </button>
+
           <button class="btn btn-light" id="btnAtualizarContasReceber" type="button">
             <i class="fa-solid fa-rotate"></i>
             Atualizar
@@ -374,6 +380,7 @@ function renderLinhas() {
 
 function bindEventos() {
   const btnAtualizar = document.getElementById('btnAtualizarContasReceber');
+  const btnNovaContaManual = document.getElementById('btnNovaContaManual');
   const btnFiltrar = document.getElementById('btnFiltrarContasReceber');
   const btnLimpar = document.getElementById('btnLimparFiltrosContasReceber');
   const busca = document.getElementById('crBusca');
@@ -382,6 +389,10 @@ function bindEventos() {
 
   btnAtualizar?.addEventListener('click', async () => {
     await recarregar();
+  });
+
+  btnNovaContaManual?.addEventListener('click', () => {
+    abrirModalContaManual();
   });
 
   btnFiltrar?.addEventListener('click', async () => {
@@ -1290,4 +1301,202 @@ function injectContasReceberStyles() {
   `;
 
   document.head.appendChild(style);
+}
+
+function abrirModalContaManual() {
+  const modalExistente = document.getElementById('crContaManualModal');
+
+  if (modalExistente) {
+    modalExistente.remove();
+  }
+
+  const modal = document.createElement('div');
+
+  modal.id = 'crContaManualModal';
+  modal.className = 'modal-overlay cr-detail-overlay';
+
+  modal.innerHTML = `
+    <div class="modal-card cr-detail-card">
+      <div class="cr-detail-header">
+        <div>
+          <span class="cr-detail-eyebrow">
+            Conta manual
+          </span>
+
+          <h3>Nova promissória antiga</h3>
+
+          <p>
+            Cadastre contas antigas sem gerar venda ou movimentar estoque.
+          </p>
+        </div>
+
+        <button
+          class="icon-button"
+          type="button"
+          id="fecharContaManual"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="cr-detail-body">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label>Cliente</label>
+
+            <select id="crManualCliente" class="input">
+              <option value="">Cliente avulso</option>
+
+              ${state.clientes
+                .map(
+                  (cliente) => `
+                    <option value="${cliente.id}">
+                      ${escapeHtml(cliente.nome)}
+                    </option>
+                  `
+                )
+                .join('')}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Nome manual</label>
+
+            <input
+              type="text"
+              id="crManualNome"
+              class="input"
+              placeholder="Nome do cliente"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Valor</label>
+
+            <input
+              type="number"
+              step="0.01"
+              id="crManualValor"
+              class="input"
+              placeholder="0,00"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Vencimento</label>
+
+            <input
+              type="date"
+              id="crManualVencimento"
+              class="input"
+            />
+          </div>
+
+          <div class="form-group form-group--full">
+            <label>Descrição</label>
+
+            <input
+              type="text"
+              id="crManualDescricao"
+              class="input"
+              placeholder="Ex: Promissória antiga"
+            />
+          </div>
+
+          <div class="form-group form-group--full">
+            <label>Observação</label>
+
+            <textarea
+              id="crManualObservacao"
+              class="input"
+              rows="4"
+              placeholder="Observações da promissória..."
+            ></textarea>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="cr-detail-footer">
+
+        <button
+          class="btn btn-primary"
+          type="button"
+          id="salvarContaManual"
+        >
+          <i class="fa-solid fa-floppy-disk"></i>
+          Salvar conta
+        </button>
+
+        <button
+          class="btn btn-light"
+          type="button"
+          id="cancelarContaManual"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('fecharContaManual')?.addEventListener('click', () => modal.remove());
+
+  document.getElementById('cancelarContaManual')?.addEventListener('click', () => modal.remove());
+
+  document.getElementById('salvarContaManual')?.addEventListener('click', async () => {
+    await salvarContaManual(modal);
+  });
+
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      modal.remove();
+    }
+  });
+}
+
+async function salvarContaManual(modal) {
+  try {
+    const clienteId = document.getElementById('crManualCliente')?.value || '';
+
+    const nomeManual = document.getElementById('crManualNome')?.value?.trim() || '';
+
+    const valor = document.getElementById('crManualValor')?.value || '';
+
+    const vencimento = document.getElementById('crManualVencimento')?.value || '';
+
+    const descricao = document.getElementById('crManualDescricao')?.value?.trim() || '';
+
+    const observacao = document.getElementById('crManualObservacao')?.value?.trim() || '';
+
+    if (!valor || Number(valor) <= 0) {
+      showMessage('Informe um valor válido.', 'error');
+      return;
+    }
+
+    await api.post('/contas-receber/manual', {
+      cliente_id: clienteId || null,
+      cliente_nome: nomeManual,
+      valor,
+      data_vencimento: vencimento,
+      descricao,
+      observacao,
+      forma_pagamento: 'promissoria'
+    });
+
+    showMessage('Conta manual cadastrada com sucesso.', 'success');
+
+    modal.remove();
+
+    await recarregar();
+  } catch (error) {
+    console.error('Erro ao salvar conta manual:', error);
+
+    const message = buildFriendlyError(error);
+
+    showMessage(message, 'error');
+  }
 }
