@@ -1480,6 +1480,8 @@ async function salvarContaManual(modal) {
     await api.request('/contas-receber/manual', {
       method: 'POST',
       body: {
+        empresa: api.getEmpresaNome(),
+        empresa_id: api.getEmpresaId(),
         cliente_id: clienteId || null,
         cliente_nome: nomeManual,
         valor,
