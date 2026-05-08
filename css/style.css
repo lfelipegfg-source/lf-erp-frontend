@@ -3017,3 +3017,31 @@ select {
   background: var(--danger-soft);
   color: var(--danger);
 }
+
+/* =========================
+   SIDEBAR — BRANDING DA EMPRESA
+========================= */
+
+.brand__text {
+  min-width: 0;
+}
+
+.brand__text strong {
+  display: block;
+  max-width: 150px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--white);
+  white-space: normal;
+}
+
+.brand__text span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
