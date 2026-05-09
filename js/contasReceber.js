@@ -1507,11 +1507,13 @@ function injectContasReceberStyles() {
     }
 
     .cr-detail-body {
-      padding: 18px 22px;
-      display: grid;
-      gap: 14px;
-      overflow-y: auto;
-    }
+  padding: 18px 22px;
+  display: grid;
+  gap: 14px;
+  overflow-y: auto;
+  max-height: calc(100vh - 230px);
+  padding-bottom: 28px;
+}
 
     .cr-detail-summary {
       display: grid;
@@ -1653,13 +1655,14 @@ function injectContasReceberStyles() {
     }
 
     .cr-detail-footer {
-      padding: 14px 22px 18px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      background: var(--surface);
-    }
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: var(--surface);
+  flex-shrink: 0;
+}
 
     .cr-detail-card .form-grid {
   display: grid;
