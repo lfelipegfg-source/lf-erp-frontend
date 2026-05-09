@@ -248,10 +248,16 @@ function render() {
         </article>
 
         <article class="mini-stat cr-stat-card cr-stat-card--pago">
-          <span>Recebidos</span>
-          <strong>${formatCurrency(state.resumo.total_pago)}</strong>
-          <small>${Number(state.resumo.qtd_pago || 0)} título(s)</small>
-        </article>
+  <span>Recebidos</span>
+  <strong>${formatCurrency(state.resumo.total_pago)}</strong>
+  <small>${Number(state.resumo.qtd_pago || 0)} título(s)</small>
+</article>
+
+<article class="mini-stat cr-stat-card cr-stat-card--parcial">
+  <span>Recebido parcial</span>
+  <strong>${formatCurrency(state.resumo.total_recebido_parcial || 0)}</strong>
+  <small>Baixas parciais realizadas</small>
+</article>
       </div>
 
       <div class="table-wrapper">
@@ -1039,6 +1045,10 @@ function injectContasReceberStyles() {
     .cr-stat-card--pago {
       border-color: rgba(22, 163, 74, 0.2);
     }
+
+    .cr-stat-card--parcial {
+  border-color: rgba(8, 145, 178, 0.24);
+}
 
     .badge--warning {
       background: var(--warning-soft);
