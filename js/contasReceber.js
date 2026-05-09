@@ -1803,6 +1803,39 @@ function injectContasReceberStyles() {
         grid-template-columns: 1fr;
       }
     }
+
+    .cr-detail-card {
+  height: min(92vh, 820px);
+}
+
+.cr-detail-body {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1;
+}
+
+.cr-detail-section {
+  overflow: visible;
+}
+
+.cr-detail-grid {
+  overflow: visible;
+}
+
+.cr-detail-list {
+  overflow: visible;
+}
+
+.cr-detail-row {
+  min-height: auto;
+}
+
+.cr-detail-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
   `;
 
   document.head.appendChild(style);
