@@ -365,21 +365,37 @@ function renderLinhas() {
                 : ''
             }
 
-            ${
-              status === 'pago'
-                ? `
-                  <button class="btn-inline btn-inline--warning" type="button" data-action="estornar-cr" data-id="${conta.id}">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    Estornar
-                  </button>
-                `
-                : `
-                  <button class="btn-inline btn-inline--success" type="button" data-action="baixar-cr" data-id="${conta.id}">
-                  <i class="fa-solid fa-check"></i>
-                    Baixar
-                  </button>
-                `
-            }
+           ${
+             status === 'pago'
+               ? `
+      <button class="btn-inline btn-inline--warning" type="button" data-action="estornar-cr" data-id="${conta.id}">
+        <i class="fa-solid fa-rotate-left"></i>
+        Estornar
+      </button>
+    `
+               : `
+      <button class="btn-inline btn-inline--success" type="button" data-action="baixar-cr" data-id="${conta.id}">
+        <i class="fa-solid fa-check"></i>
+        Baixar
+      </button>
+
+      ${
+        !conta.venda_id && status !== 'parcial'
+          ? `
+            <button
+              class="btn-inline btn-inline--danger"
+              type="button"
+              data-action="excluir-cr"
+              data-id="${conta.id}"
+            >
+              <i class="fa-solid fa-trash"></i>
+              Excluir
+            </button>
+          `
+          : ''
+      }
+    `
+           }
           </div>
         </td>
       </tr>
@@ -442,6 +458,12 @@ function bindEventos() {
   document.querySelectorAll("[data-action='baixar-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
       await baixarConta(button.dataset.id);
+    });
+  });
+
+  document.querySelectorAll("[data-action='excluir-cr']").forEach((button) => {
+    button.addEventListener('click', async () => {
+      await excluirConta(button.dataset.id);
     });
   });
 
@@ -534,6 +556,30 @@ async function baixarConta(id) {
   } catch (error) {
     console.error('Erro ao baixar conta a receber:', error);
     const message = buildFriendlyError(error);
+    showMessage(message, 'error');
+  }
+}
+
+async function excluirConta(id) {
+  const confirmar = window.confirm(
+    'Deseja realmente excluir esta conta manual?\n\nEsta ação não poderá ser desfeita.'
+  );
+
+  if (!confirmar) return;
+
+  try {
+    await api.request(`/contas-receber/${id}`, {
+      method: 'DELETE'
+    });
+
+    showMessage('Conta manual excluída com sucesso.', 'success');
+
+    await recarregar();
+  } catch (error) {
+    console.error('Erro ao excluir conta manual:', error);
+
+    const message = buildFriendlyError(error);
+
     showMessage(message, 'error');
   }
 }
@@ -1023,6 +1069,16 @@ function injectContasReceberStyles() {
       background: var(--warning-soft);
       color: #b45309;
     }
+
+    .btn-inline--danger {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.22);
+}
+
+.btn-inline--danger:hover {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+}
 
     .btn-warning {
       background: #d97706;
