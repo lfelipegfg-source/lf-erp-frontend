@@ -1458,20 +1458,22 @@ function injectContasReceberStyles() {
     }
 
     .cr-detail-card,
-    .cr-origin-card {
-      width: min(100%, 820px);
-      max-height: calc(100vh - 36px);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      border-radius: 26px;
-      padding: 0;
-    }
+.cr-origin-card {
+  width: min(100%, 820px);
+  height: auto;
+  max-height: calc(100vh - 36px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 26px;
+  padding: 0;
+}
 
     .cr-detail-header {
       padding: 20px 22px 16px;
       border-bottom: 1px solid var(--border);
       display: flex;
+      flex-shrink: 0;
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
@@ -1507,12 +1509,13 @@ function injectContasReceberStyles() {
     }
 
     .cr-detail-body {
-  padding: 18px 22px;
-  display: grid;
+  padding: 18px 22px 28px;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
   overflow-y: auto;
-  max-height: calc(100vh - 230px);
-  padding-bottom: 28px;
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
     .cr-detail-summary {
