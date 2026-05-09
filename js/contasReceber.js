@@ -363,17 +363,6 @@ function renderLinhas() {
             </button>
 
             ${
-              status === 'parcial'
-                ? `
-      <button class="btn-inline btn-inline--warning" type="button" data-action="recebimentos-parciais-cr" data-id="${conta.id}">
-        <i class="fa-solid fa-clock-rotate-left"></i>
-        Parciais
-      </button>
-    `
-                : ''
-            }
-
-            ${
               conta.venda_id
                 ? `
                   <button class="btn-inline" type="button" data-action="origem-venda-cr" data-id="${conta.id}">
@@ -489,12 +478,6 @@ function bindEventos() {
   document.querySelectorAll("[data-action='historico-cliente-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
       await abrirHistoricoCliente(button.dataset.id);
-    });
-  });
-
-  document.querySelectorAll("[data-action='recebimentos-parciais-cr']").forEach((button) => {
-    button.addEventListener('click', async () => {
-      await abrirRecebimentosParciais(button.dataset.id);
     });
   });
 
@@ -870,11 +853,25 @@ async function abrirDetalheConta(id) {
   }
 }
 
-function renderDetalheConta(conta) {
+async function renderDetalheConta(conta) {
   const modalExistente = document.getElementById('crDetalheModal');
   if (modalExistente) modalExistente.remove();
 
   const status = normalizarStatus(conta.status);
+
+  let recebimentosParciais = [];
+
+  try {
+    const recebimentosResponse = await api.request(
+      `/contas-receber/${conta.id}/recebimentos-parciais`
+    );
+
+    recebimentosParciais = Array.isArray(recebimentosResponse?.recebimentos)
+      ? recebimentosResponse.recebimentos
+      : [];
+  } catch (error) {
+    console.error('Erro ao carregar recebimentos parciais:', error);
+  }
 
   const modal = document.createElement('div');
   modal.id = 'crDetalheModal';
@@ -954,6 +951,52 @@ function renderDetalheConta(conta) {
           <span>Observação</span>
           <p>${escapeHtml(conta.observacao || 'Nenhuma observação registrada.')}</p>
         </section>
+        ${
+          recebimentosParciais.length
+            ? `
+      <section class="cr-detail-section">
+        <div class="cr-detail-section__header">
+          <div>
+            <h4>Recebimentos parciais</h4>
+            <p>${recebimentosParciais.length} recebimento(s) registrado(s)</p>
+          </div>
+        </div>
+
+        <div class="cr-detail-list">
+          ${recebimentosParciais
+            .map(
+              (item) => `
+                <div class="cr-detail-row">
+                  <div>
+                    <strong>${formatCurrency(item.valor)}</strong>
+                    <small>${escapeHtml(item.descricao || 'Recebimento parcial')}</small>
+                  </div>
+
+                  <div>
+                    <span>Data</span>
+                    <strong>${formatDate(item.pagamento_data)}</strong>
+                  </div>
+
+                  <div>
+                    <button
+                      class="btn-inline btn-inline--warning"
+                      type="button"
+                      data-action="estornar-parcial-cr"
+                      data-id="${item.id}"
+                    >
+                      <i class="fa-solid fa-rotate-left"></i>
+                      Estornar
+                    </button>
+                  </div>
+                </div>
+              `
+            )
+            .join('')}
+        </div>
+      </section>
+    `
+            : ''
+        }
       </div>
 
       <div class="cr-detail-footer">
@@ -995,6 +1038,12 @@ function renderDetalheConta(conta) {
     const contaId = event.currentTarget.dataset.id;
     modal.remove();
     await estornarConta(contaId);
+  });
+
+  modal.querySelectorAll("[data-action='estornar-parcial-cr']").forEach((button) => {
+    button.addEventListener('click', async () => {
+      await estornarRecebimentoParcial(button.dataset.id, modal);
+    });
   });
 
   modal.addEventListener('click', (event) => {
