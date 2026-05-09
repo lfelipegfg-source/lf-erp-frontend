@@ -112,14 +112,19 @@ function setHtml(id, value) {
 }
 
 function renderKpis(payload, financeiro, filters = {}) {
-  setText('kpiFaturamento', toCurrency(payload.faturamento));
+  setText('kpiFaturamento', toCurrency(financeiro.fluxoEntradas || payload.faturamento));
   setText('kpiVendas', String(payload.vendas));
   setText('kpiReceber', toCurrency(financeiro.contasReceberPendente));
   setText('kpiPagar', toCurrency(financeiro.contasPagarPendente));
   setText('kpiEstoque', String(payload.estoque));
   setText('kpiClientes', String(payload.clientes));
 
-  setText('kpiFaturamentoMeta', `Período: ${getPeriodLabel(filters)}`);
+  setText(
+    'kpiFaturamentoMeta',
+    financeiro.fluxoEntradas > 0
+      ? `Entradas realizadas no período: ${getPeriodLabel(filters)}`
+      : `Período: ${getPeriodLabel(filters)}`
+  );
   setText(
     'kpiVendasInfo',
     payload.vendas > 0 ? 'Vendas reais do período' : 'Sem vendas no período'
