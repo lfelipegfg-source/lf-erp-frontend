@@ -363,6 +363,17 @@ function renderLinhas() {
             </button>
 
             ${
+              status === 'parcial'
+                ? `
+      <button class="btn-inline btn-inline--warning" type="button" data-action="recebimentos-parciais-cr" data-id="${conta.id}">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        Parciais
+      </button>
+    `
+                : ''
+            }
+
+            ${
               conta.venda_id
                 ? `
                   <button class="btn-inline" type="button" data-action="origem-venda-cr" data-id="${conta.id}">
@@ -481,6 +492,12 @@ function bindEventos() {
     });
   });
 
+  document.querySelectorAll("[data-action='recebimentos-parciais-cr']").forEach((button) => {
+    button.addEventListener('click', async () => {
+      await abrirRecebimentosParciais(button.dataset.id);
+    });
+  });
+
   document.querySelectorAll("[data-action='detalhe-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
       await abrirDetalheConta(button.dataset.id);
@@ -589,6 +606,135 @@ async function excluirConta(id) {
     const message = buildFriendlyError(error);
 
     showMessage(message, 'error');
+  }
+}
+
+async function abrirRecebimentosParciais(id) {
+  try {
+    const data = await api.request(`/contas-receber/${id}/recebimentos-parciais`);
+    const recebimentos = Array.isArray(data?.recebimentos) ? data.recebimentos : [];
+
+    const modalExistente = document.getElementById('crRecebimentosParciaisModal');
+    if (modalExistente) modalExistente.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'crRecebimentosParciaisModal';
+    modal.className = 'modal-overlay cr-detail-overlay';
+
+    modal.innerHTML = `
+      <div class="modal-card cr-detail-card">
+        <div class="cr-detail-header">
+          <div>
+            <span class="cr-detail-eyebrow">Conta #${escapeHtml(id)}</span>
+            <h3>Recebimentos parciais</h3>
+            <p>Estorne apenas o recebimento lançado incorretamente.</p>
+          </div>
+
+          <button class="icon-button" type="button" id="fecharRecebimentosParciais">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="cr-detail-body">
+          <section class="cr-detail-section">
+            <div class="cr-detail-section__header">
+              <div>
+                <h4>Baixas parciais realizadas</h4>
+                <p>${recebimentos.length} recebimento(s)</p>
+              </div>
+            </div>
+
+            <div class="cr-detail-list">
+              ${
+                recebimentos.length
+                  ? recebimentos
+                      .map(
+                        (item) => `
+                          <div class="cr-detail-row">
+                            <div>
+                              <strong>${formatCurrency(item.valor)}</strong>
+                              <small>${escapeHtml(item.descricao || 'Recebimento parcial')}</small>
+                            </div>
+
+                            <div>
+                              <span>Data</span>
+                              <strong>${formatDate(item.pagamento_data)}</strong>
+                            </div>
+
+                            <div>
+                              <button
+                                class="btn-inline btn-inline--warning"
+                                type="button"
+                                data-action="estornar-parcial-cr"
+                                data-id="${item.id}"
+                              >
+                                <i class="fa-solid fa-rotate-left"></i>
+                                Estornar
+                              </button>
+                            </div>
+                          </div>
+                        `
+                      )
+                      .join('')
+                  : `<div class="empty-detail-state">Nenhum recebimento parcial encontrado.</div>`
+              }
+            </div>
+          </section>
+        </div>
+
+        <div class="cr-detail-footer">
+          <button class="btn btn-light" type="button" id="fecharRecebimentosParciaisFooter">
+            Fechar
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document
+      .getElementById('fecharRecebimentosParciais')
+      ?.addEventListener('click', () => modal.remove());
+
+    document
+      .getElementById('fecharRecebimentosParciaisFooter')
+      ?.addEventListener('click', () => modal.remove());
+
+    modal.querySelectorAll("[data-action='estornar-parcial-cr']").forEach((button) => {
+      button.addEventListener('click', async () => {
+        await estornarRecebimentoParcial(button.dataset.id, modal);
+      });
+    });
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.remove();
+    });
+  } catch (error) {
+    console.error('Erro ao abrir recebimentos parciais:', error);
+    showMessage(buildFriendlyError(error), 'error');
+  }
+}
+
+async function estornarRecebimentoParcial(lancamentoId, modal) {
+  const confirmar = window.confirm(
+    'Deseja estornar este recebimento parcial?\n\nO valor voltará para o saldo da conta.'
+  );
+
+  if (!confirmar) return;
+
+  try {
+    await api.request(`/contas-receber/estornar-parcial/${lancamentoId}`, {
+      method: 'POST'
+    });
+
+    showMessage('Recebimento parcial estornado com sucesso.', 'success');
+
+    modal.remove();
+
+    await recarregar();
+  } catch (error) {
+    console.error('Erro ao estornar recebimento parcial:', error);
+    showMessage(buildFriendlyError(error), 'error');
   }
 }
 
