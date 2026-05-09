@@ -553,36 +553,13 @@ async function estornarConta(id) {
 
 async function baixarConta(id) {
   const conta = state.contas.find((item) => String(item.id) === String(id));
-  const valorAtual = Number(conta?.valor || 0);
 
-  const confirmar = window.confirm(
-    `Confirmar recebimento desta conta?\n\nSaldo atual: ${formatCurrency(valorAtual)}`
-  );
-
-  if (!confirmar) return;
-
-  const valorPago = window.prompt(
-    `Informe o valor recebido.\n\nSaldo atual: ${formatCurrency(valorAtual)}\nDeixe em branco para baixar o valor total:`
-  );
-
-  const dataPagamento = window.prompt(
-    'Informe a data do recebimento no formato AAAA-MM-DD.\nDeixe em branco para usar a data de hoje:'
-  );
-
-  try {
-    await api.baixarContaReceber(id, {
-      valor_pago: valorPago || undefined,
-      data_pagamento: dataPagamento || undefined
-    });
-
-    showMessage('Recebimento registrado com sucesso.', 'success');
-
-    await recarregar();
-  } catch (error) {
-    console.error('Erro ao baixar conta a receber:', error);
-    const message = buildFriendlyError(error);
-    showMessage(message, 'error');
+  if (!conta) {
+    showMessage('Conta não encontrada para baixa.', 'error');
+    return;
   }
+
+  abrirModalBaixaConta(conta);
 }
 
 async function excluirConta(id) {
@@ -736,6 +713,150 @@ async function estornarRecebimentoParcial(lancamentoId, modal) {
     console.error('Erro ao estornar recebimento parcial:', error);
     showMessage(buildFriendlyError(error), 'error');
   }
+}
+
+function abrirModalBaixaConta(conta) {
+  const modalExistente = document.getElementById('crBaixaModal');
+  if (modalExistente) modalExistente.remove();
+
+  const valorAtual = Number(conta?.valor || 0);
+  const hojeISO = new Date().toLocaleDateString('en-CA');
+
+  const modal = document.createElement('div');
+  modal.id = 'crBaixaModal';
+  modal.className = 'modal-overlay cr-detail-overlay';
+
+  modal.innerHTML = `
+    <div class="modal-card cr-detail-card">
+      <div class="cr-detail-header">
+        <div>
+          <span class="cr-detail-eyebrow">Recebimento</span>
+          <h3>Baixar conta #${escapeHtml(conta.id)}</h3>
+          <p>${escapeHtml(conta.cliente_nome || 'Cliente não informado')}</p>
+        </div>
+
+        <button class="icon-button" type="button" id="fecharCrBaixa">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="cr-detail-body">
+        <section class="cr-detail-summary">
+          <article class="cr-detail-summary__main">
+            <span>Saldo atual</span>
+            <strong>${formatCurrency(valorAtual)}</strong>
+            <small>Informe o valor recebido agora</small>
+          </article>
+
+          <article>
+            <span>Vencimento</span>
+            <strong>${formatDate(conta.data_vencimento)}</strong>
+          </article>
+
+          <article>
+            <span>Status</span>
+            <strong>${getStatusLabel(normalizarStatus(conta.status))}</strong>
+          </article>
+
+          <article>
+            <span>Origem</span>
+            <strong>${conta.venda_id ? `Venda #${escapeHtml(conta.venda_id)}` : 'Manual'}</strong>
+          </article>
+        </section>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Valor recebido</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              max="${valorAtual}"
+              id="crBaixaValor"
+              class="input"
+              value="${valorAtual}"
+            />
+            <small>Para baixa parcial, informe somente o valor recebido.</small>
+          </div>
+
+          <div class="form-group">
+            <label>Data do recebimento</label>
+            <input
+              type="date"
+              id="crBaixaData"
+              class="input"
+              value="${hojeISO}"
+            />
+            <small>Formato correto: dia/mês/ano no calendário.</small>
+          </div>
+        </div>
+
+        <section class="cr-detail-note">
+          <span>Importante</span>
+          <p>
+            Se o valor recebido for menor que o saldo atual, a conta ficará como Parcial.
+            Se for igual ao saldo, será marcada como Recebida.
+          </p>
+        </section>
+      </div>
+
+      <div class="cr-detail-footer">
+        <button class="btn btn-primary" type="button" id="confirmarCrBaixa">
+          <i class="fa-solid fa-check"></i>
+          Confirmar recebimento
+        </button>
+
+        <button class="btn btn-light" type="button" id="cancelarCrBaixa">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('fecharCrBaixa')?.addEventListener('click', () => modal.remove());
+  document.getElementById('cancelarCrBaixa')?.addEventListener('click', () => modal.remove());
+
+  document.getElementById('confirmarCrBaixa')?.addEventListener('click', async () => {
+    const valorPago = document.getElementById('crBaixaValor')?.value || '';
+    const dataPagamento = document.getElementById('crBaixaData')?.value || '';
+
+    if (!valorPago || Number(valorPago) <= 0) {
+      showMessage('Informe um valor recebido válido.', 'error');
+      return;
+    }
+
+    if (Number(valorPago) > valorAtual) {
+      showMessage('O valor recebido não pode ser maior que o saldo atual.', 'error');
+      return;
+    }
+
+    if (!dataPagamento) {
+      showMessage('Informe a data do recebimento.', 'error');
+      return;
+    }
+
+    try {
+      await api.baixarContaReceber(conta.id, {
+        valor_pago: valorPago,
+        data_pagamento: dataPagamento
+      });
+
+      showMessage('Recebimento registrado com sucesso.', 'success');
+
+      modal.remove();
+
+      await recarregar();
+    } catch (error) {
+      console.error('Erro ao baixar conta a receber:', error);
+      showMessage(buildFriendlyError(error), 'error');
+    }
+  });
+
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) modal.remove();
+  });
 }
 
 async function abrirDetalheConta(id) {
