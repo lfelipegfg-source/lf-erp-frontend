@@ -399,7 +399,7 @@ function renderLinhas() {
       </button>
 
       ${
-        !conta.venda_id && status !== 'parcial'
+        !conta.venda_id && status !== 'pago'
           ? `
             <button
               class="btn-inline btn-inline--danger"
