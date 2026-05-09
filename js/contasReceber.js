@@ -1612,6 +1612,91 @@ function injectContasReceberStyles() {
       background: var(--surface);
     }
 
+    .cr-detail-card .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+
+.cr-detail-card .form-group {
+  display: grid;
+  gap: 8px;
+}
+
+.cr-detail-card .form-group--full {
+  grid-column: 1 / -1;
+}
+
+.cr-detail-card .form-group label {
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.cr-detail-card .form-group small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.cr-detail-card .input,
+.cr-detail-card input,
+.cr-detail-card select,
+.cr-detail-card textarea {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  outline: none;
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.cr-detail-card textarea.input,
+.cr-detail-card textarea {
+  min-height: 96px;
+  padding-top: 12px;
+  resize: vertical;
+}
+
+.cr-detail-card .input::placeholder,
+.cr-detail-card input::placeholder,
+.cr-detail-card textarea::placeholder {
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.cr-detail-card .input:focus,
+.cr-detail-card input:focus,
+.cr-detail-card select:focus,
+.cr-detail-card textarea:focus {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.cr-detail-card input[type='date'] {
+  color-scheme: light;
+}
+
+.cr-detail-card input[type='date']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.cr-detail-card input[type='date']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
     @media (max-width: 980px) {
       .cr-toolbar-grid {
         grid-template-columns: 1fr;
@@ -1639,6 +1724,10 @@ function injectContasReceberStyles() {
         padding: 10px;
         align-items: flex-start;
       }
+
+      .cr-detail-card .form-grid {
+  grid-template-columns: 1fr;
+}
 
       .cr-detail-card,
       .cr-origin-card {
