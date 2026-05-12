@@ -2082,13 +2082,13 @@ async function abrirHistoricoCliente(clienteId) {
             </article>
 
             <article>
-              <span>Pago</span>
-              <strong>${formatCurrency(resumo.total_pago || 0)}</strong>
+              <span>Recebido parcial</span>
+              <strong>${formatCurrency(resumo.total_recebido_parcial || 0)}</strong>
             </article>
 
             <article>
-              <span>Atrasado</span>
-              <strong>${formatCurrency(resumo.total_atrasado || 0)}</strong>
+              <span>Em parcial</span>
+              <strong>${formatCurrency(resumo.total_parcial || 0)}</strong>
             </article>
 
             <article>
@@ -2124,7 +2124,12 @@ async function abrirHistoricoCliente(clienteId) {
                             </div>
 
                             <div>
-                              <span>Valor</span>
+                              <span>Status</span>
+                              <strong>${getStatusLabel(normalizarStatus(conta.status))}</strong>
+                            </div>
+
+                            <div>
+                              <span>Saldo</span>
                               <strong>${formatCurrency(conta.valor || 0)}</strong>
                             </div>
                           </div>
