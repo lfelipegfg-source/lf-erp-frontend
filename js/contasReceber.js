@@ -1236,6 +1236,7 @@ function getStatusLabel(status) {
   if (normalized === 'atrasado') return 'Atrasado';
   if (normalized === 'pendente') return 'Pendente';
   if (normalized === 'parcial') return 'Parcial';
+  if (normalized === 'parcial_atrasado') return 'Parcial em atraso';
 
   return capitalize(normalized);
 }
@@ -1246,6 +1247,7 @@ function getStatusBadgeClass(status) {
   if (normalized === 'pago') return 'badge badge--success';
   if (normalized === 'atrasado') return 'badge badge--danger';
   if (normalized === 'pendente') return 'badge badge--warning';
+  if (normalized === 'parcial_atrasado') return 'badge badge--warning';
 
   return 'badge badge--info';
 }
