@@ -129,9 +129,6 @@ const ComprasModule = {
 
     this.setFeedback('Carregando compras...', 'info');
 
-    if (typeof showToast === 'function') {
-      showToast('Carregando compras...', 'info');
-    }
 
     this.setLoading(true);
 
@@ -915,9 +912,7 @@ const ComprasModule = {
   showMessage(message, type = 'info') {
     this.setFeedback(message, type);
 
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-    }
+    showToast(message, type);
   },
 
   setLoading(value) {

@@ -7,9 +7,7 @@ let lastDashboardContext = {
 };
 
 function showMessage(message, type = 'info') {
-  if (typeof showToast === 'function') {
-    showToast(message, type);
-  }
+  showToast(message, type);
 }
 
 function buildFriendlyError(error) {

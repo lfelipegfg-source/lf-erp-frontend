@@ -619,10 +619,7 @@ const ProdutosModule = {
 
   showMessage(message, type = 'info') {
     this.showModuleMessage(message, type);
-
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-    }
+    showToast(message, type);
   },
 
   setFormFeedback(message, type = 'info') {

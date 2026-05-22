@@ -101,9 +101,6 @@ const ClientesModule = {
     this.setFeedback('Carregando clientes...', 'info');
     this.setLoading(true);
 
-    if (typeof showToast === 'function') {
-      showToast('Carregando clientes...', 'info');
-    }
 
     try {
       const data = await api.getClientes();
@@ -377,9 +374,7 @@ const ClientesModule = {
 
       this.setFeedback(message, 'info');
 
-      if (typeof showToast === 'function') {
-        showToast(message, 'info');
-      }
+      showToast(message, 'info');
 
       if (this.state.editingId) {
         await api.updateCliente(this.state.editingId, payload);
@@ -403,9 +398,7 @@ const ClientesModule = {
     try {
       this.setFeedback('Excluindo cliente...', 'info');
 
-      if (typeof showToast === 'function') {
-        showToast('Excluindo cliente...', 'info');
-      }
+      showToast('Excluindo cliente...', 'info');
 
       await api.deleteCliente(id);
 
@@ -443,9 +436,7 @@ const ClientesModule = {
   showMessage(message, type = 'info') {
     this.setFeedback(message, type);
 
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-    }
+    showToast(message, type);
   },
 
   setLoading(value) {

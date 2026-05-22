@@ -102,9 +102,6 @@ const FornecedoresModule = {
     this.setFeedback('Carregando fornecedores...', 'info');
     this.setLoading(true);
 
-    if (typeof showToast === 'function') {
-      showToast('Carregando fornecedores...', 'info');
-    }
 
     try {
       const data = await api.getFornecedores();
@@ -393,9 +390,7 @@ const FornecedoresModule = {
 
       this.setFeedback(message, 'info');
 
-      if (typeof showToast === 'function') {
-        showToast(message, 'info');
-      }
+      showToast(message, 'info');
 
       if (this.state.editingId) {
         await api.updateFornecedor(this.state.editingId, payload);
@@ -419,9 +414,7 @@ const FornecedoresModule = {
     try {
       this.setFeedback('Excluindo fornecedor...', 'info');
 
-      if (typeof showToast === 'function') {
-        showToast('Excluindo fornecedor...', 'info');
-      }
+      showToast('Excluindo fornecedor...', 'info');
 
       await api.deleteFornecedor(id);
 
@@ -459,9 +452,7 @@ const FornecedoresModule = {
   showMessage(message, type = 'info') {
     this.setFeedback(message, type);
 
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-    }
+    showToast(message, type);
   },
 
   setLoading(value) {

@@ -38,9 +38,7 @@ function showMessage(message, type = 'info') {
     feedback.textContent = message || '';
   }
 
-  if (typeof showToast === 'function') {
-    showToast(message, type);
-  }
+  showToast(message, type);
 }
 
 function setLoading(value) {

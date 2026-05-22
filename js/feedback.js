@@ -1,4 +1,4 @@
-export function showToast(message, type = 'info', duration = 3500) {
+export function showToast(message, type = 'info', duration = 4000) {
   if (!message) return;
 
   let container = document.getElementById('toastContainer');
@@ -13,8 +13,13 @@ export function showToast(message, type = 'info', duration = 3500) {
   const toast = document.createElement('div');
   toast.className = `toast toast--${type}`;
   toast.innerHTML = `
-    <span>${escapeHtml(message)}</span>
-    <button type="button" aria-label="Fechar">&times;</button>
+    <div class="toast__content">
+      <strong>${escapeHtml(getTituloToast(type))}</strong>
+      <span>${escapeHtml(message)}</span>
+    </div>
+    <button type="button" class="toast__close" aria-label="Fechar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
   `;
 
   const close = () => {
@@ -22,11 +27,20 @@ export function showToast(message, type = 'info', duration = 3500) {
     setTimeout(() => toast.remove(), 250);
   };
 
-  toast.querySelector('button')?.addEventListener('click', close);
+  toast.querySelector('.toast__close')?.addEventListener('click', close);
 
   container.appendChild(toast);
 
   setTimeout(close, duration);
+}
+
+function getTituloToast(type) {
+  switch (type) {
+    case 'success': return 'Sucesso';
+    case 'error':   return 'Erro';
+    case 'warning': return 'Atenção';
+    default:        return 'Informação';
+  }
 }
 
 function escapeHtml(value) {

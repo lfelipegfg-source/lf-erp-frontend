@@ -999,10 +999,7 @@ const PDVModule = {
 
   showMessage(message, type = 'info') {
     this.setFeedback(message, type);
-
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-    }
+    showToast(message, type);
   },
 
   buildFriendlyError(error) {

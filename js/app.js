@@ -1,5 +1,6 @@
 import api from './api.js';
 import dashboard from './dashboard.js';
+import { showToast } from './feedback.js';
 import { initProdutosModule } from './produtos.js';
 import { initClientesModule } from './clientes.js';
 import { initPDVModule } from './pdv.js';
@@ -804,51 +805,6 @@ function closeGlobalModal() {
   modal.setAttribute('aria-hidden', 'true');
 }
 
-function showToast(message, type = 'info') {
-  const toastContainer = document.getElementById('toastContainer');
-  if (!toastContainer) return;
-
-  const toast = document.createElement('div');
-  toast.className = `toast toast--${type}`;
-
-  toast.innerHTML = `
-    <div class="toast__content">
-      <strong>${getToastTitle(type)}</strong>
-      <span>${message}</span>
-    </div>
-
-    <button type="button" class="toast__close" aria-label="Fechar">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-  `;
-
-  const closeButton = toast.querySelector('.toast__close');
-
-  if (closeButton) {
-    closeButton.addEventListener('click', () => {
-      toast.remove();
-    });
-  }
-
-  toastContainer.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 4000);
-}
-
-function getToastTitle(type) {
-  switch (type) {
-    case 'success':
-      return 'Sucesso';
-    case 'error':
-      return 'Erro';
-    case 'warning':
-      return 'Atenção';
-    default:
-      return 'Informação';
-  }
-}
 
 async function loadDashboardReal() {
   showGlobalLoader('Carregando dashboard...');
@@ -1230,13 +1186,23 @@ function getInitials(name) {
 
 function buildFriendlyAuthError(error) {
   const status = error?.status;
+  const codigo = error?.payload?.codigo || '';
   const message = error?.message || 'Falha ao autenticar.';
 
+  if (codigo === 'CREDENCIAIS_INVALIDAS') return 'Usuário ou senha inválidos.';
+  if (codigo === 'EMPRESA_BLOQUEADA')     return 'Empresa bloqueada. Entre em contato com o suporte.';
+  if (codigo === 'ASSINATURA_INATIVA')    return 'Assinatura inativa. Regularize o acesso para continuar.';
+  if (codigo === 'TRIAL_EXPIRADO')        return 'Período de teste expirado. Escolha um plano para continuar.';
+  if (codigo === 'TOKEN_EXPIRADO')        return 'Sua sessão expirou. Faça login novamente.';
+
+  if (status === 429) return message || 'Muitas tentativas. Aguarde alguns minutos.';
   if (status === 401) return 'Usuário ou senha inválidos.';
-  if (status === 403) return 'Acesso negado para este usuário.';
-  if (status === 404) return 'Endpoint de login não encontrado no backend.';
-  if (message.includes('Failed to fetch')) return 'Não foi possível conectar com o backend.';
-  if (message.includes('demorou demais')) return 'O backend demorou demais para responder.';
+  if (status === 403) return 'Acesso negado. Verifique suas credenciais.';
+
+  if (message.includes('Failed to fetch') || message.includes('NetworkError'))
+    return 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+  if (message.includes('demorou demais'))
+    return 'O servidor demorou demais para responder. Tente novamente.';
 
   return message;
 }

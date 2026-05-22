@@ -63,9 +63,6 @@ const EstoqueModule = {
     this.state.loading = true;
     this.setFeedback('Carregando estoque...', 'info');
 
-    if (typeof showToast === 'function') {
-      showToast('Carregando estoque...', 'info');
-    }
 
     this.setLoading(true);
     try {
@@ -337,9 +334,7 @@ const EstoqueModule = {
   showMessage(message, type = 'info') {
     this.setFeedback(message, type);
 
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-    }
+    showToast(message, type);
   },
 
   setLoading(value) {

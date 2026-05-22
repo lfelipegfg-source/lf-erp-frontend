@@ -118,9 +118,7 @@ const VendasModule = {
         this.recalcularVendaEmEdicao();
         this.renderDetalheModal(venda);
 
-        if (typeof showToast === 'function') {
-          showToast('Quantidade atualizada', 'info');
-        }
+        showToast('Quantidade atualizada', 'info');
       }
     });
 
@@ -175,9 +173,7 @@ const VendasModule = {
         document.getElementById('modalAddProduto')?.remove();
         this.renderDetalheModal(venda);
 
-        if (typeof showToast === 'function') {
-          showToast('Produto adicionado', 'success');
-        }
+        showToast('Produto adicionado', 'success');
 
         return;
       }
@@ -249,9 +245,7 @@ const VendasModule = {
         this.recalcularVendaEmEdicao();
         this.renderDetalheModal(venda);
 
-        if (typeof showToast === 'function') {
-          showToast('Item removido da venda', 'info');
-        }
+        showToast('Item removido da venda', 'info');
 
         return;
       }
@@ -275,10 +269,6 @@ const VendasModule = {
 
     this.state.loading = true;
     this.setFeedback('Carregando vendas...', 'info');
-
-    if (typeof showToast === 'function') {
-      showToast('Carregando vendas...', 'info');
-    }
 
     this.setLoading(true);
 
@@ -1142,9 +1132,7 @@ const VendasModule = {
     if (!confirmar) return;
 
     try {
-      if (typeof showToast === 'function') {
-        showToast('Estornando baixa da parcela...', 'info');
-      }
+      showToast('Estornando baixa da parcela...', 'info');
 
       await api.estornarContaReceber(id, {
         empresa: this.state.empresa,
@@ -1194,9 +1182,7 @@ const VendasModule = {
     }
 
     try {
-      if (typeof showToast === 'function') {
-        showToast('Registrando baixa da parcela...', 'info');
-      }
+      showToast('Registrando baixa da parcela...', 'info');
 
       await api.baixarContaReceber(id, {
         valor_pago: valorNormalizado,
@@ -1231,9 +1217,7 @@ const VendasModule = {
     if (novaObservacao === null) return;
 
     try {
-      if (typeof showToast === 'function') {
-        showToast('Atualizando observação...', 'info');
-      }
+      showToast('Atualizando observação...', 'info');
 
       await api.updateVendaObservacao(venda.id, novaObservacao);
 
@@ -1273,9 +1257,7 @@ const VendasModule = {
     if (novoObservacao === null) return;
 
     try {
-      if (typeof showToast === 'function') {
-        showToast('Reprocessando venda...', 'info');
-      }
+      showToast('Reprocessando venda...', 'info');
 
       this.recalcularVendaEmEdicao();
 
@@ -1309,10 +1291,6 @@ const VendasModule = {
 
       this.showMessage('Venda editada com sucesso.', 'success');
 
-      if (typeof showToast === 'function') {
-        showToast('Venda editada com sucesso.', 'success');
-      }
-
       await this.load();
     } catch (error) {
       console.error('Erro ao editar venda:', error);
@@ -1345,19 +1323,13 @@ const VendasModule = {
         btnExcluir.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Excluindo...';
       }
 
-      if (typeof showToast === 'function') {
-        showToast('Excluindo venda...', 'info');
-      }
+      showToast('Excluindo venda...', 'info');
 
       await this.deleteVendaRequest(id);
 
       if (modal) modal.remove();
 
       this.showMessage('Venda excluída com sucesso.', 'success');
-
-      if (typeof showToast === 'function') {
-        showToast('Venda excluída com sucesso.', 'success');
-      }
 
       await this.load();
     } catch (error) {
@@ -1402,10 +1374,7 @@ const VendasModule = {
 
   showMessage(message, type = 'info') {
     this.setFeedback(message, type);
-
-    if (typeof showToast === 'function') {
-      showToast(message, type);
-    }
+    showToast(message, type);
   },
 
   setLoading(value) {
