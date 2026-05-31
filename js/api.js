@@ -278,6 +278,10 @@ async function getAlertas() {
   return request(`/alertas/${empresa}`, { method: 'GET' });
 }
 
+async function updateMePerfil(payload) {
+  return request('/me/perfil', { method: 'PUT', body: payload });
+}
+
 async function getProdutos(params = {}) {
   const empresa = ensureEmpresa();
 
@@ -833,6 +837,7 @@ const api = {
   getDashboard,
   getEmpresaStatus,
   getAlertas,
+  updateMePerfil,
 
   getProdutos,
   createProduto,

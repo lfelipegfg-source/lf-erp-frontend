@@ -10,9 +10,27 @@ const ConfigModule = {
   init() {
     const auth = getAuth();
     this.state.empresa = auth?.empresa?.nome || auth?.user?.empresa || 'LF ERP';
+    this.state.user = auth?.user || {};
 
     this.render();
     this.load();
+  },
+
+  async salvarPerfil() {
+    const nome = document.getElementById('cfgNomeCompleto')?.value?.trim();
+    const cpf = document.getElementById('cfgCpf')?.value?.trim();
+    const nascimento = document.getElementById('cfgNascimento')?.value?.trim();
+    const btn = document.getElementById('cfgSalvarPerfilBtn');
+
+    try {
+      if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+      await api.updateMePerfil({ nome_completo: nome || null, cpf: cpf || null, nascimento: nascimento || null });
+      alert('Perfil atualizado com sucesso!');
+    } catch (err) {
+      alert(err.message || 'Erro ao atualizar perfil');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
+    }
   },
 
   async load() {
@@ -178,6 +196,34 @@ const ConfigModule = {
 
         <div class="module-card__header" style="margin-bottom:16px">
           <div>
+            <h3>Meu Perfil</h3>
+            <p>Atualize suas informações pessoais</p>
+          </div>
+        </div>
+        <div class="form-grid" style="max-width: 420px;">
+          <div class="form-field">
+            <label>Nome completo</label>
+            <input id="cfgNomeCompleto" value="${this.state.user?.nome_completo || ''}" placeholder="Seu nome" />
+          </div>
+          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-field">
+              <label>CPF</label>
+              <input id="cfgCpf" value="${this.state.user?.cpf || ''}" placeholder="000.000.000-00" />
+            </div>
+            <div class="form-field">
+              <label>Nascimento</label>
+              <input id="cfgNascimento" type="date" value="${this.state.user?.nascimento || ''}" />
+            </div>
+          </div>
+          <div>
+            <button id="cfgSalvarPerfilBtn" class="btn btn-primary">Salvar perfil</button>
+          </div>
+        </div>
+
+        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
+
+        <div class="module-card__header" style="margin-bottom:16px">
+          <div>
             <h3>Segurança — Alterar senha</h3>
             <p>Informe sua senha atual para definir uma nova</p>
           </div>
@@ -229,6 +275,7 @@ const ConfigModule = {
 
     setTimeout(() => {
       document.getElementById('salvarConfigBtn')?.addEventListener('click', () => this.save());
+      document.getElementById('cfgSalvarPerfilBtn')?.addEventListener('click', () => this.salvarPerfil());
       document.getElementById('cfgTrocarSenhaBtn')?.addEventListener('click', () => this.trocarSenha());
       document.getElementById('cfgCarregarHistoricoBtn')?.addEventListener('click', () => this.carregarHistorico());
       document.getElementById('resetDadosBtn')?.addEventListener('click', () => this.resetDados());

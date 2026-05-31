@@ -127,12 +127,58 @@
         <td style="text-align:center">${e.total_usuarios}</td>
         <td style="text-align:center">${e.total_vendas}</td>
         <td>
+          <button class="btn btn-secondary btn-sm" onclick="verDetalheEmpresa(${e.id}, '${e.nome.replace(/'/g, "\\'")}')"><i class="fa fa-eye"></i></button>
           <button class="btn btn-secondary btn-sm" onclick="editarEmpresa(${e.id})"><i class="fa fa-pencil"></i> Editar</button>
           <button class="btn btn-secondary btn-sm" onclick="exportarEmpresa(${e.id}, '${e.nome.replace(/'/g, "\\'")}')"><i class="fa fa-download"></i></button>
         </td>
       </tr>
     `).join('');
   }
+
+  window.verDetalheEmpresa = async function (id, nome) {
+    document.getElementById('modalDetalheTitulo').textContent = nome;
+    document.getElementById('modalDetalheConteudo').innerHTML =
+      '<div style="text-align:center;padding:24px;color:var(--text-muted)"><i class="fa fa-spinner fa-spin"></i> Carregando...</div>';
+    openModal('modalDetalheEmpresa');
+
+    try {
+      const d = await api(`/admin/empresas/${id}`);
+      const e = d.empresa;
+
+      document.getElementById('modalDetalheConteudo').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Status</span><br>${badgeEmpresa(e)}</div>
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Plano</span><br>${e.plano_nome || '—'}</div>
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Trial até</span><br>${formatDate(e.trial_fim)}</div>
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Criada em</span><br>${formatDate(e.criado_em)}</div>
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Total vendas</span><br><strong>${d.resumo_vendas.total}</strong> (R$ ${Number(d.resumo_vendas.valor_total).toFixed(2)})</div>
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Usuários</span><br><strong>${d.usuarios.length}</strong></div>
+        </div>
+
+        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Usuários</p>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px">
+          ${d.usuarios.map(u => `<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:6px 8px">${u.nome_completo || u.usuario}</td>
+            <td style="padding:6px 8px;color:var(--text-muted)">${u.usuario}</td>
+            <td style="padding:6px 8px"><span class="badge badge-${u.tipo === 'admin' ? 'bloqueado' : u.tipo === 'gerente' ? 'trial' : 'ativo'}">${u.tipo}</span></td>
+          </tr>`).join('')}
+        </table>
+
+        <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Últimos acessos</p>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          ${d.ultimos_acessos.map(l => `<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:5px 8px;color:var(--text-muted)">${formatDateTime(l.criado_em)}</td>
+            <td style="padding:5px 8px">${l.usuario_nome || '—'}</td>
+            <td style="padding:5px 8px;color:var(--text-muted)">${l.acao}</td>
+            <td style="padding:5px 8px;color:var(--text-muted)">${l.ip || '—'}</td>
+          </tr>`).join('')}
+        </table>
+      `;
+    } catch (err) {
+      document.getElementById('modalDetalheConteudo').innerHTML =
+        `<p style="color:var(--danger)">Erro ao carregar: ${err.message}</p>`;
+    }
+  };
 
   window.openModalEmpresa = async function () {
     await carregarPlanosSelect();
