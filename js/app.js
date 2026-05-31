@@ -659,8 +659,19 @@ async function restoreAuthSession() {
   applyAuthData(auth);
 
   try {
-    await validateSession();
+    const meData = await validateSession();
+    if (meData) {
+      AppState.user = { ...AppState.user, ...meData };
+      AppState.assinatura = {
+        status: meData.assinatura_status || null,
+        trial_fim: meData.trial_fim || null,
+        dias_restantes_trial: meData.dias_restantes_trial ?? null,
+        bloqueada: Boolean(meData.bloqueada),
+        plano_nome: meData.plano_nome || null
+      };
+    }
     renderAuthenticatedUser();
+    renderTrialBanner();
     showMainScreen();
     await setActiveView(AppState.currentView || 'dashboard');
     showToast('Sessão restaurada com sucesso.', 'success');
@@ -712,6 +723,39 @@ function renderAuthenticatedUser() {
   if (adminLink && AppState.user?.tipo === 'admin') {
     adminLink.style.display = 'block';
   }
+}
+
+function renderTrialBanner() {
+  const banner = document.getElementById('trialBanner');
+  if (!banner) return;
+
+  const a = AppState.assinatura;
+  if (!a) { banner.style.display = 'none'; return; }
+
+  if (a.bloqueada) {
+    banner.style.cssText = 'display:block;padding:10px 20px;font-size:13px;font-weight:600;text-align:center;background:var(--danger);color:#fff';
+    banner.innerHTML = 'Sua conta está bloqueada. Entre em contato com o suporte.';
+    return;
+  }
+
+  if (a.status === 'trial' && a.dias_restantes_trial !== null) {
+    const dias = a.dias_restantes_trial;
+    if (dias < 0) {
+      banner.style.cssText = 'display:block;padding:10px 20px;font-size:13px;font-weight:600;text-align:center;background:var(--danger);color:#fff';
+      banner.innerHTML = 'Seu período de teste expirou. Entre em contato para ativar sua assinatura.';
+    } else if (dias <= 7) {
+      const cor = dias <= 2 ? 'var(--danger)' : 'var(--warning)';
+      banner.style.cssText = `display:block;padding:10px 20px;font-size:13px;font-weight:600;text-align:center;background:${cor};color:#fff`;
+      banner.innerHTML = dias === 0
+        ? 'Seu trial expira hoje. Contate o suporte para ativar.'
+        : `Seu trial expira em <strong>${dias} dia(s)</strong>. Fale com o suporte para continuar usando.`;
+    } else {
+      banner.style.display = 'none';
+    }
+    return;
+  }
+
+  banner.style.display = 'none';
 }
 
 function showMainScreen() {

@@ -36,7 +36,21 @@ const ConfigModule = {
 
   async load() {
     try {
-      const data = await api.fetchAPI(`/configuracoes/${this.state.empresa}`);
+      const [data, meData] = await Promise.all([
+        api.fetchAPI(`/configuracoes/${this.state.empresa}`),
+        api.validateSession().catch(() => null)
+      ]);
+
+      if (meData) {
+        this.state.user = { ...this.state.user, ...meData };
+        const nomeCampo = document.getElementById('cfgNomeCompleto');
+        const cpfCampo = document.getElementById('cfgCpf');
+        const nascCampo = document.getElementById('cfgNascimento');
+        if (nomeCampo) nomeCampo.value = meData.nome_completo || '';
+        if (cpfCampo) cpfCampo.value = meData.cpf || '';
+        if (nascCampo) nascCampo.value = meData.nascimento || '';
+      }
+
       this.state.dados = data;
 
       const campoNome = document.getElementById('cfgNomeEmpresa');

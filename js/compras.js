@@ -104,9 +104,7 @@ const ComprasModule = {
       }
 
       if (btn.dataset.action === 'edit-compra') {
-        alert(
-          'A edição de compras será liberada em uma etapa segura para não quebrar estoque e financeiro.'
-        );
+        showToast('A edição de compras será liberada em uma etapa segura para não quebrar estoque e financeiro.', 'info');
         return;
       }
 
