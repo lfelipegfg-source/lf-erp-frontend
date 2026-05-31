@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LF ERP — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <style>
+      body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+
+      .admin-header {
+        background: var(--sidebar-bg);
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .admin-header__logo { color: #fff; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+      .admin-header__logo span { background: var(--primary); border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 600; letter-spacing: .5px; }
+      .admin-header__user { color: rgba(255,255,255,.7); font-size: 13px; display: flex; align-items: center; gap: 12px; }
+      .btn-logout { background: rgba(255,255,255,.1); border: none; color: rgba(255,255,255,.8); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+      .btn-logout:hover { background: rgba(255,255,255,.2); }
+
+      .admin-tabs { display: flex; gap: 4px; padding: 20px 24px 0; border-bottom: 1px solid var(--border); background: var(--surface); }
+      .tab-btn { padding: 10px 20px; border: none; background: none; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: .15s; }
+      .tab-btn.active { color: var(--primary); border-color: var(--primary); }
+      .tab-btn:hover:not(.active) { color: var(--text); }
+
+      .admin-content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+      .tab-panel { display: none; }
+      .tab-panel.active { display: block; }
+
+      .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+      .section-title { font-size: 18px; font-weight: 600; }
+
+      .btn { padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: .15s; display: inline-flex; align-items: center; gap: 7px; }
+      .btn-primary { background: var(--primary); color: #fff; }
+      .btn-primary:hover { background: var(--primary-hover); }
+      .btn-secondary { background: var(--surface-3); color: var(--text); border: 1px solid var(--border); }
+      .btn-secondary:hover { background: var(--border); }
+      .btn-danger { background: var(--danger-soft); color: var(--danger); border: 1px solid #fca5a5; }
+      .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+      .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-xs); }
+
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th { text-align: left; padding: 10px 14px; font-weight: 600; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+      td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+      tr:last-child td { border-bottom: none; }
+      tr:hover td { background: var(--surface-2); }
+
+      .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+      .badge-ativo { background: var(--success-soft); color: var(--success); }
+      .badge-trial { background: var(--warning-soft); color: var(--warning); }
+      .badge-bloqueado { background: var(--danger-soft); color: var(--danger); }
+      .badge-inativo { background: var(--surface-3); color: var(--text-muted); }
+      .badge-expirado { background: var(--danger-soft); color: var(--danger); }
+
+      .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+      .filter-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: var(--surface); color: var(--text); outline: none; min-width: 160px; }
+      .filter-input:focus { border-color: var(--primary); }
+
+      /* Modal */
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+      .modal-overlay.hidden { display: none; }
+      .modal { background: var(--surface); border-radius: var(--radius-md); width: 100%; max-width: 520px; box-shadow: var(--shadow-lg); }
+      .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+      .modal-title { font-size: 16px; font-weight: 700; }
+      .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+      .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+      .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+      .form-group { display: flex; flex-direction: column; gap: 5px; }
+      .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
+      .form-input { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: var(--surface); color: var(--text); outline: none; }
+      .form-input:focus { border-color: var(--primary); }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+      .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+      .empty-state i { font-size: 36px; margin-bottom: 12px; opacity: .4; }
+
+      .loading-row td { text-align: center; padding: 32px; color: var(--text-muted); }
+
+      .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+      .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 20px; }
+      .stat-card__value { font-size: 28px; font-weight: 700; color: var(--primary); }
+      .stat-card__label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+      #toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px; z-index: 9999; opacity: 0; transform: translateY(8px); transition: .25s; pointer-events: none; }
+      #toast.show { opacity: 1; transform: translateY(0); }
+      #toast.success { background: var(--success); }
+      #toast.error { background: var(--danger); }
+    </style>
+  </head>
+  <body>
+
+    <header class="admin-header">
+      <div class="admin-header__logo">
+        <i class="fa-solid fa-layer-group"></i>
+        LF ERP
+        <span>ADMIN</span>
+      </div>
+      <div class="admin-header__user">
+        <span id="adminUserName"></span>
+        <button class="btn-logout" onclick="adminLogout()"><i class="fa fa-sign-out-alt"></i> Sair</button>
+      </div>
+    </header>
+
+    <nav class="admin-tabs">
+      <button class="tab-btn active" onclick="switchTab('empresas')"><i class="fa fa-building"></i> Empresas</button>
+      <button class="tab-btn" onclick="switchTab('planos')"><i class="fa fa-tags"></i> Planos</button>
+      <button class="tab-btn" onclick="switchTab('logs')"><i class="fa fa-list-alt"></i> Logs</button>
+    </nav>
+
+    <main class="admin-content">
+
+      <!-- TAB EMPRESAS -->
+      <div id="tab-empresas" class="tab-panel active">
+        <div class="stat-grid" id="statsGrid"></div>
+        <div class="section-header">
+          <span class="section-title">Empresas</span>
+          <button class="btn btn-primary" onclick="openModalEmpresa()"><i class="fa fa-plus"></i> Nova Empresa</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Empresa</th>
+                <th>Status</th>
+                <th>Plano</th>
+                <th>Trial até</th>
+                <th>Usuários</th>
+                <th>Vendas</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="empresasBody">
+              <tr class="loading-row"><td colspan="7"><i class="fa fa-spinner fa-spin"></i> Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB PLANOS -->
+      <div id="tab-planos" class="tab-panel">
+        <div class="section-header">
+          <span class="section-title">Planos</span>
+          <button class="btn btn-primary" onclick="openModalPlano()"><i class="fa fa-plus"></i> Novo Plano</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>Preço/mês</th>
+                <th>Usuários</th>
+                <th>Produtos</th>
+                <th>Clientes</th>
+                <th>Vendas/mês</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="planosBody">
+              <tr class="loading-row"><td colspan="8"><i class="fa fa-spinner fa-spin"></i> Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB LOGS -->
+      <div id="tab-logs" class="tab-panel">
+        <div class="section-header">
+          <span class="section-title">Logs de Auditoria</span>
+          <button class="btn btn-secondary" onclick="carregarLogs()"><i class="fa fa-refresh"></i> Atualizar</button>
+        </div>
+        <div class="filters">
+          <input class="filter-input" id="logEmpresa" placeholder="Empresa..." />
+          <select class="filter-input" id="logModulo">
+            <option value="">Todos os módulos</option>
+            <option value="acesso">Acesso</option>
+            <option value="vendas">Vendas</option>
+            <option value="compras">Compras</option>
+            <option value="produtos">Produtos</option>
+            <option value="clientes">Clientes</option>
+            <option value="financeiro">Financeiro</option>
+          </select>
+          <select class="filter-input" id="logAcao">
+            <option value="">Todas as ações</option>
+            <option value="login">Login</option>
+            <option value="login_falha">Login falhado</option>
+            <option value="logout">Logout</option>
+            <option value="cadastro">Cadastro</option>
+            <option value="edicao">Edição</option>
+            <option value="soft_delete">Exclusão</option>
+          </select>
+          <input class="filter-input" id="logDataInicial" type="date" />
+          <input class="filter-input" id="logDataFinal" type="date" />
+          <button class="btn btn-primary btn-sm" onclick="carregarLogs()"><i class="fa fa-search"></i> Filtrar</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Empresa</th>
+                <th>Usuário</th>
+                <th>Módulo</th>
+                <th>Ação</th>
+                <th>IP</th>
+              </tr>
+            </thead>
+            <tbody id="logsBody">
+              <tr class="loading-row"><td colspan="6">Selecione os filtros e clique em Filtrar</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- MODAL EMPRESA -->
+    <div id="modalEmpresa" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title" id="modalEmpresaTitulo">Nova Empresa</span>
+          <button class="modal-close" onclick="closeModal('modalEmpresa')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="empresaEditId" />
+          <div class="form-group">
+            <label class="form-label">Nome *</label>
+            <input class="form-input" id="empresaNome" placeholder="Nome da empresa" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" id="empresaEmail" placeholder="email@empresa.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Telefone</label>
+              <input class="form-input" id="empresaTelefone" placeholder="(00) 00000-0000" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Plano</label>
+              <select class="form-input" id="empresaPlano"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dias de trial</label>
+              <input class="form-input" id="empresaTrialDias" type="number" value="30" min="0" />
+            </div>
+          </div>
+          <!-- campos de edição de status -->
+          <div id="empresaStatusFields" class="hidden">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Status assinatura</label>
+                <select class="form-input" id="empresaStatus">
+                  <option value="trial">Trial</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Trial até</label>
+                <input class="form-input" id="empresaTrialFim" type="date" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Bloqueada</label>
+                <select class="form-input" id="empresaBloqueada">
+                  <option value="false">Não</option>
+                  <option value="true">Sim</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Motivo do bloqueio</label>
+                <input class="form-input" id="empresaMotivoBloqueio" placeholder="Opcional" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modalEmpresa')">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarEmpresa()"><i class="fa fa-check"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL PLANO -->
+    <div id="modalPlano" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title" id="modalPlanoTitulo">Novo Plano</span>
+          <button class="modal-close" onclick="closeModal('modalPlano')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="planoEditId" />
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Código *</label>
+              <input class="form-input" id="planoCodigo" placeholder="ex: basic" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nome *</label>
+              <input class="form-input" id="planoNome" placeholder="ex: Básico" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço mensal (R$)</label>
+            <input class="form-input" id="planoPreco" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Limite usuários</label>
+              <input class="form-input" id="planoLimUsuarios" type="number" placeholder="0 = ilimitado" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Limite produtos</label>
+              <input class="form-input" id="planoLimProdutos" type="number" placeholder="0 = ilimitado" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Limite clientes</label>
+              <input class="form-input" id="planoLimClientes" type="number" placeholder="0 = ilimitado" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Limite vendas/mês</label>
+              <input class="form-input" id="planoLimVendas" type="number" placeholder="0 = ilimitado" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modalPlano')">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarPlano()"><i class="fa fa-check"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="./js/api.js"></script>
+    <script src="./js/admin.js"></script>
+  </body>
+</html>
