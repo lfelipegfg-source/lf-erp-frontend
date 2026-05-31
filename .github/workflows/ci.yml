@@ -20,7 +20,13 @@ jobs:
 
       - name: Check essential files exist
         run: |
-          files=("index.html" "admin.html" "css/style.css" "js/app.js" "js/api.js" "js/auth.js" "js/dashboard.js")
+          files=(
+            "index.html" "admin.html"
+            "css/style.css"
+            "js/app.js" "js/api.js" "js/auth.js" "js/dashboard.js"
+            "js/feedback.js" "js/vendas.js" "js/compras.js"
+            "js/produtos.js" "js/clientes.js" "js/configuracoes.js"
+          )
           for f in "${files[@]}"; do
             if [ ! -f "$f" ]; then
               echo "ERRO: arquivo obrigatorio ausente: $f"
@@ -29,16 +35,53 @@ jobs:
             echo "OK: $f"
           done
 
-      - name: Syntax check JS files with Node
+      - name: Syntax check JS files
         run: |
+          ERROS=0
           for f in js/*.js; do
-            echo "Checking $f..."
-            node --input-type=module < "$f" 2>/dev/null || \
-            node --check "$f" 2>/dev/null || \
-            echo "  (modulo ES - verificacao de sintaxe ignorada para $f)"
+            result=$(node --input-type=module < "$f" 2>&1)
+            if echo "$result" | grep -qiE "SyntaxError"; then
+              echo "SYNTAX ERROR em $f:"
+              echo "$result"
+              ERROS=$((ERROS+1))
+            else
+              echo "OK: $f"
+            fi
           done
+          if [ $ERROS -gt 0 ]; then exit 1; fi
 
-      - name: Check for accidental console.log in production files
+      - name: Fail on debug console.log
         run: |
-          count=$(grep -r "console\.log" js/ --include="*.js" | grep -v "console\.log.*debug\|//.*console" | wc -l)
-          echo "console.log encontrados: $count"
+          count=$(grep -rn "console\.log\b" js/ --include="*.js" | grep -v "//.*console\.log" | wc -l)
+          if [ "$count" -gt 0 ]; then
+            echo "ERRO: $count console.log(s) de debug encontrados:"
+            grep -rn "console\.log\b" js/ --include="*.js" | grep -v "//.*console\.log"
+            exit 1
+          fi
+          echo "OK: nenhum console.log de debug encontrado"
+
+      - name: Check no window.confirm or window.prompt
+        run: |
+          count=$(grep -rn "window\.confirm\|window\.prompt" js/ --include="*.js" | grep -v "//.*window\." | wc -l)
+          if [ "$count" -gt 0 ]; then
+            echo "ERRO: $count window.confirm/window.prompt encontrados:"
+            grep -rn "window\.confirm\|window\.prompt" js/ --include="*.js" | grep -v "//.*window\."
+            exit 1
+          fi
+          echo "OK: nenhum window.confirm/window.prompt encontrado"
+
+      - name: Check all JS imports reference existing files
+        run: |
+          ERROS=0
+          for f in js/*.js; do
+            imports=$(grep "^import.*from '\./\|^import.*from \"\./" "$f" 2>/dev/null | grep -oP "(?<=['\"]\./)[^'\"]+")
+            for imp in $imports; do
+              target="js/${imp}.js"
+              if [ ! -f "$target" ] && [ ! -f "js/${imp}" ]; then
+                echo "ERRO: $f importa '$imp' mas arquivo nao encontrado"
+                ERROS=$((ERROS+1))
+              fi
+            done
+          done
+          if [ $ERROS -gt 0 ]; then exit 1; fi
+          echo "OK: todos os imports resolvem arquivos existentes"
