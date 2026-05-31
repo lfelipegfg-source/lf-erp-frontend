@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const state = {
   contas: [],
@@ -542,9 +542,7 @@ async function recarregar() {
 }
 
 async function estornarConta(id) {
-  const confirmar = window.confirm(
-    'Deseja estornar a baixa desta conta?\n\nEla voltará para pendente ou atrasada conforme o vencimento.'
-  );
+  const confirmar = await confirmarAcao('Estornar a baixa desta conta? Ela voltará para pendente ou atrasada conforme o vencimento.', 'Estornar', 'warning');
 
   if (!confirmar) return;
 
@@ -573,9 +571,7 @@ async function baixarConta(id) {
 }
 
 async function excluirConta(id) {
-  const confirmar = window.confirm(
-    'Deseja realmente excluir esta conta manual?\n\nEsta ação não poderá ser desfeita.'
-  );
+  const confirmar = await confirmarAcao('Excluir esta conta manual? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
 
   if (!confirmar) return;
 
@@ -703,9 +699,7 @@ async function abrirRecebimentosParciais(id) {
 }
 
 async function estornarRecebimentoParcial(lancamentoId, modal) {
-  const confirmar = window.confirm(
-    'Deseja estornar este recebimento parcial?\n\nO valor voltará para o saldo da conta.'
-  );
+  const confirmar = await confirmarAcao('Estornar este recebimento parcial? O valor voltará para o saldo da conta.', 'Estornar', 'warning');
 
   if (!confirmar) return;
 

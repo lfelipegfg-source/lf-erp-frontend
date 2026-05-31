@@ -1,6 +1,6 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const VendasModule = {
   state: {
@@ -1125,9 +1125,7 @@ const VendasModule = {
       return;
     }
 
-    const confirmar = window.confirm(
-      'Deseja estornar a baixa desta parcela?\n\nEla voltará para pendente ou atrasada conforme o vencimento.'
-    );
+    const confirmar = await confirmarAcao('Estornar a baixa desta parcela? Ela voltará para pendente ou atrasada conforme o vencimento.', 'Estornar', 'warning');
 
     if (!confirmar) return;
 
@@ -1158,23 +1156,44 @@ const VendasModule = {
       return;
     }
 
-    const confirmar = window.confirm('Deseja marcar esta parcela como paga?');
-    if (!confirmar) return;
-
     const conta = this.state.vendaDetalheAtual?.contas_receber?.find((item) => {
       return Number(item.id) === Number(id);
     });
 
     const valorSugerido = Number(conta?.valor_atualizado || conta?.valor || 0);
+    const hoje = new Date().toISOString().slice(0, 10);
 
-    const valorPago = window.prompt(
-      'Informe o valor pago:',
-      valorSugerido.toFixed(2).replace('.', ',')
-    );
+    const resultado = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+          <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar recebimento</h3>
+          <div style="margin-bottom:12px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Valor pago (R$)</label>
+            <input id="_bpValor" type="number" step="0.01" min="0.01" value="${valorSugerido.toFixed(2)}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Data do pagamento</label>
+            <input id="_bpData" type="date" value="${hoje}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button id="_bpCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+            <button id="_bpConfirmar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--success);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirmar pagamento</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_bpCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_bpConfirmar').onclick = () => {
+        const val = Number(overlay.querySelector('#_bpValor').value);
+        const data = overlay.querySelector('#_bpData').value;
+        document.body.removeChild(overlay);
+        resolve({ valor: val, data });
+      };
+    });
 
-    if (valorPago === null) return;
-
-    const valorNormalizado = Number(String(valorPago).replace('.', '').replace(',', '.'));
+    if (!resultado) return;
+    const valorNormalizado = resultado.valor;
 
     if (!valorNormalizado || valorNormalizado <= 0) {
       this.showMessage('Informe um valor válido para pagamento.', 'error');
@@ -1186,7 +1205,7 @@ const VendasModule = {
 
       await api.baixarContaReceber(id, {
         valor_pago: valorNormalizado,
-        data_pagamento: new Date().toISOString().slice(0, 10),
+        data_pagamento: resultado.data || new Date().toISOString().slice(0, 10),
         empresa: this.state.empresa,
         empresa_id: api.getEmpresaId()
       });
@@ -1212,7 +1231,22 @@ const VendasModule = {
       return;
     }
 
-    const novaObservacao = window.prompt('Observação da venda:', venda.observacao || '');
+    const novaObservacao = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+          <h3 style="margin:0 0 12px;font-size:16px;font-weight:700">Observação da venda</h3>
+          <textarea id="_obsInput" rows="4" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box">${(venda.observacao || '').replace(/</g,'&lt;')}</textarea>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+            <button id="_obsCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+            <button id="_obsSalvar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_obsCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_obsSalvar').onclick = () => { const v = overlay.querySelector('#_obsInput').value; document.body.removeChild(overlay); resolve(v); };
+    });
 
     if (novaObservacao === null) return;
 
@@ -1246,13 +1280,24 @@ const VendasModule = {
       return;
     }
 
-    const confirmar = window.confirm(
-      'Deseja salvar a edição desta venda?\n\nO sistema irá reprocessar estoque e financeiro com segurança.'
-    );
-
-    if (!confirmar) return;
-
-    const novoObservacao = window.prompt('Observação da venda:', venda.observacao || '');
+    const novoObservacao = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+          <h3 style="margin:0 0 8px;font-size:16px;font-weight:700">Salvar edição da venda</h3>
+          <p style="font-size:13px;color:var(--text-muted);margin:0 0 14px">O sistema reprocessará estoque e financeiro com segurança.</p>
+          <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Observação</label>
+          <textarea id="_seObs" rows="3" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box">${(venda.observacao || '').replace(/</g,'&lt;')}</textarea>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+            <button id="_seCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+            <button id="_seConfirmar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar edição</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_seCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_seConfirmar').onclick = () => { const v = overlay.querySelector('#_seObs').value; document.body.removeChild(overlay); resolve(v); };
+    });
 
     if (novoObservacao === null) return;
 
@@ -1304,9 +1349,7 @@ const VendasModule = {
       return;
     }
 
-    const confirmar = window.confirm(
-      'Tem certeza que deseja excluir esta venda?\n\nO sistema irá estornar o estoque e remover as contas a receber vinculadas, desde que não exista parcela já paga.'
-    );
+    const confirmar = await confirmarAcao('Excluir esta venda? O estoque será estornado e as contas a receber removidas (se não pagas).', 'Excluir', 'danger');
 
     if (!confirmar) return;
 
