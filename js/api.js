@@ -273,6 +273,11 @@ async function getEmpresaStatus() {
   });
 }
 
+async function getAlertas() {
+  const empresa = ensureEmpresa();
+  return request(`/alertas/${empresa}`, { method: 'GET' });
+}
+
 async function getProdutos(params = {}) {
   const empresa = ensureEmpresa();
 
@@ -827,6 +832,7 @@ const api = {
   validateSession,
   getDashboard,
   getEmpresaStatus,
+  getAlertas,
 
   getProdutos,
   createProduto,

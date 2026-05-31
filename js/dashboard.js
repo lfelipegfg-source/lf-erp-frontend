@@ -524,14 +524,22 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
       busca: filters.busca || ''
     };
 
-    const [rawDashboard, rawResumoFinanceiro, rawEmpresaStatus] = await Promise.all([
+    const [rawDashboard, rawResumoFinanceiro, rawEmpresaStatus, rawAlertas] = await Promise.all([
       api.getDashboard(params),
       api.getRelatorioFinanceiroResumo(params),
-      api.getEmpresaStatus()
+      api.getEmpresaStatus(),
+      api.getAlertas().catch(() => ({ alertas: [] }))
     ]);
 
     const payload = normalizeDashboardPayload(rawDashboard);
     const financeiro = normalizeResumoFinanceiro(rawResumoFinanceiro);
+
+    if (rawAlertas?.alertas?.length) {
+      payload.alertas = rawAlertas.alertas.map(a => ({
+        tipo: a.nivel || 'warning',
+        texto: a.titulo
+      }));
+    }
 
     renderKpis(payload, financeiro, filters);
     renderResumoExecutivo(payload, financeiro, state, rawEmpresaStatus);
