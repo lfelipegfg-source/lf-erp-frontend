@@ -104,7 +104,7 @@ const ComprasModule = {
       }
 
       if (btn.dataset.action === 'edit-compra') {
-        showToast('A edição de compras será liberada em uma etapa segura para não quebrar estoque e financeiro.', 'info');
+        await this.openEditModal(btn.dataset.id);
         return;
       }
 
@@ -513,6 +513,39 @@ const ComprasModule = {
     }
   },
 
+  async openEditModal(id) {
+    try {
+      this.showMessage('Carregando compra...', 'info');
+      const compra = await api.getCompraDetalhe(id);
+
+      this.state.editingId = Number(id);
+      this.state.itensCompra = (compra.itens || []).map(i => ({
+        produto_id: i.produto_id,
+        produto_nome: i.produto_nome,
+        quantidade: Number(i.quantidade),
+        custo_unitario: Number(i.custo_unitario || 0),
+        subtotal: Number(i.subtotal || 0)
+      }));
+
+      this.openModal();
+
+      setTimeout(() => {
+        if (this.el.fornecedor) this.el.fornecedor.value = compra.compra?.fornecedor_id || '';
+        if (this.el.data) this.el.data.value = (compra.compra?.data || '').slice(0, 10);
+        if (this.el.formaPagamento) this.el.formaPagamento.value = compra.compra?.pagamento || '';
+        if (this.el.parcelas) this.el.parcelas.value = compra.compra?.total_parcelas || 1;
+        if (this.el.observacao) this.el.observacao.value = compra.compra?.observacao || '';
+        this.toggleVencimentoField();
+        this.renderItensCompra();
+
+        const titulo = document.querySelector('#compraModal h2, #compraModal .modal-title');
+        if (titulo) titulo.textContent = `Editar Compra #${id}`;
+      }, 50);
+    } catch (error) {
+      this.showMessage('Erro ao carregar compra para edição.', 'error');
+    }
+  },
+
   closeModal() {
     this.cache();
 
@@ -521,6 +554,10 @@ const ComprasModule = {
     }
 
     this.state.itensCompra = [];
+    this.state.editingId = null;
+
+    const titulo = document.querySelector('#compraModal h2, #compraModal .modal-title');
+    if (titulo) titulo.textContent = 'Nova Compra';
   },
 
   toggleVencimentoField() {
@@ -705,9 +742,15 @@ const ComprasModule = {
     };
 
     try {
-      await api.createCompra(payload);
+      if (this.state.editingId) {
+        await api.updateCompra(this.state.editingId, payload);
+        this.showMessage('Compra atualizada com sucesso.', 'success');
+      } else {
+        await api.createCompra(payload);
+        this.showMessage('Compra cadastrada com sucesso.', 'success');
+      }
 
-      this.showMessage('Compra cadastrada com sucesso.', 'success');
+      this.state.editingId = null;
       this.closeModal();
       await this.load();
     } catch (error) {

@@ -580,6 +580,20 @@ async function createCompra(payload) {
   });
 }
 
+async function updateCompra(id, payload) {
+  const empresa = getEmpresaNome();
+  const empresaId = getEmpresaId();
+
+  return request(`/compras/${id}`, {
+    method: 'PUT',
+    body: {
+      ...payload,
+      empresa,
+      empresa_id: empresaId
+    }
+  });
+}
+
 async function deleteCompra(id) {
   const empresa = getEmpresaNome();
   const empresaId = getEmpresaId();
@@ -868,6 +882,7 @@ const api = {
   getCompras,
   getCompraDetalhe,
   createCompra,
+  updateCompra,
   deleteCompra,
 
   getContasReceber,
