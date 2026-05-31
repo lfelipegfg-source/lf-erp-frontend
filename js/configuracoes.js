@@ -1,5 +1,6 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
+import { showToast } from './feedback.js';
 
 const ConfigModule = {
   state: {
@@ -25,9 +26,9 @@ const ConfigModule = {
     try {
       if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
       await api.updateMePerfil({ nome_completo: nome || null, cpf: cpf || null, nascimento: nascimento || null });
-      alert('Perfil atualizado com sucesso!');
+      showToast('Perfil atualizado com sucesso!', 'success');
     } catch (err) {
-      alert(err.message || 'Erro ao atualizar perfil');
+      showToast(err.message || 'Erro ao atualizar perfil', 'error');
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Salvar perfil'; }
     }
@@ -56,10 +57,10 @@ const ConfigModule = {
         nome_empresa: nome
       });
 
-      alert('Configurações salvas com sucesso');
+      showToast('Configurações salvas com sucesso', 'success');
     } catch (err) {
       console.error('Erro ao salvar:', err);
-      alert('Erro ao salvar configurações');
+      showToast('Erro ao salvar configurações', 'error');
     }
   },
 
@@ -69,7 +70,7 @@ const ConfigModule = {
     );
 
     if (confirmar !== 'RESETAR') {
-      alert('Reset cancelado.');
+      showToast('Reset cancelado.', 'info');
       return;
     }
 
@@ -82,11 +83,11 @@ const ConfigModule = {
 
       await api.fetchAPI('/reset-dados', 'POST', {});
 
-      alert('Dados resetados com sucesso. Atualize o sistema para conferir.');
-      window.location.reload();
+      showToast('Dados resetados com sucesso.', 'success');
+      setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       console.error('Erro ao resetar dados:', err);
-      alert(err.message || 'Erro ao resetar dados.');
+      showToast(err.message || 'Erro ao resetar dados.', 'error');
     } finally {
       const btn = document.getElementById('resetDadosBtn');
       if (btn) {
@@ -103,26 +104,26 @@ const ConfigModule = {
     const btn = document.getElementById('cfgTrocarSenhaBtn');
 
     if (!atual || !nova || !confirmar) {
-      return alert('Preencha todos os campos de senha');
+      return showToast('Preencha todos os campos de senha', 'error');
     }
 
     if (nova !== confirmar) {
-      return alert('A nova senha e a confirmação não conferem');
+      return showToast('A nova senha e a confirmação não conferem', 'error');
     }
 
     if (nova.length < 6) {
-      return alert('A nova senha deve ter pelo menos 6 caracteres');
+      return showToast('A nova senha deve ter pelo menos 6 caracteres', 'error');
     }
 
     try {
       if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
       await api.fetchAPI('/me/senha', 'PUT', { senha_atual: atual, nova_senha: nova, confirmar_senha: confirmar });
-      alert('Senha alterada com sucesso!');
+      showToast('Senha alterada com sucesso!', 'success');
       document.getElementById('cfgSenhaAtual').value = '';
       document.getElementById('cfgSenhaNova').value = '';
       document.getElementById('cfgSenhaConfirmar').value = '';
     } catch (err) {
-      alert(err.message || 'Erro ao alterar senha');
+      showToast(err.message || 'Erro ao alterar senha', 'error');
     } finally {
       if (btn) { btn.disabled = false; btn.textContent = 'Alterar senha'; }
     }

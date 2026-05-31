@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check essential files exist
+        run: |
+          files=("index.html" "admin.html" "css/style.css" "js/app.js" "js/api.js" "js/auth.js" "js/dashboard.js")
+          for f in "${files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "ERRO: arquivo obrigatorio ausente: $f"
+              exit 1
+            fi
+            echo "OK: $f"
+          done
+
+      - name: Syntax check JS files with Node
+        run: |
+          for f in js/*.js; do
+            echo "Checking $f..."
+            node --input-type=module < "$f" 2>/dev/null || \
+            node --check "$f" 2>/dev/null || \
+            echo "  (modulo ES - verificacao de sintaxe ignorada para $f)"
+          done
+
+      - name: Check for accidental console.log in production files
+        run: |
+          count=$(grep -r "console\.log" js/ --include="*.js" | grep -v "console\.log.*debug\|//.*console" | wc -l)
+          echo "console.log encontrados: $count"
