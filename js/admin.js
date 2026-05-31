@@ -10,7 +10,6 @@
     return;
   }
   if (auth.user?.tipo !== 'admin') {
-    alert('Acesso restrito a administradores.');
     window.location.href = './index.html';
     return;
   }
