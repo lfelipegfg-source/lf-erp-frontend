@@ -1,6 +1,6 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const ProdutosModule = {
   state: {
@@ -575,7 +575,7 @@ const ProdutosModule = {
       return;
     }
 
-    const confirmed = window.confirm(`Deseja realmente excluir o produto "${item.nome}"?`);
+    const confirmed = await confirmarAcao(`Excluir o produto "${item.nome}"?`, 'Excluir', 'danger');
     if (!confirmed) return;
 
     this.state.deletingId = id;

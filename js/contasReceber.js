@@ -146,7 +146,6 @@ async function carregarContas() {
     qtd_atrasado: 0
   };
 
-  console.log('Resumo contas receber:', response?.resumo);
 }
 
 function getFiltrosGlobais() {

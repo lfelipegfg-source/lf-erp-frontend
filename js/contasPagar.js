@@ -445,25 +445,40 @@ async function recarregar() {
 }
 
 async function pagarConta(id) {
-  const confirmar = window.confirm('Confirmar pagamento desta conta?');
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
 
-  if (!confirmar) return;
+    const hoje = new Date().toISOString().slice(0, 10);
+    overlay.innerHTML = `
+      <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+        <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar pagamento</h3>
+        <div style="margin-bottom:16px">
+          <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Data do pagamento</label>
+          <input id="_pagarDataInput" type="date" value="${hoje}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button id="_pagarCancelarBtn" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+          <button id="_pagarConfirmarBtn" style="padding:8px 16px;border-radius:8px;border:none;background:var(--success);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirmar pagamento</button>
+        </div>
+      </div>`;
 
-  const dataPagamento = window.prompt(
-    'Informe a data do pagamento no formato AAAA-MM-DD.\nDeixe em branco para usar a data de hoje:'
-  );
+    document.body.appendChild(overlay);
 
-  try {
-    await api.pagarContaPagar(id, {
-      data_pagamento: dataPagamento || undefined
-    });
-
-    await recarregar();
-  } catch (error) {
-    console.error('Erro ao pagar conta:', error);
-    const message = buildFriendlyError(error);
-    showMessage(message, 'error');
-  }
+    overlay.querySelector('#_pagarCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+    overlay.querySelector('#_pagarConfirmarBtn').onclick = async () => {
+      const data = overlay.querySelector('#_pagarDataInput').value;
+      document.body.removeChild(overlay);
+      try {
+        await api.pagarContaPagar(id, { data_pagamento: data || undefined });
+        await recarregar();
+      } catch (error) {
+        console.error('Erro ao pagar conta:', error);
+        showMessage(buildFriendlyError(error), 'error');
+      }
+      resolve();
+    };
+  });
 }
 
 async function abrirDetalheConta(id) {

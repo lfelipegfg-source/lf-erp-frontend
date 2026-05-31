@@ -1,6 +1,6 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const ComprasModule = {
   state: {
@@ -718,9 +718,7 @@ const ComprasModule = {
   },
 
   async remove(id) {
-    const confirmar = window.confirm(
-      'Deseja realmente excluir esta compra? O estoque e as contas vinculadas serão ajustados.'
-    );
+    const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serão ajustados.', 'Excluir', 'danger');
 
     if (!confirmar) return;
 

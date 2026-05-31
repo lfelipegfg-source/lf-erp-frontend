@@ -79,11 +79,29 @@ const ConfigModule = {
   },
 
   async resetDados() {
-    const confirmar = window.prompt(
-      'ATENÇÃO: isso apagará os dados operacionais da empresa atual.\n\nDigite RESETAR para confirmar:'
-    );
+    const confirmado = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+          <h3 style="margin:0 0 8px;font-size:16px;font-weight:700;color:var(--danger)">Resetar dados do piloto</h3>
+          <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">Esta ação <strong>apagará permanentemente</strong> todos os dados operacionais da empresa. Digite <strong>RESETAR</strong> para confirmar.</p>
+          <input id="_resetConfirmInput" placeholder="Digite RESETAR" style="width:100%;padding:9px 12px;border:1px solid var(--danger);border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:16px" />
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button id="_resetCancelarBtn" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+            <button id="_resetConfirmarBtn" style="padding:8px 16px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Resetar dados</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_resetCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(false); };
+      overlay.querySelector('#_resetConfirmarBtn').onclick = () => {
+        const val = overlay.querySelector('#_resetConfirmInput').value.trim();
+        document.body.removeChild(overlay);
+        resolve(val === 'RESETAR');
+      };
+    });
 
-    if (confirmar !== 'RESETAR') {
+    if (!confirmado) {
       showToast('Reset cancelado.', 'info');
       return;
     }
