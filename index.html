@@ -187,6 +187,7 @@
             <button class="nav-item active" data-view="dashboard">
               <span class="nav-item__icon"><i class="fa-solid fa-chart-pie"></i></span>
               <span class="nav-item__label">Dashboard</span>
+              <span id="alertasBadge" style="display:none;background:var(--danger);color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:auto"></span>
             </button>
 
             <button class="nav-item" data-view="pdv">
@@ -290,6 +291,13 @@
               <span class="nav-item__icon"><i class="fa-solid fa-gear"></i></span>
               <span class="nav-item__label">Configurações</span>
             </button>
+
+            <a id="adminNavLink" href="./admin.html" style="display:none;text-decoration:none">
+              <button class="nav-item" style="width:100%">
+                <span class="nav-item__icon"><i class="fa-solid fa-shield-halved"></i></span>
+                <span class="nav-item__label">Admin</span>
+              </button>
+            </a>
           </nav>
 
           <div class="sidebar__footer">

@@ -707,6 +707,11 @@ function renderAuthenticatedUser() {
   if (sidebarUserName) sidebarUserName.textContent = userName;
   if (sidebarUserRole) sidebarUserRole.textContent = userRole;
   if (sidebarUserAvatar) sidebarUserAvatar.textContent = getInitials(userName);
+
+  const adminLink = document.getElementById('adminNavLink');
+  if (adminLink && AppState.user?.tipo === 'admin') {
+    adminLink.style.display = 'block';
+  }
 }
 
 function showMainScreen() {

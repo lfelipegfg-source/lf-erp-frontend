@@ -541,6 +541,17 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
       }));
     }
 
+    const badge = document.getElementById('alertasBadge');
+    const totalAlertas = rawAlertas?.total || 0;
+    if (badge) {
+      if (totalAlertas > 0) {
+        badge.textContent = totalAlertas;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
     renderKpis(payload, financeiro, filters);
     renderResumoExecutivo(payload, financeiro, state, rawEmpresaStatus);
     renderTopProdutos(payload);
