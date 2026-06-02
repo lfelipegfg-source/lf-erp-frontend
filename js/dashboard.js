@@ -491,6 +491,54 @@ function renderAlertas(payload, financeiro) {
   );
 }
 
+function renderTabelaPrecos(data) {
+  const el = document.getElementById('dashboardTabelaPrecos');
+  if (!el) return;
+
+  if (!data || !data.total_tabelas) {
+    el.innerHTML = `<div class="alert-list__item info">Nenhuma tabela de preço ativa. Configure em Clientes para aplicar preços diferenciados.</div>`;
+    return;
+  }
+
+  const tabelas = data.tabelas || [];
+
+  el.innerHTML = `
+    <div class="dashboard-list">
+      <div class="dashboard-list__item">
+        <strong>Tabelas ativas</strong>
+        <span class="badge badge--info">${data.total_tabelas}</span>
+      </div>
+      <div class="dashboard-list__item">
+        <strong>Clientes com preço especial</strong>
+        <span class="badge badge--success">${data.total_clientes}</span>
+      </div>
+    </div>
+    ${tabelas.length ? `
+      <div style="margin-top:14px;display:grid;gap:8px">
+        ${tabelas.map((t) => {
+          let regra = 'Preços fixos por produto';
+          if (t.tipo === 'percentual') {
+            if (t.desconto_percentual > 0) regra = `Desconto de ${t.desconto_percentual}%`;
+            else if (t.markup_percentual > 0) regra = `Markup de +${t.markup_percentual}%`;
+            else regra = 'Sem regra percentual geral';
+          }
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:12px;background:var(--surface-2)">
+              <div>
+                <strong style="font-size:13px;display:block">${safeText(t.nome)}</strong>
+                <small style="color:var(--text-muted)">${regra}</small>
+              </div>
+              <span class="badge ${t.total_clientes > 0 ? 'badge--success' : ''}" style="font-size:11px;white-space:nowrap">
+                ${t.total_clientes} cliente(s)
+              </span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    ` : ''}
+  `;
+}
+
 function renderErrorState(message = 'Não foi possível carregar o dashboard.') {
   setText('kpiFaturamento', 'R$ 0,00');
   setText('kpiVendas', '0');
@@ -509,6 +557,7 @@ function renderErrorState(message = 'Não foi possível carregar o dashboard.') 
   setHtml('dashboardResumo', `<div class="empty-state">${message}</div>`);
   setHtml('dashboardTopProdutos', `<div class="empty-state">Sem ranking disponível.</div>`);
   setHtml('dashboardAlertas', `<div class="empty-state">Sem alertas disponíveis.</div>`);
+  setHtml('dashboardTabelaPrecos', `<div class="empty-state">Sem dados disponíveis.</div>`);
 }
 
 export async function loadDashboard({ filters = {}, state = {} } = {}) {
@@ -524,11 +573,12 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
       busca: filters.busca || ''
     };
 
-    const [rawDashboard, rawResumoFinanceiro, rawEmpresaStatus, rawAlertas] = await Promise.all([
+    const [rawDashboard, rawResumoFinanceiro, rawEmpresaStatus, rawAlertas, rawTabelaPrecos] = await Promise.all([
       api.getDashboard(params),
       api.getRelatorioFinanceiroResumo(params),
       api.getEmpresaStatus(),
-      api.getAlertas().catch(() => ({ alertas: [] }))
+      api.getAlertas().catch(() => ({ alertas: [] })),
+      api.getTabelaPrecosDashboard().catch(() => null)
     ]);
 
     const payload = normalizeDashboardPayload(rawDashboard);
@@ -556,6 +606,7 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
     renderResumoExecutivo(payload, financeiro, state, rawEmpresaStatus);
     renderTopProdutos(payload);
     renderAlertas(payload, financeiro);
+    renderTabelaPrecos(rawTabelaPrecos);
 
     return {
       dashboard: payload,

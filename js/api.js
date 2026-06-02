@@ -362,6 +362,10 @@ async function getAtributos() {
 
 // ── TABELAS DE PREÇO ─────────────────────────────────────────────────────────
 
+async function getTabelaPrecosDashboard() {
+  return request('/tabelas-preco/dashboard', { method: 'GET' });
+}
+
 async function resolverPrecoTabela({ produtoId, clienteId = null, gradeId = null, quantidade = 1 }) {
   const q = { produto_id: produtoId, quantidade };
   if (clienteId) q.cliente_id = clienteId;
@@ -1070,6 +1074,7 @@ const api = {
   deleteGrade,
   toggleGrade,
   getAtributos,
+  getTabelaPrecosDashboard,
   resolverPrecoTabela,
 
   getKitComponentes,
