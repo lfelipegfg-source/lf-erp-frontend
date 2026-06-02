@@ -2764,8 +2764,284 @@ select {
 
 /* LUCRO NEGATIVO */
 
-.text-danger {
-  color: #dc2626;
+.text-danger  { color: var(--danger); }
+.text-success { color: var(--success); }
+.text-muted   { color: var(--text-muted); }
+
+/* ── PRODUTO TABS ─────────────────────────────────────────────────────────── */
+
+.modal-card--xl { max-width: 860px; }
+
+.prod-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 24px;
+  border-bottom: 2px solid var(--border);
+  background: var(--surface);
+}
+
+.prod-tab {
+  padding: 11px 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.prod-tab:hover   { color: var(--primary); }
+.prod-tab.active  { color: var(--primary); border-bottom-color: var(--primary); }
+.prod-tab .prod-tab-badge {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 1px 7px;
+  margin-left: 5px;
+}
+
+.prod-tab-panel          { display: none; padding: 20px 24px 24px; }
+.prod-tab-panel.active   { display: block; }
+
+/* ── GRADE CARDS ─────────────────────────────────────────────────────────── */
+
+.grade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.grade-card {
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 10px 10px;
+  text-align: center;
+  position: relative;
+  background: var(--surface);
+  transition: border-color 0.15s;
+}
+.grade-card:hover { border-color: var(--primary); }
+.grade-card--alert { border-color: var(--danger); background: var(--danger-soft); }
+
+.grade-card__label {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.2;
+}
+.grade-card__sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.grade-card__estoque {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-bottom: 8px;
+}
+.grade-card__actions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* ── KIT COMPONENTS ──────────────────────────────────────────────────────── */
+
+.kit-section { margin-bottom: 16px; }
+
+.kit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: var(--surface);
+}
+.kit-row__nome  { flex: 1; font-weight: 500; font-size: 14px; }
+.kit-row__info  { font-size: 13px; color: var(--text-muted); min-width: 80px; text-align: right; }
+.kit-row__estoque { font-size: 12px; color: var(--text-light); min-width: 80px; text-align: right; }
+
+/* ── IMAGENS ─────────────────────────────────────────────────────────────── */
+
+.imagem-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: 16px;
+}
+.imagem-upload-area:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.imagem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.imagem-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 2px solid var(--border);
+  background: var(--surface-2);
+}
+.imagem-card--principal { border-color: var(--primary); }
+.imagem-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.imagem-card__badge {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.imagem-card__actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.imagem-card:hover .imagem-card__actions { opacity: 1; }
+
+.imagem-card__actions button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+.imagem-card__actions button:hover { background: rgba(255,255,255,0.2); }
+.imagem-card__actions button.btn-star { color: #fbbf24; }
+
+/* ── TOGGLE SWITCH ───────────────────────────────────────────────────────── */
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.toggle-row__label { font-weight: 600; font-size: 14px; }
+.toggle-row__desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-switch__track {
+  position: absolute;
+  inset: 0;
+  background: var(--border-strong);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle-switch input:checked + .toggle-switch__track { background: var(--primary); }
+.toggle-switch__track::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.toggle-switch input:checked + .toggle-switch__track::after { transform: translateX(20px); }
+
+/* ── ADD FORM INLINE ─────────────────────────────────────────────────────── */
+
+.inline-add-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.inline-add-form input, .inline-add-form select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+}
+.inline-add-form input:focus, .inline-add-form select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.section-empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.estoque-kit-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 14px;
 }
 
 .text-success {

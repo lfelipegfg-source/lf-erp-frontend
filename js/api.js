@@ -334,6 +334,88 @@ async function deleteProduto(id) {
   });
 }
 
+// ── GRADES ───────────────────────────────────────────────────────────────────
+
+async function getGradesProduto(produtoId) {
+  return request(`/grades/produto/${produtoId}`);
+}
+
+async function createGrade(produtoId, data) {
+  return request(`/grades/produto/${produtoId}`, { method: 'POST', body: data });
+}
+
+async function updateGrade(gradeId, data) {
+  return request(`/grades/${gradeId}`, { method: 'PUT', body: data });
+}
+
+async function deleteGrade(gradeId) {
+  return request(`/grades/${gradeId}`, { method: 'DELETE' });
+}
+
+async function toggleGrade(produtoId) {
+  return request(`/grades/produto/${produtoId}/toggle`, { method: 'PATCH' });
+}
+
+async function getAtributos() {
+  return request('/grades/atributos');
+}
+
+// ── KITS ─────────────────────────────────────────────────────────────────────
+
+async function getKitComponentes(produtoId) {
+  return request(`/kits/produto/${produtoId}/componentes`);
+}
+
+async function addKitComponente(produtoId, data) {
+  return request(`/kits/produto/${produtoId}/componentes`, { method: 'POST', body: data });
+}
+
+async function updateKitComponente(produtoId, compId, data) {
+  return request(`/kits/produto/${produtoId}/componentes/${compId}`, { method: 'PUT', body: data });
+}
+
+async function deleteKitComponente(produtoId, compId) {
+  return request(`/kits/produto/${produtoId}/componentes/${compId}`, { method: 'DELETE' });
+}
+
+async function toggleKit(produtoId) {
+  return request(`/kits/produto/${produtoId}/toggle`, { method: 'PATCH' });
+}
+
+async function getEstoqueKit(produtoId) {
+  return request(`/kits/produto/${produtoId}/estoque`);
+}
+
+// ── IMAGENS ───────────────────────────────────────────────────────────────────
+
+async function getImagensProduto(produtoId) {
+  return request(`/imagens/produto/${produtoId}`);
+}
+
+async function uploadImagemProduto(produtoId, file) {
+  const token = getAuthToken();
+  const url   = buildUrl(`/imagens/produto/${produtoId}`);
+  const form  = new FormData();
+  form.append('imagem', file);
+
+  const res = await withTimeout(
+    fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
+  );
+  return parseResponse(res);
+}
+
+async function setPrincipalImagem(imagemId) {
+  return request(`/imagens/${imagemId}/principal`, { method: 'PATCH' });
+}
+
+async function updateOrdemImagem(imagemId, ordem) {
+  return request(`/imagens/${imagemId}/ordem`, { method: 'PUT', body: { ordem } });
+}
+
+async function deletarImagem(imagemId) {
+  return request(`/imagens/${imagemId}`, { method: 'DELETE' });
+}
+
 async function getClientes(params = {}) {
   const empresa = ensureEmpresa();
 
@@ -857,6 +939,26 @@ const api = {
   createProduto,
   updateProduto,
   deleteProduto,
+
+  getGradesProduto,
+  createGrade,
+  updateGrade,
+  deleteGrade,
+  toggleGrade,
+  getAtributos,
+
+  getKitComponentes,
+  addKitComponente,
+  updateKitComponente,
+  deleteKitComponente,
+  toggleKit,
+  getEstoqueKit,
+
+  getImagensProduto,
+  uploadImagemProduto,
+  setPrincipalImagem,
+  updateOrdemImagem,
+  deletarImagem,
 
   getClientes,
   createCliente,
