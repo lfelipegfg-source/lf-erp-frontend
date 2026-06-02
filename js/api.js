@@ -1008,6 +1008,16 @@ async function deleteOrcamento(id) {
   return request(`/orcamentos/${id}`, { method: 'DELETE' });
 }
 
+// ── PORTAL DO CLIENTE (admin) ─────────────────────────────────────────────────
+
+async function configurarPortalCliente(clienteId, senha) {
+  return request(`/portal/admin/clientes/${clienteId}/senha`, { method: 'POST', body: { senha } });
+}
+
+async function togglePortalCliente(clienteId) {
+  return request(`/portal/admin/clientes/${clienteId}/toggle`, { method: 'PATCH' });
+}
+
 // ── PEDIDOS ──────────────────────────────────────────────────────────────────
 
 async function getPedidos(params = {}) {
@@ -1165,6 +1175,8 @@ const api = {
   recusarOrcamento,
   converterOrcamentoPedido,
   deleteOrcamento,
+  configurarPortalCliente,
+  togglePortalCliente,
 
   getPedidos,
   getPedido,

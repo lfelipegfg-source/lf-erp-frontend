@@ -82,6 +82,10 @@ const ClientesModule = {
         this.edit(btn.dataset.id);
       }
 
+      if (btn.dataset.action === 'portal-cliente') {
+        await this.configurarPortal(btn.dataset.id, btn.dataset.nome);
+      }
+
       if (btn.dataset.action === 'delete-cliente') {
         await this.delete(btn.dataset.id);
       }
@@ -273,6 +277,9 @@ const ClientesModule = {
           <div class="table-actions">
             <button class="btn-inline" data-action="edit-cliente" data-id="${cliente.id}">
               Editar
+            </button>
+            <button class="btn-inline ${cliente.portal_ativo ? 'btn-inline--active' : ''}" data-action="portal-cliente" data-id="${cliente.id}" data-nome="${escapeHtml(cliente.nome || '')}">
+              <i class="fa-solid fa-globe"></i> Portal
             </button>
             <button class="btn-inline btn-inline--danger" data-action="delete-cliente" data-id="${cliente.id}">
               Excluir
@@ -467,6 +474,59 @@ const ClientesModule = {
     }
 
     return message || 'Não foi possível concluir a operação.';
+  },
+
+  async configurarPortal(clienteId, clienteNome) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = `
+      <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+        <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">Portal do Cliente</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">${clienteNome} — defina uma senha de acesso ao portal. Mínimo 4 caracteres.</p>
+        <div style="margin-bottom:12px">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase">Nova senha</label>
+          <input type="password" id="_portalSenha" placeholder="Mínimo 4 caracteres" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box" />
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">
+          O cliente acessa em: <strong>/portal.html</strong> com seu CPF/CNPJ + esta senha.
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button id="_portalCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+          <button id="_portalSalvar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar senha</button>
+        </div>
+        <div id="_portalFeedback" style="margin-top:10px;font-size:13px;display:none"></div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#_portalCancelar').onclick = () => document.body.removeChild(overlay);
+    overlay.querySelector('#_portalSalvar').onclick = async () => {
+      const senha = overlay.querySelector('#_portalSenha').value;
+      const feedback = overlay.querySelector('#_portalFeedback');
+      const saveBtn = overlay.querySelector('#_portalSalvar');
+
+      if (!senha || senha.length < 4) {
+        feedback.style.cssText = 'margin-top:10px;font-size:13px;display:block;color:var(--danger)';
+        feedback.textContent = 'A senha deve ter ao menos 4 caracteres.';
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Salvando...';
+
+      try {
+        await api.configurarPortalCliente(Number(clienteId), senha);
+        feedback.style.cssText = 'margin-top:10px;font-size:13px;display:block;color:var(--success)';
+        feedback.textContent = 'Senha configurada! Portal ativado para o cliente.';
+        saveBtn.textContent = 'Salvo ✓';
+        setTimeout(() => { document.body.removeChild(overlay); this.load(); }, 1500);
+      } catch (err) {
+        feedback.style.cssText = 'margin-top:10px;font-size:13px;display:block;color:var(--danger)';
+        feedback.textContent = err.message || 'Erro ao configurar portal.';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Salvar senha';
+      }
+    };
   }
 };
 

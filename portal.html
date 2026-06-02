@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal do Cliente — LF ERP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6366f1;
+      --primary-soft: #eef2ff;
+      --success: #22c55e;
+      --success-soft: #f0fdf4;
+      --danger: #ef4444;
+      --danger-soft: #fef2f2;
+      --warning: #f59e0b;
+      --warning-soft: #fffbeb;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--surface-2);
+      color: var(--text);
+      min-height: 100dvh;
+    }
+
+    /* ── LOGIN ───────────────────────────────────────────────────── */
+    #loginScreen {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+    }
+
+    .login-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    }
+
+    .login-card__logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .login-card__logo h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .login-card__logo p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-field { margin-bottom: 16px; }
+    .form-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+    .form-field input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; transition: border-color .15s; }
+    .form-field input:focus { border-color: var(--primary); }
+
+    .btn-login { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .15s; margin-top: 4px; }
+    .btn-login:hover { opacity: .9; }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+
+    .login-error { margin-top: 12px; padding: 10px 14px; background: var(--danger-soft); color: var(--danger); border-radius: 10px; font-size: 13px; display: none; }
+
+    /* ── APP ─────────────────────────────────────────────────────── */
+    #appScreen { display: none; }
+
+    .portal-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .portal-header__info h2 { font-size: 1rem; font-weight: 800; }
+    .portal-header__info p  { font-size: 0.8rem; opacity: .8; margin-top: 2px; }
+
+    .portal-header__logout { background: rgba(255,255,255,.2); border: none; color: #fff; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+    .portal-tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .portal-tab  { flex: 1; min-width: 100px; padding: 14px 8px; border: none; background: none; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .15s, border-color .15s; }
+    .portal-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .portal-content { padding: 20px; max-width: 720px; margin: 0 auto; }
+
+    /* ── KPI GRID ────────────────────────────────────────────────── */
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .kpi-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .kpi-box__label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+    .kpi-box__value { font-size: 1.25rem; font-weight: 900; color: var(--text); }
+    .kpi-box--danger .kpi-box__value { color: var(--danger); }
+    .kpi-box--success .kpi-box__value { color: var(--success); }
+
+    /* ── TABELA ──────────────────────────────────────────────────── */
+    .portal-table-wrap { overflow-x: auto; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .badge-pago    { background: var(--success-soft); color: var(--success); }
+    .badge-aberto  { background: var(--warning-soft); color: var(--warning); }
+    .badge-atrasado { background: var(--danger-soft); color: var(--danger); }
+
+    .empty-msg { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px; }
+
+    .loading-spin { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--text-muted); gap: 10px; }
+
+    @media (max-width: 480px) {
+      .login-card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-card__logo">
+        <h1>LF ERP</h1>
+        <p>Portal do Cliente</p>
+      </div>
+      <div class="form-field">
+        <label>CPF / CNPJ</label>
+        <input type="text" id="loginDoc" placeholder="000.000.000-00" autocomplete="username" />
+      </div>
+      <div class="form-field">
+        <label>Senha</label>
+        <input type="password" id="loginSenha" placeholder="••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-login" id="loginBtn">Entrar</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appScreen">
+    <div class="portal-header">
+      <div class="portal-header__info">
+        <h2 id="portalClienteNome">Olá</h2>
+        <p id="portalEmpresaNome"></p>
+      </div>
+      <button class="portal-header__logout" id="logoutBtn">
+        <i class="fa-solid fa-right-from-bracket"></i> Sair
+      </button>
+    </div>
+
+    <div class="portal-tabs">
+      <button class="portal-tab active" data-tab="resumo"><i class="fa-solid fa-chart-pie"></i> Resumo</button>
+      <button class="portal-tab" data-tab="titulos"><i class="fa-solid fa-file-invoice-dollar"></i> Meus Títulos</button>
+      <button class="portal-tab" data-tab="compras"><i class="fa-solid fa-bag-shopping"></i> Compras</button>
+    </div>
+
+    <div class="portal-content" id="portalContent">
+      <div class="loading-spin"><i class="fa-solid fa-spinner fa-spin"></i> Carregando...</div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/portal.js"></script>
+</body>
+</html>
