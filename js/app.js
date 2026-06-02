@@ -15,6 +15,9 @@ import { initComprasModule } from './compras.js';
 import { initUsuariosModule } from './usuarios.js';
 import { initEstoqueModule } from './estoque.js';
 import { initConfigModule } from './configuracoes.js';
+import { initNfeModule } from './nfe.js';
+import { initOrcamentosModule } from './orcamentos.js';
+import { initPedidosModule } from './pedidos.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -63,6 +66,9 @@ const VIEW_CONFIG = {
   'fluxo-caixa': { title: 'Fluxo de Caixa', subtitle: 'Entradas, saídas e saldo consolidado' },
   lancamentos: { title: 'Lançamentos', subtitle: 'Receitas e despesas manuais' },
   relatorios: { title: 'Relatórios', subtitle: 'Relatórios gerenciais e operacionais' },
+  orcamentos: { title: 'Orçamentos', subtitle: 'Cotações emitidas — gerencie aprovações e converta em pedidos' },
+  pedidos: { title: 'Pedidos', subtitle: 'Pedidos em andamento — confirme, separe e converta em venda' },
+  nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
   configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
 };
 
@@ -477,6 +483,12 @@ async function loadCurrentView(view) {
     await loadFornecedoresReal();
   } else if (view === 'usuarios') {
     await loadUsuariosReal();
+  } else if (view === 'orcamentos') {
+    await loadOrcamentosReal();
+  } else if (view === 'pedidos') {
+    await loadPedidosReal();
+  } else if (view === 'nfe') {
+    await loadNfeReal();
   } else if (view === 'configuracoes') {
     await loadConfigReal();
   } else {
@@ -1102,6 +1114,49 @@ async function loadUsuariosReal() {
     console.error('Erro ao carregar usuários:', error);
     showToast('Falha ao carregar módulo de usuários.', 'error');
     renderModuleError('usuariosContainer', 'Usuários', 'Não foi possível carregar usuários.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadOrcamentosReal() {
+  showGlobalLoader('Carregando orçamentos...');
+  try {
+    await initOrcamentosModule();
+    showToast('Orçamentos carregados.', 'success');
+  } catch (error) {
+    console.error('Erro ao carregar orçamentos:', error);
+    showToast('Falha ao carregar orçamentos.', 'error');
+    renderModuleError('orcamentosContainer', 'Orçamentos', 'Não foi possível carregar orçamentos.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadPedidosReal() {
+  showGlobalLoader('Carregando pedidos...');
+  try {
+    await initPedidosModule();
+    showToast('Pedidos carregados.', 'success');
+  } catch (error) {
+    console.error('Erro ao carregar pedidos:', error);
+    showToast('Falha ao carregar pedidos.', 'error');
+    renderModuleError('pedidosContainer', 'Pedidos', 'Não foi possível carregar pedidos.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadNfeReal() {
+  showGlobalLoader('Carregando NF-e...');
+
+  try {
+    await initNfeModule();
+    showToast('Módulo NF-e carregado.', 'success');
+  } catch (error) {
+    console.error('Erro ao carregar NF-e:', error);
+    showToast('Falha ao carregar módulo NF-e.', 'error');
+    renderModuleError('nfeContainer', 'NF-e', 'Não foi possível carregar o módulo NF-e.');
   } finally {
     hideGlobalLoader();
   }

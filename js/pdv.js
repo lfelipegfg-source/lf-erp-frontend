@@ -18,7 +18,9 @@ const PDVModule = {
     desconto: 0,
     acrescimo: 0,
     observacao: '',
-    salvando: false
+    salvando: false,
+    gradeModalProduto: null,  // produto aguardando seleção de grade
+    gradesDisponiveis: []     // grades carregadas para o modal
   },
 
   init() {
@@ -98,6 +100,27 @@ const PDVModule = {
       this.state.primeiroVencimento = event.target.value || '';
     });
 
+    // ── Eventos do modal de grade ──────────────────────────────────────────
+    document.getElementById('pdvGradeModalClose')?.addEventListener('click', () => {
+      this.closeGradeSelector();
+    });
+
+    document.getElementById('pdvGradeModal')?.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('pdvGradeModal')) this.closeGradeSelector();
+    });
+
+    document.getElementById('pdvGradeGrid')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-pdv-grade-id]');
+      if (!btn) return;
+      const gradeId  = Number(btn.dataset.pdvGradeId);
+      const estoque  = Number(btn.dataset.estoque);
+      const preco    = Number(btn.dataset.preco) || null;
+      const atrib1   = btn.dataset.atrib1;
+      const atrib2   = btn.dataset.atrib2 || '';
+      if (estoque <= 0) { showToast('Variação sem estoque.', 'error'); return; }
+      this.selectGrade(gradeId, atrib1, atrib2, estoque, preco);
+    });
+
     this.el.atualizarBtn?.addEventListener('click', async (event) => {
       event.preventDefault();
       await this.load();
@@ -106,6 +129,11 @@ const PDVModule = {
     this.el.limparBtn?.addEventListener('click', (event) => {
       event.preventDefault();
       this.resetVenda();
+    });
+
+    document.getElementById('pdvSalvarOrcamentoBtn')?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      await this.salvarOrcamento();
     });
 
     this.el.finalizarBtn?.addEventListener('click', async (event) => {
@@ -348,6 +376,10 @@ const PDVModule = {
               </div>
 
               <div class="pdv-actions">
+                <button type="button" class="btn btn-light" id="pdvSalvarOrcamentoBtn">
+                  <i class="fa-solid fa-file-lines"></i>
+                  Salvar orçamento
+                </button>
                 <button type="button" class="btn btn-primary" id="pdvFinalizarBtn">
                   <i class="fa-solid fa-check"></i>
                   Finalizar venda
@@ -360,6 +392,30 @@ const PDVModule = {
     `;
 
     this.injectStyles();
+
+    // Modal de seleção de grade (injetado uma vez)
+    if (!document.getElementById('pdvGradeModal')) {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay hidden';
+      overlay.id = 'pdvGradeModal';
+      overlay.innerHTML = `
+        <div class="modal-card" style="max-width:520px">
+          <div class="modal-card__header">
+            <div>
+              <h3 id="pdvGradeModalTitle">Selecionar variação</h3>
+              <p id="pdvGradeModalSub">Escolha o tamanho/cor disponível.</p>
+            </div>
+            <button type="button" class="icon-button" id="pdvGradeModalClose">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div style="padding:20px 24px 24px">
+            <div class="grade-grid" id="pdvGradeGrid"></div>
+            <div class="section-empty hidden" id="pdvGradeEmpty">Nenhuma variação disponível.</div>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
   },
 
   injectStyles() {
@@ -554,6 +610,50 @@ const PDVModule = {
           grid-template-columns: 1fr;
         }
       }
+
+      /* ── Grade selector ───────────────────────────────── */
+      .grade-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+      }
+
+      .grade-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 12px 8px;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface-2);
+        cursor: pointer;
+        transition: border-color 0.15s, background 0.15s;
+        width: 100%;
+      }
+
+      .grade-btn:not(:disabled):hover {
+        border-color: var(--primary);
+        background: var(--surface-3, var(--surface));
+      }
+
+      .grade-btn--esgotado,
+      .grade-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .grade-btn__label {
+        font-weight: 800;
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+
+      .grade-btn__estoque {
+        font-size: 0.77rem;
+        color: var(--text-muted);
+      }
     `;
     document.head.appendChild(style);
   },
@@ -655,6 +755,7 @@ const PDVModule = {
             <td>
               <div class="table-primary">
                 <strong>${this.escapeHtml(item.produto_nome || 'Produto')}</strong>
+                ${item.grade_label ? `<small style="display:block;color:var(--text-muted);margin-top:2px">${this.escapeHtml(item.grade_label)}</small>` : ''}
               </div>
             </td>
 
@@ -730,6 +831,11 @@ const PDVModule = {
     this.state.clienteNome = cliente?.nome || '';
 
     this.updateClienteInfo();
+
+    // Recalcula preços do carrinho pela tabela de preços do cliente
+    if (this.state.carrinho.length) {
+      this.recalcularPrecosCarrinho();
+    }
   },
 
   updateClienteInfo() {
@@ -762,7 +868,7 @@ const PDVModule = {
     this.renderProdutos();
   },
 
-  addProduto(produtoId) {
+  async addProduto(produtoId) {
     const produto = this.state.produtos.find((item) => Number(item.id) === Number(produtoId));
     if (!produto) {
       this.showMessage('Produto não encontrado.', 'error');
@@ -775,26 +881,42 @@ const PDVModule = {
       return;
     }
 
+    // Produto com grade → abre modal de seleção de variação
+    if (produto.tem_grade) {
+      await this.openGradeSelector(produto);
+      return;
+    }
+
+    await this._addProdutoSemGrade(produto, estoqueDisponivel);
+  },
+
+  async _addProdutoSemGrade(produto, estoqueDisponivel) {
+    const precoResolvido = await this.resolverPrecoItem(produto.id, null, this.state.clienteId, 1);
+    const preco = precoResolvido ?? Number(produto.preco || 0);
+
     const existenteIndex = this.state.carrinho.findIndex(
-      (item) => Number(item.produto_id) === Number(produto.id)
+      (item) => Number(item.produto_id) === Number(produto.id) && !item.grade_id
     );
 
     if (existenteIndex >= 0) {
       const itemAtual = this.state.carrinho[existenteIndex];
-
       if (Number(itemAtual.quantidade || 0) + 1 > estoqueDisponivel) {
         this.showMessage(`Estoque insuficiente para "${produto.nome}".`, 'error');
         return;
       }
-
       this.state.carrinho[existenteIndex].quantidade += 1;
+      if (precoResolvido !== null) this.state.carrinho[existenteIndex].preco_unitario = preco;
     } else {
       this.state.carrinho.push({
         produto_id: Number(produto.id),
         produto_nome: produto.nome,
+        grade_id: null,
+        grade_label: '',
         quantidade: 1,
-        preco_unitario: Number(produto.preco || 0),
-        custo_unitario: Number(produto.custo || 0)
+        preco_unitario: preco,
+        preco_padrao: Number(produto.preco || 0),
+        custo_unitario: Number(produto.custo || 0),
+        estoque_disponivel: estoqueDisponivel
       });
     }
 
@@ -803,12 +925,175 @@ const PDVModule = {
     this.setFeedback('', 'info');
   },
 
+  // ── SELETOR DE GRADE ────────────────────────────────────────────────────────
+
+  async openGradeSelector(produto) {
+    this.state.gradeModalProduto = produto;
+    this.state.gradesDisponiveis = [];
+
+    const modal = document.getElementById('pdvGradeModal');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+
+    const grid = document.getElementById('pdvGradeGrid');
+    if (grid) grid.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">Carregando variações...</div>';
+
+    try {
+      const result = await api.getGradesProduto(produto.id);
+      this.state.gradesDisponiveis = result?.grades || (Array.isArray(result) ? result : []);
+    } catch {
+      this.state.gradesDisponiveis = [];
+    }
+
+    this.renderGradeGrid();
+  },
+
+  closeGradeSelector() {
+    this.state.gradeModalProduto = null;
+    this.state.gradesDisponiveis = [];
+    document.getElementById('pdvGradeModal')?.classList.add('hidden');
+  },
+
+  async selectGrade(gradeId, atrib1, atrib2, estoque, precoPadrao) {
+    const produto = this.state.gradeModalProduto;
+    if (!produto) return;
+
+    this.closeGradeSelector();
+
+    const gradeLabel = atrib2 ? `${atrib1} / ${atrib2}` : atrib1;
+    const precoBase = Number(precoPadrao) > 0 ? Number(precoPadrao) : Number(produto.preco || 0);
+    const precoResolvido = await this.resolverPrecoItem(produto.id, gradeId, this.state.clienteId, 1);
+    const preco = precoResolvido ?? precoBase;
+
+    const existenteIndex = this.state.carrinho.findIndex(
+      (item) => Number(item.produto_id) === Number(produto.id) && Number(item.grade_id) === Number(gradeId)
+    );
+
+    if (existenteIndex >= 0) {
+      const itemAtual = this.state.carrinho[existenteIndex];
+      if (Number(itemAtual.quantidade) + 1 > estoque) {
+        this.showMessage(`Estoque insuficiente para "${produto.nome} — ${gradeLabel}".`, 'error');
+        return;
+      }
+      this.state.carrinho[existenteIndex].quantidade += 1;
+      if (precoResolvido !== null) this.state.carrinho[existenteIndex].preco_unitario = preco;
+    } else {
+      this.state.carrinho.push({
+        produto_id: Number(produto.id),
+        produto_nome: produto.nome,
+        grade_id: Number(gradeId),
+        grade_label: gradeLabel,
+        quantidade: 1,
+        preco_unitario: preco,
+        preco_padrao: precoBase,
+        custo_unitario: Number(produto.custo || 0),
+        estoque_disponivel: estoque
+      });
+    }
+
+    this.renderCarrinho();
+    this.renderResumo();
+    this.setFeedback('', 'info');
+  },
+
+  renderGradeGrid() {
+    const grid  = document.getElementById('pdvGradeGrid');
+    const empty = document.getElementById('pdvGradeEmpty');
+    const title = document.getElementById('pdvGradeModalTitle');
+    const sub   = document.getElementById('pdvGradeModalSub');
+    if (!grid) return;
+
+    const produto = this.state.gradeModalProduto;
+    if (title) title.textContent = this.escapeHtml(produto?.nome || 'Selecionar variação');
+    if (sub)   sub.textContent   = 'Escolha o tamanho/cor disponível.';
+
+    const grades = this.state.gradesDisponiveis;
+
+    if (!grades.length) {
+      grid.innerHTML = '';
+      empty?.classList.remove('hidden');
+      return;
+    }
+
+    empty?.classList.add('hidden');
+
+    grid.innerHTML = grades.map((g) => {
+      const label      = g.atributo2 ? `${g.atributo1} / ${g.atributo2}` : g.atributo1;
+      const est        = Number(g.estoque || 0);
+      const semEstoque = est <= 0;
+      return `
+        <button
+          type="button"
+          class="grade-btn${semEstoque ? ' grade-btn--esgotado' : ''}"
+          data-pdv-grade-id="${g.id}"
+          data-estoque="${est}"
+          data-preco="${Number(g.preco || 0)}"
+          data-atrib1="${this.escapeHtml(g.atributo1 || '')}"
+          data-atrib2="${this.escapeHtml(g.atributo2 || '')}"
+          ${semEstoque ? 'disabled' : ''}
+        >
+          <span class="grade-btn__label">${this.escapeHtml(label)}</span>
+          <span class="grade-btn__estoque">${semEstoque ? 'Esgotado' : `Est: ${est}`}</span>
+        </button>
+      `;
+    }).join('');
+  },
+
+  // ── TABELA DE PREÇOS ─────────────────────────────────────────────────────────
+
+  async resolverPrecoItem(produtoId, gradeId, clienteId, quantidade) {
+    if (!clienteId) return null;
+    try {
+      const result = await api.resolverPrecoTabela({
+        produtoId,
+        gradeId: gradeId || null,
+        clienteId,
+        quantidade: quantidade || 1
+      });
+      return result?.preco != null ? Number(result.preco) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  async recalcularPrecosCarrinho() {
+    if (!this.state.carrinho.length) return;
+
+    await Promise.all(
+      this.state.carrinho.map(async (item, i) => {
+        let preco = null;
+
+        if (this.state.clienteId) {
+          preco = await this.resolverPrecoItem(
+            item.produto_id,
+            item.grade_id || null,
+            this.state.clienteId,
+            item.quantidade
+          );
+        }
+
+        // Sem tabela ou sem cliente → preço padrão armazenado no item
+        if (preco === null) {
+          preco = item.preco_padrao ?? item.preco_unitario;
+        }
+
+        this.state.carrinho[i].preco_unitario = preco;
+      })
+    );
+
+    this.renderCarrinho();
+    this.renderResumo();
+  },
+
   updateQuantidade(index, delta) {
     const item = this.state.carrinho[index];
     if (!item) return;
 
     const produto = this.state.produtos.find((prod) => Number(prod.id) === Number(item.produto_id));
-    const estoqueDisponivel = Number(produto?.estoque || 0);
+    const estoqueDisponivel = item.estoque_disponivel != null
+      ? Number(item.estoque_disponivel)
+      : Number(produto?.estoque || 0);
     const novaQuantidade = Number(item.quantidade || 0) + Number(delta || 0);
 
     if (novaQuantidade <= 0) {
@@ -889,6 +1174,7 @@ const PDVModule = {
       cliente_nome: this.state.clienteNome || '',
       itens: this.state.carrinho.map((item) => ({
         produto_id: Number(item.produto_id),
+        grade_id: item.grade_id ? Number(item.grade_id) : null,
         quantidade: Number(item.quantidade),
         preco_unitario: Number(item.preco_unitario),
         custo_unitario: Number(item.custo_unitario)
@@ -943,6 +1229,7 @@ const PDVModule = {
   },
 
   resetVenda() {
+    this.closeGradeSelector();
     this.state.carrinho = [];
     this.state.clienteId = '';
     this.state.clienteNome = '';
@@ -974,12 +1261,51 @@ const PDVModule = {
     this.setFeedback('', 'info');
   },
 
+  async salvarOrcamento() {
+    if (!this.state.carrinho.length) {
+      this.showMessage('Adicione ao menos um produto ao carrinho.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('pdvSalvarOrcamentoBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
+
+    try {
+      const result = await api.createOrcamento({
+        cliente_id: this.state.clienteId ? Number(this.state.clienteId) : null,
+        cliente_nome: this.state.clienteNome || '',
+        itens: this.state.carrinho.map((item) => ({
+          produto_id: Number(item.produto_id),
+          produto_nome: item.produto_nome,
+          grade_id: item.grade_id ? Number(item.grade_id) : null,
+          quantidade: Number(item.quantidade),
+          preco_unitario: Number(item.preco_unitario)
+        })),
+        desconto: Number(this.state.desconto || 0),
+        acrescimo: Number(this.state.acrescimo || 0),
+        observacao: this.state.observacao || ''
+      });
+
+      const numero = result?.orcamento?.numero ?? result?.numero ?? '?';
+      const msg = `Orçamento #${numero} salvo com sucesso.`;
+      this.showMessage(msg, 'success');
+      showToast(msg, 'success');
+      this.resetVenda();
+    } catch (err) {
+      this.showMessage(err.message || 'Erro ao salvar orçamento.', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-lines"></i> Salvar orçamento'; }
+    }
+  },
+
   setLoading(value) {
     this.cache();
 
     if (this.el.finalizarBtn) this.el.finalizarBtn.disabled = value;
     if (this.el.limparBtn) this.el.limparBtn.disabled = value;
     if (this.el.atualizarBtn) this.el.atualizarBtn.disabled = value;
+    const orcBtn = document.getElementById('pdvSalvarOrcamentoBtn');
+    if (orcBtn) orcBtn.disabled = value;
   },
 
   setFeedback(message, type = 'info') {

@@ -360,6 +360,15 @@ async function getAtributos() {
   return request('/grades/atributos');
 }
 
+// ── TABELAS DE PREÇO ─────────────────────────────────────────────────────────
+
+async function resolverPrecoTabela({ produtoId, clienteId = null, gradeId = null, quantidade = 1 }) {
+  const q = { produto_id: produtoId, quantidade };
+  if (clienteId) q.cliente_id = clienteId;
+  if (gradeId) q.grade_id = gradeId;
+  return request('/tabelas-preco/resolver', { method: 'GET', query: q });
+}
+
 // ── KITS ─────────────────────────────────────────────────────────────────────
 
 async function getKitComponentes(produtoId) {
@@ -906,6 +915,121 @@ async function getRelatorioFinanceiroLucratividade(params = {}) {
   });
 }
 
+async function getRelatorioVendasPorGrade(params = {}) {
+  const empresa = ensureEmpresa();
+
+  return request(`/relatorios/vendas/por-grade/${empresa}`, {
+    method: 'GET',
+    query: { ...params }
+  });
+}
+
+// ── NF-e ─────────────────────────────────────────────────────────────────────
+
+async function getNfeConfig() {
+  return request('/nfe/config', { method: 'GET' });
+}
+
+async function salvarNfeConfig(payload) {
+  return request('/nfe/config', { method: 'PUT', body: payload });
+}
+
+async function emitirNfe(vendaId) {
+  return request(`/nfe/emitir/${vendaId}`, { method: 'POST', body: {} });
+}
+
+async function consultarNfe(ref) {
+  return request(`/nfe/consultar/${encodeURIComponent(ref)}`, { method: 'GET' });
+}
+
+async function cancelarNfe(nfeId, justificativa) {
+  return request(`/nfe/cancelar/${nfeId}`, { method: 'POST', body: { justificativa } });
+}
+
+async function getNfeLista(params = {}) {
+  return request('/nfe/lista', { method: 'GET', query: params });
+}
+
+async function downloadNfePdf(ref) {
+  const token = getAuthToken();
+  const url = buildUrl(`/nfe/pdf/${encodeURIComponent(ref)}`);
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error('DANFE não disponível');
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+async function downloadNfeXml(ref) {
+  const token = getAuthToken();
+  const url = buildUrl(`/nfe/xml/${encodeURIComponent(ref)}`);
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error('XML não disponível');
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
+// ── ORÇAMENTOS ───────────────────────────────────────────────────────────────
+
+async function getOrcamentos(params = {}) {
+  return request('/orcamentos', { method: 'GET', query: params });
+}
+
+async function getOrcamento(id) {
+  return request(`/orcamentos/${id}`, { method: 'GET' });
+}
+
+async function createOrcamento(payload) {
+  const empresa = getEmpresaNome();
+  const empresaId = getEmpresaId();
+  return request('/orcamentos', { method: 'POST', body: { ...payload, empresa, empresa_id: empresaId } });
+}
+
+async function enviarOrcamento(id) {
+  return request(`/orcamentos/${id}/enviar`, { method: 'POST', body: {} });
+}
+
+async function aprovarOrcamento(id) {
+  return request(`/orcamentos/${id}/aprovar`, { method: 'POST', body: {} });
+}
+
+async function recusarOrcamento(id) {
+  return request(`/orcamentos/${id}/recusar`, { method: 'POST', body: {} });
+}
+
+async function converterOrcamentoPedido(id, payload = {}) {
+  return request(`/orcamentos/${id}/converter`, { method: 'POST', body: payload });
+}
+
+async function deleteOrcamento(id) {
+  return request(`/orcamentos/${id}`, { method: 'DELETE' });
+}
+
+// ── PEDIDOS ──────────────────────────────────────────────────────────────────
+
+async function getPedidos(params = {}) {
+  return request('/pedidos', { method: 'GET', query: params });
+}
+
+async function getPedido(id) {
+  return request(`/pedidos/${id}`, { method: 'GET' });
+}
+
+async function confirmarPedido(id) {
+  return request(`/pedidos/${id}/confirmar`, { method: 'POST', body: {} });
+}
+
+async function separacaoPedido(id) {
+  return request(`/pedidos/${id}/separacao`, { method: 'POST', body: {} });
+}
+
+async function cancelarPedido(id) {
+  return request(`/pedidos/${id}/cancelar`, { method: 'POST', body: {} });
+}
+
+async function converterPedidoVenda(id, payload = {}) {
+  return request(`/pedidos/${id}/converter-venda`, { method: 'POST', body: payload });
+}
+
 function setApiBaseUrl(url) {
   if (!url || typeof url !== 'string') {
     throw new Error('Informe uma URL válida para a API.');
@@ -946,6 +1070,7 @@ const api = {
   deleteGrade,
   toggleGrade,
   getAtributos,
+  resolverPrecoTabela,
 
   getKitComponentes,
   addKitComponente,
@@ -1016,6 +1141,32 @@ const api = {
   getRelatorioFinanceiroContasPagar,
   getRelatorioFinanceiroFluxoCaixa,
   getRelatorioFinanceiroLucratividade,
+  getRelatorioVendasPorGrade,
+
+  getNfeConfig,
+  salvarNfeConfig,
+  emitirNfe,
+  consultarNfe,
+  cancelarNfe,
+  getNfeLista,
+  downloadNfePdf,
+  downloadNfeXml,
+
+  getOrcamentos,
+  getOrcamento,
+  createOrcamento,
+  enviarOrcamento,
+  aprovarOrcamento,
+  recusarOrcamento,
+  converterOrcamentoPedido,
+  deleteOrcamento,
+
+  getPedidos,
+  getPedido,
+  confirmarPedido,
+  separacaoPedido,
+  cancelarPedido,
+  converterPedidoVenda,
 
   getAuthToken,
   getEmpresaId,

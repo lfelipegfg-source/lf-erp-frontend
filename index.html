@@ -287,6 +287,21 @@
               <span class="nav-item__label">Relatórios</span>
             </button>
 
+            <button class="nav-item" data-view="orcamentos">
+              <span class="nav-item__icon"><i class="fa-solid fa-file-lines"></i></span>
+              <span class="nav-item__label">Orçamentos</span>
+            </button>
+
+            <button class="nav-item" data-view="pedidos">
+              <span class="nav-item__icon"><i class="fa-solid fa-cart-shopping"></i></span>
+              <span class="nav-item__label">Pedidos</span>
+            </button>
+
+            <button class="nav-item" data-view="nfe">
+              <span class="nav-item__icon"><i class="fa-solid fa-file-invoice"></i></span>
+              <span class="nav-item__label">NF-e</span>
+            </button>
+
             <button class="nav-item" data-view="configuracoes">
               <span class="nav-item__icon"><i class="fa-solid fa-gear"></i></span>
               <span class="nav-item__label">Configurações</span>
@@ -858,6 +873,45 @@
               </div>
               <div id="relatoriosContainer" class="module-placeholder">
                 Estrutura do módulo de relatórios será carregada posteriormente.
+              </div>
+            </section>
+
+            <!-- ORÇAMENTOS -->
+            <section class="view-section" data-view="orcamentos">
+              <div class="section-header">
+                <div>
+                  <h2>Orçamentos</h2>
+                  <p>Cotações emitidas — gerencie aprovações e converta em pedidos</p>
+                </div>
+              </div>
+              <div id="orcamentosContainer" class="module-placeholder">
+                Módulo de orçamentos será carregado pelo arquivo orcamentos.js
+              </div>
+            </section>
+
+            <!-- PEDIDOS -->
+            <section class="view-section" data-view="pedidos">
+              <div class="section-header">
+                <div>
+                  <h2>Pedidos</h2>
+                  <p>Pedidos em andamento — confirme, separe e converta em venda</p>
+                </div>
+              </div>
+              <div id="pedidosContainer" class="module-placeholder">
+                Módulo de pedidos será carregado pelo arquivo pedidos.js
+              </div>
+            </section>
+
+            <!-- NF-e -->
+            <section class="view-section" data-view="nfe">
+              <div class="section-header">
+                <div>
+                  <h2>NF-e</h2>
+                  <p>Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas</p>
+                </div>
+              </div>
+              <div id="nfeContainer" class="module-placeholder">
+                Módulo NF-e será carregado pelo arquivo nfe.js
               </div>
             </section>
 

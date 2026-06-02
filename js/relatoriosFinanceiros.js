@@ -6,6 +6,7 @@ const state = {
   pagar: [],
   fluxo: [],
   lucratividade: [],
+  grade: [],
   aba: 'resumo'
 };
 
@@ -23,13 +24,14 @@ export async function initRelatoriosFinanceirosModule() {
 async function carregarDados() {
   const filtros = getFiltrosGlobais();
 
-  const [resumoResult, receberResult, pagarResult, fluxoResult, lucratividadeResult] =
+  const [resumoResult, receberResult, pagarResult, fluxoResult, lucratividadeResult, gradeResult] =
     await Promise.allSettled([
       api.getRelatorioFinanceiroResumo(filtros),
       api.getRelatorioFinanceiroContasReceber(filtros),
       api.getRelatorioFinanceiroContasPagar(filtros),
       api.getRelatorioFinanceiroFluxoCaixa(filtros),
-      api.getRelatorioFinanceiroLucratividade(filtros)
+      api.getRelatorioFinanceiroLucratividade(filtros),
+      api.getRelatorioVendasPorGrade(filtros)
     ]);
 
   state.resumo = resumoResult.status === 'fulfilled' ? resumoResult.value : null;
@@ -53,6 +55,11 @@ async function carregarDados() {
   state.lucratividade =
     lucratividadeResult.status === 'fulfilled' && Array.isArray(lucratividadeResult.value)
       ? lucratividadeResult.value
+      : [];
+
+  state.grade =
+    gradeResult.status === 'fulfilled' && Array.isArray(gradeResult.value)
+      ? gradeResult.value
       : [];
 }
 
@@ -116,6 +123,10 @@ function render() {
             <span>Lucratividade</span>
             <strong>${state.lucratividade.length}</strong>
           </div>
+          <div class="mini-stat">
+            <span>Variações vendidas</span>
+            <strong>${state.grade.length}</strong>
+          </div>
         </div>
       </div>
 
@@ -136,6 +147,9 @@ function render() {
           <button class="btn-inline ${state.aba === 'lucratividade' ? 'btn-inline--active' : ''}" data-aba="lucratividade">
             Lucratividade
           </button>
+          <button class="btn-inline ${state.aba === 'grade' ? 'btn-inline--active' : ''}" data-aba="grade">
+            Por Variação
+          </button>
         </div>
       </div>
 
@@ -151,7 +165,96 @@ function renderConteudoAba() {
   if (state.aba === 'receber') return renderTabelaReceber();
   if (state.aba === 'pagar') return renderTabelaPagar();
   if (state.aba === 'fluxo') return renderTabelaFluxo();
+  if (state.aba === 'grade') return renderTabelaGrade();
   return renderTabelaLucratividade();
+}
+
+function renderTabelaGrade() {
+  if (!state.grade.length) {
+    return `<div class="module-feedback module-feedback--info">Nenhuma venda por variação encontrada no período.<br><small>Apenas produtos com grade (tamanho/cor) aparecem aqui.</small></div>`;
+  }
+
+  const totalFat  = state.grade.reduce((s, r) => s + r.faturamento_total, 0);
+  const totalLucro = state.grade.reduce((s, r) => s + r.lucro_total, 0);
+  const totalQtd  = state.grade.reduce((s, r) => s + r.quantidade_vendida, 0);
+
+  return `
+    <div class="kpi-grid" style="margin-top:8px;margin-bottom:16px">
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="kpi-card__content">
+          <span>Variações vendidas</span>
+          <strong>${state.grade.length}</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+        <div class="kpi-card__content">
+          <span>Unidades vendidas</span>
+          <strong>${totalQtd}</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="kpi-card__content">
+          <span>Faturamento</span>
+          <strong>${formatCurrency(totalFat)}</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-coins"></i></div>
+        <div class="kpi-card__content">
+          <span>Lucro total</span>
+          <strong>${formatCurrency(totalLucro)}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Variação</th>
+            <th>Qtd. vendida</th>
+            <th>Faturamento</th>
+            <th>Custo total</th>
+            <th>Lucro total</th>
+            <th>Estoque atual</th>
+            <th>Última venda</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${state.grade.map((item) => {
+            const margem = item.faturamento_total > 0
+              ? ((item.lucro_total / item.faturamento_total) * 100).toFixed(1)
+              : '0.0';
+            return `
+              <tr>
+                <td><strong>${escapeHtml(item.produto_nome || '-')}</strong></td>
+                <td>
+                  <span class="badge badge--info" style="font-size:12px">${escapeHtml(item.variacao)}</span>
+                </td>
+                <td>${item.quantidade_vendida}</td>
+                <td>${formatCurrency(item.faturamento_total)}</td>
+                <td>${formatCurrency(item.custo_total)}</td>
+                <td class="${item.lucro_total >= 0 ? 'text-success' : 'text-danger'}">
+                  <strong>${formatCurrency(item.lucro_total)}</strong>
+                  <div class="table-muted">${margem}% margem</div>
+                </td>
+                <td>
+                  <span class="${item.estoque_atual <= 0 ? 'badge badge--danger' : item.estoque_atual <= 3 ? 'badge badge--warning' : ''}">
+                    ${item.estoque_atual}
+                  </span>
+                </td>
+                <td>${formatDate(item.ultima_venda)}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 function renderResumo() {
