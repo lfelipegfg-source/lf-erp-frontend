@@ -19,6 +19,7 @@ import { initNfeModule } from './nfe.js';
 import { initOrcamentosModule } from './orcamentos.js';
 import { initPedidosModule } from './pedidos.js';
 import { initComissoesModule } from './comissoes.js';
+import { initCaixaModule } from './caixa.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -70,6 +71,7 @@ const VIEW_CONFIG = {
   orcamentos: { title: 'Orçamentos', subtitle: 'Cotações emitidas — gerencie aprovações e converta em pedidos' },
   pedidos: { title: 'Pedidos', subtitle: 'Pedidos em andamento — confirme, separe e converta em venda' },
   comissoes: { title: 'Comissões', subtitle: 'Comissões de vendedores por venda realizada' },
+  caixa: { title: 'Caixa', subtitle: 'Abertura, movimentações e fechamento do caixa físico' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
   configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
 };
@@ -485,6 +487,8 @@ async function loadCurrentView(view) {
     await loadFornecedoresReal();
   } else if (view === 'usuarios') {
     await loadUsuariosReal();
+  } else if (view === 'caixa') {
+    await loadCaixaReal();
   } else if (view === 'comissoes') {
     await loadComissoesReal();
   } else if (view === 'orcamentos') {
@@ -1118,6 +1122,20 @@ async function loadUsuariosReal() {
     console.error('Erro ao carregar usuários:', error);
     showToast('Falha ao carregar módulo de usuários.', 'error');
     renderModuleError('usuariosContainer', 'Usuários', 'Não foi possível carregar usuários.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadCaixaReal() {
+  showGlobalLoader('Carregando caixa...');
+  try {
+    await initCaixaModule();
+    showToast('Caixa carregado.', 'success');
+  } catch (error) {
+    console.error('Erro ao carregar caixa:', error);
+    showToast('Falha ao carregar caixa.', 'error');
+    renderModuleError('caixaContainer', 'Caixa', 'Não foi possível carregar o caixa.');
   } finally {
     hideGlobalLoader();
   }

@@ -1092,6 +1092,32 @@ async function cancelarComissao(id) {
   return request(`/comissoes/${id}/cancelar`, { method: 'POST', body: {} });
 }
 
+// ── CAIXA ─────────────────────────────────────────────────────────────────────
+
+async function getCaixaSessaoAtiva() {
+  return request('/caixa/sessao-ativa', { method: 'GET' });
+}
+
+async function abrirCaixa(payload) {
+  return request('/caixa/abrir', { method: 'POST', body: payload });
+}
+
+async function sangriaCaixa(payload) {
+  return request('/caixa/sangria', { method: 'POST', body: payload });
+}
+
+async function suprimentoCaixa(payload) {
+  return request('/caixa/suprimento', { method: 'POST', body: payload });
+}
+
+async function fecharCaixa(payload) {
+  return request('/caixa/fechar', { method: 'POST', body: payload });
+}
+
+async function getCaixaHistorico() {
+  return request('/caixa/historico', { method: 'GET' });
+}
+
 function setApiBaseUrl(url) {
   if (!url || typeof url !== 'string') {
     throw new Error('Informe uma URL válida para a API.');
@@ -1242,6 +1268,13 @@ const api = {
   getComissoesResumo,
   pagarComissao,
   cancelarComissao,
+
+  getCaixaSessaoAtiva,
+  abrirCaixa,
+  sangriaCaixa,
+  suprimentoCaixa,
+  fecharCaixa,
+  getCaixaHistorico,
 
   getAuthToken,
   getEmpresaId,
