@@ -140,8 +140,9 @@ const ProdutosModule = {
       if (action === 'produtoCancelBtn' || action === 'produtoModalCloseBtn') {
         this.closeModal(); return;
       }
-      if (t.dataset.action === 'edit')   { this.openEditModal(Number(t.dataset.id)); return; }
-      if (t.dataset.action === 'delete') { await this.handleDelete(Number(t.dataset.id)); return; }
+      if (t.dataset.action === 'etiqueta') { this.abrirEtiqueta(Number(t.dataset.id)); return; }
+      if (t.dataset.action === 'edit')    { this.openEditModal(Number(t.dataset.id)); return; }
+      if (t.dataset.action === 'delete')  { await this.handleDelete(Number(t.dataset.id)); return; }
 
       // ── tabs
       if (t.dataset.tab) { this.switchTab(t.dataset.tab); return; }
@@ -249,6 +250,9 @@ const ProdutosModule = {
           <td><span class="${statusClass}">${alerta ? 'Alerta' : 'Ok'}</span></td>
           <td class="text-right">
             <div class="table-actions">
+              <button type="button" class="btn-inline" data-action="etiqueta" data-id="${item.id}">
+                <i class="fa-solid fa-tag"></i> Etiqueta
+              </button>
               <button type="button" class="btn-inline" data-action="edit" data-id="${item.id}">Editar</button>
               <button type="button" class="btn-inline btn-inline--danger" data-action="delete" data-id="${item.id}">Excluir</button>
             </div>
@@ -1004,6 +1008,53 @@ const ProdutosModule = {
     this.cacheElements();
     if (this.el.toolbarRefresh) this.el.toolbarRefresh.disabled = value;
     if (this.el.toolbarNew) this.el.toolbarNew.disabled = value;
+  },
+
+  abrirEtiqueta(produtoId) {
+    const item = this.state.items.find((p) => Number(p.id) === produtoId);
+    if (!item) return;
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = `
+      <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+        <h3 style="margin:0 0 6px;font-size:16px;font-weight:700"><i class="fa-solid fa-tag"></i> Imprimir Etiqueta</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">${String(item.nome).substring(0, 50)}</p>
+        <div style="display:grid;gap:12px;margin-bottom:16px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase">Quantidade de etiquetas</label>
+            <input type="number" id="_etiqQtd" value="1" min="1" max="100"
+              style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button id="_etiqCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+          <button id="_etiqAbrir" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">
+            <i class="fa-solid fa-print"></i> Abrir para impressão
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#_etiqCancelar').onclick = () => document.body.removeChild(overlay);
+    overlay.querySelector('#_etiqAbrir').onclick = () => {
+      const qtd = Math.max(1, Number(overlay.querySelector('#_etiqQtd').value) || 1);
+      document.body.removeChild(overlay);
+
+      const dados = [{
+        nome:          item.nome || '',
+        preco:         Number(item.preco || 0),
+        codigo_barras: item.codigo_barras || '',
+        categoria:     item.categoria || '',
+        empresa_nome:  this.state.empresa || 'LF ERP',
+        variacao:      '',
+        quantidade:    qtd
+      }];
+
+      localStorage.setItem('lf_erp_etiquetas', JSON.stringify(dados));
+      window.open('./etiquetas.html', '_blank');
+    };
   },
 
   showModuleMessage(message, type = 'info') {
