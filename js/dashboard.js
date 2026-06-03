@@ -74,7 +74,9 @@ function normalizeDashboardPayload(data = {}) {
 
     classeA: Number(data.classe_a ?? 0),
     classeB: Number(data.classe_b ?? 0),
-    classeC: Number(data.classe_c ?? 0)
+    classeC: Number(data.classe_c ?? 0),
+
+    comparativo: data.comparativo || null
   };
 }
 
@@ -109,6 +111,23 @@ function setHtml(id, value) {
   if (el) el.innerHTML = value;
 }
 
+function renderTrend(atual, anterior) {
+  if (anterior === null || anterior === undefined) return '';
+  if (anterior === 0) return atual > 0 ? '<span class="kpi-trend kpi-trend--new">Novo</span>' : '';
+  const pct = ((atual - anterior) / anterior) * 100;
+  const up = pct >= 0;
+  const sinal = up ? '+' : '';
+  return `<span class="kpi-trend ${up ? 'kpi-trend--up' : 'kpi-trend--down'}">
+    <i class="fa-solid fa-arrow-${up ? 'trend-up' : 'trend-down'}"></i>
+    ${sinal}${Math.abs(pct).toFixed(1)}% vs período anterior
+  </span>`;
+}
+
+function setTrend(id, atual, anterior) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = renderTrend(atual, anterior);
+}
+
 function renderKpis(payload, financeiro, filters = {}) {
   setText('kpiFaturamento', toCurrency(financeiro.fluxoEntradas || payload.faturamento));
   setText('kpiVendas', String(payload.vendas));
@@ -141,6 +160,14 @@ function renderKpis(payload, financeiro, filters = {}) {
   );
   setText('kpiEstoqueInfo', `${payload.totalProdutos} produto(s) cadastrados`);
   setText('kpiClientesInfo', `${payload.clientes} cliente(s) na base`);
+
+  // Trends vs período anterior
+  if (payload.comparativo) {
+    const c = payload.comparativo;
+    setTrend('kpiFaturamentoTrend', financeiro.fluxoEntradas || payload.faturamento, c.faturamento);
+    setTrend('kpiVendasTrend',      payload.vendas,   c.vendas);
+    setTrend('kpiClientesTrend',    payload.clientes, c.clientes);
+  }
 }
 
 function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = null) {

@@ -3323,6 +3323,37 @@ select {
 }
 
 /* =========================
+   KPI TREND (comparativo)
+========================= */
+
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.kpi-trend--up {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.kpi-trend--down {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.kpi-trend--new {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* =========================
    LANÇAMENTOS FINANCEIROS
 ========================= */
 
