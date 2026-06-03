@@ -937,6 +937,15 @@ async function getRelatorioDRE(params = {}) {
   });
 }
 
+async function getRelatorioInadimplencia(params = {}) {
+  const empresa = ensureEmpresa();
+
+  return request(`/relatorios/inadimplencia/${empresa}`, {
+    method: 'GET',
+    query: { ...params }
+  });
+}
+
 // ── NF-e ─────────────────────────────────────────────────────────────────────
 
 async function getNfeConfig() {
@@ -1197,6 +1206,7 @@ const api = {
   getRelatorioFinanceiroLucratividade,
   getRelatorioVendasPorGrade,
   getRelatorioDRE,
+  getRelatorioInadimplencia,
 
   getNfeConfig,
   salvarNfeConfig,

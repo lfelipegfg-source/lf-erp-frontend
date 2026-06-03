@@ -9,6 +9,7 @@ const state = {
   lucratividade: [],
   grade: [],
   dre: null,
+  inadimplencia: null,
   aba: 'resumo'
 };
 
@@ -26,7 +27,7 @@ export async function initRelatoriosFinanceirosModule() {
 async function carregarDados() {
   const filtros = getFiltrosGlobais();
 
-  const [resumoResult, receberResult, pagarResult, fluxoResult, lucratividadeResult, gradeResult, dreResult] =
+  const [resumoResult, receberResult, pagarResult, fluxoResult, lucratividadeResult, gradeResult, dreResult, inadResult] =
     await Promise.allSettled([
       api.getRelatorioFinanceiroResumo(filtros),
       api.getRelatorioFinanceiroContasReceber(filtros),
@@ -34,7 +35,8 @@ async function carregarDados() {
       api.getRelatorioFinanceiroFluxoCaixa(filtros),
       api.getRelatorioFinanceiroLucratividade(filtros),
       api.getRelatorioVendasPorGrade(filtros),
-      api.getRelatorioDRE(filtros)
+      api.getRelatorioDRE(filtros),
+      api.getRelatorioInadimplencia(filtros)
     ]);
 
   state.resumo = resumoResult.status === 'fulfilled' ? resumoResult.value : null;
@@ -65,7 +67,8 @@ async function carregarDados() {
       ? gradeResult.value
       : [];
 
-  state.dre = dreResult.status === 'fulfilled' ? dreResult.value : null;
+  state.dre          = dreResult.status  === 'fulfilled' ? dreResult.value  : null;
+  state.inadimplencia = inadResult.status === 'fulfilled' ? inadResult.value : null;
 }
 
 function getFiltrosGlobais() {
@@ -161,6 +164,9 @@ function render() {
           <button class="btn-inline ${state.aba === 'dre' ? 'btn-inline--active' : ''}" data-aba="dre">
             DRE
           </button>
+          <button class="btn-inline ${state.aba === 'inadimplencia' ? 'btn-inline--active' : ''}" data-aba="inadimplencia">
+            Inadimplência
+          </button>
         </div>
       </div>
 
@@ -178,7 +184,116 @@ function renderConteudoAba() {
   if (state.aba === 'fluxo') return renderTabelaFluxo();
   if (state.aba === 'grade') return renderTabelaGrade();
   if (state.aba === 'dre') return renderDRE();
+  if (state.aba === 'inadimplencia') return renderInadimplencia();
   return renderTabelaLucratividade();
+}
+
+function renderInadimplencia() {
+  const d = state.inadimplencia;
+
+  if (!d || !d.total_clientes) {
+    return `<div class="module-feedback module-feedback--success">
+      <i class="fa-solid fa-circle-check"></i> Nenhum título em atraso encontrado. Carteira em dia!
+    </div>`;
+  }
+
+  const ag = d.aging || {};
+  const totAging = (ag.faixa_1_30 || 0) + (ag.faixa_31_60 || 0) + (ag.faixa_61_90 || 0) + (ag.faixa_90plus || 0);
+
+  function agingBar(valor, cor) {
+    const pct = totAging > 0 ? Math.max(4, (valor / totAging) * 100) : 0;
+    return `<div style="background:${cor};height:10px;border-radius:6px;width:${pct.toFixed(1)}%;min-width:4px"></div>`;
+  }
+
+  const linhas = d.clientes.map((c) => {
+    const gravidade = c.max_dias_atraso > 90 ? 'badge--danger'
+                    : c.max_dias_atraso > 60 ? 'badge--danger'
+                    : c.max_dias_atraso > 30 ? 'badge--warning'
+                    : 'badge--warning';
+    return `
+      <tr>
+        <td><strong>${escapeHtml(c.cliente_nome)}</strong></td>
+        <td>${c.total_titulos}</td>
+        <td class="text-right"><strong>${formatCurrency(c.valor_total)}</strong></td>
+        <td>
+          <span class="badge ${gravidade}">${c.max_dias_atraso}d</span>
+        </td>
+        <td class="text-right">${c.faixa_1_30  > 0 ? formatCurrency(c.faixa_1_30)  : '—'}</td>
+        <td class="text-right">${c.faixa_31_60 > 0 ? formatCurrency(c.faixa_31_60) : '—'}</td>
+        <td class="text-right">${c.faixa_61_90 > 0 ? formatCurrency(c.faixa_61_90) : '—'}</td>
+        <td class="text-right ${c.faixa_90plus > 0 ? 'text-danger' : ''}">${c.faixa_90plus > 0 ? formatCurrency(c.faixa_90plus) : '—'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <div class="kpi-grid" style="margin-top:8px;margin-bottom:20px">
+      <div class="kpi-card">
+        <div class="kpi-card__icon" style="color:var(--danger)"><i class="fa-solid fa-user-xmark"></i></div>
+        <div class="kpi-card__content">
+          <span>Inadimplentes</span>
+          <strong style="color:var(--danger)">${d.total_clientes}</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon" style="color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="kpi-card__content">
+          <span>Valor em atraso</span>
+          <strong style="color:var(--danger)">${formatCurrency(d.total_valor)}</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+        <div class="kpi-card__content">
+          <span>Títulos em atraso</span>
+          <strong>${d.total_titulos}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card__header">
+        <div><h3>Aging — Concentração do atraso</h3><p>Distribuição do valor por faixa de dias em atraso</p></div>
+      </div>
+      <div class="panel-card__body">
+        <div style="display:grid;gap:10px">
+          ${[
+            { label: '1 a 30 dias',   valor: ag.faixa_1_30,  cor: '#f59e0b' },
+            { label: '31 a 60 dias',  valor: ag.faixa_31_60, cor: '#f97316' },
+            { label: '61 a 90 dias',  valor: ag.faixa_61_90, cor: '#ef4444' },
+            { label: 'Acima de 90',   valor: ag.faixa_90plus, cor: '#b91c1c' }
+          ].map(({ label, valor, cor }) => `
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:120px;font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap">${label}</div>
+              <div style="flex:1;display:flex;align-items:center;gap:8px">
+                ${agingBar(valor, cor)}
+              </div>
+              <div style="min-width:100px;text-align:right;font-size:13px;font-weight:700">${formatCurrency(valor)}</div>
+              <div style="min-width:48px;text-align:right;font-size:11px;color:var(--text-muted)">${totAging > 0 ? ((valor / totAging) * 100).toFixed(1) + '%' : '—'}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Títulos</th>
+            <th class="text-right">Total em atraso</th>
+            <th>Maior atraso</th>
+            <th class="text-right">1-30d</th>
+            <th class="text-right">31-60d</th>
+            <th class="text-right">61-90d</th>
+            <th class="text-right">90d+</th>
+          </tr>
+        </thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>
+  `;
 }
 
 function renderDRE() {
