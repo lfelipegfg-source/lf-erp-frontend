@@ -3323,6 +3323,41 @@ select {
 }
 
 /* =========================
+   LANÇAMENTOS FINANCEIROS
+========================= */
+
+.lf-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.lf-stat--receita  { border-top: 3px solid var(--success); }
+.lf-stat--despesa  { border-top: 3px solid var(--danger);  }
+.lf-stat--saldo    { border-top: 3px solid var(--primary); }
+.lf-stat--positivo strong { color: var(--success); }
+.lf-stat--negativo strong { color: var(--danger);  }
+
+.lf-toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+  .lf-stats-grid { grid-template-columns: 1fr 1fr; }
+  .lf-toolbar    { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .lf-stats-grid { grid-template-columns: 1fr; }
+  .lf-toolbar    { grid-template-columns: 1fr; }
+}
+
+/* =========================
    DASHBOARD — GRÁFICOS
 ========================= */
 

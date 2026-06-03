@@ -286,8 +286,13 @@
                   <span>Contas a Pagar</span>
                 </button>
                 <button class="nav-subitem" data-view="fluxo-caixa">
-                  <i class="fa-solid fa-cash-register"></i>
+                  <i class="fa-solid fa-arrow-trend-up"></i>
                   <span>Fluxo de Caixa</span>
+                </button>
+
+                <button class="nav-subitem" data-view="lancamentos">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  <span>Lançamentos</span>
                 </button>
               </div>
             </div>
@@ -930,6 +935,19 @@
               </div>
               <div id="fluxoCaixaContainer" class="module-placeholder">
                 Estrutura financeira será carregada pelo arquivo financeiro.js
+              </div>
+            </section>
+
+            <!-- LANÇAMENTOS FINANCEIROS -->
+            <section class="view-section" data-view="lancamentos">
+              <div class="section-header">
+                <div>
+                  <h2>Lançamentos Financeiros</h2>
+                  <p>Receitas e despesas manuais</p>
+                </div>
+              </div>
+              <div id="lancamentosContainer" class="module-placeholder">
+                Carregando lançamentos...
               </div>
             </section>
 
