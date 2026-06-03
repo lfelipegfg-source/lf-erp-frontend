@@ -1136,6 +1136,24 @@ async function getVendaDetalheParaDevolucao(vendaId) {
   return request(`/vendas/detalhe/${vendaId}`, { method: 'GET' });
 }
 
+// ── ALERTAS DE COBRANÇA ───────────────────────────────────────────────────────
+
+async function getAlertasConfig() {
+  return request('/alertas/config', { method: 'GET' });
+}
+
+async function salvarAlertasConfig(payload) {
+  return request('/alertas/config', { method: 'PUT', body: payload });
+}
+
+async function dispararAlertas(payload = {}) {
+  return request('/alertas/disparar', { method: 'POST', body: payload });
+}
+
+async function getAlertasHistorico() {
+  return request('/alertas/historico', { method: 'GET' });
+}
+
 function setApiBaseUrl(url) {
   if (!url || typeof url !== 'string') {
     throw new Error('Informe uma URL válida para a API.');
@@ -1298,6 +1316,11 @@ const api = {
   registrarDevolucao,
   getDevolucoesDaVenda,
   getVendaDetalheParaDevolucao,
+
+  getAlertasConfig,
+  salvarAlertasConfig,
+  dispararAlertas,
+  getAlertasHistorico,
 
   getAuthToken,
   getEmpresaId,

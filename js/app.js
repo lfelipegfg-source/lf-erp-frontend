@@ -21,6 +21,7 @@ import { initPedidosModule } from './pedidos.js';
 import { initComissoesModule } from './comissoes.js';
 import { initCaixaModule } from './caixa.js';
 import { initDevolucoesModule } from './devolucoes.js';
+import { initAlertasModule } from './alertas.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -74,6 +75,7 @@ const VIEW_CONFIG = {
   comissoes: { title: 'Comissões', subtitle: 'Comissões de vendedores por venda realizada' },
   caixa: { title: 'Caixa', subtitle: 'Abertura, movimentações e fechamento do caixa físico' },
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
+  alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
   configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
 };
@@ -489,6 +491,8 @@ async function loadCurrentView(view) {
     await loadFornecedoresReal();
   } else if (view === 'usuarios') {
     await loadUsuariosReal();
+  } else if (view === 'alertas') {
+    await loadAlertasReal();
   } else if (view === 'devolucoes') {
     await loadDevolucoesReal();
   } else if (view === 'caixa') {
@@ -1126,6 +1130,20 @@ async function loadUsuariosReal() {
     console.error('Erro ao carregar usuários:', error);
     showToast('Falha ao carregar módulo de usuários.', 'error');
     renderModuleError('usuariosContainer', 'Usuários', 'Não foi possível carregar usuários.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadAlertasReal() {
+  showGlobalLoader('Carregando alertas...');
+  try {
+    await initAlertasModule();
+    showToast('Alertas carregados.', 'success');
+  } catch (error) {
+    console.error('Erro ao carregar alertas:', error);
+    showToast('Falha ao carregar alertas.', 'error');
+    renderModuleError('alertasContainer', 'Alertas', 'Não foi possível carregar alertas.');
   } finally {
     hideGlobalLoader();
   }
