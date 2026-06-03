@@ -454,6 +454,15 @@ async function getClientes(params = {}) {
   });
 }
 
+async function getClientesABC() {
+  const empresa   = getEmpresaNome();
+  const empresaId = getEmpresaId();
+  return request('/clientes/segmentacao-abc', {
+    method: 'GET',
+    query: { empresa, empresa_id: empresaId }
+  });
+}
+
 async function createCliente(payload) {
   const empresa = getEmpresaNome();
   const empresaId = getEmpresaId();
@@ -1325,6 +1334,7 @@ const api = {
   deletarImagem,
 
   getClientes,
+  getClientesABC,
   createCliente,
   updateCliente,
   deleteCliente,

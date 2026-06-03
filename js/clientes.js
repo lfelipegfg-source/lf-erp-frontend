@@ -86,6 +86,11 @@ const ClientesModule = {
         return;
       }
 
+      if (btn.id === 'abcClientesBtn') {
+        this.mostrarABC();
+        return;
+      }
+
       if (btn.id === 'novoClienteBtn') {
         this.openModal(false);
       }
@@ -162,6 +167,9 @@ const ClientesModule = {
           </div>
 
           <div class="module-card__actions">
+            <button class="btn btn-light" id="abcClientesBtn" title="Segmentação A/B/C por receita">
+              <i class="fa-solid fa-chart-bar"></i> Curva ABC
+            </button>
             <button class="btn btn-light" id="exportarClientesBtn">
               <i class="fa-solid fa-file-csv"></i> Exportar CSV
             </button>
@@ -545,6 +553,132 @@ const ClientesModule = {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Salvar senha';
       }
+    };
+  },
+
+  // ── Segmentação A/B/C ──────────────────────────────────────────────────────
+
+  async mostrarABC() {
+    const container = document.getElementById('clientesContainer');
+    if (!container) return;
+
+    // Skeleton enquanto carrega
+    container.innerHTML = `
+      <div class="module-card">
+        <div class="module-card__header">
+          <div>
+            <h3>Curva ABC — Segmentação de Clientes</h3>
+            <p>Classificação por contribuição de receita (Pareto)</p>
+          </div>
+          <button class="btn btn-light" id="abcVoltarBtn"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        </div>
+        <div style="padding:32px;text-align:center;color:var(--text-muted)">
+          <div class="skeleton" style="height:80px;border-radius:var(--radius-sm);margin-bottom:16px"></div>
+          <div class="skeleton" style="height:300px;border-radius:var(--radius-sm)"></div>
+        </div>
+      </div>`;
+
+    document.getElementById('abcVoltarBtn').onclick = () => {
+      this.render(); this.cache(); this.renderTable();
+    };
+
+    try {
+      const data = await api.getClientesABC();
+      this.renderPainelABC(data, container);
+    } catch (err) {
+      container.innerHTML = `<div class="module-card">
+        <div class="module-feedback module-feedback--error">Erro ao carregar segmentação: ${escapeHtml(err.message || 'Tente novamente.')}</div>
+        <button class="btn btn-light" style="margin:16px" onclick="this.closest('.module-card').remove()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+      </div>`;
+    }
+  },
+
+  renderPainelABC(data, container) {
+    const cur = (v) => Number(v||0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const pct = (v) => Number(v||0).toFixed(1) + '%';
+
+    const receitaGeral = Number(data.receita_geral || 0);
+
+    const pctA = receitaGeral > 0 ? ((data.resumo.A.receita / receitaGeral) * 100) : 0;
+    const pctB = receitaGeral > 0 ? ((data.resumo.B.receita / receitaGeral) * 100) : 0;
+    const pctC = receitaGeral > 0 ? ((data.resumo.C.receita / receitaGeral) * 100) : 0;
+
+    const badgeCls = { A: 'badge--success', B: 'badge--warning', C: 'badge--danger' };
+
+    container.innerHTML = `
+      <div class="module-card">
+        <div class="module-card__header">
+          <div>
+            <h3>Curva ABC — Segmentação de Clientes</h3>
+            <p>${data.total_clientes} cliente(s) com histórico de compras · Total: ${cur(receitaGeral)}</p>
+          </div>
+          <button class="btn btn-light" id="abcVoltarBtn2"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        </div>
+
+        <!-- Cards de resumo -->
+        <div class="abc-resumo-grid">
+          ${['A','B','C'].map(cls => {
+            const r = data.resumo[cls];
+            const p = receitaGeral > 0 ? ((r.receita / receitaGeral) * 100).toFixed(1) : '0.0';
+            const desc = cls === 'A' ? 'Clientes estratégicos — prioridade máxima'
+                       : cls === 'B' ? 'Clientes importantes — fidelização ativa'
+                       : 'Clientes ocasionais — potencial de crescimento';
+            return `
+              <div class="abc-classe-card abc-classe-card--${cls.toLowerCase()}">
+                <span class="abc-classe-card__label">Classe ${cls}</span>
+                <span class="abc-classe-card__qtd">${r.clientes}</span>
+                <span class="abc-classe-card__receita">${cur(r.receita)}</span>
+                <span class="abc-classe-card__pct">${p}% da receita total</span>
+                <span style="font-size:.75rem;color:var(--text-muted);margin-top:4px">${desc}</span>
+              </div>`;
+          }).join('')}
+        </div>
+
+        <!-- Barra proporcional -->
+        <div class="abc-barra-wrap" title="Distribuição de receita por classe">
+          <div class="abc-barra-a" style="width:${pctA.toFixed(1)}%" title="Classe A: ${pctA.toFixed(1)}%"></div>
+          <div class="abc-barra-b" style="width:${pctB.toFixed(1)}%" title="Classe B: ${pctB.toFixed(1)}%"></div>
+          <div class="abc-barra-c" style="width:${pctC.toFixed(1)}%" title="Classe C: ${pctC.toFixed(1)}%"></div>
+        </div>
+
+        <!-- Tabela ranking -->
+        ${data.clientes.length === 0
+          ? `<div class="empty-state" style="padding:40px;text-align:center;color:var(--text-muted)">
+               <i class="fa-solid fa-chart-bar" style="font-size:2rem;opacity:.3;display:block;margin-bottom:12px"></i>
+               <p>Nenhuma venda vinculada a clientes encontrada.</p>
+             </div>`
+          : `<div class="table-wrapper">
+               <table class="data-table">
+                 <thead>
+                   <tr>
+                     <th>#</th>
+                     <th>Cliente</th>
+                     <th>Vendas</th>
+                     <th class="text-right">Receita</th>
+                     <th class="text-right">% do total</th>
+                     <th class="text-right">% acumulado</th>
+                     <th>Classe</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   ${data.clientes.map((c, i) => `
+                     <tr>
+                       <td style="color:var(--text-muted);font-size:.85rem">${i + 1}</td>
+                       <td><strong>${escapeHtml(c.nome)}</strong></td>
+                       <td>${c.num_vendas}</td>
+                       <td class="text-right">${cur(c.receita_total)}</td>
+                       <td class="text-right">${pct(c.percentual)}</td>
+                       <td class="text-right">${pct(c.percentual_acumulado)}</td>
+                       <td><span class="badge ${badgeCls[c.classe]}">${c.classe}</span></td>
+                     </tr>`).join('')}
+                 </tbody>
+               </table>
+             </div>`
+        }
+      </div>`;
+
+    document.getElementById('abcVoltarBtn2').onclick = () => {
+      this.render(); this.cache(); this.renderTable();
     };
   }
 };

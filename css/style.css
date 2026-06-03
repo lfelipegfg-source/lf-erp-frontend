@@ -3656,6 +3656,75 @@ select {
 }
 
 /* =========================
+   SEGMENTAÇÃO ABC CLIENTES
+========================= */
+
+.abc-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.abc-classe-card {
+  border-radius: var(--radius-sm);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.abc-classe-card--a { background: var(--success-soft); border-top: 3px solid var(--success); }
+.abc-classe-card--b { background: var(--warning-soft); border-top: 3px solid var(--warning); }
+.abc-classe-card--c { background: var(--danger-soft);  border-top: 3px solid var(--danger);  }
+
+.abc-classe-card__label {
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.abc-classe-card--a .abc-classe-card__label { color: var(--success); }
+.abc-classe-card--b .abc-classe-card__label { color: var(--warning); }
+.abc-classe-card--c .abc-classe-card__label { color: var(--danger);  }
+
+.abc-classe-card__qtd {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.abc-classe-card__receita {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.abc-classe-card__pct {
+  font-size: .78rem;
+  color: var(--text-muted);
+}
+
+.abc-barra-wrap {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background: var(--border);
+}
+
+.abc-barra-a { background: var(--success); }
+.abc-barra-b { background: var(--warning); }
+.abc-barra-c { background: var(--danger);  }
+
+@media (max-width: 720px) {
+  .abc-resumo-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================
    SKELETON LOADERS
 ========================= */
 
