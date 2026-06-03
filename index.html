@@ -35,6 +35,7 @@
     />
 
     <link rel="stylesheet" href="./css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <div id="app" class="app-shell">
@@ -581,6 +582,34 @@
                   </div>
                   <div id="dashboardTabelaPrecos" class="panel-card__body empty-state">
                     Dados ainda não carregados.
+                  </div>
+                </article>
+              </div>
+
+              <!-- GRÁFICOS -->
+              <div class="dashboard-charts-grid">
+                <article class="panel-card panel-card--chart">
+                  <div class="panel-card__header">
+                    <div>
+                      <h3>Faturamento por dia</h3>
+                      <p>Evolução das vendas no período</p>
+                    </div>
+                  </div>
+                  <div class="panel-card__body chart-container">
+                    <canvas id="chartVendasDia"></canvas>
+                  </div>
+                </article>
+
+                <article class="panel-card panel-card--chart">
+                  <div class="panel-card__header">
+                    <div>
+                      <h3>Formas de pagamento</h3>
+                      <p>Distribuição por método no período</p>
+                    </div>
+                  </div>
+                  <div class="panel-card__body chart-container chart-container--donut">
+                    <canvas id="chartFormaPagamento"></canvas>
+                    <div id="chartFormaPagamentoLegenda" class="chart-legend"></div>
                   </div>
                 </article>
               </div>

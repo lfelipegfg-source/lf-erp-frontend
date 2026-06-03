@@ -539,7 +539,171 @@ function renderTabelaPrecos(data) {
   `;
 }
 
+// ─── GRÁFICOS (Chart.js) ──────────────────────────────────────────────────────
+
+let _chartVendas = null;
+let _chartForma = null;
+
+const CHART_COLORS = {
+  primary:    '#2563eb',
+  primaryFill:'rgba(37,99,235,0.12)',
+  success:    '#16a34a',
+  warning:    '#d97706',
+  danger:     '#dc2626',
+  info:       '#0891b2',
+  purple:     '#7c3aed',
+  pink:       '#db2777',
+  palette: ['#2563eb','#16a34a','#d97706','#dc2626','#0891b2','#7c3aed','#db2777','#64748b']
+};
+
+function destroyCharts() {
+  if (_chartVendas) { _chartVendas.destroy(); _chartVendas = null; }
+  if (_chartForma)  { _chartForma.destroy();  _chartForma  = null; }
+}
+
+function formatDia(isoDate) {
+  if (!isoDate) return '';
+  const d = new Date(isoDate + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function renderChartVendas(vendasPorDia = []) {
+  const canvas = document.getElementById('chartVendasDia');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const labels = vendasPorDia.map((r) => formatDia(r.data));
+  const totais  = vendasPorDia.map((r) => r.total);
+
+  const ctx = canvas.getContext('2d');
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+  gradient.addColorStop(0, 'rgba(37,99,235,0.22)');
+  gradient.addColorStop(1, 'rgba(37,99,235,0)');
+
+  _chartVendas = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Faturamento (R$)',
+        data: totais,
+        borderColor: CHART_COLORS.primary,
+        backgroundColor: gradient,
+        borderWidth: 2.5,
+        pointBackgroundColor: CHART_COLORS.primary,
+        pointRadius: labels.length <= 14 ? 4 : 2,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ' ' + toCurrency(ctx.raw)
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(203,213,225,0.35)' },
+          ticks: { color: '#64748b', font: { size: 11 }, maxRotation: 0 }
+        },
+        y: {
+          grid: { color: 'rgba(203,213,225,0.35)' },
+          ticks: {
+            color: '#64748b',
+            font: { size: 11 },
+            callback: (v) => 'R$ ' + Number(v).toLocaleString('pt-BR')
+          },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  if (!vendasPorDia.length) {
+    const parent = canvas.parentElement;
+    parent.innerHTML = `<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center">Sem vendas no período para exibir o gráfico.</div>`;
+  }
+}
+
+function renderChartFormaPagamento(formasPagamento = []) {
+  const canvas = document.getElementById('chartFormaPagamento');
+  const legendaEl = document.getElementById('chartFormaPagamentoLegenda');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (!formasPagamento.length) {
+    const parent = canvas.parentElement;
+    parent.innerHTML = `<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center">Sem dados de pagamento no período.</div>`;
+    return;
+  }
+
+  const labels = formasPagamento.map((r) => r.forma);
+  const totais  = formasPagamento.map((r) => r.total);
+  const cores   = formasPagamento.map((_, i) => CHART_COLORS.palette[i % CHART_COLORS.palette.length]);
+
+  _chartForma = new Chart(canvas.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: totais,
+        backgroundColor: cores,
+        borderColor: '#ffffff',
+        borderWidth: 2,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` ${ctx.label}: ${toCurrency(ctx.raw)}`
+          }
+        }
+      }
+    }
+  });
+
+  if (legendaEl) {
+    const totalGeral = totais.reduce((a, b) => a + b, 0);
+    legendaEl.innerHTML = formasPagamento.map((r, i) => {
+      const pct = totalGeral > 0 ? ((r.total / totalGeral) * 100).toFixed(1) : '0.0';
+      return `
+        <div class="chart-legend__item">
+          <span class="chart-legend__dot" style="background:${cores[i]}"></span>
+          <span class="chart-legend__label">${r.forma}</span>
+          <span class="chart-legend__value">${pct}%</span>
+        </div>`;
+    }).join('');
+  }
+}
+
+async function renderGraficos(params = {}) {
+  destroyCharts();
+  try {
+    const data = await api.getDashboardGrafico(params);
+    renderChartVendas(data?.vendas_por_dia || []);
+    renderChartFormaPagamento(data?.forma_pagamento || []);
+  } catch (_) {
+    // falha silenciosa — gráficos são complementares, não críticos
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function renderErrorState(message = 'Não foi possível carregar o dashboard.') {
+  destroyCharts();
   setText('kpiFaturamento', 'R$ 0,00');
   setText('kpiVendas', '0');
   setText('kpiReceber', 'R$ 0,00');
@@ -607,6 +771,7 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
     renderTopProdutos(payload);
     renderAlertas(payload, financeiro);
     renderTabelaPrecos(rawTabelaPrecos);
+    renderGraficos(params);
 
     return {
       dashboard: payload,

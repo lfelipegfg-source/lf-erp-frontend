@@ -267,6 +267,20 @@ async function getDashboard(params = {}) {
   });
 }
 
+async function getDashboardGrafico(params = {}) {
+  const empresa = getEmpresaNome();
+  const empresaId = getEmpresaId();
+
+  return request('/dashboard/grafico', {
+    method: 'GET',
+    query: {
+      empresa,
+      empresa_id: empresaId,
+      ...params
+    }
+  });
+}
+
 async function getEmpresaStatus() {
   return request('/empresa/status', {
     method: 'GET'
@@ -1179,6 +1193,7 @@ const api = {
   login,
   validateSession,
   getDashboard,
+  getDashboardGrafico,
   getEmpresaStatus,
   getAlertas,
   updateMePerfil,
