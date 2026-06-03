@@ -226,6 +226,13 @@ const VendasModule = {
         return;
       }
 
+      if (button.dataset.action === 'emitir-nfce-venda') {
+        event.preventDefault();
+        const id = Number(button.dataset.id);
+        await this.emitirNfce(id, button);
+        return;
+      }
+
       if (button.dataset.action === 'estornar-parcela-venda') {
         event.preventDefault();
 
@@ -600,6 +607,17 @@ const VendasModule = {
               >
                 <i class="fa-solid fa-eye"></i>
                 Detalhes
+              </button>
+              <button
+                type="button"
+                class="btn-inline"
+                style="color:var(--info)"
+                data-action="emitir-nfce-venda"
+                data-id="${id}"
+                title="Emitir NFC-e para esta venda"
+              >
+                <i class="fa-solid fa-file-invoice"></i>
+                NFC-e
               </button>
             </div>
           </td>
@@ -2036,6 +2054,25 @@ const VendasModule = {
     `;
 
     document.head.appendChild(style);
+  },
+
+  async emitirNfce(vendaId, btn) {
+    const original = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
+    try {
+      const result = await api.emitirNfce(vendaId);
+      if (result.status === 'autorizado') {
+        showToast(`NFC-e autorizada! Nº ${result.numero || '—'}`, 'success');
+      } else if (result.status === 'processando') {
+        showToast('NFC-e em processamento na SEFAZ. Consulte em alguns instantes.', 'info');
+      } else {
+        showToast(`NFC-e: ${result.mensagem || result.status}`, 'warning');
+      }
+    } catch (err) {
+      showToast(err?.message || 'Erro ao emitir NFC-e', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = original; }
+    }
   }
 };
 

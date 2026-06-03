@@ -78,6 +78,7 @@ const NfeModule = {
         <div class="module-toolbar">
           <div class="table-actions">
             <button class="btn-inline btn-inline--active" data-nfe-aba="lista">NF-es Emitidas</button>
+            <button class="btn-inline" data-nfe-aba="nfce">NFC-e</button>
             <button class="btn-inline" data-nfe-aba="emitir">Emitir NF-e</button>
             <button class="btn-inline" data-nfe-aba="config">Configuração</button>
           </div>
@@ -109,6 +110,7 @@ const NfeModule = {
     if (!c) return;
 
     if (this.state.aba === 'lista')   { c.innerHTML = this.renderLista();  this.bindListaEvents();  return; }
+    if (this.state.aba === 'nfce')    { this.renderNfce(c);                return; }
     if (this.state.aba === 'emitir')  { c.innerHTML = this.renderEmitir(); this.bindEmitirEvents(); return; }
     c.innerHTML = this.renderConfig();
     this.bindConfigEvents();
@@ -343,6 +345,21 @@ const NfeModule = {
                 <label>Série</label>
                 <input id="nfeCfgSerie" value="${v(cfg.serie || '1')}" maxlength="3" />
               </div>
+
+              <!-- CSC para NFC-e -->
+              <div class="form-field form-field--span-2" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+                <label style="font-weight:700;color:var(--text)">NFC-e — Código de Segurança do Contribuinte (CSC)</label>
+                <small style="color:var(--text-muted);display:block;margin-bottom:10px">Obrigatório para QR code na NFC-e. Obtido no portal da SEFAZ do seu estado.</small>
+              </div>
+              <div class="form-field">
+                <label>ID Token CSC</label>
+                <input id="nfeCfgIdTokenCsc" value="${v(cfg.id_token_csc)}" placeholder="Ex: 000001" />
+              </div>
+              <div class="form-field">
+                <label>Código CSC</label>
+                <input type="password" id="nfeCfgCodigoCsc"
+                  placeholder="${cfg.codigo_csc ? '***configurado***' : 'Cole seu CSC da SEFAZ'}" />
+              </div>
             </div>
           </div>
         </div>
@@ -434,6 +451,8 @@ const NfeModule = {
         token_focusnfe:    document.getElementById('nfeCfgToken')?.value?.trim() || undefined,
         ambiente:          Number(document.getElementById('nfeCfgAmbiente')?.value || 2),
         serie:             document.getElementById('nfeCfgSerie')?.value?.trim() || '1',
+        id_token_csc:      document.getElementById('nfeCfgIdTokenCsc')?.value?.trim() || null,
+        codigo_csc:        document.getElementById('nfeCfgCodigoCsc')?.value?.trim() || null,
         ie:                document.getElementById('nfeCfgIe')?.value?.trim() || null,
         im:                document.getElementById('nfeCfgIm')?.value?.trim() || null,
         crt:               Number(document.getElementById('nfeCfgCrt')?.value || 1),
@@ -548,6 +567,114 @@ const NfeModule = {
         resolve(val);
       };
     });
+  },
+
+  // ── NFC-e ─────────────────────────────────────────────────────────────────
+
+  async renderNfce(container) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:32px;color:var(--text-muted)">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:1.5rem"></i>
+        <p style="margin-top:10px">Carregando NFC-es...</p>
+      </div>`;
+
+    try {
+      const result = await api.getNfceLista({ limite: 50 });
+      const nfces  = result?.nfces || [];
+      const total  = result?.total || 0;
+
+      const esc = this.esc.bind(this);
+
+      const statusBadge = (s) => {
+        const map = {
+          autorizado: '<span class="badge badge--success">Autorizada</span>',
+          processando: '<span class="badge badge--warning">Processando</span>',
+          erro: '<span class="badge badge--danger">Erro</span>',
+          cancelado: '<span class="badge">Cancelada</span>',
+          rejeitado: '<span class="badge badge--danger">Rejeitada</span>'
+        };
+        return map[s] || `<span class="badge">${esc(s)}</span>`;
+      };
+
+      container.innerHTML = `
+        <div class="nfce-info-card">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>
+            <strong>NFC-e — Nota Fiscal ao Consumidor Eletrônica (modelo 65)</strong>
+            <p>Para emitir, clique em <strong>NFC-e</strong> na linha de uma venda no módulo Vendas. Requer token Focus NFe e CSC configurados abaixo.</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:.85rem;color:var(--text-muted)">${total} NFC-e(s) emitida(s)</span>
+        </div>
+
+        ${nfces.length === 0
+          ? `<div class="empty-state" style="padding:40px;text-align:center;color:var(--text-muted)">
+               <i class="fa-solid fa-file-invoice" style="font-size:2rem;opacity:.3;margin-bottom:12px;display:block"></i>
+               <p>Nenhuma NFC-e emitida ainda.</p>
+               <p style="font-size:.85rem">Use o botão NFC-e na coluna de ações do módulo Vendas.</p>
+             </div>`
+          : `<div class="table-wrapper">
+               <table class="data-table">
+                 <thead>
+                   <tr>
+                     <th>Referência</th>
+                     <th>Venda</th>
+                     <th>Nº</th>
+                     <th>Status</th>
+                     <th>Ambiente</th>
+                     <th>Emissão</th>
+                     <th>Ações</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   ${nfces.map(n => `
+                     <tr>
+                       <td style="font-size:.78rem;color:var(--text-muted)">${esc(n.ref)}</td>
+                       <td>${n.venda_id ? `#${n.venda_id}` : '—'}</td>
+                       <td>${n.numero || '—'}</td>
+                       <td>${statusBadge(n.status)}</td>
+                       <td><span class="badge ${n.ambiente === 1 ? 'badge--success' : ''}">${n.ambiente === 1 ? 'Produção' : 'Homologação'}</span></td>
+                       <td>${new Date(n.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                       <td>
+                         <div style="display:flex;gap:6px;flex-wrap:wrap">
+                           ${n.status === 'autorizado' ? `
+                             <a href="${api.config.baseURL}/nfce/pdf/${encodeURIComponent(n.ref)}"
+                                target="_blank" class="btn-inline" style="font-size:11px">
+                               <i class="fa-solid fa-print"></i> DANFCE
+                             </a>` : ''}
+                           ${['processando'].includes(n.status) ? `
+                             <button class="btn-inline" style="font-size:11px" data-nfce-consultar="${esc(n.ref)}">
+                               <i class="fa-solid fa-rotate"></i> Consultar
+                             </button>` : ''}
+                         </div>
+                       </td>
+                     </tr>`).join('')}
+                 </tbody>
+               </table>
+             </div>`
+        }`;
+
+      // Bind consultar
+      container.querySelectorAll('[data-nfce-consultar]').forEach(btn => {
+        btn.onclick = async () => {
+          const ref = btn.dataset.nfceConsultar;
+          btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+          try {
+            const r = await api.consultarNfce(ref);
+            showToast(`Status: ${r.status}${r.chave_nfe ? ' — Autorizada!' : ''}`, r.status === 'autorizado' ? 'success' : 'info');
+            await this.renderNfce(container);
+          } catch (e) {
+            showToast(e.message || 'Erro ao consultar', 'error');
+            btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Consultar';
+          }
+        };
+      });
+    } catch (err) {
+      console.error('[nfe] renderNfce:', err);
+      container.innerHTML = `<div class="module-feedback module-feedback--error">Erro ao carregar NFC-es: ${this.esc(err.message)}</div>`;
+    }
   },
 
   // ── HELPERS ───────────────────────────────────────────────────────────────

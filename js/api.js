@@ -816,6 +816,28 @@ async function getFluxoCaixa(params = {}) {
   });
 }
 
+// ── NFC-e ─────────────────────────────────────────────────────────────────────
+
+async function emitirNfce(vendaId) {
+  return request(`/nfce/emitir/${vendaId}`, { method: 'POST', body: {} });
+}
+
+async function consultarNfce(ref) {
+  return request(`/nfce/consultar/${ref}`, { method: 'GET' });
+}
+
+async function cancelarNfce(nfceId, justificativa) {
+  return request(`/nfce/cancelar/${nfceId}`, { method: 'POST', body: { justificativa } });
+}
+
+async function getNfceLista(params = {}) {
+  return request('/nfce/lista', { method: 'GET', query: params });
+}
+
+async function getNfcePdf(ref) {
+  return request(`/nfce/pdf/${ref}`, { method: 'GET' });
+}
+
 // ── PIX ───────────────────────────────────────────────────────────────────────
 
 async function getPixConfig() {
@@ -1333,6 +1355,12 @@ const api = {
   getOrigemCompraContaPagar,
 
   getFluxoCaixa,
+
+  emitirNfce,
+  consultarNfce,
+  cancelarNfce,
+  getNfceLista,
+  getNfcePdf,
 
   getPixConfig,
   savePixConfig,
