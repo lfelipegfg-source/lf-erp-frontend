@@ -816,6 +816,49 @@ async function getFluxoCaixa(params = {}) {
   });
 }
 
+// ── Conciliação Bancária ──────────────────────────────────────────────────────
+
+async function importarConciliacao(payload) {
+  const empresa   = getEmpresaNome();
+  const empresaId = getEmpresaId();
+  return request('/conciliacao/importar', {
+    method: 'POST',
+    body: { ...payload, empresa, empresa_id: empresaId }
+  });
+}
+
+async function getConciliacoes() {
+  const empresa   = getEmpresaNome();
+  const empresaId = getEmpresaId();
+  return request('/conciliacao', {
+    method: 'GET',
+    query: { empresa, empresa_id: empresaId }
+  });
+}
+
+async function getConciliacaoItens(id, params = {}) {
+  const empresa   = getEmpresaNome();
+  const empresaId = getEmpresaId();
+  return request(`/conciliacao/${id}/itens`, {
+    method: 'GET',
+    query: { empresa, empresa_id: empresaId, ...params }
+  });
+}
+
+async function ignorarConciliacaoItem(id) {
+  return request(`/conciliacao/itens/${id}/ignorar`, { method: 'POST', body: {} });
+}
+
+async function criarLancamentoConciliacao(id, payload = {}) {
+  return request(`/conciliacao/itens/${id}/criar-lancamento`, { method: 'POST', body: payload });
+}
+
+async function deleteConciliacao(id) {
+  return request(`/conciliacao/${id}`, { method: 'DELETE' });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function getLancamentosFinanceiros(params = {}) {
   const empresa = ensureEmpresa();
 
@@ -1267,6 +1310,13 @@ const api = {
   getOrigemCompraContaPagar,
 
   getFluxoCaixa,
+
+  importarConciliacao,
+  getConciliacoes,
+  getConciliacaoItens,
+  ignorarConciliacaoItem,
+  criarLancamentoConciliacao,
+  deleteConciliacao,
 
   getLancamentosFinanceiros,
   getLancamentoFinanceiroDetalhe,

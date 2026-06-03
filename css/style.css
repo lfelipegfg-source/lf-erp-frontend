@@ -3323,6 +3323,150 @@ select {
 }
 
 /* =========================
+   CONCILIAÇÃO BANCÁRIA
+========================= */
+
+.cb-info-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--primary-soft);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: .875rem;
+  color: var(--primary);
+}
+
+.cb-info-card i { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+.cb-info-card strong { display: block; font-weight: 700; margin-bottom: 3px; }
+.cb-info-card p { margin: 0; color: var(--text-soft); }
+
+.cb-sessoes-lista { display: flex; flex-direction: column; gap: 12px; }
+
+.cb-sessao-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  flex-wrap: wrap;
+}
+
+.cb-sessao-card__left { display: flex; align-items: center; gap: 14px; }
+.cb-sessao-card__right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+.cb-sessao-card__icon {
+  width: 42px; height: 42px;
+  border-radius: var(--radius-xs);
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: grid; place-items: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+
+.cb-sessao-card__nome { display: block; font-size: .93rem; font-weight: 700; }
+.cb-sessao-card__meta { font-size: .8rem; color: var(--text-muted); }
+.cb-sessao-card__badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.cb-progresso {
+  width: 100px; height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.cb-progresso__bar {
+  height: 100%;
+  background: var(--success);
+  border-radius: 999px;
+  transition: width .3s ease;
+}
+
+/* Drop area */
+.cb-drop-area {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  color: var(--text-muted);
+}
+
+.cb-drop-area:hover, .cb-drop-area--over {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.cb-drop-area i { font-size: 2rem; margin-bottom: 10px; }
+.cb-drop-area p { margin: 6px 0 4px; font-weight: 600; font-size: .9rem; }
+.cb-drop-area small { font-size: .8rem; }
+
+/* Stats detalhe */
+.cb-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.cb-stat--credito  { border-top: 3px solid var(--success); }
+.cb-stat--debito   { border-top: 3px solid var(--danger);  }
+.cb-stat--pendente { border-top: 3px solid var(--warning); }
+.cb-stat--ok       { border-top: 3px solid var(--primary); }
+
+/* Filtro de status */
+.cb-filtro-status {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.cb-filtro-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.cb-filtro-btn:hover { background: var(--surface-3); }
+
+.cb-filtro-btn--ativo {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.cb-empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.cb-empty i { font-size: 2rem; margin-bottom: 14px; opacity: .3; display: block; }
+
+@media (max-width: 900px) {
+  .cb-stats-grid { grid-template-columns: 1fr 1fr; }
+  .cb-sessao-card { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 600px) {
+  .cb-stats-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================
    KPI TREND (comparativo)
 ========================= */
 

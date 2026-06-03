@@ -22,6 +22,7 @@ import { initComissoesModule } from './comissoes.js';
 import { initCaixaModule } from './caixa.js';
 import { initDevolucoesModule } from './devolucoes.js';
 import { initAlertasModule } from './alertas.js';
+import { initConciliacaoModule } from './conciliacaoBancaria.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -69,6 +70,7 @@ const VIEW_CONFIG = {
   'contas-pagar': { title: 'Contas a Pagar', subtitle: 'Despesas, vencimentos e quitações' },
   'fluxo-caixa': { title: 'Fluxo de Caixa', subtitle: 'Entradas, saídas e saldo consolidado' },
   lancamentos: { title: 'Lançamentos', subtitle: 'Receitas e despesas manuais' },
+  conciliacao: { title: 'Conciliação Bancária', subtitle: 'Reconciliação de extratos OFX e CSV' },
   relatorios: { title: 'Relatórios', subtitle: 'Relatórios gerenciais e operacionais' },
   orcamentos: { title: 'Orçamentos', subtitle: 'Cotações emitidas — gerencie aprovações e converta em pedidos' },
   pedidos: { title: 'Pedidos', subtitle: 'Pedidos em andamento — confirme, separe e converta em venda' },
@@ -485,6 +487,8 @@ async function loadCurrentView(view) {
     await loadFluxoCaixaReal();
   } else if (view === 'lancamentos') {
     await loadLancamentosReal();
+  } else if (view === 'conciliacao') {
+    await loadConciliacaoReal();
   } else if (view === 'relatorios') {
     await loadRelatoriosFinanceirosReal();
   } else if (view === 'fornecedores') {
@@ -543,7 +547,7 @@ function getParentViewFromChild(view) {
   const groups = {
     cadastros: ['produtos', 'clientes', 'fornecedores', 'usuarios'],
     movimentacoes: ['vendas', 'compras', 'estoque'],
-    financeiro: ['contas-receber', 'contas-pagar', 'fluxo-caixa', 'lancamentos']
+    financeiro: ['contas-receber', 'contas-pagar', 'fluxo-caixa', 'lancamentos', 'conciliacao']
   };
 
   for (const [parent, children] of Object.entries(groups)) {
@@ -1067,6 +1071,23 @@ async function loadLancamentosReal() {
   }
 }
 
+async function loadConciliacaoReal() {
+  showGlobalLoader('Carregando conciliação bancária...');
+  try {
+    await initConciliacaoModule();
+  } catch (error) {
+    console.error('Erro ao carregar conciliação:', error);
+    showToast('Erro ao carregar conciliação bancária', 'error');
+    renderModuleError(
+      'conciliacaoContainer',
+      'Conciliação Bancária',
+      'Não foi possível carregar o módulo de conciliação.'
+    );
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
 async function loadRelatoriosFinanceirosReal() {
   showGlobalLoader('Carregando relatórios financeiros...');
 
@@ -1268,6 +1289,7 @@ function renderViewFeedback(view) {
     'contas-pagar': 'contasPagarContainer',
     'fluxo-caixa': 'fluxoCaixaContainer',
     lancamentos: 'lancamentosContainer',
+    conciliacao: 'conciliacaoContainer',
     pdv: 'pdvContainer',
     usuarios: 'usuariosContainer',
     estoque: 'estoqueContainer',
