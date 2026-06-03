@@ -1,4 +1,5 @@
 import api from './api.js';
+import { exportCSV, numCSV } from './exportUtils.js';
 
 const state = {
   resumo: null,
@@ -103,6 +104,9 @@ function render() {
         </div>
 
         <div class="module-card__actions">
+          <button class="btn btn-light" id="btnExportarRelatorios">
+            <i class="fa-solid fa-file-csv"></i> Exportar CSV
+          </button>
           <button class="btn btn-light" id="btnAtualizarRelatoriosFinanceiros">
             Atualizar
           </button>
@@ -775,7 +779,86 @@ function renderTabelaFluxo() {
   `;
 }
 
+function exportarAbaAtual() {
+  const { aba } = state;
+
+  if (aba === 'receber') {
+    exportCSV(state.receber.map((r) => ({
+      'Vencimento':      formatDate(r.data_vencimento),
+      'Cliente':         r.cliente_nome || '-',
+      'Parcela':         `${r.parcela || 1}/${r.total_parcelas || 1}`,
+      'Status':          r.status || '-',
+      'Valor (R$)':      numCSV(r.valor)
+    })), 'contas_receber');
+    return;
+  }
+  if (aba === 'pagar') {
+    exportCSV(state.pagar.map((r) => ({
+      'Vencimento':      formatDate(r.data_vencimento),
+      'Fornecedor':      r.fornecedor_nome || '-',
+      'Parcela':         `${r.parcela || 1}/${r.total_parcelas || 1}`,
+      'Status':          r.status || '-',
+      'Valor (R$)':      numCSV(r.valor)
+    })), 'contas_pagar');
+    return;
+  }
+  if (aba === 'fluxo') {
+    exportCSV(state.fluxo.map((r) => ({
+      'Data':        formatDate(r.data_movimento || r.data),
+      'Tipo':        r.tipo || '-',
+      'Origem':      r.origem || '-',
+      'Descricao':   r.descricao || '-',
+      'Valor (R$)':  numCSV(r.valor)
+    })), 'fluxo_caixa');
+    return;
+  }
+  if (aba === 'lucratividade') {
+    exportCSV(state.lucratividade.map((r) => ({
+      'ABC':              r.classe_abc || '-',
+      'Produto':          r.produto_nome || '-',
+      'Qtd Vendida':      r.quantidade_vendida || 0,
+      'Faturamento (R$)': numCSV(r.faturamento_total),
+      'CMV (R$)':         numCSV(r.custo_total),
+      'Lucro Total (R$)': numCSV(r.lucro_total),
+      'Margem (%)':       numCSV(r.margem_lucro),
+      'Capital Parado (R$)': numCSV(r.capital_parado),
+      'Ultima Venda':     formatDate(r.ultima_venda)
+    })), 'lucratividade');
+    return;
+  }
+  if (aba === 'grade') {
+    exportCSV(state.grade.map((r) => ({
+      'Produto':          r.produto_nome || '-',
+      'Variacao':         r.variacao || '-',
+      'Qtd Vendida':      r.quantidade_vendida || 0,
+      'Faturamento (R$)': numCSV(r.faturamento_total),
+      'Custo Total (R$)': numCSV(r.custo_total),
+      'Lucro Total (R$)': numCSV(r.lucro_total),
+      'Estoque Atual':    r.estoque_atual || 0,
+      'Ultima Venda':     formatDate(r.ultima_venda)
+    })), 'vendas_por_variacao');
+    return;
+  }
+  if (aba === 'dre' && state.dre?.mensal?.length) {
+    exportCSV(state.dre.mensal.map((m) => ({
+      'Mes':                  m.label,
+      'Receita (R$)':         numCSV(m.receita),
+      'CMV (R$)':             numCSV(m.cmv),
+      'Lucro Bruto (R$)':     numCSV(m.lucro_bruto),
+      'Margem Bruta (%)':     numCSV(m.margem_bruta),
+      'Despesas (R$)':        numCSV(m.despesas),
+      'Resultado Oper (R$)':  numCSV(m.resultado),
+      'Margem Oper (%)':      numCSV(m.margem_oper)
+    })), 'dre');
+    return;
+  }
+}
+
 function bindEventos() {
+  document
+    .getElementById('btnExportarRelatorios')
+    ?.addEventListener('click', () => { exportarAbaAtual(); });
+
   document
     .getElementById('btnAtualizarRelatoriosFinanceiros')
     ?.addEventListener('click', async () => {

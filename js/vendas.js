@@ -1,6 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { exportCSV, numCSV } from './exportUtils.js';
 
 const VendasModule = {
   state: {
@@ -194,6 +195,24 @@ const VendasModule = {
         return;
       }
 
+      if (button.id === 'vendasExportarBtn') {
+        event.preventDefault();
+        const lista = this.state.vendasFiltradas.length
+          ? this.state.vendasFiltradas
+          : this.state.vendas;
+        exportCSV(lista.map((v) => ({
+          'Data':        v.data || '',
+          'Cliente':     v.cliente_nome || 'Consumidor Final',
+          'Pagamento':   v.pagamento || '',
+          'Status':      v.status_pagamento || '',
+          'Subtotal (R$)': numCSV(v.subtotal),
+          'Desconto (R$)': numCSV(v.desconto),
+          'Total (R$)':    numCSV(v.total),
+          'Observacao':  v.observacao || ''
+        })), 'vendas');
+        return;
+      }
+
       if (button.id === 'vendasAtualizarBtn') {
         event.preventDefault();
         await this.load();
@@ -344,6 +363,9 @@ const VendasModule = {
           </div>
 
           <div class="module-card__actions">
+            <button type="button" class="btn btn-light" id="vendasExportarBtn">
+              <i class="fa-solid fa-file-csv"></i> Exportar CSV
+            </button>
             <button type="button" class="btn btn-light" id="vendasAtualizarBtn">
               <i class="fa-solid fa-rotate"></i>
               Atualizar

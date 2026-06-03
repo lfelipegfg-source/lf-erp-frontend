@@ -1,6 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { exportCSV, numCSV } from './exportUtils.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -114,6 +115,24 @@ const ProdutosModule = {
       const action = t.dataset.prodAction || t.id;
 
       // ── toolbar
+      if (action === 'produtosExportBtn') {
+        const lista = this.state.filteredItems.length
+          ? this.state.filteredItems
+          : this.state.items;
+        exportCSV(lista.map((p) => ({
+          'Nome':          p.nome || '',
+          'Categoria':     p.categoria || '',
+          'Preco (R$)':    numCSV(p.preco),
+          'Custo (R$)':    numCSV(p.custo),
+          'Estoque':       p.estoque ?? 0,
+          'Estoque Min':   p.estoque_minimo ?? 0,
+          'Codigo Barras': p.codigo_barras || '',
+          'NCM':           p.ncm || '',
+          'Unidade':       p.unidade || 'UN',
+          'Grade':         p.tem_grade ? 'Sim' : 'Nao'
+        })), 'produtos');
+        return;
+      }
       if (action === 'produtosRefreshBtn') { await this.load(); return; }
       if (action === 'produtosNewBtn')     { this.openCreateModal(); return; }
 
@@ -264,6 +283,7 @@ const ProdutosModule = {
         <div class="module-card__header">
           <div><h3>Produtos</h3><p>Cadastro, edição, estoque e consulta</p></div>
           <div class="module-card__actions">
+            <button type="button" class="btn btn-light" id="produtosExportBtn"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
             <button type="button" class="btn btn-light" id="produtosRefreshBtn"><i class="fa-solid fa-rotate"></i> Atualizar</button>
             <button type="button" class="btn btn-primary" id="produtosNewBtn"><i class="fa-solid fa-plus"></i> Novo produto</button>
           </div>

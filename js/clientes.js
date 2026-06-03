@@ -1,6 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast } from './feedback.js';
+import { exportCSV } from './exportUtils.js';
 
 const ClientesModule = {
   state: {
@@ -69,6 +70,21 @@ const ClientesModule = {
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
+
+      if (btn.id === 'exportarClientesBtn') {
+        const lista = this.state.filteredItems.length
+          ? this.state.filteredItems
+          : this.state.items;
+        exportCSV(lista.map((c) => ({
+          'Nome':        c.nome || '',
+          'Telefone':    c.telefone || '',
+          'CPF/CNPJ':    c.cpf || c.cpf_cnpj || '',
+          'Nascimento':  c.nascimento || '',
+          'Endereco':    c.endereco || '',
+          'Portal':      c.portal_ativo ? 'Sim' : 'Nao'
+        })), 'clientes');
+        return;
+      }
 
       if (btn.id === 'novoClienteBtn') {
         this.openModal(false);
@@ -146,6 +162,9 @@ const ClientesModule = {
           </div>
 
           <div class="module-card__actions">
+            <button class="btn btn-light" id="exportarClientesBtn">
+              <i class="fa-solid fa-file-csv"></i> Exportar CSV
+            </button>
             <button class="btn btn-primary" id="novoClienteBtn">
               <i class="fa-solid fa-plus"></i>
               Novo Cliente
