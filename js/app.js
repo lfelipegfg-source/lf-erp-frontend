@@ -1386,3 +1386,10 @@ function buildFriendlyAuthError(error) {
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// Registro do Service Worker (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
