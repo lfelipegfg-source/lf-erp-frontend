@@ -928,6 +928,15 @@ async function getRelatorioVendasPorGrade(params = {}) {
   });
 }
 
+async function getRelatorioDRE(params = {}) {
+  const empresa = ensureEmpresa();
+
+  return request(`/relatorios/dre/${empresa}`, {
+    method: 'GET',
+    query: { ...params }
+  });
+}
+
 // ── NF-e ─────────────────────────────────────────────────────────────────────
 
 async function getNfeConfig() {
@@ -1157,6 +1166,7 @@ const api = {
   getRelatorioFinanceiroFluxoCaixa,
   getRelatorioFinanceiroLucratividade,
   getRelatorioVendasPorGrade,
+  getRelatorioDRE,
 
   getNfeConfig,
   salvarNfeConfig,

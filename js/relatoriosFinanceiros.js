@@ -7,6 +7,7 @@ const state = {
   fluxo: [],
   lucratividade: [],
   grade: [],
+  dre: null,
   aba: 'resumo'
 };
 
@@ -24,14 +25,15 @@ export async function initRelatoriosFinanceirosModule() {
 async function carregarDados() {
   const filtros = getFiltrosGlobais();
 
-  const [resumoResult, receberResult, pagarResult, fluxoResult, lucratividadeResult, gradeResult] =
+  const [resumoResult, receberResult, pagarResult, fluxoResult, lucratividadeResult, gradeResult, dreResult] =
     await Promise.allSettled([
       api.getRelatorioFinanceiroResumo(filtros),
       api.getRelatorioFinanceiroContasReceber(filtros),
       api.getRelatorioFinanceiroContasPagar(filtros),
       api.getRelatorioFinanceiroFluxoCaixa(filtros),
       api.getRelatorioFinanceiroLucratividade(filtros),
-      api.getRelatorioVendasPorGrade(filtros)
+      api.getRelatorioVendasPorGrade(filtros),
+      api.getRelatorioDRE(filtros)
     ]);
 
   state.resumo = resumoResult.status === 'fulfilled' ? resumoResult.value : null;
@@ -61,6 +63,8 @@ async function carregarDados() {
     gradeResult.status === 'fulfilled' && Array.isArray(gradeResult.value)
       ? gradeResult.value
       : [];
+
+  state.dre = dreResult.status === 'fulfilled' ? dreResult.value : null;
 }
 
 function getFiltrosGlobais() {
@@ -150,6 +154,9 @@ function render() {
           <button class="btn-inline ${state.aba === 'grade' ? 'btn-inline--active' : ''}" data-aba="grade">
             Por Variação
           </button>
+          <button class="btn-inline ${state.aba === 'dre' ? 'btn-inline--active' : ''}" data-aba="dre">
+            DRE
+          </button>
         </div>
       </div>
 
@@ -166,7 +173,161 @@ function renderConteudoAba() {
   if (state.aba === 'pagar') return renderTabelaPagar();
   if (state.aba === 'fluxo') return renderTabelaFluxo();
   if (state.aba === 'grade') return renderTabelaGrade();
+  if (state.aba === 'dre') return renderDRE();
   return renderTabelaLucratividade();
+}
+
+function renderDRE() {
+  const d = state.dre;
+
+  if (!d) {
+    return `<div class="module-feedback module-feedback--info">Nenhum dado de DRE encontrado no período.</div>`;
+  }
+
+  function pct(v) { return `${Number(v || 0).toFixed(1)}%`; }
+  function val(v)  { return formatCurrency(v); }
+
+  function dreRow(label, value, bold = false, cls = '', indent = false) {
+    const style = indent ? 'padding-left:28px' : '';
+    return `
+      <tr class="${cls}">
+        <td style="${style}">${bold ? `<strong>${escapeHtml(label)}</strong>` : escapeHtml(label)}</td>
+        <td class="text-right" style="${style}">${bold ? `<strong>${val(value)}</strong>` : val(value)}</td>
+      </tr>
+    `;
+  }
+
+  function dreRowPct(label, value, pctVal, cls = '') {
+    return `
+      <tr class="${cls}">
+        <td><strong>${escapeHtml(label)}</strong></td>
+        <td class="text-right">
+          <strong>${val(value)}</strong>
+          <span class="badge ${Number(pctVal) >= 0 ? 'badge--success' : 'badge--danger'}" style="margin-left:8px;font-size:11px">
+            ${pct(pctVal)}
+          </span>
+        </td>
+      </tr>
+    `;
+  }
+
+  const mensal = Array.isArray(d.mensal) ? d.mensal : [];
+
+  const mensalRows = mensal.map((m) => `
+    <tr>
+      <td><strong>${escapeHtml(m.label)}</strong></td>
+      <td class="text-right">${val(m.receita)}</td>
+      <td class="text-right">${val(m.cmv)}</td>
+      <td class="text-right ${Number(m.lucro_bruto) < 0 ? 'text-danger' : 'text-success'}">
+        <strong>${val(m.lucro_bruto)}</strong>
+        <small style="display:block;color:var(--text-muted)">${pct(m.margem_bruta)}</small>
+      </td>
+      <td class="text-right">${val(m.despesas)}</td>
+      <td class="text-right ${Number(m.resultado) < 0 ? 'text-danger' : 'text-success'}">
+        <strong>${val(m.resultado)}</strong>
+        <small style="display:block;color:var(--text-muted)">${pct(m.margem_oper)}</small>
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="kpi-grid" style="margin-top:8px;margin-bottom:20px">
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div class="kpi-card__content">
+          <span>Receita Bruta</span>
+          <strong>${val(d.receita_bruta)}</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-box-open"></i></div>
+        <div class="kpi-card__content">
+          <span>CMV</span>
+          <strong>${val(d.cmv)}</strong>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="kpi-card__content">
+          <span>Lucro Bruto</span>
+          <strong class="${Number(d.lucro_bruto) >= 0 ? 'text-success' : 'text-danger'}">${val(d.lucro_bruto)}</strong>
+          <small>Margem: ${pct(d.margem_bruta)}</small>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card__icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="kpi-card__content">
+          <span>Resultado Operacional</span>
+          <strong class="${Number(d.resultado_operacional) >= 0 ? 'text-success' : 'text-danger'}">${val(d.resultado_operacional)}</strong>
+          <small>Margem: ${pct(d.margem_operacional)}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid" style="margin-bottom:24px">
+      <div class="panel-card panel-card--large">
+        <div class="panel-card__header"><div><h3>DRE — Demonstrativo de Resultado</h3><p>Apuração do período selecionado</p></div></div>
+        <div class="panel-card__body" style="padding:0">
+          <table class="data-table" style="margin:0">
+            <tbody>
+              ${dreRow('(+) Receita Bruta de Vendas', d.receita_bruta, true)}
+              ${dreRow('(-) Custo das Mercadorias Vendidas (CMV)', d.cmv, false, '', true)}
+              ${dreRowPct('(=) Lucro Bruto', d.lucro_bruto, d.margem_bruta, Number(d.lucro_bruto) < 0 ? 'text-danger' : '')}
+              ${dreRow('(-) Despesas Operacionais', d.despesas_operacionais, false, '', true)}
+              ${dreRowPct('(=) Resultado Operacional', d.resultado_operacional, d.margem_operacional, Number(d.resultado_operacional) < 0 ? 'text-danger' : '')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-card__header"><div><h3>Leitura rápida</h3><p>Interpretação gerencial</p></div></div>
+        <div class="panel-card__body">
+          <div class="alert-list">
+            <div class="alert-list__item ${Number(d.margem_bruta) >= 30 ? 'info' : Number(d.margem_bruta) >= 10 ? 'warning' : 'danger'}">
+              Margem bruta de <strong>${pct(d.margem_bruta)}</strong>${Number(d.margem_bruta) >= 30 ? ' — saudável.' : Number(d.margem_bruta) >= 10 ? ' — atenção ao CMV.' : ' — CMV elevado, revisar preços.'}
+            </div>
+            <div class="alert-list__item ${Number(d.resultado_operacional) >= 0 ? 'info' : 'danger'}">
+              Resultado operacional ${Number(d.resultado_operacional) >= 0 ? 'positivo' : 'negativo'} de <strong>${val(d.resultado_operacional)}</strong>.
+            </div>
+            ${Number(d.despesas_operacionais) > Number(d.lucro_bruto) * 0.8 ? `
+              <div class="alert-list__item warning">
+                Despesas operacionais consomem mais de 80% do lucro bruto.
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${mensal.length > 1 ? `
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th class="text-right">Receita</th>
+              <th class="text-right">CMV</th>
+              <th class="text-right">Lucro Bruto</th>
+              <th class="text-right">Despesas</th>
+              <th class="text-right">Resultado</th>
+            </tr>
+          </thead>
+          <tbody>${mensalRows}</tbody>
+          <tfoot>
+            <tr style="border-top:2px solid var(--border);font-weight:800">
+              <td><strong>Total</strong></td>
+              <td class="text-right"><strong>${val(d.receita_bruta)}</strong></td>
+              <td class="text-right"><strong>${val(d.cmv)}</strong></td>
+              <td class="text-right"><strong>${val(d.lucro_bruto)}</strong></td>
+              <td class="text-right"><strong>${val(d.despesas_operacionais)}</strong></td>
+              <td class="text-right"><strong class="${Number(d.resultado_operacional) >= 0 ? 'text-success' : 'text-danger'}">${val(d.resultado_operacional)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    ` : ''}
+  `;
 }
 
 function renderTabelaGrade() {
