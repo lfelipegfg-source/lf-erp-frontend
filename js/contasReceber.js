@@ -161,16 +161,30 @@ function renderSkeleton() {
   const container = document.getElementById('contasReceberContainer');
   if (!container) return;
 
+  const skRow = (cols) => `
+    <div class="skeleton-row">
+      ${cols.map((w, i) => `<span class="skeleton ${i === cols.length - 1 ? 'skeleton-badge' : 'skeleton-text'}" style="flex:${w}"></span>`).join('')}
+    </div>`;
+
   container.innerHTML = `
-    <section class="finance-module">
-      <div class="finance-module__panel">
-        <div class="finance-module__loading">
-          <div class="finance-module__loading-spinner"></div>
-          <p>Carregando contas a receber...</p>
+    <section class="module-card">
+      <div class="module-card__header">
+        <div>
+          <span class="skeleton skeleton-h3" style="width:200px"></span>
+          <span class="skeleton skeleton-text" style="width:260px;margin-top:8px"></span>
         </div>
       </div>
-    </section>
-  `;
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+        ${Array.from({length:3},()=>`
+          <div class="mini-stat" style="display:flex;flex-direction:column;gap:8px">
+            <span class="skeleton skeleton-text" style="width:50%"></span>
+            <span class="skeleton skeleton-value"></span>
+          </div>`).join('')}
+      </div>
+      <div style="padding:4px 0">
+        ${[[3,1,1,1],[3,1,1,1],[3,1,1,1],[3,1,1,1],[3,1,1,1],[3,1,1,1]].map(skRow).join('')}
+      </div>
+    </section>`;
 }
 
 function render() {

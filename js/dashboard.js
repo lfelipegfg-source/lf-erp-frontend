@@ -732,6 +732,55 @@ async function renderGraficos(params = {}) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─── Skeleton loaders ─────────────────────────────────────────────────────────
+
+function skeletonRows(n, cols = [2, 1, 1]) {
+  return `<div style="padding:4px 0">${Array.from({ length: n }, () => `
+    <div class="skeleton-row">
+      ${cols.map((flex, i) => `
+        <span class="skeleton ${i === cols.length - 1 ? 'skeleton-badge' : 'skeleton-text'}"
+              style="flex:${flex}${i === cols.length - 1 ? '' : ''}"></span>`
+      ).join('')}
+    </div>`).join('')}</div>`;
+}
+
+function renderDashboardSkeleton() {
+  // KPI cards — shimmer nos valores e subtítulos
+  [
+    ['kpiFaturamento', 'kpiFaturamentoMeta'],
+    ['kpiVendas',      'kpiVendasInfo'],
+    ['kpiReceber',     'kpiReceberInfo'],
+    ['kpiPagar',       'kpiPagarInfo'],
+    ['kpiEstoque',     'kpiEstoqueInfo'],
+    ['kpiClientes',    'kpiClientesInfo']
+  ].forEach(([valId, infoId]) => {
+    const valEl  = document.getElementById(valId);
+    const infoEl = document.getElementById(infoId);
+    if (valEl)  valEl.innerHTML  = '<span class="skeleton skeleton-value" style="display:inline-block;width:80%;margin-top:2px"></span>';
+    if (infoEl) infoEl.innerHTML = '<span class="skeleton skeleton-text"  style="display:inline-block;width:65%;margin-top:4px"></span>';
+  });
+
+  // Limpar trends
+  ['kpiFaturamentoTrend','kpiVendasTrend','kpiClientesTrend'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+
+  // Panels — mostrar rows de skeleton
+  setHtml('dashboardResumo',       skeletonRows(6, [2, 1]));
+  setHtml('dashboardTopProdutos',  skeletonRows(5, [3, 1]));
+  setHtml('dashboardAlertas',      skeletonRows(4, [4]));
+  setHtml('dashboardTabelaPrecos', skeletonRows(3, [2, 1]));
+
+  // Charts — placeholders
+  const vcv = document.getElementById('chartVendasDia');
+  const fcp = document.getElementById('chartFormaPagamento');
+  if (vcv?.parentElement) vcv.parentElement.innerHTML = `<div style="height:260px;display:flex;align-items:center;justify-content:center"><span class="skeleton" style="width:100%;height:200px;border-radius:var(--radius-sm)"></span></div>`;
+  if (fcp?.parentElement) fcp.parentElement.innerHTML = `<div style="min-height:220px;display:flex;align-items:center;justify-content:center;gap:20px"><span class="skeleton skeleton-icon" style="width:160px;height:160px;border-radius:50%"></span><div style="flex:1;display:flex;flex-direction:column;gap:10px">${Array.from({length:4},()=>'<span class="skeleton skeleton-text"></span>').join('')}</div></div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function renderErrorState(message = 'Não foi possível carregar o dashboard.') {
   destroyCharts();
   setText('kpiFaturamento', 'R$ 0,00');
@@ -760,6 +809,8 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
       filters: { ...filters },
       state: { ...state }
     };
+
+    renderDashboardSkeleton();
 
     const params = {
       data_inicial: filters.dataInicial || '',

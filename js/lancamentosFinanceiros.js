@@ -119,9 +119,35 @@ async function carregarLancamentos() {
 function renderSkeleton() {
   const c = document.getElementById('lancamentosContainer');
   if (!c) return;
+
+  const skRow = () => `
+    <div class="skeleton-row">
+      <span class="skeleton skeleton-badge" style="width:70px"></span>
+      <span class="skeleton skeleton-text" style="flex:3"></span>
+      <span class="skeleton skeleton-text" style="flex:2"></span>
+      <span class="skeleton skeleton-text" style="flex:1"></span>
+      <span class="skeleton skeleton-badge"></span>
+      <span class="skeleton skeleton-text" style="flex:1"></span>
+    </div>`;
+
   c.innerHTML = `
     <div class="module-card">
-      <div class="module-feedback module-feedback--info">Carregando lançamentos...</div>
+      <div class="module-card__header">
+        <div>
+          <span class="skeleton skeleton-h3" style="width:220px"></span>
+          <span class="skeleton skeleton-text" style="width:180px;margin-top:8px"></span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+        ${Array.from({length:3},()=>`
+          <div class="mini-stat" style="display:flex;flex-direction:column;gap:8px">
+            <span class="skeleton skeleton-text" style="width:50%"></span>
+            <span class="skeleton skeleton-value"></span>
+          </div>`).join('')}
+      </div>
+      <div style="padding:4px 0">
+        ${Array.from({length:6}, skRow).join('')}
+      </div>
     </div>`;
 }
 
