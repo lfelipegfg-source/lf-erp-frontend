@@ -82,7 +82,28 @@ const VIEW_CONFIG = {
   configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
 };
 
+// ── Tema (dark / light) ────────────────────────────────────────────────────────
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('lf_erp_theme', theme);
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) {
+    const isDark = theme === 'dark';
+    btn.innerHTML = `<i class="fa-solid fa-${isDark ? 'sun' : 'moon'}"></i>`;
+    btn.title = isDark ? 'Modo claro' : 'Modo escuro';
+  }
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('lf_erp_theme') || 'light';
+  applyTheme(saved);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   initializeApp();
 });
 
@@ -296,6 +317,14 @@ function bindFilterEvents() {
 }
 
 function bindTopbarEvents() {
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+
   const refreshDataBtn = document.getElementById('refreshDataBtn');
   const dashboardExportBtn = document.getElementById('dashboardExportBtn');
 

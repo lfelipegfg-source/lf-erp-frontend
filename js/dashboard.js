@@ -602,9 +602,12 @@ function renderChartVendas(vendasPorDia = []) {
   const totais  = vendasPorDia.map((r) => r.total);
 
   const ctx = canvas.getContext('2d');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(203,213,225,0.35)';
+  const tickColor  = isDark ? '#64748b' : '#64748b';
 
   const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-  gradient.addColorStop(0, 'rgba(37,99,235,0.22)');
+  gradient.addColorStop(0, isDark ? 'rgba(59,130,246,0.28)' : 'rgba(37,99,235,0.22)');
   gradient.addColorStop(1, 'rgba(37,99,235,0)');
 
   _chartVendas = new Chart(ctx, {
@@ -638,13 +641,13 @@ function renderChartVendas(vendasPorDia = []) {
       },
       scales: {
         x: {
-          grid: { color: 'rgba(203,213,225,0.35)' },
-          ticks: { color: '#64748b', font: { size: 11 }, maxRotation: 0 }
+          grid: { color: gridColor },
+          ticks: { color: tickColor, font: { size: 11 }, maxRotation: 0 }
         },
         y: {
-          grid: { color: 'rgba(203,213,225,0.35)' },
+          grid: { color: gridColor },
           ticks: {
-            color: '#64748b',
+            color: tickColor,
             font: { size: 11 },
             callback: (v) => 'R$ ' + Number(v).toLocaleString('pt-BR')
           },
