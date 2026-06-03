@@ -3323,6 +3323,177 @@ select {
 }
 
 /* =========================
+   PIX — Modal e botão
+========================= */
+
+.btn-inline--pix {
+  background: rgba(50,188,173,0.12);
+  color: #1a7a6e;
+  border-color: rgba(50,188,173,0.3);
+}
+
+.btn-inline--pix:hover { background: rgba(50,188,173,0.22); }
+
+.pix-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.52);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.pix-modal {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+}
+
+.pix-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pix-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.pix-icon { color: #32bcad; font-size: 1.3rem; }
+
+.pix-modal__body { padding: 22px; }
+
+.pix-sandbox-badge {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-radius: var(--radius-xs);
+  padding: 6px 12px;
+  font-size: .8rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.pix-valor {
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.pix-cliente {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .87rem;
+  margin-bottom: 16px;
+}
+
+.pix-qr-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.pix-qr {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  padding: 6px;
+}
+
+.pix-qr--svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pix-chave-wrap { margin-bottom: 16px; }
+.pix-chave-wrap label { font-size: .8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
+
+.pix-chave-box {
+  display: flex;
+  gap: 8px;
+}
+
+.pix-chave-input {
+  flex: 1;
+  font-size: .78rem;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pix-copy-btn { padding: 8px 12px; flex-shrink: 0; }
+
+.pix-timer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .83rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pix-status-badge {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.pix-status--aguardando { background: var(--warning-soft); color: var(--warning); }
+.pix-status--pago { background: var(--success-soft); color: var(--success); }
+
+.pix-sandbox-info {
+  background: var(--surface-2);
+  border-radius: var(--radius-xs);
+  padding: 12px 14px;
+  font-size: .82rem;
+}
+
+.pix-sandbox-info strong { display: block; margin-bottom: 6px; }
+.pix-sandbox-info ol { margin: 0; padding-left: 16px; color: var(--text-soft); }
+.pix-sandbox-info li { margin-bottom: 4px; }
+
+/* Config PIX em Configurações */
+.pix-config-info {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: rgba(50,188,173,0.08);
+  border: 1px solid rgba(50,188,173,0.25);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: .875rem;
+  color: #1a7a6e;
+}
+
+.pix-config-info i { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+.pix-config-info strong { display: block; font-weight: 700; margin-bottom: 3px; }
+
+/* =========================
    CONCILIAÇÃO BANCÁRIA
 ========================= */
 

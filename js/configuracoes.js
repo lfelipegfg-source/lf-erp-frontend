@@ -2,6 +2,10 @@ import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast } from './feedback.js';
 
+function esc(v) {
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 const ConfigModule = {
   state: {
     empresa: null,
@@ -54,11 +58,41 @@ const ConfigModule = {
       this.state.dados = data;
 
       const campoNome = document.getElementById('cfgNomeEmpresa');
-      if (campoNome) {
-        campoNome.value = data.nome_empresa || '';
-      }
+      if (campoNome) campoNome.value = data.nome_empresa || '';
+
+      // Carregar config PIX
+      try {
+        const pixCfg = await api.getPixConfig();
+        if (document.getElementById('cfgPixClientId')) {
+          document.getElementById('cfgPixClientId').value   = pixCfg.pix_client_id  || '';
+          document.getElementById('cfgPixChave').value      = pixCfg.pix_chave       || '';
+          document.getElementById('cfgPixSandbox').checked  = pixCfg.pix_sandbox !== false;
+          if (pixCfg.pix_certificado === 'configurado')
+            document.getElementById('cfgPixCertificado').placeholder = '✓ Certificado configurado (deixe vazio para manter)';
+        }
+      } catch (_) { /* silencioso — PIX é opcional */ }
     } catch (err) {
       console.error('Erro ao carregar configurações:', err);
+    }
+  },
+
+  async salvarPix() {
+    const btn = document.getElementById('cfgSalvarPixBtn');
+    try {
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
+      await api.savePixConfig({
+        pix_client_id:     document.getElementById('cfgPixClientId')?.value?.trim()    || '',
+        pix_client_secret: document.getElementById('cfgPixClientSecret')?.value?.trim() || '',
+        pix_certificado:   document.getElementById('cfgPixCertificado')?.value?.trim()  || '',
+        pix_chave:         document.getElementById('cfgPixChave')?.value?.trim()         || '',
+        pix_sandbox:       document.getElementById('cfgPixSandbox')?.checked ?? true
+      });
+      showToast('Configuração PIX salva com sucesso!', 'success');
+      document.getElementById('cfgPixClientSecret').value = '';
+    } catch (err) {
+      showToast(err.message || 'Erro ao salvar configuração PIX', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar configuração PIX'; }
     }
   },
 
@@ -294,6 +328,65 @@ const ConfigModule = {
 
         <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
 
+        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
+
+        <div class="module-card__header" style="margin-bottom:16px">
+          <div>
+            <h3><i class="fa-brands fa-pix" style="color:#32bcad;margin-right:6px"></i>PIX — Configuração EFÍ</h3>
+            <p>Configure as credenciais da EFÍ (Gerencianet) para gerar cobranças PIX automaticamente</p>
+          </div>
+        </div>
+
+        <div class="pix-config-info">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>
+            <strong>Como obter as credenciais</strong>
+            <ol style="margin:6px 0 0;padding-left:18px;font-size:.85rem;color:var(--text-soft)">
+              <li>Acesse <strong>efipay.com.br</strong> e abra uma conta gratuita</li>
+              <li>Vá em <strong>API → Criar aplicação</strong> → copie Client ID e Client Secret</li>
+              <li>Baixe o certificado <strong>.p12</strong> e carregue abaixo (como Base64)</li>
+              <li>Registre sua <strong>chave PIX</strong> (CPF, CNPJ, e-mail ou aleatória)</li>
+              <li>Desative o sandbox quando tudo estiver pronto</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="form-grid" style="max-width:600px" id="cfgPixForm">
+          <div class="form-field">
+            <label>Client ID</label>
+            <input id="cfgPixClientId" class="input" placeholder="Client_Id_..." />
+          </div>
+          <div class="form-field">
+            <label>Client Secret</label>
+            <input id="cfgPixClientSecret" class="input" type="password" placeholder="Client_Secret_..." />
+          </div>
+          <div class="form-field form-field--span-2">
+            <label>Chave PIX</label>
+            <input id="cfgPixChave" class="input" placeholder="CPF, CNPJ, e-mail ou chave aleatória" />
+          </div>
+          <div class="form-field form-field--span-2">
+            <label>Certificado (.p12 em Base64) <span style="color:var(--text-muted);font-weight:400">— opcional para sandbox</span></label>
+            <textarea id="cfgPixCertificado" class="input" rows="3"
+              placeholder="Cole aqui o conteúdo Base64 do certificado .p12 baixado da EFÍ..."></textarea>
+            <small style="color:var(--text-muted);font-size:.78rem">
+              Para converter: <code>base64 -i certificado.p12</code> (Linux/Mac) ou use uma ferramenta online segura.
+            </small>
+          </div>
+          <div class="form-field">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <input type="checkbox" id="cfgPixSandbox" style="width:16px;height:16px" checked />
+              <span>Modo Sandbox (testes) — desative para produção real</span>
+            </label>
+          </div>
+          <div class="form-field">
+            <button id="cfgSalvarPixBtn" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk"></i> Salvar configuração PIX
+            </button>
+          </div>
+        </div>
+
+        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
+
         <div class="module-card" style="background: var(--danger-soft); border-color: rgba(220,38,38,0.25);">
           <div class="module-card__header">
             <div>
@@ -312,6 +405,7 @@ const ConfigModule = {
       document.getElementById('cfgTrocarSenhaBtn')?.addEventListener('click', () => this.trocarSenha());
       document.getElementById('cfgCarregarHistoricoBtn')?.addEventListener('click', () => this.carregarHistorico());
       document.getElementById('resetDadosBtn')?.addEventListener('click', () => this.resetDados());
+      document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
     }, 0);
   }
 };

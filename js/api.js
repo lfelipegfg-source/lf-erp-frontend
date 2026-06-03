@@ -816,6 +816,29 @@ async function getFluxoCaixa(params = {}) {
   });
 }
 
+// ── PIX ───────────────────────────────────────────────────────────────────────
+
+async function getPixConfig() {
+  const empresa = getEmpresaNome();
+  return request('/pagamentos/pix/config', { method: 'GET', query: { empresa } });
+}
+
+async function savePixConfig(payload) {
+  const empresa = getEmpresaNome();
+  return request('/pagamentos/pix/config', { method: 'PUT', body: { ...payload, empresa } });
+}
+
+async function gerarPIX(payload) {
+  const empresa = getEmpresaNome();
+  const empresaId = getEmpresaId();
+  return request('/pagamentos/pix/gerar', { method: 'POST', body: { ...payload, empresa, empresa_id: empresaId } });
+}
+
+async function verificarStatusPIX(txid) {
+  const empresa = getEmpresaNome();
+  return request(`/pagamentos/pix/status/${txid}`, { method: 'GET', query: { empresa } });
+}
+
 // ── Conciliação Bancária ──────────────────────────────────────────────────────
 
 async function importarConciliacao(payload) {
@@ -1310,6 +1333,11 @@ const api = {
   getOrigemCompraContaPagar,
 
   getFluxoCaixa,
+
+  getPixConfig,
+  savePixConfig,
+  gerarPIX,
+  verificarStatusPIX,
 
   importarConciliacao,
   getConciliacoes,

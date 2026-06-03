@@ -1,5 +1,6 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { gerarPIX } from './pix.js';
 
 const state = {
   contas: [],
@@ -414,6 +415,15 @@ function renderLinhas() {
         Baixar
       </button>
 
+      <button class="btn-inline btn-inline--pix" type="button"
+        data-action="cobrar-pix-cr"
+        data-id="${conta.id}"
+        data-valor="${conta.valor}"
+        data-cliente="${conta.cliente_nome || ''}">
+        <i class="fa-brands fa-pix"></i>
+        PIX
+      </button>
+
       ${
         !conta.venda_id && status !== 'pago'
           ? `
@@ -511,6 +521,17 @@ function bindEventos() {
   document.querySelectorAll("[data-action='detalhe-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
       await abrirDetalheConta(button.dataset.id);
+    });
+  });
+
+  document.querySelectorAll("[data-action='cobrar-pix-cr']").forEach((button) => {
+    button.addEventListener('click', () => {
+      gerarPIX({
+        contaReceberID: Number(button.dataset.id),
+        valor:          Number(button.dataset.valor),
+        clienteNome:    button.dataset.cliente || '',
+        onPago:         () => recarregarContasReceber()
+      });
     });
   });
 
