@@ -1118,6 +1118,24 @@ async function getCaixaHistorico() {
   return request('/caixa/historico', { method: 'GET' });
 }
 
+// ── DEVOLUÇÕES ────────────────────────────────────────────────────────────────
+
+async function getDevolucoes(params = {}) {
+  return request('/devolucoes', { method: 'GET', query: params });
+}
+
+async function registrarDevolucao(payload) {
+  return request('/devolucoes', { method: 'POST', body: payload });
+}
+
+async function getDevolucoesDaVenda(vendaId) {
+  return request(`/devolucoes/venda/${vendaId}`, { method: 'GET' });
+}
+
+async function getVendaDetalheParaDevolucao(vendaId) {
+  return request(`/vendas/detalhe/${vendaId}`, { method: 'GET' });
+}
+
 function setApiBaseUrl(url) {
   if (!url || typeof url !== 'string') {
     throw new Error('Informe uma URL válida para a API.');
@@ -1275,6 +1293,11 @@ const api = {
   suprimentoCaixa,
   fecharCaixa,
   getCaixaHistorico,
+
+  getDevolucoes,
+  registrarDevolucao,
+  getDevolucoesDaVenda,
+  getVendaDetalheParaDevolucao,
 
   getAuthToken,
   getEmpresaId,
