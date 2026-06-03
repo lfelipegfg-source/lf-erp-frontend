@@ -72,11 +72,21 @@ const ComprasModule = {
       if (e.target.id === 'compraFormaPagamento') {
         this.toggleVencimentoField();
       }
+      if (e.target.id === 'xmlNFInput') {
+        const file = e.target.files?.[0];
+        if (file) this.importarXML(file);
+        e.target.value = '';
+      }
     });
 
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
+
+      if (btn.id === 'importarXmlBtn') {
+        document.getElementById('xmlNFInput')?.click();
+        return;
+      }
 
       if (btn.id === 'novaCompraBtn') {
         this.openModal();
@@ -179,11 +189,16 @@ const ComprasModule = {
           </div>
 
           <div class="module-card__actions">
+            <button class="btn btn-light" id="importarXmlBtn" type="button" title="Importar NF do fornecedor (XML)">
+              <i class="fa-solid fa-file-import"></i>
+              Importar XML
+            </button>
             <button class="btn btn-primary" id="novaCompraBtn" type="button">
               <i class="fa-solid fa-plus"></i>
               Nova Compra
             </button>
           </div>
+          <input type="file" id="xmlNFInput" accept=".xml" style="display:none"/>
         </div>
 
         <div class="module-toolbar">
@@ -1302,6 +1317,176 @@ const ComprasModule = {
     `;
 
     document.head.appendChild(style);
+  },
+
+  // ── Import XML NF de Fornecedor ────────────────────────────────────────────
+
+  async importarXML(file) {
+    const btn = document.getElementById('importarXmlBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
+
+    try {
+      const conteudo = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload  = (e) => res(e.target.result);
+        reader.onerror = () => rej(new Error('Erro ao ler arquivo'));
+        reader.readAsText(file, 'utf-8');
+      });
+
+      const data = await api.importarXmlNF(conteudo);
+      this.renderModalXML(data);
+    } catch (err) {
+      showToast(err?.message || 'Erro ao processar XML', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-import"></i> Importar XML'; }
+    }
+  },
+
+  renderModalXML(data) {
+    const existing = document.getElementById('_xmlNFModal');
+    if (existing) existing.remove();
+
+    const esc = (v) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const cur = (v) => Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+    const fornecedorOptions = this.state.fornecedores.map(f =>
+      `<option value="${f.id}" ${f.id === data.fornecedor_id ? 'selected' : ''}>${esc(f.nome)}</option>`
+    ).join('');
+
+    const itensHTML = (data.itens || []).map((item, idx) => `
+      <tr>
+        <td style="font-size:.82rem">${esc(item.nome)}</td>
+        <td style="text-align:center">${item.quantidade}</td>
+        <td style="text-align:right">${cur(item.custo_unitario)}</td>
+        <td style="text-align:right"><strong>${cur(item.total)}</strong></td>
+        <td>
+          <select class="input xml-produto-select" style="font-size:.8rem;padding:4px 8px" data-idx="${idx}">
+            <option value="">— Vincular produto —</option>
+            ${this.state.produtos.map(p =>
+              `<option value="${p.id}">${esc(p.nome)}</option>`
+            ).join('')}
+          </select>
+        </td>
+      </tr>`).join('');
+
+    const overlay = document.createElement('div');
+    overlay.id = '_xmlNFModal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,.55);z-index:3500;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto';
+
+    overlay.innerHTML = `
+      <div style="background:var(--surface);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);width:100%;max-width:860px;max-height:90vh;overflow-y:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)">
+          <div>
+            <h3 style="margin:0;font-size:1rem;font-weight:700">Importar NF do Fornecedor</h3>
+            <p style="margin:4px 0 0;font-size:.83rem;color:var(--text-muted)">NF-e nº ${esc(data.numero_nf || '—')} · ${esc(data.data_emissao || '—')} · Total: ${cur(data.total)}</p>
+          </div>
+          <button id="_xmlFechar" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div style="padding:22px;display:grid;gap:18px">
+
+          ${!data.fornecedor_id ? `<div class="module-feedback module-feedback--info" style="margin:0">
+            CNPJ ${esc(data.fornecedor_cnpj)} não encontrado na base. Selecione um fornecedor abaixo ou cadastre-o primeiro.
+          </div>` : `<div class="module-feedback module-feedback--success" style="margin:0">
+            Fornecedor identificado: <strong>${esc(data.fornecedor_nome)}</strong>
+          </div>`}
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="form-field">
+              <label>Fornecedor <span style="color:var(--danger)">*</span></label>
+              <select id="_xmlFornecedor" class="input" required>
+                <option value="">Selecionar...</option>
+                ${fornecedorOptions}
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Data</label>
+              <input id="_xmlData" class="input" type="date" value="${esc(data.data_emissao || '')}" />
+            </div>
+            <div class="form-field">
+              <label>Forma de Pagamento</label>
+              <select id="_xmlForma" class="input">
+                ${['dinheiro','boleto','pix','transferencia','cartao credito','cartao debito','cheque','promissoria'].map(f =>
+                  `<option value="${f}" ${f === data.forma_pagamento ? 'selected' : ''}>${f.charAt(0).toUpperCase()+f.slice(1)}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Observação</label>
+              <input id="_xmlObs" class="input" placeholder="Ex: NF ${esc(data.numero_nf)}" value="NF ${esc(data.numero_nf)}" />
+            </div>
+          </div>
+
+          <div>
+            <h4 style="font-size:.9rem;font-weight:700;margin-bottom:10px">Itens da NF (${(data.itens||[]).length})</h4>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px">Vincule cada item da NF a um produto do seu cadastro. Itens sem vínculo serão ignorados.</p>
+            <div class="table-wrapper">
+              <table class="data-table" style="font-size:.85rem">
+                <thead>
+                  <tr><th>Produto na NF</th><th>Qtd</th><th class="text-right">Unit</th><th class="text-right">Total</th><th>Produto no sistema</th></tr>
+                </thead>
+                <tbody>${itensHTML}</tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--border)">
+            <button class="btn btn-light" id="_xmlCancelar">Cancelar</button>
+            <button class="btn btn-primary" id="_xmlConfirmar">
+              <i class="fa-solid fa-basket-shopping"></i> Criar Compra
+            </button>
+          </div>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('_xmlFechar').onclick  = () => overlay.remove();
+    document.getElementById('_xmlCancelar').onclick = () => overlay.remove();
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    document.getElementById('_xmlConfirmar').onclick = async () => {
+      const fornecedorId = Number(document.getElementById('_xmlFornecedor').value);
+      const dataVal      = document.getElementById('_xmlData').value;
+      const formaVal     = document.getElementById('_xmlForma').value;
+      const obsVal       = document.getElementById('_xmlObs').value;
+
+      if (!fornecedorId) { showToast('Selecione o fornecedor.', 'error'); return; }
+      if (!dataVal)      { showToast('Informe a data da compra.', 'error'); return; }
+
+      // Coleta itens vinculados
+      const itensVinculados = [];
+      overlay.querySelectorAll('.xml-produto-select').forEach((sel, idx) => {
+        if (!sel.value) return;
+        const item = data.itens[idx];
+        itensVinculados.push({
+          produto_id:    Number(sel.value),
+          quantidade:    item.quantidade,
+          custo_unitario: item.custo_unitario
+        });
+      });
+
+      if (!itensVinculados.length) { showToast('Vincule pelo menos um item a um produto.', 'error'); return; }
+
+      const btn = document.getElementById('_xmlConfirmar');
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Criando...';
+
+      try {
+        await api.createCompra({
+          fornecedor_id: fornecedorId,
+          data: dataVal,
+          pagamento: formaVal,
+          observacao: obsVal,
+          itens: itensVinculados
+        });
+        showToast('Compra criada com sucesso a partir da NF!', 'success');
+        overlay.remove();
+        await this.load();
+      } catch (err) {
+        showToast(err?.message || 'Erro ao criar compra', 'error');
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-basket-shopping"></i> Criar Compra';
+      }
+    };
   }
 };
 

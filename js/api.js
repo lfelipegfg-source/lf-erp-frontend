@@ -816,6 +816,17 @@ async function getFluxoCaixa(params = {}) {
   });
 }
 
+// ── Import XML NF de Fornecedor ───────────────────────────────────────────────
+
+async function importarXmlNF(conteudo) {
+  const empresa   = getEmpresaNome();
+  const empresaId = getEmpresaId();
+  return request('/compras/importar-xml', {
+    method: 'POST',
+    body: { conteudo, empresa, empresa_id: empresaId }
+  });
+}
+
 // ── NFC-e ─────────────────────────────────────────────────────────────────────
 
 async function emitirNfce(vendaId) {
@@ -1355,6 +1366,8 @@ const api = {
   getOrigemCompraContaPagar,
 
   getFluxoCaixa,
+
+  importarXmlNF,
 
   emitirNfce,
   consultarNfce,
