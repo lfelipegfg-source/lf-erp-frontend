@@ -171,6 +171,10 @@ const OrcamentosModule = {
       `<button class="btn-inline ${cls}" data-orc-acao="${acao}" data-orc-id="${o.id}">${label}</button>`;
 
     const acoes = [];
+    // PDF disponível para qualquer status exceto excluído
+    if (!['expirado'].includes(o.status)) {
+      acoes.push(btn('<i class="fa-solid fa-file-pdf"></i> PDF', 'pdf'));
+    }
     if (o.status === 'rascunho') {
       acoes.push(btn('Enviar', 'enviar'));
       acoes.push(btn('Excluir', 'excluir', 'btn-inline--danger'));
@@ -185,9 +189,22 @@ const OrcamentosModule = {
     return acoes.join('');
   },
 
+  async gerarPdf(id) {
+    try {
+      showToast('Carregando orçamento...', 'info');
+      const result = await api.getOrcamento(id);
+      const orc = result?.orcamento || result;
+      localStorage.setItem('lf_erp_orcamento_pdf', JSON.stringify(orc));
+      window.open('./orcamento-pdf.html', '_blank');
+    } catch (err) {
+      showToast(err.message || 'Erro ao gerar PDF.', 'error');
+    }
+  },
+
   async executarAcao(id, acao, btnEl) {
     if (btnEl) btnEl.disabled = true;
     try {
+      if (acao === 'pdf') { await this.gerarPdf(id); if (btnEl) btnEl.disabled = false; return; }
       if (acao === 'enviar') {
         await api.enviarOrcamento(id);
         showToast('Orçamento marcado como enviado.', 'success');
