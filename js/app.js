@@ -18,6 +18,7 @@ import { initConfigModule } from './configuracoes.js';
 import { initNfeModule } from './nfe.js';
 import { initOrcamentosModule } from './orcamentos.js';
 import { initPedidosModule } from './pedidos.js';
+import { initComissoesModule } from './comissoes.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -68,6 +69,7 @@ const VIEW_CONFIG = {
   relatorios: { title: 'Relatórios', subtitle: 'Relatórios gerenciais e operacionais' },
   orcamentos: { title: 'Orçamentos', subtitle: 'Cotações emitidas — gerencie aprovações e converta em pedidos' },
   pedidos: { title: 'Pedidos', subtitle: 'Pedidos em andamento — confirme, separe e converta em venda' },
+  comissoes: { title: 'Comissões', subtitle: 'Comissões de vendedores por venda realizada' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
   configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
 };
@@ -483,6 +485,8 @@ async function loadCurrentView(view) {
     await loadFornecedoresReal();
   } else if (view === 'usuarios') {
     await loadUsuariosReal();
+  } else if (view === 'comissoes') {
+    await loadComissoesReal();
   } else if (view === 'orcamentos') {
     await loadOrcamentosReal();
   } else if (view === 'pedidos') {
@@ -1114,6 +1118,20 @@ async function loadUsuariosReal() {
     console.error('Erro ao carregar usuários:', error);
     showToast('Falha ao carregar módulo de usuários.', 'error');
     renderModuleError('usuariosContainer', 'Usuários', 'Não foi possível carregar usuários.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadComissoesReal() {
+  showGlobalLoader('Carregando comissões...');
+  try {
+    await initComissoesModule();
+    showToast('Comissões carregadas.', 'success');
+  } catch (error) {
+    console.error('Erro ao carregar comissões:', error);
+    showToast('Falha ao carregar comissões.', 'error');
+    renderModuleError('comissoesContainer', 'Comissões', 'Não foi possível carregar comissões.');
   } finally {
     hideGlobalLoader();
   }

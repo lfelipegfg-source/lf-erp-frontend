@@ -1053,6 +1053,36 @@ async function converterPedidoVenda(id, payload = {}) {
   return request(`/pedidos/${id}/converter-venda`, { method: 'POST', body: payload });
 }
 
+// ── COMISSÕES ─────────────────────────────────────────────────────────────────
+
+async function getComissoesConfig() {
+  return request('/comissoes/config', { method: 'GET' });
+}
+
+async function salvarComissaoConfig(payload) {
+  return request('/comissoes/config', { method: 'POST', body: payload });
+}
+
+async function deleteComissaoConfig(id) {
+  return request(`/comissoes/config/${id}`, { method: 'DELETE' });
+}
+
+async function getComissoes(params = {}) {
+  return request('/comissoes', { method: 'GET', query: params });
+}
+
+async function getComissoesResumo(params = {}) {
+  return request('/comissoes/resumo', { method: 'GET', query: params });
+}
+
+async function pagarComissao(id, payload = {}) {
+  return request(`/comissoes/${id}/pagar`, { method: 'POST', body: payload });
+}
+
+async function cancelarComissao(id) {
+  return request(`/comissoes/${id}/cancelar`, { method: 'POST', body: {} });
+}
+
 function setApiBaseUrl(url) {
   if (!url || typeof url !== 'string') {
     throw new Error('Informe uma URL válida para a API.');
@@ -1194,6 +1224,14 @@ const api = {
   separacaoPedido,
   cancelarPedido,
   converterPedidoVenda,
+
+  getComissoesConfig,
+  salvarComissaoConfig,
+  deleteComissaoConfig,
+  getComissoes,
+  getComissoesResumo,
+  pagarComissao,
+  cancelarComissao,
 
   getAuthToken,
   getEmpresaId,
