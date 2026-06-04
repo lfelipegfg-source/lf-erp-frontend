@@ -29,6 +29,7 @@ import { initExportacaoContabilModule } from './exportacaoContabil.js';
 import { initApiPublicaModule } from './apiPublica.js';
 import { initRastreabilidadeModule } from './rastreabilidade.js';
 import { initWhatsappModule } from './whatsapp.js';
+import { initFidelidadeModule } from './fidelidade.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -85,6 +86,7 @@ const VIEW_CONFIG = {
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
   alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  fidelidade: { title: 'Programa de Fidelidade', subtitle: 'Pontos por compra, ranking e resgate' },
   whatsapp: { title: 'WhatsApp Business', subtitle: 'Cobranças automáticas e mensagens via API' },
   rastreabilidade: { title: 'Rastreabilidade', subtitle: 'Controle de lotes e números de série' },
   'api-publica': { title: 'API & Webhooks', subtitle: 'Integração com sistemas externos via API Key e webhooks' },
@@ -696,6 +698,8 @@ async function loadCurrentView(view) {
     await loadPedidosReal();
   } else if (view === 'nfe') {
     await loadNfeReal();
+  } else if (view === 'fidelidade') {
+    await loadFidelidadeReal();
   } else if (view === 'whatsapp') {
     await loadWhatsappReal();
   } else if (view === 'rastreabilidade') {
@@ -1455,6 +1459,18 @@ async function loadNfeReal() {
     console.error('Erro ao carregar NF-e:', error);
     showToast('Falha ao carregar módulo NF-e.', 'error');
     renderModuleError('nfeContainer', 'NF-e', 'Não foi possível carregar o módulo NF-e.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadFidelidadeReal() {
+  showGlobalLoader('Carregando fidelidade...');
+  try {
+    await initFidelidadeModule();
+  } catch (error) {
+    console.error('Erro ao carregar fidelidade:', error);
+    renderModuleError('fidelidadeContainer', 'Fidelidade', 'Nao foi possivel carregar o modulo.');
   } finally {
     hideGlobalLoader();
   }
