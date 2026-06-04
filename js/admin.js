@@ -51,6 +51,7 @@
     if (tab === 'empresas')  carregarEmpresas();
     if (tab === 'planos')    carregarPlanos();
     if (tab === 'billing')   carregarBilling();
+    if (tab === 'smtp')      carregarSmtpConfig();
   };
 
   // ══════════════════════════════════════════════════════
@@ -637,6 +638,92 @@
     d.setDate(d.getDate() + dias);
     return d.toISOString().slice(0, 10);
   }
+
+  // ══════════════════════════════════════════════════════
+  //  CONFIG SMTP (EMAIL TRANSACIONAL)
+  // ══════════════════════════════════════════════════════
+
+  async function carregarSmtpConfig() {
+    const corpo = document.getElementById('smtpCorpo');
+    if (!corpo) return;
+    try {
+      const cfg = await api('/admin/smtp/config');
+      corpo.innerHTML = `
+        <h4 style="margin:0 0 16px;font-size:15px;font-weight:700">
+          <i class="fa fa-envelope"></i> Configuração SMTP — E-mails Transacionais
+        </h4>
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px">
+          Configure o servidor de e-mail para envio de boas-vindas, confirmações e alertas do sistema.
+          Use Gmail (com App Password), Brevo, SendGrid SMTP, etc.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:640px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">HOST SMTP</label>
+            <input id="smtpHost" class="form-input" placeholder="smtp.gmail.com" value="${cfg.smtp_host || ''}" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">PORTA</label>
+            <input id="smtpPort" class="form-input" type="number" placeholder="587" value="${cfg.smtp_port || 587}" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">USUÁRIO</label>
+            <input id="smtpUser" class="form-input" placeholder="seu@email.com" value="${cfg.smtp_user || ''}" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">SENHA / APP PASSWORD</label>
+            <input id="smtpPass" class="form-input" type="password" placeholder="${cfg.smtp_pass === '***' ? '*** (configurada)' : 'Senha ou App Password'}" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">REMETENTE (FROM)</label>
+            <input id="smtpFrom" class="form-input" placeholder="LF ERP &lt;noreply@lferp.com&gt;" value="${cfg.smtp_from || ''}" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">URL DO SISTEMA (para links nos emails)</label>
+            <input id="smtpAppUrl" class="form-input" placeholder="https://app.lferp.com" value="${cfg.app_url || ''}" />
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+          <button class="btn btn-primary btn-sm" onclick="salvarSmtpConfig()">
+            <i class="fa fa-save"></i> Salvar
+          </button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="smtpTestEmail" class="form-input" style="width:220px" placeholder="email para teste..." />
+            <button class="btn btn-secondary btn-sm" onclick="testarSmtp()">
+              <i class="fa fa-paper-plane"></i> Enviar teste
+            </button>
+          </div>
+        </div>`;
+    } catch (e) {
+      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+    }
+  }
+
+  window.salvarSmtpConfig = async function () {
+    try {
+      await api('/admin/smtp/config', {
+        method: 'PUT',
+        body: {
+          smtp_host: document.getElementById('smtpHost')?.value?.trim() || null,
+          smtp_port: Number(document.getElementById('smtpPort')?.value) || 587,
+          smtp_user: document.getElementById('smtpUser')?.value?.trim() || null,
+          smtp_pass: document.getElementById('smtpPass')?.value || null,
+          smtp_from: document.getElementById('smtpFrom')?.value?.trim() || null,
+          app_url:   document.getElementById('smtpAppUrl')?.value?.trim() || null
+        }
+      });
+      showToast('Configuração SMTP salva!', 'success');
+      if (document.getElementById('smtpPass')) document.getElementById('smtpPass').value = '';
+    } catch (e) { showToast(`Erro: ${e.message}`, 'error'); }
+  };
+
+  window.testarSmtp = async function () {
+    const email = document.getElementById('smtpTestEmail')?.value?.trim();
+    if (!email) { showToast('Informe um email para teste', 'error'); return; }
+    try {
+      const r = await api('/admin/smtp/testar', { method: 'POST', body: { email } });
+      showToast(r.mensagem || 'Teste enviado!', 'success');
+    } catch (e) { showToast(`Erro: ${e.message}`, 'error'); }
+  };
 
   // ── Init ─────────────────────────────────────────────
   carregarOwnerDashboard();
