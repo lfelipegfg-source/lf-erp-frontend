@@ -226,6 +226,12 @@ const VendasModule = {
         return;
       }
 
+      if (button.dataset.action === 'imprimir-recibo-venda') {
+        event.preventDefault();
+        await this.imprimirRecibo(Number(button.dataset.id));
+        return;
+      }
+
       if (button.dataset.action === 'emitir-nfce-venda') {
         event.preventDefault();
         const id = Number(button.dataset.id);
@@ -607,6 +613,16 @@ const VendasModule = {
               >
                 <i class="fa-solid fa-eye"></i>
                 Detalhes
+              </button>
+              <button
+                type="button"
+                class="btn-inline"
+                data-action="imprimir-recibo-venda"
+                data-id="${id}"
+                title="Imprimir recibo simples"
+              >
+                <i class="fa-solid fa-receipt"></i>
+                Recibo
               </button>
               <button
                 type="button"
@@ -2073,6 +2089,92 @@ const VendasModule = {
     } finally {
       if (btn) { btn.disabled = false; btn.innerHTML = original; }
     }
+  },
+
+  // ── Recibo simples (não fiscal) ──────────────────────────────────────────────
+
+  async imprimirRecibo(vendaId) {
+    if (!vendaId) return;
+    try {
+      const venda = await api.getVendaDetalhe(vendaId);
+      this._abrirJanelaRecibo(venda);
+    } catch (err) {
+      showToast(err?.message || 'Erro ao carregar dados da venda', 'error');
+    }
+  },
+
+  _abrirJanelaRecibo(venda) {
+    const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const dt  = (v) => v ? new Date(`${v}T12:00:00`).toLocaleDateString('pt-BR') : '-';
+    const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const empresa = window.LfErpApi?.getEmpresaNome?.() || '';
+
+    const itens = (venda.itens || []).map((i) => `
+      <tr>
+        <td>${esc(i.produto_nome || '-')}</td>
+        <td class="center">${Number(i.quantidade || 0)}</td>
+        <td class="right">${cur(i.preco_unitario)}</td>
+        <td class="right">${cur(i.total)}</td>
+      </tr>`).join('');
+
+    const pagamentos = Array.isArray(venda.pagamentos) && venda.pagamentos.length > 1
+      ? venda.pagamentos.map((p) => `<div style="display:flex;justify-content:space-between"><span>${esc(p.forma)}</span><span>${cur(p.valor)}</span></div>`).join('')
+      : '';
+
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+      <title>Recibo #${venda.id}</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #222; padding: 20px; max-width: 380px; margin: 0 auto; }
+        h1 { font-size: 16px; text-align: center; margin-bottom: 2px; }
+        .empresa { text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 12px; }
+        .sep { border: none; border-top: 1px dashed #aaa; margin: 10px 0; }
+        .info { margin-bottom: 10px; }
+        .info div { display: flex; justify-content: space-between; margin-bottom: 3px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th { text-align: left; border-bottom: 1px solid #ccc; padding: 4px 0; font-size: 11px; }
+        td { padding: 4px 0; vertical-align: top; font-size: 11px; }
+        td.right, th.right { text-align: right; }
+        td.center { text-align: center; }
+        .totais { border-top: 1px dashed #aaa; padding-top: 8px; margin-top: 4px; }
+        .totais div { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .totais .total-final { font-size: 14px; font-weight: bold; border-top: 1px solid #ccc; padding-top: 6px; margin-top: 4px; }
+        .rodape { text-align: center; margin-top: 16px; font-size: 10px; color: #666; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <div class="empresa">${esc(empresa)}</div>
+      <h1>RECIBO DE VENDA</h1>
+      <hr class="sep">
+      <div class="info">
+        <div><span>Nº da venda:</span><span>#${venda.id}</span></div>
+        <div><span>Data:</span><span>${dt(venda.data)}</span></div>
+        ${venda.cliente_nome ? `<div><span>Cliente:</span><span>${esc(venda.cliente_nome)}</span></div>` : ''}
+      </div>
+      <hr class="sep">
+      <table>
+        <thead><tr>
+          <th>Produto</th><th class="center">Qtd</th>
+          <th class="right">Unit.</th><th class="right">Total</th>
+        </tr></thead>
+        <tbody>${itens}</tbody>
+      </table>
+      <div class="totais">
+        ${Number(venda.desconto || 0) > 0 ? `<div><span>Subtotal</span><span>${cur(venda.subtotal)}</span></div><div><span>Desconto</span><span>- ${cur(venda.desconto)}</span></div>` : ''}
+        ${Number(venda.acrescimo || 0) > 0 ? `<div><span>Acréscimo</span><span>+ ${cur(venda.acrescimo)}</span></div>` : ''}
+        <div class="total-final"><span>TOTAL</span><span>${cur(venda.total)}</span></div>
+        ${pagamentos ? `<div style="margin-top:6px;font-size:11px;color:#555">${pagamentos}</div>` : `<div style="margin-top:4px;font-size:11px;color:#555"><span>Pagamento:</span><span>${esc(venda.pagamento || '-')}</span></div>`}
+      </div>
+      ${venda.observacao ? `<hr class="sep"><div style="font-size:11px;color:#666">Obs: ${esc(venda.observacao)}</div>` : ''}
+      <div class="rodape">
+        Documento sem valor fiscal · Gerado em ${new Date().toLocaleDateString('pt-BR')}
+      </div>
+      <script>window.onload = () => { window.print(); }<\/script>
+      </body></html>`;
+
+    const win = window.open('', '_blank', 'width=420,height=600');
+    if (win) { win.document.write(html); win.document.close(); }
+    else showToast('Permita pop-ups para imprimir o recibo.', 'warning');
   }
 };
 
