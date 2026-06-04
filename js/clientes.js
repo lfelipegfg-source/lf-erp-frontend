@@ -103,12 +103,24 @@ const ClientesModule = {
         this.edit(btn.dataset.id);
       }
 
+      if (btn.dataset.action === 'extrato-cliente') {
+        await this.abrirExtrato(Number(btn.dataset.id), btn.dataset.nome);
+      }
+
       if (btn.dataset.action === 'portal-cliente') {
         await this.configurarPortal(btn.dataset.id, btn.dataset.nome);
       }
 
       if (btn.dataset.action === 'delete-cliente') {
         await this.delete(btn.dataset.id);
+      }
+
+      if (btn.id === 'extratoClienteFecharBtn' || btn.id === 'extratoClienteFecharFooter') {
+        document.getElementById('extratoClienteModal')?.classList.add('hidden');
+      }
+
+      if (btn.id === 'extratoClienteImprimirBtn') {
+        this.imprimirExtrato();
       }
     });
 
@@ -304,6 +316,9 @@ const ClientesModule = {
           <div class="table-actions">
             <button class="btn-inline" data-action="edit-cliente" data-id="${cliente.id}">
               Editar
+            </button>
+            <button class="btn-inline" data-action="extrato-cliente" data-id="${cliente.id}" data-nome="${escapeHtml(cliente.nome || '')}">
+              <i class="fa-solid fa-file-invoice-dollar"></i> Extrato
             </button>
             <button class="btn-inline ${cliente.portal_ativo ? 'btn-inline--active' : ''}" data-action="portal-cliente" data-id="${cliente.id}" data-nome="${escapeHtml(cliente.nome || '')}">
               <i class="fa-solid fa-globe"></i> Portal
@@ -680,6 +695,175 @@ const ClientesModule = {
     document.getElementById('abcVoltarBtn2').onclick = () => {
       this.render(); this.cache(); this.renderTable();
     };
+  },
+
+  // ── Extrato do cliente ──────────────────────────────────────────────────────
+
+  async abrirExtrato(clienteId, clienteNome) {
+    // Injeta modal se ainda não existe
+    if (!document.getElementById('extratoClienteModal')) {
+      const el = document.createElement('div');
+      el.className = 'modal-overlay hidden';
+      el.id = 'extratoClienteModal';
+      el.innerHTML = `
+        <div class="modal-card" style="max-width:780px;width:95vw">
+          <div class="modal-card__header">
+            <div>
+              <h3 id="extratoClienteTitulo">Extrato</h3>
+              <p id="extratoClienteSubtitulo" style="color:var(--text-muted);font-size:.9rem"></p>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button type="button" class="btn btn-light btn-sm" id="extratoClienteImprimirBtn">
+                <i class="fa-solid fa-print"></i> Imprimir
+              </button>
+              <button type="button" class="icon-button" id="extratoClienteFecharBtn">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          <div id="extratoClienteCorpo" style="padding:20px 24px 24px;overflow-y:auto;max-height:70vh">
+            <div class="skeleton-line" style="height:80px;border-radius:12px;margin-bottom:16px"></div>
+            <div class="skeleton-line" style="height:200px;border-radius:12px"></div>
+          </div>
+          <div class="modal-card__footer" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+            <button type="button" class="btn btn-light" id="extratoClienteFecharFooter">Fechar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(el);
+    }
+
+    const modal = document.getElementById('extratoClienteModal');
+    const titulo = document.getElementById('extratoClienteTitulo');
+    const subtitulo = document.getElementById('extratoClienteSubtitulo');
+    const corpo = document.getElementById('extratoClienteCorpo');
+
+    if (titulo) titulo.textContent = `Extrato — ${escapeHtml(clienteNome || 'Cliente')}`;
+    if (subtitulo) subtitulo.textContent = 'Carregando...';
+    modal.classList.remove('hidden');
+
+    try {
+      const data = await api.request(`/clientes/${clienteId}/extrato`, { method: 'GET' });
+      this._extratoAtual = data;
+      this._renderExtratoCorpo(data, corpo, subtitulo);
+    } catch (err) {
+      if (corpo) corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message || 'Erro ao carregar extrato')}</div>`;
+    }
+  },
+
+  _renderExtratoCorpo(data, corpo, subtitulo) {
+    const { cliente, resumo, parcelas } = data;
+    const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const dt  = (v) => v ? new Date(`${v}T12:00:00`).toLocaleDateString('pt-BR') : '-';
+
+    const statusLabel = { pago: 'Pago', pendente: 'Pendente', atrasado: 'Atrasado', parcial: 'Parcial', parcial_atrasado: 'Parcial em atraso' };
+    const statusClass = { pago: 'badge--success', pendente: 'badge--warning', atrasado: 'badge--danger', parcial: 'badge--info', parcial_atrasado: 'badge--danger' };
+
+    if (subtitulo) {
+      subtitulo.textContent = resumo.qtd_pendente > 0
+        ? `${resumo.qtd_pendente} parcela(s) em aberto · Total: ${cur(resumo.total_aberto)}`
+        : 'Sem pendências financeiras';
+    }
+
+    corpo.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px">
+        ${[
+          ['Em aberto',   resumo.total_aberto,   resumo.total_aberto > 0   ? 'var(--warning,#d69e2e)' : 'var(--text-muted)'],
+          ['Atrasado',    resumo.total_atrasado,  resumo.total_atrasado > 0 ? 'var(--danger,#e53e3e)'  : 'var(--text-muted)'],
+          ['Já recebido', resumo.total_pago,      'var(--success,#38a169)'],
+          ['Parcial',     resumo.total_parcial,   resumo.total_parcial > 0  ? 'var(--info,#3182ce)'    : 'var(--text-muted)']
+        ].map(([label, valor, cor]) => `
+          <div style="border:1px solid var(--border);border-radius:14px;padding:14px">
+            <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:4px">${label}</div>
+            <div style="font-size:1.1rem;font-weight:800;color:${cor}">${cur(valor)}</div>
+          </div>`).join('')}
+      </div>
+
+      ${parcelas.length === 0
+        ? `<div class="empty-state">Nenhum lançamento financeiro encontrado para este cliente.</div>`
+        : `<div class="table-wrapper">
+           <table class="data-table">
+             <thead><tr>
+               <th>Venda</th><th>Parcela</th><th>Vencimento</th>
+               <th class="text-right">Valor</th><th class="text-right">Atualizado</th>
+               <th>Pagamento</th><th>Status</th>
+             </tr></thead>
+             <tbody>
+               ${parcelas.map((p) => `
+                 <tr>
+                   <td><small>#${p.venda_id || '-'}</small></td>
+                   <td>${p.parcela}/${p.total_parcelas}</td>
+                   <td>${dt(p.data_vencimento)}${p.dias_atraso > 0 ? `<br><small style="color:var(--danger,#e53e3e)">${p.dias_atraso}d atraso</small>` : ''}</td>
+                   <td class="text-right">${cur(p.valor)}</td>
+                   <td class="text-right">${p.valor_atualizado !== p.valor ? `<strong>${cur(p.valor_atualizado)}</strong>` : cur(p.valor)}</td>
+                   <td>${dt(p.data_pagamento)}</td>
+                   <td><span class="badge ${statusClass[p.status] || ''}">${statusLabel[p.status] || p.status}</span></td>
+                 </tr>`).join('')}
+             </tbody>
+           </table>
+           </div>`}`;
+  },
+
+  imprimirExtrato() {
+    const data = this._extratoAtual;
+    if (!data) return;
+
+    const { cliente, resumo, parcelas } = data;
+    const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const dt  = (v) => v ? new Date(`${v}T12:00:00`).toLocaleDateString('pt-BR') : '-';
+    const statusLabel = { pago: 'Pago', pendente: 'Pendente', atrasado: 'Atrasado', parcial: 'Parcial', parcial_atrasado: 'Parcial em atraso' };
+
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+      <title>Extrato — ${escapeHtml(cliente.nome || '')}</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 13px; color: #222; padding: 24px; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        .resumo { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+        .resumo-item { border: 1px solid #ddd; border-radius: 8px; padding: 10px 16px; min-width: 130px; }
+        .resumo-item .label { font-size: 11px; color: #666; }
+        .resumo-item .valor { font-size: 15px; font-weight: bold; margin-top: 2px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th { background: #f5f5f5; text-align: left; padding: 7px 10px; font-size: 12px; }
+        td { padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
+        .text-right { text-align: right; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <h1>Extrato — ${escapeHtml(cliente.nome || '')}</h1>
+      <div style="color:#666;font-size:12px">
+        ${cliente.cpf || cliente.cpf_cnpj ? `CPF/CNPJ: ${escapeHtml(cliente.cpf || cliente.cpf_cnpj)} &nbsp;|&nbsp;` : ''}
+        ${cliente.telefone ? `Tel: ${escapeHtml(cliente.telefone)} &nbsp;|&nbsp;` : ''}
+        Gerado em: ${new Date().toLocaleDateString('pt-BR')}
+      </div>
+      <div class="resumo">
+        <div class="resumo-item"><div class="label">Em aberto</div><div class="valor">${cur(resumo.total_aberto)}</div></div>
+        <div class="resumo-item"><div class="label">Atrasado</div><div class="valor" style="color:#c53030">${cur(resumo.total_atrasado)}</div></div>
+        <div class="resumo-item"><div class="label">Já recebido</div><div class="valor" style="color:#276749">${cur(resumo.total_pago)}</div></div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Venda</th><th>Parcela</th><th>Vencimento</th>
+          <th class="text-right">Valor</th><th class="text-right">Atualizado</th>
+          <th>Pagamento</th><th>Status</th>
+        </tr></thead>
+        <tbody>
+          ${parcelas.map((p) => `
+            <tr>
+              <td>#${p.venda_id || '-'}</td>
+              <td>${p.parcela}/${p.total_parcelas}</td>
+              <td>${dt(p.data_vencimento)}</td>
+              <td class="text-right">${cur(p.valor)}</td>
+              <td class="text-right">${cur(p.valor_atualizado)}</td>
+              <td>${dt(p.data_pagamento)}</td>
+              <td>${statusLabel[p.status] || p.status}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      </body></html>`;
+
+    const win = window.open('', '_blank', 'width=800,height=600');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    win.print();
   }
 };
 
