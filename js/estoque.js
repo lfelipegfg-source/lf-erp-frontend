@@ -56,6 +56,14 @@ const EstoqueModule = {
       if (btn.id === 'estoqueAtualizarBtn') {
         await this.load();
       }
+
+      if (btn.id === 'estoqueSugestaoBtn') {
+        await this.abrirSugestaoCompra();
+      }
+
+      if (btn.id === 'sugestaoFecharBtn') {
+        document.getElementById('sugestaoCompraModal')?.classList.add('hidden');
+      }
     });
   },
 
@@ -110,6 +118,10 @@ const EstoqueModule = {
           </div>
 
           <div class="module-card__actions">
+            <button class="btn btn-light" id="estoqueSugestaoBtn" type="button">
+              <i class="fa-solid fa-cart-shopping"></i>
+              Sugestão de compra
+            </button>
             <button class="btn btn-light" id="estoqueAtualizarBtn" type="button">
               <i class="fa-solid fa-rotate"></i>
               Atualizar
@@ -366,6 +378,96 @@ const EstoqueModule = {
     }
 
     return message || 'Não foi possível concluir a operação.';
+  },
+
+  // ── Sugestão automática de compra ─────────────────────────────────────────
+
+  async abrirSugestaoCompra() {
+    if (!document.getElementById('sugestaoCompraModal')) {
+      const el = document.createElement('div');
+      el.className = 'modal-overlay hidden';
+      el.id = 'sugestaoCompraModal';
+      el.innerHTML = `
+        <div class="modal-card" style="max-width:820px;width:95vw">
+          <div class="modal-card__header">
+            <div>
+              <h3>Sugestão de Compra</h3>
+              <p id="sugestaoSubtitulo" style="color:var(--text-muted);font-size:.9rem">Produtos abaixo do estoque mínimo</p>
+            </div>
+            <button type="button" class="icon-button" id="sugestaoFecharBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="sugestaoCorpo" style="padding:20px 24px 24px;overflow-y:auto;max-height:70vh">
+            <div class="skeleton-line" style="height:200px;border-radius:12px"></div>
+          </div>
+        </div>`;
+      document.body.appendChild(el);
+    }
+
+    const modal  = document.getElementById('sugestaoCompraModal');
+    const corpo  = document.getElementById('sugestaoCorpo');
+    const sub    = document.getElementById('sugestaoSubtitulo');
+    modal.classList.remove('hidden');
+    if (corpo) corpo.innerHTML = `<div class="module-feedback module-feedback--info">Calculando sugestão...</div>`;
+
+    try {
+      const empresa = this.state.empresa || '';
+      const data = await api.request('/estoque/sugestao-compra', { method: 'GET', query: { empresa } });
+      const { itens = [], total_itens = 0, total_estimado = 0 } = data;
+
+      if (sub) sub.textContent = total_itens === 0
+        ? 'Todos os produtos estão acima do estoque mínimo'
+        : `${total_itens} produto(s) abaixo do mínimo · Custo estimado: ${formatCurrency(total_estimado)}`;
+
+      if (!itens.length) {
+        corpo.innerHTML = `<div class="empty-state"><i class="fa-solid fa-check-circle" style="color:var(--success,#38a169);font-size:2rem;margin-bottom:8px"></i><br>Nenhum produto precisa de reposição.</div>`;
+        return;
+      }
+
+      corpo.innerHTML = `
+        <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr>
+            <th>Produto</th>
+            <th>Categoria</th>
+            <th class="text-right">Atual</th>
+            <th class="text-right">Mínimo</th>
+            <th class="text-right">Sugerido</th>
+            <th class="text-right">Custo unit.</th>
+            <th class="text-right">Total est.</th>
+            <th>Fornecedor</th>
+          </tr></thead>
+          <tbody>
+            ${itens.map((i) => `
+              <tr>
+                <td>
+                  <div class="table-primary">
+                    <strong>${escapeHtml(i.nome)}</strong>
+                    ${i.codigo_barras ? `<small style="display:block;color:var(--text-muted)">${escapeHtml(i.codigo_barras)}</small>` : ''}
+                  </div>
+                </td>
+                <td>${escapeHtml(i.categoria || '-')}</td>
+                <td class="text-right" style="color:var(--danger,#e53e3e);font-weight:800">${i.estoque_atual}</td>
+                <td class="text-right">${i.estoque_minimo}</td>
+                <td class="text-right"><strong>${i.qtd_sugerida}</strong></td>
+                <td class="text-right">${i.custo_estimado > 0 ? formatCurrency(i.custo_estimado) : '-'}</td>
+                <td class="text-right">${i.custo_estimado > 0 ? formatCurrency(i.qtd_sugerida * i.custo_estimado) : '-'}</td>
+                <td>${escapeHtml(i.fornecedor_preferencial || '-')}</td>
+              </tr>`).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="font-weight:800;border-top:2px solid var(--border)">
+              <td colspan="6" class="text-right" style="padding-top:10px">Total estimado:</td>
+              <td class="text-right" style="padding-top:10px">${formatCurrency(total_estimado)}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        </div>`;
+    } catch (err) {
+      if (corpo) corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message || 'Erro ao carregar sugestão')}</div>`;
+    }
   }
 };
 
