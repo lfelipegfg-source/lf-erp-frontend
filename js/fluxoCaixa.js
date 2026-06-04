@@ -14,7 +14,9 @@ const state = {
     tipo: '',
     origem: ''
   },
-  loading: false
+  loading: false,
+  cashflowFuturo: null,
+  diasProjecao: 30
 };
 
 function showMessage(message, type = 'info') {
@@ -73,8 +75,14 @@ export async function initFluxoCaixaModule() {
   try {
     state.loading = true;
     renderSkeleton();
-    await carregarFluxoCaixa();
+
+    await Promise.all([
+      carregarFluxoCaixa(),
+      carregarCashflowFuturo(state.diasProjecao)
+    ]);
+
     render();
+    renderCashflowFuturo();
   } catch (error) {
     console.error('Erro ao iniciar fluxo de caixa:', error);
     const message = buildFriendlyError(error);
@@ -478,6 +486,109 @@ function renderResumoOrigens() {
     .join('');
 }
 
+// ── Cashflow Futuro ───────────────────────────────────────────────────────────
+
+async function carregarCashflowFuturo(dias = 30) {
+  try {
+    const empresa = document.getElementById('filtroEmpresa')?.value
+      || window.LfErpApi?.getEmpresaNome?.() || '';
+    const data = await api.request('/financeiro/cashflow-futuro', {
+      method: 'GET',
+      query: { dias, empresa }
+    });
+    state.cashflowFuturo = data;
+  } catch {
+    state.cashflowFuturo = null;
+  }
+}
+
+function renderCashflowFuturo() {
+  let section = document.getElementById('cashflowFuturoSection');
+  if (!section) {
+    section = document.createElement('section');
+    section.id = 'cashflowFuturoSection';
+    section.className = 'module-card';
+    section.style.marginTop = '20px';
+    const container = document.getElementById('fluxoCaixaContainer');
+    container?.appendChild(section);
+  }
+
+  const cf = state.cashflowFuturo;
+  const dias = state.diasProjecao;
+  const cur = formatCurrency;
+  const dt  = formatDate;
+
+  if (!cf) {
+    section.innerHTML = `<div class="module-feedback module-feedback--error">Não foi possível carregar a projeção futura.</div>`;
+    return;
+  }
+
+  const linhas = (cf.projecao || []).map((p) => {
+    const saldoColor = p.saldo_acumulado >= 0 ? 'var(--success,#38a169)' : 'var(--danger,#e53e3e)';
+    return `<tr>
+      <td>${dt(p.data)}</td>
+      <td class="text-right" style="color:var(--success,#38a169)">${p.entrada > 0 ? cur(p.entrada) : '-'}</td>
+      <td class="text-right" style="color:var(--danger,#e53e3e)">${p.saida > 0 ? cur(p.saida) : '-'}</td>
+      <td class="text-right"><strong style="color:${saldoColor}">${cur(p.saldo_acumulado)}</strong></td>
+    </tr>`;
+  }).join('');
+
+  const saldoFinalColor = cf.saldo_projetado >= 0 ? 'var(--success,#38a169)' : 'var(--danger,#e53e3e)';
+
+  section.innerHTML = `
+    <div class="module-card__header">
+      <div>
+        <h3>Projeção de Caixa</h3>
+        <p>Entradas e saídas previstas nos próximos ${dias} dias com base em títulos em aberto</p>
+      </div>
+      <div class="module-card__actions">
+        <div style="display:flex;gap:6px">
+          ${[30,60,90].map((d) => `
+            <button type="button" class="btn ${d === dias ? 'btn-primary' : 'btn-light'} btn-sm"
+              id="cfFuturo${d}d">${d} dias</button>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px">
+      <div style="border:1px solid var(--border);border-radius:14px;padding:14px">
+        <div style="font-size:.8rem;color:var(--text-muted)">A receber</div>
+        <div style="font-weight:800;color:var(--success,#38a169)">${cur(cf.total_entradas)}</div>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:14px;padding:14px">
+        <div style="font-size:.8rem;color:var(--text-muted)">A pagar</div>
+        <div style="font-weight:800;color:var(--danger,#e53e3e)">${cur(cf.total_saidas)}</div>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:14px;padding:14px">
+        <div style="font-size:.8rem;color:var(--text-muted)">Saldo projetado</div>
+        <div style="font-weight:800;color:${saldoFinalColor}">${cur(cf.saldo_projetado)}</div>
+      </div>
+    </div>
+
+    ${linhas
+      ? `<div class="table-wrapper">
+         <table class="data-table">
+           <thead><tr>
+             <th>Data</th>
+             <th class="text-right">Entradas</th>
+             <th class="text-right">Saídas</th>
+             <th class="text-right">Saldo acumulado</th>
+           </tr></thead>
+           <tbody>${linhas}</tbody>
+         </table></div>`
+      : `<div class="empty-state">Nenhum título vencendo nos próximos ${dias} dias.</div>`}`;
+
+  // Bind seletores de dias
+  [30, 60, 90].forEach((d) => {
+    document.getElementById(`cfFuturo${d}d`)?.addEventListener('click', async () => {
+      state.diasProjecao = d;
+      section.innerHTML = `<div class="module-feedback module-feedback--info">Carregando projeção de ${d} dias...</div>`;
+      await carregarCashflowFuturo(d);
+      renderCashflowFuturo();
+    });
+  });
+}
+
 function bindEventos() {
   const btnAtualizar = document.getElementById('btnAtualizarFluxoCaixa');
   const btnFiltrar = document.getElementById('btnFiltrarFluxoCaixa');
@@ -528,8 +639,12 @@ async function recarregar() {
 
   try {
     renderSkeleton();
-    await carregarFluxoCaixa();
+    await Promise.all([
+      carregarFluxoCaixa(),
+      carregarCashflowFuturo(state.diasProjecao)
+    ]);
     render();
+    renderCashflowFuturo();
   } catch (error) {
     console.error('Erro ao atualizar fluxo de caixa:', error);
     const message = buildFriendlyError(error);
