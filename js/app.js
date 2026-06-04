@@ -27,6 +27,7 @@ import { initMarketplaceModule } from './marketplace.js';
 import { initCrmModule } from './crm.js';
 import { initExportacaoContabilModule } from './exportacaoContabil.js';
 import { initApiPublicaModule } from './apiPublica.js';
+import { initRastreabilidadeModule } from './rastreabilidade.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -83,6 +84,7 @@ const VIEW_CONFIG = {
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
   alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  rastreabilidade: { title: 'Rastreabilidade', subtitle: 'Controle de lotes e números de série' },
   'api-publica': { title: 'API & Webhooks', subtitle: 'Integração com sistemas externos via API Key e webhooks' },
   'exportacao-contabil': { title: 'Exportação Contábil', subtitle: 'Arquivos CSV e EFD/SPED para o contador' },
   crm: { title: 'CRM', subtitle: 'Pipeline de oportunidades de venda' },
@@ -692,6 +694,8 @@ async function loadCurrentView(view) {
     await loadPedidosReal();
   } else if (view === 'nfe') {
     await loadNfeReal();
+  } else if (view === 'rastreabilidade') {
+    await loadRastreabilidadeReal();
   } else if (view === 'api-publica') {
     await loadApiPublicaReal();
   } else if (view === 'exportacao-contabil') {
@@ -1447,6 +1451,18 @@ async function loadNfeReal() {
     console.error('Erro ao carregar NF-e:', error);
     showToast('Falha ao carregar módulo NF-e.', 'error');
     renderModuleError('nfeContainer', 'NF-e', 'Não foi possível carregar o módulo NF-e.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadRastreabilidadeReal() {
+  showGlobalLoader('Carregando rastreabilidade...');
+  try {
+    await initRastreabilidadeModule();
+  } catch (error) {
+    console.error('Erro ao carregar rastreabilidade:', error);
+    renderModuleError('rastreabilidadeContainer', 'Rastreabilidade', 'Nao foi possivel carregar o modulo.');
   } finally {
     hideGlobalLoader();
   }
