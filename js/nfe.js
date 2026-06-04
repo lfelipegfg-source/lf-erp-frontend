@@ -80,6 +80,7 @@ const NfeModule = {
             <button class="btn-inline btn-inline--active" data-nfe-aba="lista">NF-es Emitidas</button>
             <button class="btn-inline" data-nfe-aba="nfce">NFC-e</button>
             <button class="btn-inline" data-nfe-aba="emitir">Emitir NF-e</button>
+            <button class="btn-inline" data-nfe-aba="nfse">NFS-e</button>
             <button class="btn-inline" data-nfe-aba="config">Configuração</button>
           </div>
         </div>
@@ -112,6 +113,7 @@ const NfeModule = {
     if (this.state.aba === 'lista')   { c.innerHTML = this.renderLista();  this.bindListaEvents();  return; }
     if (this.state.aba === 'nfce')    { this.renderNfce(c);                return; }
     if (this.state.aba === 'emitir')  { c.innerHTML = this.renderEmitir(); this.bindEmitirEvents(); return; }
+    if (this.state.aba === 'nfse')    { this.renderNfse(c);                return; }
     c.innerHTML = this.renderConfig();
     this.bindConfigEvents();
   },
@@ -694,6 +696,253 @@ const NfeModule = {
       .replaceAll('>', '&gt;')
       .replaceAll('"', '&quot;')
       .replaceAll("'", '&#039;');
+  },
+
+  // ── NFS-e ──────────────────────────────────────────────────────────────────
+
+  async renderNfse(container) {
+    const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const dt  = (v) => v ? new Date(v).toLocaleDateString('pt-BR') : '-';
+    const esc = (v) => this.escapeHtml(v);
+
+    container.innerHTML = `
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" id="nfseEmitirBtn">
+          <i class="fa-solid fa-plus"></i> Emitir NFS-e
+        </button>
+        <button class="btn btn-light btn-sm" id="nfseConfigBtn">
+          <i class="fa-solid fa-gear"></i> Configuração
+        </button>
+        <button class="btn btn-light btn-sm" id="nfseAtualizarBtn">
+          <i class="fa-solid fa-rotate"></i> Atualizar lista
+        </button>
+      </div>
+      <div id="nfseCorpo"><div class="module-feedback module-feedback--info">Carregando...</div></div>`;
+
+    document.getElementById('nfseEmitirBtn')?.addEventListener('click', () => this.abrirFormNfse());
+    document.getElementById('nfseConfigBtn')?.addEventListener('click', () => this.abrirConfigNfse());
+    document.getElementById('nfseAtualizarBtn')?.addEventListener('click', () => this.carregarListaNfse());
+
+    await this.carregarListaNfse();
+  },
+
+  async carregarListaNfse() {
+    const corpo = document.getElementById('nfseCorpo');
+    if (!corpo) return;
+    corpo.innerHTML = `<div class="module-feedback module-feedback--info">Carregando...</div>`;
+
+    try {
+      const data = await api.request('/nfse/lista');
+      const emissoes = data.emissoes || [];
+
+      if (!emissoes.length) {
+        corpo.innerHTML = `<div class="module-feedback module-feedback--info">Nenhuma NFS-e emitida ainda.</div>`;
+        return;
+      }
+
+      const statusColor = { autorizada: 'badge--success', pendente: 'badge--warning', erro: 'badge--danger', cancelada: 'badge--warning' };
+      const dt = (v) => v ? new Date(v).toLocaleDateString('pt-BR') : '-';
+      const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+      corpo.innerHTML = `
+        <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr>
+            <th>Data</th><th>Tomador</th><th>Discriminação</th>
+            <th class="text-right">Valor</th><th>Número</th><th>Status</th>
+            <th class="text-right">Ações</th>
+          </tr></thead>
+          <tbody>
+            ${emissoes.map((e) => `
+              <tr>
+                <td>${dt(e.criado_em)}</td>
+                <td>${this.escapeHtml(e.tomador_nome || '-')}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this.escapeHtml(e.discriminacao || '-')}</td>
+                <td class="text-right">${cur(e.valor_servico)}</td>
+                <td>${this.escapeHtml(e.numero_nfse || e.rps_numero || '-')}</td>
+                <td><span class="badge ${statusColor[e.status] || ''}">${e.status || 'pendente'}</span></td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <button class="btn-inline" data-nfse-consultar="${this.escapeHtml(e.ref)}">
+                      <i class="fa-solid fa-sync"></i>
+                    </button>
+                    ${e.link_pdf ? `
+                      <a href="${this.escapeHtml(e.link_pdf)}" target="_blank" class="btn-inline">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
+                      </a>` : ''}
+                    ${e.status === 'autorizada' ? `
+                      <button class="btn-inline btn-inline--danger" data-nfse-cancelar="${this.escapeHtml(e.ref)}">
+                        Cancelar
+                      </button>` : ''}
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        </div>`;
+
+      corpo.querySelectorAll('[data-nfse-consultar]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          try {
+            await api.request(`/nfse/consultar/${btn.dataset.nfseConsultar}`);
+            showToast('Status atualizado!', 'success');
+            await this.carregarListaNfse();
+          } catch (e) { showToast(e.message, 'error'); }
+        });
+      });
+
+      corpo.querySelectorAll('[data-nfse-cancelar]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Cancelar esta NFS-e?')) return;
+          try {
+            await api.request(`/nfse/cancelar/${btn.dataset.nfseCancelar}`, { method: 'POST', body: {} });
+            showToast('Cancelamento solicitado!', 'success');
+            await this.carregarListaNfse();
+          } catch (e) { showToast(e.message, 'error'); }
+        });
+      });
+    } catch (err) {
+      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${this.escapeHtml(err.message)}</div>`;
+    }
+  },
+
+  abrirFormNfse() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'nfseFormModal';
+    overlay.innerHTML = `
+      <div class="modal-card" style="max-width:560px;width:95vw">
+        <div class="modal-card__header">
+          <div><h3>Emitir NFS-e</h3><p style="color:var(--text-muted);font-size:.9rem">Nota Fiscal de Serviço Eletrônica avulsa</p></div>
+          <button type="button" class="icon-button" onclick="document.getElementById('nfseFormModal').remove()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="nfseForm" style="padding:20px 24px 24px;display:grid;gap:12px">
+          <div class="form-grid">
+            <div class="form-field form-field--span-2">
+              <label>Nome do tomador *</label>
+              <input class="form-control" name="tomador_nome" required />
+            </div>
+            <div class="form-field">
+              <label>CPF/CNPJ do tomador</label>
+              <input class="form-control" name="tomador_cpf_cnpj" />
+            </div>
+            <div class="form-field">
+              <label>Email do tomador</label>
+              <input class="form-control" name="tomador_email" type="email" />
+            </div>
+            <div class="form-field form-field--span-2">
+              <label>Discriminação do serviço *</label>
+              <textarea class="form-control" name="discriminacao" rows="3" required></textarea>
+            </div>
+            <div class="form-field">
+              <label>Valor do serviço (R$) *</label>
+              <input class="form-control" name="valor_servico" type="number" min="0.01" step="0.01" required inputmode="decimal" />
+            </div>
+            <div class="form-field">
+              <label>Data de emissão</label>
+              <input class="form-control" name="data_emissao" type="date" value="${new Date().toISOString().slice(0,10)}" />
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+            <button type="button" class="btn btn-light" onclick="document.getElementById('nfseFormModal').remove()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="nfseSubmitBtn">
+              <i class="fa-solid fa-paper-plane"></i> Emitir
+            </button>
+          </div>
+        </form>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    document.getElementById('nfseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('nfseSubmitBtn');
+      const fd = new FormData(e.target);
+      const body = Object.fromEntries(fd.entries());
+
+      try {
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...'; }
+        await api.request('/nfse/emitir', { method: 'POST', body });
+        showToast('NFS-e enviada para processamento!', 'success');
+        overlay.remove();
+        await this.carregarListaNfse();
+      } catch (err) {
+        showToast(err.message || 'Erro ao emitir NFS-e', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Emitir'; }
+      }
+    });
+  },
+
+  async abrirConfigNfse() {
+    try {
+      const data = await api.request('/nfse/config');
+      const cfg = data.config || {};
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-card" style="max-width:520px;width:95vw">
+          <div class="modal-card__header">
+            <div><h3>Configuração NFS-e</h3></div>
+            <button type="button" class="icon-button" onclick="this.closest('.modal-overlay').remove()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <form id="nfseConfigForm" style="padding:20px 24px 24px;display:grid;gap:12px">
+            <div class="form-grid">
+              <div class="form-field form-field--span-2">
+                <label>Token FocusNFe</label>
+                <input class="form-control" name="token_focus" type="password"
+                  placeholder="${cfg.token_focus === '***' ? '*** (configurado)' : 'Token da empresa no FocusNFe'}" />
+              </div>
+              <div class="form-field">
+                <label>Ambiente</label>
+                <select class="form-control" name="ambiente">
+                  <option value="2" ${cfg.ambiente == 2 ? 'selected' : ''}>Homologação</option>
+                  <option value="1" ${cfg.ambiente == 1 ? 'selected' : ''}>Produção</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Código IBGE do município</label>
+                <input class="form-control" name="codigo_municipio" placeholder="ex: 3550308 (São Paulo)"
+                  value="${cfg.codigo_municipio || ''}" />
+              </div>
+              <div class="form-field">
+                <label>Item da lista de serviços</label>
+                <input class="form-control" name="item_lista_servico" placeholder="ex: 01.01"
+                  value="${cfg.item_lista_servico || ''}" />
+              </div>
+              <div class="form-field">
+                <label>Alíquota ISS (%)</label>
+                <input class="form-control" name="aliquota_iss" type="number" step="0.01" min="0" max="10"
+                  value="${cfg.aliquota_iss || 5}" inputmode="decimal" />
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+              <button type="button" class="btn btn-light" onclick="this.closest('.modal-overlay').remove()">Cancelar</button>
+              <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Salvar</button>
+            </div>
+          </form>
+        </div>`;
+      document.body.appendChild(overlay);
+
+      document.getElementById('nfseConfigForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = Object.fromEntries(fd.entries());
+        try {
+          await api.request('/nfse/config', { method: 'PUT', body });
+          showToast('Configuração NFS-e salva!', 'success');
+          overlay.remove();
+        } catch (err) {
+          showToast(err.message || 'Erro ao salvar', 'error');
+        }
+      });
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
   }
 };
 
