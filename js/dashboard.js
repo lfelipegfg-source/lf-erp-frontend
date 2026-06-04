@@ -48,7 +48,11 @@ function getPeriodLabel(filters = {}) {
 
 function safeText(value, fallback = '-') {
   if (value === undefined || value === null || value === '') return fallback;
-  return String(value);
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function normalizeDashboardPayload(data = {}) {
