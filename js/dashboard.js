@@ -771,12 +771,8 @@ function renderDashboardSkeleton() {
   setHtml('dashboardTopProdutos',  skeletonRows(5, [3, 1]));
   setHtml('dashboardAlertas',      skeletonRows(4, [4]));
   setHtml('dashboardTabelaPrecos', skeletonRows(3, [2, 1]));
-
-  // Charts — placeholders
-  const vcv = document.getElementById('chartVendasDia');
-  const fcp = document.getElementById('chartFormaPagamento');
-  if (vcv?.parentElement) vcv.parentElement.innerHTML = `<div style="height:260px;display:flex;align-items:center;justify-content:center"><span class="skeleton" style="width:100%;height:200px;border-radius:var(--radius-sm)"></span></div>`;
-  if (fcp?.parentElement) fcp.parentElement.innerHTML = `<div style="min-height:220px;display:flex;align-items:center;justify-content:center;gap:20px"><span class="skeleton skeleton-icon" style="width:160px;height:160px;border-radius:50%"></span><div style="flex:1;display:flex;flex-direction:column;gap:10px">${Array.from({length:4},()=>'<span class="skeleton skeleton-text"></span>').join('')}</div></div>`;
+  // Os containers de gráfico não recebem skeleton para preservar os <canvas>
+  // que renderGraficos() precisa encontrar após as chamadas de API.
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

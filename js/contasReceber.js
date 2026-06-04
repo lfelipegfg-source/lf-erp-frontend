@@ -544,7 +544,7 @@ function bindEventos() {
         contaReceberID: Number(button.dataset.id),
         valor:          Number(button.dataset.valor),
         clienteNome:    button.dataset.cliente || '',
-        onPago:         () => recarregarContasReceber()
+        onPago:         () => recarregar()
       });
     });
   });
