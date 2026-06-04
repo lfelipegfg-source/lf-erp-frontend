@@ -124,15 +124,26 @@
     </header>
 
     <nav class="admin-tabs">
-      <button class="tab-btn active" onclick="switchTab('empresas')"><i class="fa fa-building"></i> Empresas</button>
+      <button class="tab-btn active" onclick="switchTab('dashboard')"><i class="fa fa-chart-line"></i> Dashboard</button>
+      <button class="tab-btn" onclick="switchTab('empresas')"><i class="fa fa-building"></i> Empresas</button>
       <button class="tab-btn" onclick="switchTab('planos')"><i class="fa fa-tags"></i> Planos</button>
+      <button class="tab-btn" onclick="switchTab('billing')"><i class="fa fa-barcode"></i> Billing</button>
       <button class="tab-btn" onclick="switchTab('logs')"><i class="fa fa-list-alt"></i> Logs</button>
     </nav>
 
     <main class="admin-content">
 
+      <!-- TAB DASHBOARD SAAS OWNER -->
+      <div id="tab-dashboard" class="tab-panel active">
+        <div id="ownerDashboardCorpo">
+          <div style="text-align:center;padding:40px;color:var(--text-muted)">
+            <i class="fa fa-spinner fa-spin fa-2x"></i><br><br>Carregando métricas...
+          </div>
+        </div>
+      </div>
+
       <!-- TAB EMPRESAS -->
-      <div id="tab-empresas" class="tab-panel active">
+      <div id="tab-empresas" class="tab-panel">
         <div class="stat-grid" id="statsGrid"></div>
         <div class="section-header">
           <span class="section-title">Empresas</span>
@@ -200,6 +211,15 @@
         </div>
       </div>
     </div>
+
+    <!-- TAB BILLING -->
+      <div id="tab-billing" class="tab-panel">
+        <div id="billingCorpo">
+          <div style="text-align:center;padding:40px;color:var(--text-muted)">
+            <i class="fa fa-spinner fa-spin fa-2x"></i><br><br>Carregando...
+          </div>
+        </div>
+      </div>
 
     <!-- TAB LOGS -->
       <div id="tab-logs" class="tab-panel">

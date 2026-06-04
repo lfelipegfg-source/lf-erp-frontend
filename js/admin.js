@@ -47,9 +47,78 @@
     document.getElementById(`tab-${tab}`).classList.add('active');
     event.currentTarget.classList.add('active');
 
-    if (tab === 'empresas') carregarEmpresas();
-    if (tab === 'planos') carregarPlanos();
+    if (tab === 'dashboard') carregarOwnerDashboard();
+    if (tab === 'empresas')  carregarEmpresas();
+    if (tab === 'planos')    carregarPlanos();
+    if (tab === 'billing')   carregarBilling();
   };
+
+  // ══════════════════════════════════════════════════════
+  //  DASHBOARD SAAS OWNER
+  // ══════════════════════════════════════════════════════
+
+  async function carregarOwnerDashboard() {
+    const corpo = document.getElementById('ownerDashboardCorpo');
+    if (!corpo) return;
+
+    try {
+      const d = await api('/admin/dashboard');
+      const m = d.metricas;
+      const cur = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+
+      corpo.innerHTML = `
+        <!-- KPIs principais -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px">
+          ${[
+            ['MRR', cur(m.mrr), 'var(--success)', 'fa-dollar-sign', 'Receita mensal recorrente'],
+            ['Empresas ativas', m.ativas, 'var(--success)', 'fa-building', 'Com assinatura ativa'],
+            ['Em trial', m.em_trial, 'var(--warning)', 'fa-clock', 'Testando o sistema'],
+            ['Trial expirado', m.trial_expirado, 'var(--danger)', 'fa-triangle-exclamation', 'Trial encerrado sem conversão'],
+            ['Novas (30d)', m.novos_30d, 'var(--primary)', 'fa-user-plus', 'Empresas criadas nos últimos 30 dias'],
+            ['Bloqueadas', m.bloqueadas, 'var(--danger)', 'fa-ban', 'Empresas com acesso bloqueado'],
+            ['Vendas (30d)', m.total_vendas_30d, 'var(--info, #3182ce)', 'fa-cart-shopping', 'Total de vendas nos últimos 30 dias'],
+            ['Volume (30d)', cur(m.volume_vendas_30d), 'var(--info, #3182ce)', 'fa-chart-bar', 'Valor total vendido nos últimos 30 dias']
+          ].map(([label, valor, cor, icon, titulo]) => `
+            <div style="border:1px solid var(--border);border-radius:14px;padding:16px" title="${titulo}">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <div style="width:32px;height:32px;border-radius:10px;background:${cor}22;color:${cor};display:flex;align-items:center;justify-content:center">
+                  <i class="fa fa-${icon}" style="font-size:.9rem"></i>
+                </div>
+                <span style="font-size:.78rem;color:var(--text-muted);font-weight:600;text-transform:uppercase">${label}</span>
+              </div>
+              <div style="font-size:1.4rem;font-weight:800;color:${cor}">${valor}</div>
+            </div>`).join('')}
+        </div>
+
+        <!-- Últimas empresas -->
+        <div>
+          <h4 style="font-size:14px;font-weight:700;margin:0 0 12px">Últimas empresas cadastradas</h4>
+          <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:var(--surface-2)">
+                  <th style="text-align:left;padding:10px 14px">Empresa</th>
+                  <th style="text-align:left;padding:10px 14px">Plano</th>
+                  <th style="text-align:left;padding:10px 14px">Status</th>
+                  <th style="text-align:left;padding:10px 14px">Criada em</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(d.ultimas_empresas || []).map(e => `
+                  <tr style="border-top:1px solid var(--border)">
+                    <td style="padding:10px 14px;font-weight:600">${e.nome}</td>
+                    <td style="padding:10px 14px;color:var(--text-muted)">${e.plano_nome || '—'}</td>
+                    <td style="padding:10px 14px">${badgeEmpresa(e)}</td>
+                    <td style="padding:10px 14px;font-size:12px;color:var(--text-muted)">${formatDate(e.criado_em)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    } catch (e) {
+      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+    }
+  }
 
   // ── Logout ───────────────────────────────────────────
   window.adminLogout = async function () {
@@ -570,7 +639,7 @@
   }
 
   // ── Init ─────────────────────────────────────────────
-  carregarEmpresas();
+  carregarOwnerDashboard();
   carregarPlanosSelect();
 
 })();
