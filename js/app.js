@@ -379,6 +379,61 @@ function bindFilterEvents() {
   }
 }
 
+// ── Notificações in-app ─────────────────────────────────────────────────────
+
+let _notifCarregadas = false;
+
+async function carregarNotificacoes() {
+  try {
+    const data = await api.request('/notificacoes', { method: 'GET' });
+    const lista = data.notificacoes || [];
+
+    const badge = document.getElementById('notifBadge');
+    if (badge) {
+      if (lista.length > 0) {
+        badge.textContent = String(lista.length);
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    const listaEl = document.getElementById('notifLista');
+    if (!listaEl) return;
+
+    if (!lista.length) {
+      listaEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.88rem">
+        <i class="fa-solid fa-check-circle" style="font-size:1.5rem;color:var(--success,#38a169);margin-bottom:8px;display:block"></i>
+        Tudo em ordem!
+      </div>`;
+      return;
+    }
+
+    listaEl.innerHTML = lista.map((n) => `
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:12px;align-items:flex-start"
+        class="notif-item" data-view="${n.link || ''}">
+        <div style="width:34px;height:34px;border-radius:10px;background:${n.cor}22;color:${n.cor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fa-solid ${n.icone}" style="font-size:.85rem"></i>
+        </div>
+        <div style="min-width:0">
+          <div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:2px">${n.titulo}</div>
+          <div style="font-size:.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.texto}</div>
+        </div>
+      </div>`).join('');
+
+    // Clique em item → navega para a view
+    listaEl.querySelectorAll('.notif-item[data-view]').forEach((el) => {
+      el.addEventListener('click', () => {
+        document.getElementById('notifDropdown')?.classList.add('hidden');
+        const view = el.dataset.view;
+        if (view) setActiveView(view);
+      });
+    });
+  } catch {
+    /* silencioso — notificações não podem impedir o carregamento */
+  }
+}
+
 function bindTopbarEvents() {
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   if (themeToggleBtn) {
@@ -387,6 +442,34 @@ function bindTopbarEvents() {
       applyTheme(current === 'dark' ? 'light' : 'dark');
     });
   }
+
+  // Sino de notificações
+  const sinoBtn    = document.getElementById('notifSinoBtn');
+  const dropdown   = document.getElementById('notifDropdown');
+  const marcarBtn  = document.getElementById('notifMarcarLidoBtn');
+
+  sinoBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const aberto = !dropdown.classList.contains('hidden');
+    dropdown.classList.toggle('hidden');
+    if (!aberto && !_notifCarregadas) {
+      _notifCarregadas = true;
+      carregarNotificacoes();
+    }
+  });
+
+  marcarBtn?.addEventListener('click', () => {
+    dropdown.classList.add('hidden');
+    const badge = document.getElementById('notifBadge');
+    if (badge) badge.classList.add('hidden');
+  });
+
+  // Fecha dropdown ao clicar fora
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('notifWrapper')?.contains(e.target)) {
+      dropdown?.classList.add('hidden');
+    }
+  });
 
   const refreshDataBtn = document.getElementById('refreshDataBtn');
   const dashboardExportBtn = document.getElementById('dashboardExportBtn');
@@ -888,6 +971,12 @@ function showMainScreen() {
 
   if (loginScreen) loginScreen.classList.add('hidden');
   if (mainScreen) mainScreen.classList.remove('hidden');
+
+  // Carrega notificações 2s após a tela aparecer (não bloqueia)
+  setTimeout(() => {
+    _notifCarregadas = false;
+    carregarNotificacoes();
+  }, 2000);
 }
 
 function showLoginScreen() {
