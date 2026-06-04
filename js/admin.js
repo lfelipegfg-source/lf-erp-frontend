@@ -441,6 +441,134 @@
     return new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
   }
 
+  // ══════════════════════════════════════════════════════
+  //  BILLING DE ASSINATURAS
+  // ══════════════════════════════════════════════════════
+
+  window.carregarBilling = async function () {
+    const corpo = document.getElementById('billingCorpo');
+    if (!corpo) return;
+    corpo.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted)"><i class="fa fa-spinner fa-spin"></i> Carregando...</div>';
+
+    try {
+      const [configRes, empresasRes] = await Promise.all([
+        api('/admin/billing/config'),
+        api('/admin/empresas')
+      ]);
+
+      const sandbox = configRes.asaas_sandbox !== false;
+      const temChave = configRes.asaas_api_key && configRes.asaas_api_key !== '****';
+
+      corpo.innerHTML = `
+        <!-- Config Asaas do SaaS -->
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px">
+          <h4 style="margin:0 0 12px;font-size:14px;font-weight:700">
+            <i class="fa fa-gear"></i> Configuração Asaas (SaaS Owner)
+          </h4>
+          ${!temChave ? `<div class="badge badge-expirado" style="margin-bottom:12px">
+            <i class="fa fa-exclamation-triangle"></i> API Key não configurada — cobranças em modo demo
+          </div>` : ''}
+          <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;max-width:500px">
+            <div>
+              <label style="font-size:11px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:4px">API KEY ASAAS</label>
+              <input id="billingApiKey" type="password" placeholder="${temChave ? '****  (configurada)' : '$aact_...'}"
+                style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+            </div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;white-space:nowrap">
+              <input type="checkbox" id="billingAsaasSandbox" ${sandbox ? 'checked' : ''} /> Sandbox
+            </label>
+          </div>
+          <button onclick="salvarBillingConfig()" class="btn btn-primary btn-sm" style="margin-top:10px">
+            <i class="fa fa-save"></i> Salvar configuração
+          </button>
+        </div>
+
+        <!-- Tabela de empresas para cobrança -->
+        <h4 style="margin:0 0 12px;font-size:14px;font-weight:700">Empresas — Cobranças</h4>
+        <div class="table-responsive">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border)">
+                <th style="text-align:left;padding:8px 10px">Empresa</th>
+                <th style="text-align:left;padding:8px 10px">Status</th>
+                <th style="text-align:left;padding:8px 10px">Plano</th>
+                <th style="text-align:right;padding:8px 10px">Valor</th>
+                <th style="text-align:left;padding:8px 10px">Trial/Vencimento</th>
+                <th style="text-align:center;padding:8px 10px">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${empresasRes.map(e => {
+                const preco = Number(e.plano_preco_mensal || 0);
+                return `
+                  <tr style="border-bottom:1px solid var(--border)" id="billingRow_${e.id}">
+                    <td style="padding:8px 10px">
+                      <strong>${e.nome}</strong>
+                      ${e.email ? `<br><small style="color:var(--text-muted)">${e.email}</small>` : ''}
+                    </td>
+                    <td style="padding:8px 10px">${badgeEmpresa(e)}</td>
+                    <td style="padding:8px 10px">${e.plano_nome || '—'}</td>
+                    <td style="padding:8px 10px;text-align:right">${preco > 0 ? `R$ ${preco.toFixed(2)}` : '—'}</td>
+                    <td style="padding:8px 10px;font-size:12px">${e.trial_fim ? formatDate(e.trial_fim) : '—'}</td>
+                    <td style="padding:8px 10px;text-align:center">
+                      <button class="btn btn-secondary btn-sm"
+                        onclick="gerarCobrancaEmpresa(${e.id}, '${e.nome.replace(/'/g,"\\'")}', ${preco})">
+                        <i class="fa fa-barcode"></i> Cobrar
+                      </button>
+                    </td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+    }
+  };
+
+  window.salvarBillingConfig = async function () {
+    try {
+      await api('/admin/billing/config', {
+        method: 'PUT',
+        body: {
+          asaas_api_key: document.getElementById('billingApiKey')?.value?.trim() || null,
+          asaas_sandbox: document.getElementById('billingAsaasSandbox')?.checked ?? true
+        }
+      });
+      showToast('Configuração salva!', 'success');
+      document.getElementById('billingApiKey').value = '';
+    } catch (e) {
+      showToast(`Erro: ${e.message}`, 'error');
+    }
+  };
+
+  window.gerarCobrancaEmpresa = async function (empresaId, nome, preco) {
+    if (!preco || preco <= 0) {
+      showToast('Empresa sem plano com preço configurado.', 'error');
+      return;
+    }
+
+    const vencimento = prompt(`Vencimento da cobrança para "${nome}" (YYYY-MM-DD):`, addDias(new Date().toISOString().slice(0,10), 5));
+    if (!vencimento) return;
+
+    try {
+      const r = await api(`/admin/billing/cobrar/${empresaId}`, {
+        method: 'POST',
+        body: { valor: preco, vencimento }
+      });
+      showToast(r.mensagem || 'Cobrança gerada!', 'success');
+      if (r.boleto?.invoiceUrl) window.open(r.boleto.invoiceUrl, '_blank');
+    } catch (e) {
+      showToast(`Erro: ${e.message}`, 'error');
+    }
+  };
+
+  function addDias(dateStr, dias) {
+    const d = new Date(`${dateStr}T12:00:00`);
+    d.setDate(d.getDate() + dias);
+    return d.toISOString().slice(0, 10);
+  }
+
   // ── Init ─────────────────────────────────────────────
   carregarEmpresas();
   carregarPlanosSelect();
