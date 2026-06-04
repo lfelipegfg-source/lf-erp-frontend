@@ -12,15 +12,13 @@ const PDVModule = {
     carrinho: [],
     clienteId: '',
     clienteNome: '',
-    pagamento: 'Dinheiro',
-    parcelas: 1,
-    primeiroVencimento: '',
     desconto: 0,
     acrescimo: 0,
     observacao: '',
     salvando: false,
-    gradeModalProduto: null,  // produto aguardando seleção de grade
-    gradesDisponiveis: []     // grades carregadas para o modal
+    pagamentos: [{ forma: 'Dinheiro', valor: 0, parcelas: 1, vencimento: '' }],
+    gradeModalProduto: null,
+    gradesDisponiveis: []
   },
 
   init() {
@@ -44,9 +42,9 @@ const PDVModule = {
       listaProdutos: document.getElementById('pdvListaProdutos'),
       carrinhoBody: document.getElementById('pdvCarrinhoBody'),
       emptyCarrinho: document.getElementById('pdvCarrinhoEmpty'),
-      pagamento: document.getElementById('pdvPagamento'),
-      parcelas: document.getElementById('pdvParcelas'),
-      primeiroVencimento: document.getElementById('pdvPrimeiroVencimento'),
+      pagamentosLista: document.getElementById('pdvPagamentosLista'),
+      splitRestante: document.getElementById('pdvSplitRestante'),
+      addPagamentoBtn: document.getElementById('pdvAddPagamentoBtn'),
       desconto: document.getElementById('pdvDesconto'),
       acrescimo: document.getElementById('pdvAcrescimo'),
       observacao: document.getElementById('pdvObservacao'),
@@ -85,19 +83,41 @@ const PDVModule = {
       this.handleClienteChange(event.target.value);
     });
 
-    this.el.pagamento?.addEventListener('change', (event) => {
-      this.state.pagamento = event.target.value || 'Dinheiro';
-      this.syncParcelasState();
-      this.togglePrimeiroVencimentoField();
-      this.renderResumo();
+    // ── Split de pagamento — delegação de eventos ───────────────────────────
+    document.getElementById('pdvAddPagamentoBtn')?.addEventListener('click', () => {
+      this.addPagamento();
     });
 
-    this.el.parcelas?.addEventListener('change', (event) => {
-      this.state.parcelas = Number(event.target.value || 1);
+    document.getElementById('pdvPagamentosLista')?.addEventListener('change', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      if (isNaN(idx)) return;
+
+      if (e.target.classList.contains('pdv-split-forma')) {
+        this.state.pagamentos[idx].forma = e.target.value;
+        this.renderPagamentos();
+      } else if (e.target.classList.contains('pdv-split-parcelas')) {
+        this.state.pagamentos[idx].parcelas = Math.max(1, Number(e.target.value) || 1);
+      } else if (e.target.classList.contains('pdv-split-vencimento')) {
+        this.state.pagamentos[idx].vencimento = e.target.value || '';
+      }
     });
 
-    this.el.primeiroVencimento?.addEventListener('change', (event) => {
-      this.state.primeiroVencimento = event.target.value || '';
+    document.getElementById('pdvPagamentosLista')?.addEventListener('input', (e) => {
+      const idx = Number(e.target.dataset.idx);
+      if (isNaN(idx)) return;
+
+      if (e.target.classList.contains('pdv-split-valor')) {
+        this.state.pagamentos[idx].valor = this.parseMoneyInput(e.target.value);
+        this.renderSplitRestante();
+      }
+    });
+
+    document.getElementById('pdvPagamentosLista')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pdv-split-remove');
+      if (!btn) return;
+      const idx = Number(btn.dataset.idx);
+      if (isNaN(idx)) return;
+      this.removePagamento(idx);
     });
 
     // ── Eventos do modal de grade ──────────────────────────────────────────
@@ -311,32 +331,15 @@ const PDVModule = {
 
             <div class="pdv-checkout">
               <div class="form-grid">
-                <div class="form-field">
-                  <label for="pdvPagamento">Forma de pagamento</label>
-                  <select id="pdvPagamento">
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Pix">Pix</option>
-                    <option value="Cartão de Débito">Cartão de Débito</option>
-                    <option value="Cartão de Crédito">Cartão de Crédito</option>
-                    <option value="Promissória">Promissória</option>
-                  </select>
-                </div>
-
-                <div class="form-field">
-                  <label for="pdvParcelas">Parcelas</label>
-                  <select id="pdvParcelas">
-                    <option value="1">1x</option>
-                    <option value="2">2x</option>
-                    <option value="3">3x</option>
-                    <option value="4">4x</option>
-                    <option value="5">5x</option>
-                    <option value="6">6x</option>
-                  </select>
-                </div>
-
-                <div class="form-field" id="pdvPrimeiroVencimentoField" style="display:none;">
-                  <label for="pdvPrimeiroVencimento">Primeiro vencimento</label>
-                  <input type="date" id="pdvPrimeiroVencimento" />
+                <div class="form-field form-field--span-2">
+                  <label>Formas de pagamento</label>
+                  <div id="pdvPagamentosLista" class="pdv-split-lista"></div>
+                  <div class="pdv-split-footer">
+                    <span id="pdvSplitRestante" class="pdv-split-restante"></span>
+                    <button type="button" class="btn btn-light btn-sm" id="pdvAddPagamentoBtn">
+                      <i class="fa-solid fa-plus"></i> Adicionar forma
+                    </button>
+                  </div>
                 </div>
 
                 <div class="form-field">
@@ -606,9 +609,79 @@ const PDVModule = {
       }
 
       @media (max-width: 1100px) {
-        .pdv-grid {
-          grid-template-columns: 1fr;
-        }
+        .pdv-grid { grid-template-columns: 1fr; }
+      }
+
+      /* ── Split de pagamento ───────────────────────────────── */
+      .pdv-split-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .pdv-split-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .pdv-split-row .pdv-split-forma {
+        flex: 1 1 140px;
+        min-width: 130px;
+      }
+
+      .pdv-split-row .pdv-split-valor {
+        flex: 1 1 100px;
+        min-width: 90px;
+      }
+
+      .pdv-split-promissoria {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .pdv-split-promissoria .pdv-split-parcelas { flex: 0 0 72px; }
+      .pdv-split-promissoria .pdv-split-vencimento { flex: 1 1 140px; }
+
+      .pdv-split-remove {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--danger, #e53e3e);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+
+      .pdv-split-remove:hover { background: var(--surface-3); }
+
+      .pdv-split-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+        gap: 10px;
+      }
+
+      .pdv-split-restante {
+        font-size: 0.88rem;
+        font-weight: 700;
+      }
+
+      .pdv-split-restante--ok { color: var(--success, #38a169); }
+      .pdv-split-restante--pendente { color: var(--warning, #d69e2e); }
+      .pdv-split-restante--excesso { color: var(--danger, #e53e3e); }
+
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
       }
 
       /* ── Grade selector ───────────────────────────────── */
@@ -806,21 +879,98 @@ const PDVModule = {
     if (this.el.total) this.el.total.textContent = this.toCurrency(total);
     if (this.el.totalItens) this.el.totalItens.textContent = String(totalItens);
 
-    this.syncParcelasState();
+    // Ajusta o valor da única forma de pagamento quando total muda e só há uma
+    if (this.state.pagamentos.length === 1) {
+      this.state.pagamentos[0].valor = total;
+    }
+    this.renderPagamentos();
   },
 
-  togglePrimeiroVencimentoField() {
-    const field = document.getElementById('pdvPrimeiroVencimentoField');
-    if (!field) return;
+  // ── Split de pagamento ──────────────────────────────────────────────────────
 
-    const exibir = this.state.pagamento === 'Promissória';
-    field.style.display = exibir ? 'block' : 'none';
+  FORMAS_PAGAMENTO: ['Dinheiro', 'Pix', 'Cartão de Débito', 'Cartão de Crédito', 'Promissória'],
 
-    if (!exibir) {
-      this.state.primeiroVencimento = '';
-      if (this.el.primeiroVencimento) {
-        this.el.primeiroVencimento.value = '';
-      }
+  getSomaPagamentos() {
+    return this.state.pagamentos.reduce((acc, p) => acc + Number(p.valor || 0), 0);
+  },
+
+  getPagamentoTotal() {
+    const subtotal = this.getSubtotal();
+    const desconto = Number(this.state.desconto || 0);
+    const acrescimo = Number(this.state.acrescimo || 0);
+    return Math.max(0, subtotal - desconto + acrescimo);
+  },
+
+  getPagamentoRestante() {
+    return Number((this.getPagamentoTotal() - this.getSomaPagamentos()).toFixed(2));
+  },
+
+  addPagamento() {
+    const restante = this.getPagamentoRestante();
+    this.state.pagamentos.push({
+      forma: 'Dinheiro',
+      valor: Math.max(0, restante),
+      parcelas: 1,
+      vencimento: ''
+    });
+    this.renderPagamentos();
+  },
+
+  removePagamento(idx) {
+    if (this.state.pagamentos.length <= 1) return;
+    this.state.pagamentos.splice(idx, 1);
+    this.renderPagamentos();
+  },
+
+  renderPagamentos() {
+    this.cache();
+    const lista = this.el.pagamentosLista;
+    if (!lista) return;
+
+    lista.innerHTML = this.state.pagamentos.map((p, i) => {
+      const ehPromissoria = p.forma === 'Promissória';
+      const opcoesForma = this.FORMAS_PAGAMENTO.map((f) =>
+        `<option value="${f}" ${p.forma === f ? 'selected' : ''}>${f}</option>`
+      ).join('');
+
+      return `
+        <div class="pdv-split-row" data-idx="${i}">
+          <select class="pdv-split-forma form-control" data-idx="${i}">${opcoesForma}</select>
+          <input type="number" class="pdv-split-valor form-control" data-idx="${i}"
+            min="0" step="0.01" value="${Number(p.valor || 0).toFixed(2)}" />
+          ${ehPromissoria ? `
+            <div class="pdv-split-promissoria">
+              <select class="pdv-split-parcelas form-control" data-idx="${i}">
+                ${[1,2,3,4,5,6,8,10,12].map((n) => `<option value="${n}" ${p.parcelas === n ? 'selected' : ''}>${n}x</option>`).join('')}
+              </select>
+              <input type="date" class="pdv-split-vencimento form-control" data-idx="${i}"
+                value="${p.vencimento || ''}" placeholder="1º vencimento" />
+            </div>` : ''}
+          ${this.state.pagamentos.length > 1
+            ? `<button type="button" class="pdv-split-remove" data-idx="${i}" title="Remover">
+                <i class="fa-solid fa-xmark"></i>
+               </button>`
+            : ''}
+        </div>`;
+    }).join('');
+
+    this.renderSplitRestante();
+  },
+
+  renderSplitRestante() {
+    this.cache();
+    const el = this.el.splitRestante;
+    if (!el) return;
+    const restante = this.getPagamentoRestante();
+    if (Math.abs(restante) < 0.01) {
+      el.textContent = '';
+      el.className = 'pdv-split-restante pdv-split-restante--ok';
+    } else if (restante > 0) {
+      el.textContent = `Restante: ${this.toCurrency(restante)}`;
+      el.className = 'pdv-split-restante pdv-split-restante--pendente';
+    } else {
+      el.textContent = `Excesso: ${this.toCurrency(Math.abs(restante))}`;
+      el.className = 'pdv-split-restante pdv-split-restante--excesso';
     }
   },
 
@@ -1123,23 +1273,6 @@ const PDVModule = {
     }, 0);
   },
 
-  syncParcelasState() {
-    this.cache();
-    if (!this.el.parcelas) return;
-
-    const pagamento = this.state.pagamento || 'Dinheiro';
-    const permiteParcelas = pagamento === 'Promissória';
-
-    this.el.parcelas.disabled = !permiteParcelas;
-
-    if (!permiteParcelas) {
-      this.state.parcelas = 1;
-      this.el.parcelas.value = '1';
-      return;
-    }
-
-    this.el.parcelas.value = String(this.state.parcelas || 1);
-  },
 
   async finalizarVenda() {
     if (this.state.salvando) return;
@@ -1159,14 +1292,28 @@ const PDVModule = {
       return;
     }
 
-    const pagamento = this.state.pagamento || 'Dinheiro';
-    const ehPromissoria = pagamento === 'Promissória';
-    const status_pagamento = ehPromissoria ? 'pendente' : 'pago';
+    // Validação do split
+    const restante = this.getPagamentoRestante();
+    if (Math.abs(restante) >= 0.01) {
+      this.showMessage(
+        restante > 0
+          ? `Faltam ${this.toCurrency(restante)} para cobrir o total.`
+          : `O total dos pagamentos excede o valor da venda em ${this.toCurrency(Math.abs(restante))}.`,
+        'error'
+      );
+      return;
+    }
 
-    if (ehPromissoria && !this.state.primeiroVencimento) {
+    // Valida vencimento para Promissória
+    const promissoriaEntry = this.state.pagamentos.find((p) => p.forma === 'Promissória');
+    if (promissoriaEntry && !promissoriaEntry.vencimento) {
       this.showMessage('Informe o primeiro vencimento para a promissória.', 'error');
       return;
     }
+
+    const pagamentoPrincipal = this.state.pagamentos[0]?.forma || 'Dinheiro';
+    const temPromissoria = !!promissoriaEntry;
+    const status_pagamento = temPromissoria ? 'pendente' : 'pago';
 
     const payload = {
       empresa: this.state.empresa,
@@ -1183,20 +1330,18 @@ const PDVModule = {
       desconto,
       acrescimo,
       total,
-      pagamento,
-      parcelas: ehPromissoria ? Number(this.state.parcelas || 1) : 1,
+      pagamento: pagamentoPrincipal,
+      pagamentos: this.state.pagamentos.map((p) => ({
+        forma: p.forma,
+        valor: Number(p.valor || 0),
+        parcelas: Number(p.parcelas || 1),
+        vencimento: p.vencimento || null
+      })),
+      parcelas: promissoriaEntry ? Number(promissoriaEntry.parcelas || 1) : 1,
       status_pagamento,
       data: this.today(),
       observacao: this.state.observacao || '',
-      conta_receber: ehPromissoria
-        ? {
-            gerar: true,
-            parcelas: Number(this.state.parcelas || 1),
-            data_primeiro_vencimento: this.state.primeiroVencimento,
-            intervalo_dias: 30,
-            observacao: this.state.observacao || ''
-          }
-        : null
+      conta_receber: null
     };
 
     this.state.salvando = true;
@@ -1233,9 +1378,7 @@ const PDVModule = {
     this.state.carrinho = [];
     this.state.clienteId = '';
     this.state.clienteNome = '';
-    this.state.pagamento = 'Dinheiro';
-    this.state.parcelas = 1;
-    this.state.primeiroVencimento = '';
+    this.state.pagamentos = [{ forma: 'Dinheiro', valor: 0, parcelas: 1, vencimento: '' }];
     this.state.desconto = 0;
     this.state.acrescimo = 0;
     this.state.observacao = '';
@@ -1243,9 +1386,6 @@ const PDVModule = {
     this.cache();
 
     if (this.el.clienteSelect) this.el.clienteSelect.value = '';
-    if (this.el.pagamento) this.el.pagamento.value = 'Dinheiro';
-    if (this.el.parcelas) this.el.parcelas.value = '1';
-    if (this.el.primeiroVencimento) this.el.primeiroVencimento.value = '';
     if (this.el.desconto) this.el.desconto.value = '0';
     if (this.el.acrescimo) this.el.acrescimo.value = '0';
     if (this.el.observacao) this.el.observacao.value = '';
@@ -1257,7 +1397,6 @@ const PDVModule = {
     this.renderProdutos();
     this.renderCarrinho();
     this.renderResumo();
-    this.togglePrimeiroVencimentoField();
     this.setFeedback('', 'info');
   },
 
