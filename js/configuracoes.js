@@ -71,8 +71,41 @@ const ConfigModule = {
             document.getElementById('cfgPixCertificado').placeholder = '✓ Certificado configurado (deixe vazio para manter)';
         }
       } catch (_) { /* silencioso — PIX é opcional */ }
+
+      await this.carregarAsaas();
     } catch (err) {
       console.error('Erro ao carregar configurações:', err);
+    }
+  },
+
+  async carregarAsaas() {
+    try {
+      const data = await api.request('/pagamentos/boleto/config', { method: 'GET' });
+      const keyEl  = document.getElementById('cfgAsaasApiKey');
+      const sbEl   = document.getElementById('cfgAsaasSandbox');
+      if (keyEl && data.asaas_api_key) keyEl.placeholder = '****  (configurada — deixe vazio para manter)';
+      if (sbEl) sbEl.checked = data.asaas_sandbox !== false;
+    } catch { /* silencioso — Asaas opcional */ }
+  },
+
+  async salvarAsaas() {
+    const btn = document.getElementById('cfgSalvarAsaasBtn');
+    try {
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
+      await api.request('/pagamentos/boleto/config', {
+        method: 'PUT',
+        body: {
+          empresa:        this.state.empresa,
+          asaas_api_key:  document.getElementById('cfgAsaasApiKey')?.value?.trim()  || null,
+          asaas_sandbox:  document.getElementById('cfgAsaasSandbox')?.checked ?? true
+        }
+      });
+      showToast('Configuração Asaas salva!', 'success');
+      if (document.getElementById('cfgAsaasApiKey')) document.getElementById('cfgAsaasApiKey').value = '';
+    } catch (err) {
+      showToast(err.message || 'Erro ao salvar configuração Asaas', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar configuração Asaas'; }
     }
   },
 
@@ -387,6 +420,52 @@ const ConfigModule = {
 
         <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
 
+        <!-- Asaas — Boleto Bancário -->
+        <div style="margin-bottom:8px">
+          <h4 style="font-size:1rem;font-weight:800;margin-bottom:4px">
+            <i class="fa-solid fa-barcode" style="color:var(--primary);margin-right:6px"></i>
+            Boleto Bancário — Asaas
+          </h4>
+          <p style="font-size:.88rem;color:var(--text-muted)">
+            Emita boletos bancários diretamente do sistema. Crie uma conta gratuita em
+            <strong>asaas.com</strong> e cole a API Key abaixo.
+          </p>
+        </div>
+
+        <div class="pix-config-info" style="margin-bottom:16px">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>
+            <strong>Como configurar</strong>
+            <ol style="margin:6px 0 0;padding-left:18px;font-size:.85rem;color:var(--text-soft)">
+              <li>Acesse <strong>asaas.com</strong> e crie uma conta (gratuita)</li>
+              <li>Vá em <strong>Configurações → Integrações → API Key</strong> e copie a chave</li>
+              <li>Cole a chave abaixo e salve em modo Sandbox para testar</li>
+              <li>Desative o Sandbox quando estiver pronto para produção real</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="form-grid" style="max-width:600px">
+          <div class="form-field form-field--span-2">
+            <label>API Key Asaas</label>
+            <input id="cfgAsaasApiKey" class="input" type="password"
+              placeholder="$aact_..." autocomplete="new-password" />
+          </div>
+          <div class="form-field">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <input type="checkbox" id="cfgAsaasSandbox" style="width:16px;height:16px" checked />
+              <span>Modo Sandbox (testes) — desative para produção real</span>
+            </label>
+          </div>
+          <div class="form-field">
+            <button id="cfgSalvarAsaasBtn" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk"></i> Salvar configuração Asaas
+            </button>
+          </div>
+        </div>
+
+        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
+
         <div class="module-card" style="background: var(--danger-soft); border-color: rgba(220,38,38,0.25);">
           <div class="module-card__header">
             <div>
@@ -406,6 +485,7 @@ const ConfigModule = {
       document.getElementById('cfgCarregarHistoricoBtn')?.addEventListener('click', () => this.carregarHistorico());
       document.getElementById('resetDadosBtn')?.addEventListener('click', () => this.resetDados());
       document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
+      document.getElementById('cfgSalvarAsaasBtn')?.addEventListener('click', () => this.salvarAsaas());
     }, 0);
   }
 };

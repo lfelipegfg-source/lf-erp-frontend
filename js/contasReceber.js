@@ -438,6 +438,14 @@ function renderLinhas() {
         PIX
       </button>
 
+      <button class="btn-inline" type="button"
+        data-action="gerar-boleto-cr"
+        data-id="${conta.id}"
+        title="Gerar boleto bancário (Asaas)">
+        <i class="fa-solid fa-barcode"></i>
+        Boleto
+      </button>
+
       ${
         !conta.venda_id && status !== 'pago'
           ? `
@@ -546,6 +554,12 @@ function bindEventos() {
         clienteNome:    button.dataset.cliente || '',
         onPago:         () => recarregar()
       });
+    });
+  });
+
+  document.querySelectorAll("[data-action='gerar-boleto-cr']").forEach((button) => {
+    button.addEventListener('click', async () => {
+      await gerarBoleto(Number(button.dataset.id));
     });
   });
 
@@ -1105,6 +1119,116 @@ async function renderDetalheConta(conta) {
   modal.addEventListener('click', (event) => {
     if (event.target === modal) modal.remove();
   });
+}
+
+async function gerarBoleto(contaReceberID) {
+  // Cria ou reutiliza o modal de boleto
+  let modal = document.getElementById('boletoModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'boletoModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal-card" style="max-width:500px;width:95vw">
+        <div class="modal-card__header">
+          <div>
+            <h3><i class="fa-solid fa-barcode" style="margin-right:8px"></i>Boleto Bancário</h3>
+            <p id="boletoSubtitulo" style="color:var(--text-muted);font-size:.9rem"></p>
+          </div>
+          <button type="button" class="icon-button" id="boletoFecharBtn">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="boletoCorpo" style="padding:20px 24px 24px"></div>
+        <div class="modal-card__footer" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px">
+          <button type="button" class="btn btn-light" id="boletoFecharFooter">Fechar</button>
+          <button type="button" class="btn btn-primary" id="boletoAbrirLinkBtn" style="display:none">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir link
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    document.getElementById('boletoFecharBtn')?.addEventListener('click', () => modal.classList.add('hidden'));
+    document.getElementById('boletoFecharFooter')?.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+  }
+
+  modal.classList.remove('hidden');
+  const corpo   = document.getElementById('boletoCorpo');
+  const sub     = document.getElementById('boletoSubtitulo');
+  const linkBtn = document.getElementById('boletoAbrirLinkBtn');
+
+  if (sub) sub.textContent = 'Gerando boleto…';
+  if (corpo) corpo.innerHTML = `<div class="module-feedback module-feedback--info">Aguarde…</div>`;
+  if (linkBtn) linkBtn.style.display = 'none';
+
+  try {
+    const empresa = window.LfErpApi?.getEmpresaNome?.() || '';
+    const resp = await api.request('/pagamentos/boleto/gerar', {
+      method: 'POST',
+      body:   { conta_receber_id: contaReceberID, empresa }
+    });
+
+    const boleto  = resp.boleto || resp;
+    const sandbox = resp.sandbox || boleto.demo;
+
+    const linha = boleto.linhaDigitavel || boleto.linha_digitavel || null;
+    const url   = boleto.invoiceUrl     || boleto.boleto_url      || null;
+
+    if (sub) sub.textContent = sandbox ? 'Modo sandbox — dados de demonstração' : 'Boleto gerado com sucesso';
+
+    corpo.innerHTML = `
+      ${sandbox ? `<div class="module-feedback module-feedback--info" style="margin-bottom:14px">
+        <i class="fa-solid fa-flask"></i>
+        Modo <strong>Sandbox</strong> — configure a API Key Asaas em Configurações para emitir boletos reais.
+      </div>` : ''}
+
+      ${linha ? `
+        <div style="margin-bottom:14px">
+          <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:4px;font-weight:600">LINHA DIGITÁVEL</div>
+          <div style="
+            background:var(--surface-2);
+            border:1px solid var(--border);
+            border-radius:10px;
+            padding:12px 14px;
+            font-family:monospace;
+            font-size:.9rem;
+            letter-spacing:.04em;
+            word-break:break-all;
+            cursor:pointer
+          " id="boletoLinhaDigitavel" title="Clique para copiar">${escapeHtml(linha)}</div>
+          <small style="color:var(--text-muted)">Clique na linha para copiar</small>
+        </div>` : ''}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+          <div style="font-size:.78rem;color:var(--text-muted)">ID Boleto</div>
+          <div style="font-size:.85rem;font-weight:700;word-break:break-all">${escapeHtml(String(boleto.id || '-'))}</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+          <div style="font-size:.78rem;color:var(--text-muted)">Status</div>
+          <div style="font-size:.85rem;font-weight:700">${escapeHtml(boleto.status || 'PENDING')}</div>
+        </div>
+      </div>`;
+
+    if (url) {
+      linkBtn.style.display = 'inline-flex';
+      linkBtn.onclick = () => window.open(url, '_blank');
+    }
+
+    // Copia linha ao clicar
+    document.getElementById('boletoLinhaDigitavel')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(linha);
+        showToast('Linha digitável copiada!', 'success');
+      } catch { /* fallback silencioso */ }
+    });
+
+  } catch (err) {
+    if (sub) sub.textContent = 'Erro ao gerar boleto';
+    if (corpo) corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message || 'Erro desconhecido')}</div>`;
+  }
 }
 
 async function abrirOrigemVenda(id) {
