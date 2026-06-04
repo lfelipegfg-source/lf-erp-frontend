@@ -32,6 +32,7 @@ import { initWhatsappModule } from './whatsapp.js';
 import { initFidelidadeModule } from './fidelidade.js';
 import { initCheckoutLinksModule } from './checkoutLinks.js';
 import { initFiliaisModule } from './filiais.js';
+import { initBiModule } from './bi.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -88,6 +89,7 @@ const VIEW_CONFIG = {
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
   alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  bi: { title: 'BI Executivo', subtitle: 'Relatórios executivos com gráficos avançados e análises temporais' },
   filiais: { title: 'Multi-filial', subtitle: 'Pontos de venda independentes com comparativo consolidado' },
   'checkout-links': { title: 'Link de Pagamento', subtitle: 'Gere links de cobrança com PIX e Boleto' },
   fidelidade: { title: 'Programa de Fidelidade', subtitle: 'Pontos por compra, ranking e resgate' },
@@ -704,6 +706,8 @@ async function loadCurrentView(view) {
     await loadNfeReal();
   } else if (view === 'filiais') {
     await loadFiliaisReal();
+  } else if (view === 'bi') {
+    await loadBiReal();
   } else if (view === 'checkout-links') {
     await loadCheckoutLinksReal();
   } else if (view === 'fidelidade') {
@@ -1563,6 +1567,18 @@ async function loadCrmReal() {
   } catch (error) {
     console.error('Erro ao carregar CRM:', error);
     renderModuleError('crmContainer', 'CRM', 'Não foi possível carregar o módulo CRM.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadBiReal() {
+  showGlobalLoader('Carregando BI...');
+  try {
+    await initBiModule();
+  } catch (error) {
+    console.error('Erro ao carregar BI:', error);
+    renderModuleError('biContainer', 'BI — Relatórios Executivos', 'Não foi possível carregar o módulo.');
   } finally {
     hideGlobalLoader();
   }
