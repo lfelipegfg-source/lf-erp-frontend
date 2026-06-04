@@ -34,12 +34,13 @@ const ProdutosModule = {
     initialized: false,
     eventsBound: false,
     activeTab: 'dados',
+    selectedIds: new Set(),  // IDs selecionados para impressão em lote
     // grade
     grades: [],
     // kit
     kitComponentes: [],
     kitEstoque: 0,
-    allProdutos: [],   // para o select de componentes de kit
+    allProdutos: [],
     // imagens
     imagens: []
   },
@@ -104,8 +105,42 @@ const ProdutosModule = {
     if (this.state.eventsBound) return;
     this.state.eventsBound = true;
 
+    // Estilo de linha selecionada para impressão em lote
+    if (!document.getElementById('prod-lote-styles')) {
+      const s = document.createElement('style');
+      s.id = 'prod-lote-styles';
+      s.textContent = '.row--selected { background: color-mix(in srgb, var(--primary) 8%, transparent); }';
+      document.head.appendChild(s);
+    }
+
     document.addEventListener('input', (e) => {
       if (e.target?.id === 'produtosSearchInput') this.applySearch(e.target.value);
+    });
+
+    // Checkboxes de seleção para impressão em lote
+    document.addEventListener('change', (e) => {
+      if (e.target.id === 'produtosSelectAll') {
+        if (e.target.checked) {
+          this.state.filteredItems.forEach((i) => this.state.selectedIds.add(i.id));
+        } else {
+          this.state.selectedIds.clear();
+        }
+        this.renderTable();
+        this.atualizarBotaoLote();
+        return;
+      }
+      if (e.target.classList.contains('prod-sel-chk')) {
+        const id = Number(e.target.dataset.id);
+        if (e.target.checked) {
+          this.state.selectedIds.add(id);
+        } else {
+          this.state.selectedIds.delete(id);
+          const selAll = document.getElementById('produtosSelectAll');
+          if (selAll) selAll.checked = false;
+        }
+        e.target.closest('tr')?.classList.toggle('row--selected', e.target.checked);
+        this.atualizarBotaoLote();
+      }
     });
 
     document.addEventListener('click', async (e) => {
@@ -135,6 +170,7 @@ const ProdutosModule = {
       }
       if (action === 'produtosRefreshBtn') { await this.load(); return; }
       if (action === 'produtosNewBtn')     { this.openCreateModal(); return; }
+      if (action === 'produtosLoteBtn')    { this.imprimirLote(); return; }
 
       // ── modal básico
       if (action === 'produtoCancelBtn' || action === 'produtoModalCloseBtn') {
@@ -196,6 +232,8 @@ const ProdutosModule = {
       const items = await api.getProdutos();
       this.state.items = Array.isArray(items) ? items : [];
       this.state.filteredItems = [...this.state.items];
+      this.state.selectedIds.clear();
+      this.atualizarBotaoLote();
       this.renderStats();
       this.renderTable();
       this.toggleEmptyState();
@@ -229,8 +267,14 @@ const ProdutosModule = {
         item.e_kit     ? '<span class="badge" style="font-size:11px;padding:3px 8px;background:var(--primary-soft);color:var(--primary)">Kit</span>' : ''
       ].filter(Boolean).join(' ');
 
+      const selecionado = this.state.selectedIds.has(item.id);
       return `
-        <tr>
+        <tr class="${selecionado ? 'row--selected' : ''}">
+          <td style="padding-right:0">
+            <input type="checkbox" class="prod-sel-chk" data-id="${item.id}"
+              ${selecionado ? 'checked' : ''}
+              style="width:16px;height:16px;cursor:pointer" />
+          </td>
           <td>
             <div class="table-primary">
               <strong>${escapeHtml(item.nome || '-')}</strong>
@@ -287,6 +331,10 @@ const ProdutosModule = {
         <div class="module-card__header">
           <div><h3>Produtos</h3><p>Cadastro, edição, estoque e consulta</p></div>
           <div class="module-card__actions">
+            <button type="button" class="btn btn-light" id="produtosLoteBtn" style="display:none">
+              <i class="fa-solid fa-tags"></i>
+              Etiquetas <span id="produtosLoteBadge" class="badge badge--primary" style="margin-left:4px;font-size:.75rem">0</span>
+            </button>
             <button type="button" class="btn btn-light" id="produtosExportBtn"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
             <button type="button" class="btn btn-light" id="produtosRefreshBtn"><i class="fa-solid fa-rotate"></i> Atualizar</button>
             <button type="button" class="btn btn-primary" id="produtosNewBtn"><i class="fa-solid fa-plus"></i> Novo produto</button>
@@ -308,6 +356,10 @@ const ProdutosModule = {
           <table class="data-table">
             <thead>
               <tr>
+                <th style="width:36px;padding-right:0">
+                  <input type="checkbox" id="produtosSelectAll" title="Selecionar todos"
+                    style="width:16px;height:16px;cursor:pointer" />
+                </th>
                 <th>Produto</th><th>Categoria</th><th>Código</th>
                 <th>Preço</th><th>Custo Médio</th><th>Lucro</th><th>Margem</th>
                 <th>Estoque</th><th>Mínimo</th><th>Status</th>
@@ -1008,6 +1060,70 @@ const ProdutosModule = {
     this.cacheElements();
     if (this.el.toolbarRefresh) this.el.toolbarRefresh.disabled = value;
     if (this.el.toolbarNew) this.el.toolbarNew.disabled = value;
+  },
+
+  atualizarBotaoLote() {
+    const btn   = document.getElementById('produtosLoteBtn');
+    const badge = document.getElementById('produtosLoteBadge');
+    const n = this.state.selectedIds.size;
+    if (btn)   { btn.style.display = n > 0 ? '' : 'none'; }
+    if (badge) badge.textContent = String(n);
+  },
+
+  imprimirLote() {
+    const ids = [...this.state.selectedIds];
+    if (!ids.length) return;
+
+    const selecionados = ids
+      .map((id) => this.state.items.find((p) => p.id === id))
+      .filter(Boolean);
+
+    if (!selecionados.length) return;
+
+    // Pede quantidade uniforme de cópias extras
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = `
+      <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+        <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">
+          <i class="fa-solid fa-tags"></i> Imprimir etiquetas em lote
+        </h3>
+        <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">
+          <strong>${selecionados.length}</strong> produto(s) selecionado(s).
+        </p>
+        <div style="margin-bottom:16px">
+          <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase">Cópias por produto</label>
+          <input type="number" id="_loteQtd" value="1" min="1" max="100"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box" />
+          <small style="color:var(--text-muted);font-size:11px">Cada produto imprimirá esta quantidade de etiquetas</small>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button id="_loteCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+          <button id="_loteAbrir" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">
+            <i class="fa-solid fa-print"></i> Abrir para impressão
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#_loteCancelar').onclick = () => document.body.removeChild(overlay);
+    overlay.querySelector('#_loteAbrir').onclick = () => {
+      const qtd = Math.max(1, Number(overlay.querySelector('#_loteQtd').value) || 1);
+      document.body.removeChild(overlay);
+
+      const dados = selecionados.map((item) => ({
+        nome:          item.nome || '',
+        preco:         Number(item.preco || 0),
+        codigo_barras: item.codigo_barras || '',
+        categoria:     item.categoria || '',
+        empresa_nome:  this.state.empresa || 'LF ERP',
+        variacao:      '',
+        quantidade:    qtd
+      }));
+
+      localStorage.setItem('lf_erp_etiquetas', JSON.stringify(dados));
+      window.open('./etiquetas.html', '_blank');
+    };
   },
 
   abrirEtiqueta(produtoId) {
