@@ -219,6 +219,22 @@ const VendasModule = {
         return;
       }
 
+      if (button.id === 'vendasMetasBtn') {
+        event.preventDefault();
+        await this.abrirMetas();
+        return;
+      }
+
+      if (button.id === 'metasFecharBtn') {
+        document.getElementById('metasModal')?.classList.add('hidden');
+        return;
+      }
+
+      if (button.id === 'metasNovaBtn') {
+        await this.criarMeta();
+        return;
+      }
+
       if (button.dataset.action === 'detalhar-venda') {
         event.preventDefault();
         const id = Number(button.dataset.id);
@@ -376,6 +392,9 @@ const VendasModule = {
           </div>
 
           <div class="module-card__actions">
+            <button type="button" class="btn btn-light" id="vendasMetasBtn">
+              <i class="fa-solid fa-bullseye"></i> Metas
+            </button>
             <button type="button" class="btn btn-light" id="vendasExportarBtn">
               <i class="fa-solid fa-file-csv"></i> Exportar CSV
             </button>
@@ -2091,6 +2110,134 @@ const VendasModule = {
     }
   },
 
+  // ── Metas de vendas ──────────────────────────────────────────────────────────
+
+  async abrirMetas() {
+    if (!document.getElementById('metasModal')) {
+      const el = document.createElement('div');
+      el.className = 'modal-overlay hidden';
+      el.id = 'metasModal';
+      el.innerHTML = `
+        <div class="modal-card" style="max-width:680px;width:95vw">
+          <div class="modal-card__header">
+            <div>
+              <h3><i class="fa-solid fa-bullseye" style="margin-right:8px"></i>Metas de Vendas</h3>
+              <p id="metasSubtitulo" style="color:var(--text-muted);font-size:.9rem"></p>
+            </div>
+            <button type="button" class="icon-button" id="metasFecharBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div style="padding:14px 24px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center">
+            <label style="font-size:.88rem;font-weight:600">Período:</label>
+            <input type="month" id="metasPeriodoInput" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:.9rem" />
+            <button class="btn btn-light btn-sm" id="metasCarregarBtn">
+              <i class="fa-solid fa-search"></i> Carregar
+            </button>
+          </div>
+          <div id="metasCorpo" style="padding:20px 24px;overflow-y:auto;max-height:60vh"></div>
+          <div class="modal-card__footer" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between">
+            <button type="button" class="btn btn-primary btn-sm" id="metasNovaBtn">
+              <i class="fa-solid fa-plus"></i> Nova meta
+            </button>
+            <button type="button" class="btn btn-light" id="metasFecharFooter" onclick="document.getElementById('metasModal').classList.add('hidden')">Fechar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(el);
+
+      const hoje = new Date().toISOString().slice(0, 7);
+      document.getElementById('metasPeriodoInput').value = hoje;
+      document.getElementById('metasCarregarBtn').addEventListener('click', () => {
+        const p = document.getElementById('metasPeriodoInput').value;
+        if (p) this._carregarMetas(p);
+      });
+    }
+
+    document.getElementById('metasModal').classList.remove('hidden');
+    const periodo = document.getElementById('metasPeriodoInput').value || new Date().toISOString().slice(0, 7);
+    await this._carregarMetas(periodo);
+  },
+
+  async _carregarMetas(periodo) {
+    const corpo = document.getElementById('metasCorpo');
+    const sub   = document.getElementById('metasSubtitulo');
+    if (!corpo) return;
+    corpo.innerHTML = `<div class="module-feedback module-feedback--info">Carregando metas...</div>`;
+
+    try {
+      const data = await api.request('/metas-vendas', { method: 'GET', query: { periodo } });
+      const metas = data.metas || [];
+
+      if (sub) sub.textContent = `Período: ${periodo} · ${metas.length} meta(s) cadastrada(s)`;
+
+      if (!metas.length) {
+        corpo.innerHTML = `<div class="empty-state">Nenhuma meta cadastrada para este período. Clique em "Nova meta" para adicionar.</div>`;
+        return;
+      }
+
+      const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+      corpo.innerHTML = metas.map((m) => {
+        const pct = m.percentual || 0;
+        const cor = pct >= 100 ? 'var(--success,#38a169)' : pct >= 70 ? 'var(--warning,#d69e2e)' : 'var(--danger,#e53e3e)';
+        return `
+          <div style="border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div>
+                <strong style="font-size:.95rem">${m.vendedor_nome || m.vendedor_usuario || 'Meta global da empresa'}</strong>
+                ${m.descricao ? `<div style="font-size:.8rem;color:var(--text-muted)">${m.descricao}</div>` : ''}
+              </div>
+              <button class="btn-inline btn-inline--danger" onclick="VendasModule.excluirMeta(${m.id}, '${periodo}')">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;font-size:.85rem">
+              <div><span style="color:var(--text-muted);display:block">Meta</span><strong>${cur(m.valor_meta)}</strong></div>
+              <div><span style="color:var(--text-muted);display:block">Realizado</span><strong style="color:${cor}">${cur(m.realizado)}</strong></div>
+              <div><span style="color:var(--text-muted);display:block">Faltando</span><strong>${cur(m.faltando)}</strong></div>
+            </div>
+            <div style="background:var(--surface-2);border-radius:999px;height:10px;overflow:hidden">
+              <div style="width:${Math.min(100,pct)}%;height:100%;background:${cor};border-radius:999px;transition:width .4s"></div>
+            </div>
+            <div style="text-align:right;font-size:.8rem;color:${cor};font-weight:700;margin-top:4px">${pct}%</div>
+          </div>`;
+      }).join('');
+
+    } catch (err) {
+      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${err.message || 'Erro ao carregar metas'}</div>`;
+    }
+  },
+
+  async criarMeta() {
+    const periodo = document.getElementById('metasPeriodoInput')?.value || new Date().toISOString().slice(0, 7);
+    const valor = prompt(`Meta de vendas para o período ${periodo} (R$):`);
+    if (!valor || isNaN(Number(valor))) return;
+
+    const descricao = prompt('Descrição (opcional):') || '';
+
+    try {
+      await api.request('/metas-vendas', {
+        method: 'POST',
+        body: { periodo, valor_meta: Number(valor), descricao: descricao || null }
+      });
+      showToast('Meta criada!', 'success');
+      await this._carregarMetas(periodo);
+    } catch (err) {
+      showToast(err.message || 'Erro ao criar meta', 'error');
+    }
+  },
+
+  async excluirMeta(id, periodo) {
+    if (!confirm('Excluir esta meta?')) return;
+    try {
+      await api.request(`/metas-vendas/${id}`, { method: 'DELETE' });
+      showToast('Meta excluída', 'success');
+      await this._carregarMetas(periodo);
+    } catch (err) {
+      showToast(err.message || 'Erro ao excluir', 'error');
+    }
+  },
+
   // ── Recibo simples (não fiscal) ──────────────────────────────────────────────
 
   async imprimirRecibo(vendaId) {
@@ -2218,5 +2365,8 @@ export function initVendasModule() {
   VendasModule.init();
   return VendasModule.load();
 }
+
+// Expõe globalmente para onclick inline dentro dos modais de metas
+window.VendasModule = VendasModule;
 
 export default VendasModule;
