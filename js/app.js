@@ -24,6 +24,7 @@ import { initDevolucoesModule } from './devolucoes.js';
 import { initAlertasModule } from './alertas.js';
 import { initConciliacaoModule } from './conciliacaoBancaria.js';
 import { initMarketplaceModule } from './marketplace.js';
+import { initCrmModule } from './crm.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -80,6 +81,7 @@ const VIEW_CONFIG = {
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
   alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  crm: { title: 'CRM', subtitle: 'Pipeline de oportunidades de venda' },
   marketplace: { title: 'Marketplace', subtitle: 'Integração com Mercado Livre e Shopee' },
   configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
 };
@@ -686,6 +688,8 @@ async function loadCurrentView(view) {
     await loadPedidosReal();
   } else if (view === 'nfe') {
     await loadNfeReal();
+  } else if (view === 'crm') {
+    await loadCrmReal();
   } else if (view === 'marketplace') {
     await loadMarketplaceReal();
   } else if (view === 'configuracoes') {
@@ -1435,6 +1439,18 @@ async function loadNfeReal() {
     console.error('Erro ao carregar NF-e:', error);
     showToast('Falha ao carregar módulo NF-e.', 'error');
     renderModuleError('nfeContainer', 'NF-e', 'Não foi possível carregar o módulo NF-e.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadCrmReal() {
+  showGlobalLoader('Carregando CRM...');
+  try {
+    await initCrmModule();
+  } catch (error) {
+    console.error('Erro ao carregar CRM:', error);
+    renderModuleError('crmContainer', 'CRM', 'Não foi possível carregar o módulo CRM.');
   } finally {
     hideGlobalLoader();
   }
