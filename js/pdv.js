@@ -17,6 +17,7 @@ const PDVModule = {
     observacao: '',
     salvando: false,
     pagamentos: [{ forma: 'Dinheiro', valor: 0, parcelas: 1, vencimento: '' }],
+    activeTab: 'produtos',
     gradeModalProduto: null,
     gradesDisponiveis: []
   },
@@ -139,6 +140,19 @@ const PDVModule = {
       const atrib2   = btn.dataset.atrib2 || '';
       if (estoque <= 0) { showToast('Variação sem estoque.', 'error'); return; }
       this.selectGrade(gradeId, atrib1, atrib2, estoque, preco);
+    });
+
+    // ── Abas mobile ────────────────────────────────────────────────────────────
+    document.getElementById('pdvTabs')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-tab]');
+      if (!btn) return;
+      this.switchTab(btn.dataset.tab);
+    });
+
+    // Sticky Finalizar mobile
+    document.getElementById('pdvMobileFinalizarBtn')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await this.finalizarVenda();
     });
 
     this.el.atualizarBtn?.addEventListener('click', async (event) => {
@@ -267,8 +281,21 @@ const PDVModule = {
 
         <div class="module-feedback" id="pdvFormFeedback"></div>
 
+        <!-- Abas visíveis apenas no mobile -->
+        <div class="pdv-tabs" id="pdvTabs">
+          <button type="button" class="pdv-tab pdv-tab--active" data-tab="produtos" id="pdvTabProdutos">
+            <i class="fa-solid fa-box"></i>
+            <span>Produtos</span>
+          </button>
+          <button type="button" class="pdv-tab" data-tab="carrinho" id="pdvTabCarrinho">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Carrinho</span>
+            <span class="pdv-tab-badge hidden" id="pdvTabCarrinhoBadge">0</span>
+          </button>
+        </div>
+
         <div class="pdv-grid">
-          <div class="pdv-panel">
+          <div class="pdv-panel pdv-panel--active" data-pdv-panel="produtos">
             <div class="pdv-panel__header">
               <h4>Cliente e produtos</h4>
               <p>Selecione o cliente, busque produtos e monte o carrinho.</p>
@@ -289,7 +316,9 @@ const PDVModule = {
                   <input
                     type="text"
                     id="pdvBuscaProduto"
-                    placeholder="Digite nome, categoria ou código de barras"
+                    inputmode="search"
+                    autocomplete="off"
+                    placeholder="Nome, categoria ou código de barras"
                   />
                 </div>
               </div>
@@ -304,7 +333,7 @@ const PDVModule = {
             </div>
           </div>
 
-          <div class="pdv-panel">
+          <div class="pdv-panel" data-pdv-panel="carrinho">
             <div class="pdv-panel__header">
               <h4>Carrinho e fechamento</h4>
               <p>Revise os itens, informe o pagamento e finalize a venda.</p>
@@ -344,12 +373,12 @@ const PDVModule = {
 
                 <div class="form-field">
                   <label for="pdvDesconto">Desconto</label>
-                  <input type="number" min="0" step="0.01" id="pdvDesconto" value="0" />
+                  <input type="number" min="0" step="0.01" id="pdvDesconto" value="0" inputmode="decimal" />
                 </div>
 
                 <div class="form-field">
                   <label for="pdvAcrescimo">Acréscimo</label>
-                  <input type="number" min="0" step="0.01" id="pdvAcrescimo" value="0" />
+                  <input type="number" min="0" step="0.01" id="pdvAcrescimo" value="0" inputmode="decimal" />
                 </div>
 
                 <div class="form-field form-field--span-2">
@@ -386,6 +415,17 @@ const PDVModule = {
                 <button type="button" class="btn btn-primary" id="pdvFinalizarBtn">
                   <i class="fa-solid fa-check"></i>
                   Finalizar venda
+                </button>
+              </div>
+
+              <!-- Footer fixo no mobile -->
+              <div class="pdv-mobile-sticky" id="pdvMobileSticky">
+                <div class="pdv-mobile-sticky__total">
+                  <span>Total</span>
+                  <strong id="pdvMobileStickyTotal">R$ 0,00</strong>
+                </div>
+                <button type="button" class="btn btn-primary pdv-mobile-sticky__btn" id="pdvMobileFinalizarBtn">
+                  <i class="fa-solid fa-check"></i> Finalizar
                 </button>
               </div>
             </div>
@@ -612,6 +652,187 @@ const PDVModule = {
         .pdv-grid { grid-template-columns: 1fr; }
       }
 
+      /* ── Mobile responsivo (< 768px) ─────────────────────── */
+      .pdv-tabs {
+        display: none;
+        gap: 0;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .pdv-tab {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px 8px;
+        border: none;
+        background: var(--surface-2);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .pdv-tab--active {
+        background: var(--primary, #2563eb);
+        color: #fff;
+      }
+
+      .pdv-tab-badge {
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 800;
+        border-radius: 999px;
+        padding: 1px 6px;
+        min-width: 18px;
+        text-align: center;
+      }
+
+      .pdv-mobile-sticky {
+        display: none;
+      }
+
+      @media (max-width: 767px) {
+        .pdv-tabs { display: flex; }
+
+        /* Mostra só o painel ativo no mobile */
+        [data-pdv-panel]:not(.pdv-panel--active) { display: none; }
+
+        /* Produtos: lista mais alta, sem altura fixa */
+        .pdv-products__list {
+          max-height: calc(100dvh - 340px);
+          min-height: 200px;
+        }
+
+        /* Touch targets maiores */
+        .pdv-mini-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          font-size: 1rem;
+        }
+
+        .pdv-qty__value {
+          min-width: 32px;
+          font-size: 1.1rem;
+        }
+
+        /* Tabela do carrinho → cards */
+        .pdv-table { min-width: unset; width: 100%; }
+        .pdv-table thead { display: none; }
+        .pdv-table tbody tr {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 6px 12px;
+          padding: 12px 4px;
+          border-bottom: 1px solid var(--border);
+        }
+        .pdv-table tbody tr td { border: none; padding: 0; }
+        .pdv-table tbody tr td[data-label="Produto"] {
+          flex: 1 1 100%;
+          font-size: 1rem;
+        }
+        .pdv-table tbody tr td[data-label="Qtd"] { flex: 0 0 auto; }
+        .pdv-table tbody tr td[data-label="Preço"] {
+          flex: 1 1 auto;
+          color: var(--text-muted);
+          font-size: 0.88rem;
+        }
+        .pdv-table tbody tr td[data-label="Total"] {
+          flex: 0 0 auto;
+          font-weight: 800;
+          font-size: 1rem;
+        }
+        .pdv-table tbody tr td:last-child {
+          flex: 0 0 auto;
+          margin-left: auto;
+        }
+        .pdv-remove-label { display: none; }
+
+        /* Esconde header do painel no mobile (aba já contextualiza) */
+        .pdv-panel__header { display: none; }
+
+        /* Checkout mais compacto */
+        .pdv-checkout { margin-top: 12px; padding-top: 12px; }
+
+        /* Esconde summary e botões normais no mobile — sticky faz o trabalho */
+        .pdv-summary { display: none; }
+        .pdv-actions { display: none; }
+
+        /* Sticky footer */
+        .pdv-mobile-sticky {
+          display: flex;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 200;
+          background: var(--surface);
+          border-top: 1px solid var(--border);
+          padding: 12px 16px;
+          padding-bottom: max(12px, env(safe-area-inset-bottom));
+          gap: 12px;
+          align-items: center;
+          box-shadow: 0 -4px 20px rgba(0,0,0,.12);
+        }
+
+        .pdv-mobile-sticky__total {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .pdv-mobile-sticky__total span {
+          font-size: 0.78rem;
+          color: var(--text-muted);
+        }
+
+        .pdv-mobile-sticky__total strong {
+          font-size: 1.2rem;
+          font-weight: 800;
+          color: var(--text);
+        }
+
+        .pdv-mobile-sticky__btn {
+          flex-shrink: 0;
+          padding: 14px 24px;
+          font-size: 1rem;
+          border-radius: 14px;
+        }
+
+        /* Padding para não ficar atrás do sticky */
+        [data-pdv-panel="carrinho"] { padding-bottom: 90px; }
+
+        /* Botão adicionar produto — maior para touch */
+        .pdv-product-card .btn {
+          min-height: 44px;
+          padding: 10px 16px;
+        }
+
+        /* Form fields do checkout mais espaçados */
+        .form-grid { gap: 10px; }
+        .form-control, select, input[type="text"],
+        input[type="number"], input[type="date"] {
+          min-height: 44px;
+          font-size: 1rem;
+        }
+
+        /* Split payment mais compacto */
+        .pdv-split-row .pdv-split-forma,
+        .pdv-split-row .pdv-split-valor { min-height: 44px; }
+      }
+
       /* ── Split de pagamento ───────────────────────────────── */
       .pdv-split-lista {
         display: flex;
@@ -825,14 +1046,14 @@ const PDVModule = {
 
         return `
           <tr>
-            <td>
+            <td data-label="Produto">
               <div class="table-primary">
                 <strong>${this.escapeHtml(item.produto_nome || 'Produto')}</strong>
                 ${item.grade_label ? `<small style="display:block;color:var(--text-muted);margin-top:2px">${this.escapeHtml(item.grade_label)}</small>` : ''}
               </div>
             </td>
 
-            <td>
+            <td data-label="Qtd">
               <div class="pdv-qty">
                 <button type="button" class="pdv-mini-btn" data-action="pdv-qty-minus" data-index="${index}">
                   <i class="fa-solid fa-minus"></i>
@@ -844,8 +1065,8 @@ const PDVModule = {
               </div>
             </td>
 
-            <td>${this.toCurrency(item.preco_unitario)}</td>
-            <td>${this.toCurrency(totalItem)}</td>
+            <td data-label="Preço">${this.toCurrency(item.preco_unitario)}</td>
+            <td data-label="Total">${this.toCurrency(totalItem)}</td>
 
             <td class="text-right">
               <button
@@ -854,7 +1075,8 @@ const PDVModule = {
                 data-action="pdv-remove-item"
                 data-index="${index}"
               >
-                Remover
+                <i class="fa-solid fa-xmark"></i>
+                <span class="pdv-remove-label">Remover</span>
               </button>
             </td>
           </tr>
@@ -879,11 +1101,48 @@ const PDVModule = {
     if (this.el.total) this.el.total.textContent = this.toCurrency(total);
     if (this.el.totalItens) this.el.totalItens.textContent = String(totalItens);
 
+    // Sticky mobile footer
+    const stickyTotal = document.getElementById('pdvMobileStickyTotal');
+    if (stickyTotal) stickyTotal.textContent = this.toCurrency(total);
+
+    // Badge da aba carrinho
+    const badge = document.getElementById('pdvTabCarrinhoBadge');
+    if (badge) {
+      if (totalItens > 0) {
+        badge.textContent = String(totalItens);
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
     // Ajusta o valor da única forma de pagamento quando total muda e só há uma
     if (this.state.pagamentos.length === 1) {
       this.state.pagamentos[0].valor = total;
     }
     this.renderPagamentos();
+  },
+
+  // ── Abas mobile ─────────────────────────────────────────────────────────────
+
+  switchTab(tab) {
+    this.state.activeTab = tab;
+
+    document.querySelectorAll('[data-pdv-panel]').forEach((panel) => {
+      if (panel.dataset.pdvPanel === tab) {
+        panel.classList.add('pdv-panel--active');
+      } else {
+        panel.classList.remove('pdv-panel--active');
+      }
+    });
+
+    document.querySelectorAll('[data-tab]').forEach((btn) => {
+      if (btn.dataset.tab === tab) {
+        btn.classList.add('pdv-tab--active');
+      } else {
+        btn.classList.remove('pdv-tab--active');
+      }
+    });
   },
 
   // ── Split de pagamento ──────────────────────────────────────────────────────
@@ -1073,6 +1332,11 @@ const PDVModule = {
     this.renderCarrinho();
     this.renderResumo();
     this.setFeedback('', 'info');
+
+    // No mobile, ao adicionar o primeiro item troca para a aba do carrinho
+    if (this.state.carrinho.length === 1 && window.innerWidth < 768) {
+      this.switchTab('carrinho');
+    }
   },
 
   // ── SELETOR DE GRADE ────────────────────────────────────────────────────────
@@ -1145,6 +1409,10 @@ const PDVModule = {
     this.renderCarrinho();
     this.renderResumo();
     this.setFeedback('', 'info');
+
+    if (this.state.carrinho.length === 1 && window.innerWidth < 768) {
+      this.switchTab('carrinho');
+    }
   },
 
   renderGradeGrid() {
@@ -1393,6 +1661,7 @@ const PDVModule = {
 
     this.state.produtosFiltrados = [...this.state.produtos];
 
+    this.switchTab('produtos');
     this.updateClienteInfo();
     this.renderProdutos();
     this.renderCarrinho();
