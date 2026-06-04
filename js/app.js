@@ -30,6 +30,7 @@ import { initApiPublicaModule } from './apiPublica.js';
 import { initRastreabilidadeModule } from './rastreabilidade.js';
 import { initWhatsappModule } from './whatsapp.js';
 import { initFidelidadeModule } from './fidelidade.js';
+import { initCheckoutLinksModule } from './checkoutLinks.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -86,6 +87,7 @@ const VIEW_CONFIG = {
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
   alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  'checkout-links': { title: 'Link de Pagamento', subtitle: 'Gere links de cobrança com PIX e Boleto' },
   fidelidade: { title: 'Programa de Fidelidade', subtitle: 'Pontos por compra, ranking e resgate' },
   whatsapp: { title: 'WhatsApp Business', subtitle: 'Cobranças automáticas e mensagens via API' },
   rastreabilidade: { title: 'Rastreabilidade', subtitle: 'Controle de lotes e números de série' },
@@ -698,6 +700,8 @@ async function loadCurrentView(view) {
     await loadPedidosReal();
   } else if (view === 'nfe') {
     await loadNfeReal();
+  } else if (view === 'checkout-links') {
+    await loadCheckoutLinksReal();
   } else if (view === 'fidelidade') {
     await loadFidelidadeReal();
   } else if (view === 'whatsapp') {
@@ -1459,6 +1463,18 @@ async function loadNfeReal() {
     console.error('Erro ao carregar NF-e:', error);
     showToast('Falha ao carregar módulo NF-e.', 'error');
     renderModuleError('nfeContainer', 'NF-e', 'Não foi possível carregar o módulo NF-e.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadCheckoutLinksReal() {
+  showGlobalLoader('Carregando links de pagamento...');
+  try {
+    await initCheckoutLinksModule();
+  } catch (error) {
+    console.error('Erro ao carregar checkout links:', error);
+    renderModuleError('checkoutLinksContainer', 'Link de Pagamento', 'Nao foi possivel carregar o modulo.');
   } finally {
     hideGlobalLoader();
   }

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
+  <!-- QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" referrerpolicy="no-referrer"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:#f1f5f9;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px}
+    .card{background:#fff;border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,.1);width:100%;max-width:440px;overflow:hidden}
+    .card-header{background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:28px 28px 24px;color:#fff}
+    .empresa-nome{font-size:14px;font-weight:600;opacity:.85;margin-bottom:4px}
+    .checkout-desc{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:12px}
+    .checkout-valor{font-size:36px;font-weight:800;letter-spacing:-1px}
+    .card-body{padding:24px 28px}
+    .status-pago{background:#dcfce7;border:1px solid #86efac;border-radius:14px;padding:20px;text-align:center;color:#166534}
+    .status-pago i{font-size:40px;display:block;margin-bottom:10px}
+    .status-pago strong{font-size:18px;display:block}
+    .status-pago span{font-size:13px;opacity:.8}
+    .tabs{display:flex;gap:8px;margin-bottom:20px}
+    .tab-btn{flex:1;padding:10px;border:2px solid #e2e8f0;background:#fff;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px;color:#64748b}
+    .tab-btn.active{border-color:#2563eb;background:#eff6ff;color:#2563eb}
+    .tab-btn:hover:not(.active){border-color:#94a3b8}
+    .pix-section,.boleto-section{display:none}
+    .pix-section.active,.boleto-section.active{display:block}
+    .qr-wrap{display:flex;justify-content:center;margin:16px 0;padding:16px;background:#f8fafc;border-radius:14px;border:1px solid #e2e8f0}
+    .pix-key-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-size:12px;font-family:monospace;word-break:break-all;color:#334155;margin:12px 0}
+    .btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s}
+    .btn-pix{background:#32d583;color:#fff}
+    .btn-pix:hover{background:#10b981}
+    .btn-boleto{background:#2563eb;color:#fff;margin-top:12px}
+    .btn-boleto:hover{background:#1d4ed8}
+    .btn-secondary{background:#f1f5f9;color:#334155;margin-top:8px}
+    .btn-secondary:hover{background:#e2e8f0}
+    .btn-copied{background:#10b981!important}
+    .info-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#64748b;margin-top:12px}
+    .info-row i{margin-top:2px;flex-shrink:0}
+    .loader{text-align:center;padding:40px 20px;color:#64748b}
+    .loader i{font-size:32px;display:block;margin-bottom:12px;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .error-box{background:#fef2f2;border:1px solid #fca5a5;border-radius:14px;padding:20px;text-align:center;color:#991b1b}
+    .error-box i{font-size:32px;display:block;margin-bottom:10px}
+    .divider{border:none;border-top:1px solid #e2e8f0;margin:16px 0}
+    .expira-aviso{font-size:11px;color:#f59e0b;display:flex;align-items:center;gap:5px;margin-top:8px}
+    .powered{text-align:center;padding:16px;font-size:11px;color:#94a3b8}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div id="root">
+    <div class="card-body">
+      <div class="loader"><i class="fa fa-spinner"></i>Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = window.LF_ERP_API_URL || 'https://lf-erp-backend.onrender.com';
+
+function moeda(v) {
+  return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function dataBR(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+}
+
+async function carregar() {
+  const token = location.hash.replace('#','').trim();
+  if (!token) { mostrarErro('Link inválido. Verifique o endereço.'); return; }
+
+  try {
+    const resp = await fetch(`${API_BASE}/checkout/p/${token}`);
+    const data = await resp.json();
+    if (!data.sucesso) { mostrarErro(data.erro || 'Link inválido'); return; }
+    renderizar(data.checkout, token);
+  } catch {
+    mostrarErro('Não foi possível carregar este link. Tente novamente.');
+  }
+}
+
+function renderizar(co, token) {
+  const root = document.getElementById('root');
+
+  // Header
+  root.innerHTML = `
+    <div class="card-header">
+      <div class="empresa-nome"><i class="fa fa-store"></i> ${co.empresa_nome}</div>
+      <div class="checkout-desc">${co.descricao}</div>
+      <div class="checkout-valor">${moeda(co.valor)}</div>
+      ${co.expira_em ? `<div class="expira-aviso"><i class="fa fa-clock"></i> Válido até ${dataBR(co.expira_em)}</div>` : ''}
+    </div>
+    <div class="card-body" id="cardBody"></div>
+    <div class="powered">Pagamento seguro via <strong>LF ERP</strong></div>
+  `;
+
+  renderBody(co, token);
+}
+
+function renderBody(co, token) {
+  const body = document.getElementById('cardBody');
+
+  if (co.status === 'pago') {
+    body.innerHTML = `
+      <div class="status-pago">
+        <i class="fa fa-circle-check"></i>
+        <strong>Pagamento confirmado!</strong>
+        <span>Obrigado, ${co.cliente_nome || 'cliente'}!</span>
+        ${co.pago_em ? `<span style="margin-top:6px;display:block;">Registrado em ${dataBR(co.pago_em)}</span>` : ''}
+      </div>`;
+    return;
+  }
+
+  if (co.status === 'cancelado' || co.status === 'expirado') {
+    body.innerHTML = `
+      <div class="error-box">
+        <i class="fa fa-circle-xmark"></i>
+        <strong>Este link ${co.status === 'expirado' ? 'expirou' : 'foi cancelado'}.</strong>
+        <p style="margin-top:6px;font-size:13px;">Entre em contato com ${co.empresa_nome} para um novo link.</p>
+      </div>`;
+    return;
+  }
+
+  const temPix    = Boolean(co.tem_pix || co.pix_copia_cola);
+  const temBoleto = Boolean(co.tem_asaas);
+
+  let html = '';
+
+  if (temPix && temBoleto) {
+    html += `
+      <div class="tabs">
+        <button class="tab-btn active" onclick="trocarAba('pix',this)"><i class="fa fa-qrcode"></i> PIX</button>
+        <button class="tab-btn" onclick="trocarAba('boleto',this)"><i class="fa fa-barcode"></i> Boleto</button>
+      </div>`;
+  }
+
+  // PIX
+  if (temPix) {
+    html += `<div class="pix-section ${temBoleto ? '' : 'active'}" id="abaPixSection">`;
+    html += `<div class="qr-wrap"><div id="qrcodeDiv"></div></div>`;
+    html += `<p style="font-size:12px;color:#64748b;text-align:center;margin-bottom:8px;">Ou copie a chave PIX:</p>`;
+    html += `<div class="pix-key-box" id="pixKeyBox">${co.pix_copia_cola}</div>`;
+    html += `<button class="btn btn-pix" onclick="copiarPix()"><i class="fa fa-copy"></i> Copiar código PIX</button>`;
+    html += `<div class="info-row"><i class="fa fa-circle-info"></i><span>Abra o app do seu banco → PIX → Pagar → Copia e Cola. Confirme o valor e a empresa recebedora antes de pagar.</span></div>`;
+    html += `</div>`;
+  }
+
+  // Boleto
+  if (temBoleto) {
+    html += `<div class="boleto-section ${temPix ? '' : 'active'}" id="abaBoletoSection">`;
+    if (co.boleto_url) {
+      html += `<a href="${co.boleto_url}" target="_blank" class="btn btn-boleto"><i class="fa fa-file-lines"></i> Ver boleto</a>`;
+      if (co.boleto_linha) {
+        html += `<div class="pix-key-box" style="margin-top:12px;">${co.boleto_linha}</div>`;
+        html += `<button class="btn btn-secondary" onclick="copiarTexto('${co.boleto_linha}','bolLinha')"><i class="fa fa-copy"></i> Copiar linha digitável</button>`;
+      }
+    } else {
+      html += `<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Preencha seu nome para gerar o boleto:</p>`;
+      html += `<input id="boletoNome" placeholder="Seu nome completo" style="width:100%;padding:11px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;margin-bottom:10px;font-family:Inter,sans-serif;">`;
+      html += `<button class="btn btn-boleto" onclick="gerarBoleto('${token}')"><i class="fa fa-barcode"></i> Gerar boleto</button>`;
+      html += `<div id="boletoResult"></div>`;
+    }
+    html += `</div>`;
+  }
+
+  if (!temPix && !temBoleto) {
+    html += `<div class="error-box" style="background:#fff7ed;border-color:#fed7aa;color:#92400e;">
+      <i class="fa fa-triangle-exclamation" style="color:#f59e0b;"></i>
+      <p style="font-size:13px;">Nenhuma forma de pagamento configurada para este link. Entre em contato com ${co.empresa_nome}.</p>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+
+  // Gera QR Code
+  if (temPix && co.pix_copia_cola) {
+    setTimeout(() => {
+      const div = document.getElementById('qrcodeDiv');
+      if (div && typeof QRCode !== 'undefined') {
+        new QRCode(div, { text: co.pix_copia_cola, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+      }
+    }, 100);
+  }
+
+  // Se só tem uma opção, mostra diretamente
+  if (temPix && !temBoleto) document.getElementById('abaPixSection')?.classList.add('active');
+  if (temBoleto && !temPix) document.getElementById('abaBoletoSection')?.classList.add('active');
+}
+
+function trocarAba(aba, btn) {
+  document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.pix-section,.boleto-section').forEach((s) => s.classList.remove('active'));
+  document.getElementById(`aba${aba.charAt(0).toUpperCase()+aba.slice(1)}Section`)?.classList.add('active');
+}
+
+function copiarPix() {
+  const txt = document.getElementById('pixKeyBox')?.textContent;
+  if (!txt) return;
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.querySelector('.btn-pix');
+    if (btn) { btn.classList.add('btn-copied'); btn.innerHTML = '<i class="fa fa-check"></i> Copiado!'; setTimeout(() => { btn.classList.remove('btn-copied'); btn.innerHTML = '<i class="fa fa-copy"></i> Copiar código PIX'; }, 2500); }
+  });
+}
+
+function copiarTexto(txt, id) {
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.getElementById(id) || document.querySelector('.btn-secondary');
+    if (btn) { const orig = btn.innerHTML; btn.innerHTML = '<i class="fa fa-check"></i> Copiado!'; setTimeout(() => { btn.innerHTML = orig; }, 2000); }
+  });
+}
+
+async function gerarBoleto(token) {
+  const nome = document.getElementById('boletoNome')?.value.trim();
+  const btn  = document.querySelector('.btn-boleto');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Gerando...'; }
+
+  try {
+    const resp = await fetch(`${API_BASE}/checkout/p/${token}/boleto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome })
+    });
+    const data = await resp.json();
+    const result = document.getElementById('boletoResult');
+
+    if (!data.sucesso) { if (result) result.innerHTML = `<div class="info-row" style="color:#ef4444;margin-top:8px;"><i class="fa fa-circle-xmark"></i>${data.erro}</div>`; return; }
+
+    if (data.boleto_url) {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-external-link"></i> Abrir boleto'; btn.onclick = () => window.open(data.boleto_url, '_blank'); }
+      if (data.boleto_linha && result) {
+        result.innerHTML = `<div class="pix-key-box" style="margin-top:12px;">${data.boleto_linha}</div>`;
+      }
+    }
+  } catch {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-barcode"></i> Gerar boleto'; }
+  }
+}
+
+function mostrarErro(msg) {
+  document.getElementById('root').innerHTML = `
+    <div class="card-body">
+      <div class="error-box"><i class="fa fa-circle-xmark"></i><strong>${msg}</strong></div>
+    </div>`;
+}
+
+carregar();
+</script>
+</body>
+</html>
