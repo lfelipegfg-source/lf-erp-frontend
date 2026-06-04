@@ -78,6 +78,46 @@ const ConfigModule = {
     }
   },
 
+  async exportarDados() {
+    const btn = document.getElementById('exportarDadosBtn');
+    try {
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...'; }
+
+      const token = api.getAuthToken();
+      const baseUrl = api.config?.BASE_URL || 'https://lf-erp-backend.onrender.com';
+      const url = `${baseUrl}/empresa/exportar-dados`;
+
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.erro || `Erro ${res.status}`);
+      }
+
+      const blob = await res.blob();
+      const cd = res.headers.get('content-disposition') || '';
+      const match = cd.match(/filename="(.+?)"/);
+      const filename = match ? match[1] : `lferp-dados-${new Date().toISOString().slice(0,10)}.json`;
+
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+
+      showToast('Dados exportados com sucesso!', 'success');
+    } catch (err) {
+      showToast(err.message || 'Erro ao exportar dados', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-download"></i> Baixar meus dados'; }
+    }
+  },
+
   async carregarAsaas() {
     try {
       const data = await api.request('/pagamentos/boleto/config', { method: 'GET' });
@@ -466,6 +506,22 @@ const ConfigModule = {
 
         <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
 
+        <!-- LGPD — Exportação de dados -->
+        <div class="module-card" style="margin-bottom:16px">
+          <div class="module-card__header">
+            <div>
+              <h3><i class="fa-solid fa-file-arrow-down" style="color:var(--primary);margin-right:6px"></i>Exportar meus dados (LGPD)</h3>
+              <p>Conforme a Lei 13.709/2018 (LGPD), você pode baixar todos os dados da sua empresa a qualquer momento.</p>
+            </div>
+          </div>
+          <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:12px">
+            O arquivo JSON incluirá: clientes, produtos, vendas, compras, contas a receber/pagar, movimentações de estoque e lançamentos financeiros.
+          </p>
+          <button id="exportarDadosBtn" class="btn btn-light">
+            <i class="fa-solid fa-download"></i> Baixar meus dados
+          </button>
+        </div>
+
         <div class="module-card" style="background: var(--danger-soft); border-color: rgba(220,38,38,0.25);">
           <div class="module-card__header">
             <div>
@@ -486,6 +542,7 @@ const ConfigModule = {
       document.getElementById('resetDadosBtn')?.addEventListener('click', () => this.resetDados());
       document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
       document.getElementById('cfgSalvarAsaasBtn')?.addEventListener('click', () => this.salvarAsaas());
+      document.getElementById('exportarDadosBtn')?.addEventListener('click', () => this.exportarDados());
     }, 0);
   }
 };
