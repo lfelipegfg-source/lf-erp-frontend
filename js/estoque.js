@@ -61,8 +61,20 @@ const EstoqueModule = {
         await this.abrirSugestaoCompra();
       }
 
+      if (btn.id === 'estoqueDepositosBtn') {
+        await this.abrirDepositos();
+      }
+
       if (btn.id === 'sugestaoFecharBtn') {
         document.getElementById('sugestaoCompraModal')?.classList.add('hidden');
+      }
+
+      if (btn.id === 'depositosFecharBtn') {
+        document.getElementById('depositosModal')?.classList.add('hidden');
+      }
+
+      if (btn.id === 'depositoNovoBtn') {
+        await this.criarDeposito();
       }
     });
   },
@@ -118,6 +130,10 @@ const EstoqueModule = {
           </div>
 
           <div class="module-card__actions">
+            <button class="btn btn-light" id="estoqueDepositosBtn" type="button">
+              <i class="fa-solid fa-warehouse"></i>
+              Depósitos
+            </button>
             <button class="btn btn-light" id="estoqueSugestaoBtn" type="button">
               <i class="fa-solid fa-cart-shopping"></i>
               Sugestão de compra
@@ -382,6 +398,175 @@ const EstoqueModule = {
 
   // ── Sugestão automática de compra ─────────────────────────────────────────
 
+  // ── Multi-depósito ──────────────────────────────────────────────────────────
+
+  async abrirDepositos() {
+    if (!document.getElementById('depositosModal')) {
+      const el = document.createElement('div');
+      el.className = 'modal-overlay hidden';
+      el.id = 'depositosModal';
+      el.innerHTML = `
+        <div class="modal-card" style="max-width:700px;width:95vw">
+          <div class="modal-card__header">
+            <div>
+              <h3><i class="fa-solid fa-warehouse" style="margin-right:8px"></i>Depósitos</h3>
+              <p style="color:var(--text-muted);font-size:.9rem">Gerencie locais de armazenamento</p>
+            </div>
+            <button type="button" class="icon-button" id="depositosFecharBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="depositosCorpo" style="padding:20px 24px 24px;overflow-y:auto;max-height:70vh"></div>
+          <div class="modal-card__footer" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+            <button type="button" class="btn btn-primary" id="depositoNovoBtn">
+              <i class="fa-solid fa-plus"></i> Novo depósito
+            </button>
+            <button type="button" class="btn btn-light" id="depositosFecharBtn2" onclick="document.getElementById('depositosModal').classList.add('hidden')">Fechar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(el);
+    }
+
+    document.getElementById('depositosModal').classList.remove('hidden');
+    await this._renderDepositos();
+  },
+
+  async _renderDepositos() {
+    const corpo = document.getElementById('depositosCorpo');
+    if (!corpo) return;
+    corpo.innerHTML = `<div class="module-feedback module-feedback--info">Carregando...</div>`;
+
+    try {
+      const empresa = this.state.empresa || '';
+      const data = await api.request('/depositos', { method: 'GET', query: { empresa } });
+      const lista = data.depositos || [];
+
+      if (!lista.length) {
+        corpo.innerHTML = `
+          <div class="empty-state">Nenhum depósito cadastrado. Clique em "Novo depósito" para começar.</div>`;
+        return;
+      }
+
+      corpo.innerHTML = `
+        <div class="table-wrapper">
+        <table class="data-table">
+          <thead><tr>
+            <th>Depósito</th><th>Produtos</th><th>Unidades</th><th>Status</th><th class="text-right">Ações</th>
+          </tr></thead>
+          <tbody>
+            ${lista.map((d) => `
+              <tr>
+                <td>
+                  <div class="table-primary">
+                    <strong>${escapeHtml(d.nome)}</strong>
+                    ${d.principal ? '<span class="badge badge--primary" style="font-size:.7rem;margin-left:6px">Principal</span>' : ''}
+                    ${d.descricao ? `<small style="color:var(--text-muted)">${escapeHtml(d.descricao)}</small>` : ''}
+                  </div>
+                </td>
+                <td>${d.total_produtos || 0}</td>
+                <td>${d.total_unidades || 0}</td>
+                <td><span class="badge ${d.ativo ? 'badge--success' : 'badge--warning'}">${d.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                <td class="text-right">
+                  <button class="btn-inline" onclick="EstoqueModule.verEstoqueDeposito(${d.id}, '${escapeHtml(d.nome)}')">
+                    <i class="fa-solid fa-eye"></i> Ver estoque
+                  </button>
+                  ${!d.principal ? `
+                    <button class="btn-inline btn-inline--danger"
+                      onclick="EstoqueModule.excluirDeposito(${d.id})">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>` : ''}
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        </div>`;
+    } catch (err) {
+      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message)}</div>`;
+    }
+  },
+
+  async criarDeposito() {
+    const nome = prompt('Nome do novo depósito:');
+    if (!nome?.trim()) return;
+    const descricao = prompt('Descrição (opcional):') || '';
+    try {
+      const empresa = this.state.empresa || '';
+      await api.request('/depositos', {
+        method: 'POST',
+        body: { nome: nome.trim(), descricao, empresa }
+      });
+      showToast('Depósito criado!', 'success');
+      await this._renderDepositos();
+    } catch (err) {
+      showToast(err.message || 'Erro ao criar depósito', 'error');
+    }
+  },
+
+  async excluirDeposito(id) {
+    if (!confirm('Excluir este depósito? Só é possível se não houver estoque.')) return;
+    try {
+      await api.request(`/depositos/${id}`, { method: 'DELETE' });
+      showToast('Depósito excluído!', 'success');
+      await this._renderDepositos();
+    } catch (err) {
+      showToast(err.message || 'Erro ao excluir', 'error');
+    }
+  },
+
+  async verEstoqueDeposito(id, nome) {
+    const corpo = document.getElementById('depositosCorpo');
+    if (!corpo) return;
+    corpo.innerHTML = `
+      <div style="margin-bottom:16px">
+        <button type="button" class="btn btn-light btn-sm" onclick="EstoqueModule._renderDepositos()">
+          <i class="fa-solid fa-arrow-left"></i> Voltar
+        </button>
+        <strong style="margin-left:12px">${escapeHtml(nome)}</strong>
+      </div>
+      <div class="module-feedback module-feedback--info">Carregando estoque...</div>`;
+
+    try {
+      const data = await api.request(`/depositos/${id}/estoque`);
+      const itens = data.itens || [];
+
+      if (!itens.length) {
+        corpo.querySelector('.module-feedback').outerHTML = `<div class="empty-state">Nenhum produto neste depósito.</div>`;
+        return;
+      }
+
+      const tabela = document.createElement('div');
+      tabela.className = 'table-wrapper';
+      tabela.innerHTML = `
+        <table class="data-table">
+          <thead><tr>
+            <th>Produto</th><th>Categoria</th><th>Variação</th>
+            <th class="text-right">Estoque</th>
+          </tr></thead>
+          <tbody>
+            ${itens.map((i) => `
+              <tr>
+                <td><strong>${escapeHtml(i.produto_nome)}</strong></td>
+                <td>${escapeHtml(i.categoria || '-')}</td>
+                <td>${i.atributo1 ? escapeHtml(`${i.atributo1}${i.atributo2 ? ' / ' + i.atributo2 : ''}`) : '-'}</td>
+                <td class="text-right ${Number(i.estoque) <= 0 ? 'text-danger' : ''}">${i.estoque}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+
+      corpo.innerHTML = `
+        <div style="margin-bottom:16px">
+          <button type="button" class="btn btn-light btn-sm" onclick="EstoqueModule._renderDepositos()">
+            <i class="fa-solid fa-arrow-left"></i> Voltar
+          </button>
+          <strong style="margin-left:12px">${escapeHtml(nome)}</strong>
+          <span style="color:var(--text-muted);font-size:.85rem;margin-left:8px">(${itens.length} produto(s))</span>
+        </div>`;
+      corpo.appendChild(tabela);
+    } catch (err) {
+      showToast(err.message || 'Erro ao carregar estoque', 'error');
+    }
+  },
+
   async abrirSugestaoCompra() {
     if (!document.getElementById('sugestaoCompraModal')) {
       const el = document.createElement('div');
@@ -491,3 +676,6 @@ export async function initEstoqueModule() {
   EstoqueModule.init();
   await EstoqueModule.load();
 }
+
+// Expõe globalmente para os onclick inline dentro do modal de depósitos
+window.EstoqueModule = EstoqueModule;
