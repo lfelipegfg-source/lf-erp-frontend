@@ -163,6 +163,101 @@
 
             <div class="login-card__footer">
               <small> Ambiente seguro • Controle por perfil • Operação multiempresa </small>
+              <div style="margin-top:12px;text-align:center">
+                <span style="font-size:.85rem;color:var(--text-muted)">Novo por aqui? </span>
+                <button type="button" id="abrirRegistroBtn" class="link-button" style="font-size:.85rem">
+                  Criar conta grátis (14 dias)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TELA DE REGISTRO -->
+      <section id="registroScreen" class="login-screen hidden">
+        <div class="login-screen__left">
+          <div class="login-brand">
+            <div class="login-brand__badge"><i class="fa-solid fa-layer-group"></i></div>
+            <div><h1>LF ERP</h1><p>Gestão empresarial profissional</p></div>
+          </div>
+          <div class="login-highlight">
+            <span class="login-highlight__tag">Trial gratuito — 14 dias</span>
+            <h2>Comece agora sem cartão de crédito</h2>
+            <p>PDV, financeiro, estoque, clientes e muito mais. Tudo pronto para usar em minutos.</p>
+            <div class="login-highlight__cards">
+              <article class="login-mini-card">
+                <i class="fa-solid fa-rocket"></i>
+                <div><strong>Setup em 2 minutos</strong><small>Cadastre sua empresa e comece a vender</small></div>
+              </article>
+              <article class="login-mini-card">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div><strong>Dados isolados</strong><small>Cada empresa tem seus dados protegidos</small></div>
+              </article>
+              <article class="login-mini-card">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div><strong>14 dias grátis</strong><small>Sem compromisso, sem cartão</small></div>
+              </article>
+            </div>
+          </div>
+        </div>
+        <div class="login-screen__right">
+          <div class="login-card">
+            <div class="login-card__header">
+              <h3>Criar conta gratuita</h3>
+              <p>Preencha os dados da sua empresa</p>
+            </div>
+            <form id="registroForm" class="login-form" autocomplete="on">
+              <div class="form-group">
+                <label for="regNomeEmpresa">Nome da empresa *</label>
+                <div class="input-icon">
+                  <i class="fa-solid fa-building"></i>
+                  <input type="text" id="regNomeEmpresa" placeholder="Ex: Loja das Flores" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="regNome">Seu nome</label>
+                <div class="input-icon">
+                  <i class="fa-solid fa-user"></i>
+                  <input type="text" id="regNome" placeholder="Nome completo" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="regEmail">E-mail</label>
+                <div class="input-icon">
+                  <i class="fa-solid fa-envelope"></i>
+                  <input type="email" id="regEmail" placeholder="seu@email.com" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="regUsuario">Nome de usuário *</label>
+                <div class="input-icon">
+                  <i class="fa-solid fa-at"></i>
+                  <input type="text" id="regUsuario" placeholder="Sem espaços, ex: joao.silva" required
+                    autocomplete="username" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="regSenha">Senha *</label>
+                <div class="input-icon">
+                  <i class="fa-solid fa-lock"></i>
+                  <input type="password" id="regSenha" placeholder="Mínimo 6 caracteres" required
+                    autocomplete="new-password" />
+                </div>
+              </div>
+              <button type="submit" id="registroSubmitBtn" class="btn btn-primary btn-block">
+                <i class="fa-solid fa-user-plus"></i>
+                Criar minha conta
+              </button>
+              <div id="registroMessage" class="form-message" role="alert"></div>
+            </form>
+            <div class="login-card__footer">
+              <div style="text-align:center">
+                <span style="font-size:.85rem;color:var(--text-muted)">Já tem conta? </span>
+                <button type="button" id="voltarLoginBtn" class="link-button" style="font-size:.85rem">
+                  Fazer login
+                </button>
+              </div>
             </div>
           </div>
         </div>

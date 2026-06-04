@@ -154,6 +154,69 @@ function bindLoginEvents() {
     loginForm.addEventListener('submit', handleLoginSubmit);
   }
 
+  // ── Registro self-service ────────────────────────────────────────────────────
+  document.getElementById('abrirRegistroBtn')?.addEventListener('click', () => {
+    document.getElementById('loginScreen')?.classList.add('hidden');
+    document.getElementById('registroScreen')?.classList.remove('hidden');
+  });
+
+  document.getElementById('voltarLoginBtn')?.addEventListener('click', () => {
+    document.getElementById('registroScreen')?.classList.add('hidden');
+    document.getElementById('loginScreen')?.classList.remove('hidden');
+  });
+
+  document.getElementById('registroForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('registroSubmitBtn');
+    const msg = document.getElementById('registroMessage');
+
+    const nome_empresa    = document.getElementById('regNomeEmpresa')?.value?.trim() || '';
+    const nome_responsavel = document.getElementById('regNome')?.value?.trim() || '';
+    const email           = document.getElementById('regEmail')?.value?.trim() || '';
+    const usuario         = document.getElementById('regUsuario')?.value?.trim() || '';
+    const senha           = document.getElementById('regSenha')?.value || '';
+
+    if (!nome_empresa || !usuario || !senha) {
+      if (msg) { msg.textContent = 'Preencha os campos obrigatórios.'; msg.className = 'form-message form-message--error'; }
+      return;
+    }
+
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Criando conta...'; }
+    if (msg) { msg.textContent = ''; msg.className = 'form-message'; }
+
+    try {
+      const data = await api.request('/registro', {
+        method: 'POST',
+        body: { nome_empresa, nome_responsavel, email, usuario, senha }
+      });
+
+      // Auto-login com o token retornado
+      const authPayload = {
+        authToken: data.token,
+        empresa: data.empresa,
+        empresaId: data.empresa?.id,
+        user: { ...data.user, empresa_id: data.empresa?.id, empresa: data.empresa?.nome }
+      };
+      authLogin(authPayload, true);
+
+      document.getElementById('registroScreen')?.classList.add('hidden');
+      applyAuthData(authPayload);
+      renderAuthenticatedUser();
+      renderTrialBanner();
+      showMainScreen();
+      await setActiveView('dashboard');
+      showToast(`Bem-vindo! Seu trial de 14 dias começou.`, 'success');
+      mostrarWizardBoasVindas(data.empresa?.nome);
+    } catch (err) {
+      if (msg) {
+        msg.textContent = err?.message || 'Erro ao criar conta. Tente novamente.';
+        msg.className = 'form-message form-message--error';
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Criar minha conta'; }
+    }
+  });
+
   if (togglePasswordBtn) {
     togglePasswordBtn.addEventListener('click', togglePasswordVisibility);
   }
@@ -1436,6 +1499,91 @@ function buildFriendlyAuthError(error) {
 
 function wait(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// ── Wizard de boas-vindas (exibido após registro) ─────────────────────────────
+
+function mostrarWizardBoasVindas(nomeEmpresa) {
+  if (document.getElementById('wizardBoasVindas')) return;
+
+  const wizard = document.createElement('div');
+  wizard.id = 'wizardBoasVindas';
+  wizard.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+
+  const steps = [
+    {
+      icon: 'fa-rocket',
+      titulo: `Bem-vindo ao LF ERP!`,
+      texto: `Sua conta <strong>${nomeEmpresa || ''}</strong> foi criada com sucesso. Você tem <strong>14 dias</strong> para explorar tudo gratuitamente.`,
+      btn: 'Configurar minha empresa'
+    },
+    {
+      icon: 'fa-box',
+      titulo: 'Adicione seu primeiro produto',
+      texto: 'Cadastre produtos no menu <strong>Cadastros → Produtos</strong> para começar a vender. Você pode importar depois também.',
+      btn: 'Ir para Produtos'
+    },
+    {
+      icon: 'fa-cash-register',
+      titulo: 'PDV pronto para usar',
+      texto: 'Use o <strong>PDV</strong> para registrar vendas rapidamente. Funciona no celular, tablet e computador.',
+      btn: 'Ir para o PDV'
+    },
+    {
+      icon: 'fa-circle-check',
+      titulo: 'Tudo pronto!',
+      texto: 'Seu sistema está configurado. Explore os módulos no menu lateral. Em caso de dúvida, acesse <strong>Ajuda</strong> a qualquer momento.',
+      btn: 'Ir para o Dashboard'
+    }
+  ];
+
+  let currentStep = 0;
+
+  function renderStep() {
+    const s = steps[currentStep];
+    const isLast = currentStep === steps.length - 1;
+    wizard.innerHTML = `
+      <div style="background:var(--surface);border-radius:20px;padding:32px;max-width:480px;width:100%;box-shadow:0 30px 60px rgba(0,0,0,.3);text-align:center">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--primary-soft,rgba(37,99,235,.12));color:var(--primary);font-size:1.8rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <i class="fa-solid ${s.icon}"></i>
+        </div>
+        <h3 style="font-size:1.25rem;font-weight:800;margin:0 0 10px">${s.titulo}</h3>
+        <p style="color:var(--text-muted);font-size:.95rem;margin:0 0 24px;line-height:1.6">${s.texto}</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px">
+          ${steps.map((_, i) => `<div style="width:${i===currentStep?24:8}px;height:8px;border-radius:999px;background:${i===currentStep?'var(--primary)':'var(--border)'};transition:all .2s"></div>`).join('')}
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center">
+          ${currentStep > 0 ? `<button id="_wzVoltar" style="padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:var(--surface-3);font-size:14px;cursor:pointer">Voltar</button>` : ''}
+          <button id="_wzProximo" style="padding:10px 24px;border-radius:12px;border:none;background:var(--primary);color:#fff;font-size:14px;font-weight:700;cursor:pointer">
+            ${isLast ? `<i class="fa-solid fa-check"></i> ` : ''}${s.btn}
+          </button>
+        </div>
+        <button id="_wzPular" style="margin-top:14px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:underline">Pular tutorial</button>
+      </div>`;
+
+    document.getElementById('_wzProximo')?.addEventListener('click', async () => {
+      if (currentStep === steps.length - 1) {
+        wizard.remove();
+        return;
+      }
+      currentStep++;
+      renderStep();
+      // Navega para a view relevante ao avançar
+      if (currentStep === 1) await setActiveView('produtos');
+      if (currentStep === 2) await setActiveView('pdv');
+      if (currentStep === 3) await setActiveView('dashboard');
+    });
+
+    document.getElementById('_wzVoltar')?.addEventListener('click', () => {
+      currentStep--;
+      renderStep();
+    });
+
+    document.getElementById('_wzPular')?.addEventListener('click', () => wizard.remove());
+  }
+
+  renderStep();
+  document.body.appendChild(wizard);
 }
 
 // Registro do Service Worker (PWA)
