@@ -31,6 +31,7 @@ import { initRastreabilidadeModule } from './rastreabilidade.js';
 import { initWhatsappModule } from './whatsapp.js';
 import { initFidelidadeModule } from './fidelidade.js';
 import { initCheckoutLinksModule } from './checkoutLinks.js';
+import { initFiliaisModule } from './filiais.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -87,6 +88,7 @@ const VIEW_CONFIG = {
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
   alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  filiais: { title: 'Multi-filial', subtitle: 'Pontos de venda independentes com comparativo consolidado' },
   'checkout-links': { title: 'Link de Pagamento', subtitle: 'Gere links de cobrança com PIX e Boleto' },
   fidelidade: { title: 'Programa de Fidelidade', subtitle: 'Pontos por compra, ranking e resgate' },
   whatsapp: { title: 'WhatsApp Business', subtitle: 'Cobranças automáticas e mensagens via API' },
@@ -700,6 +702,8 @@ async function loadCurrentView(view) {
     await loadPedidosReal();
   } else if (view === 'nfe') {
     await loadNfeReal();
+  } else if (view === 'filiais') {
+    await loadFiliaisReal();
   } else if (view === 'checkout-links') {
     await loadCheckoutLinksReal();
   } else if (view === 'fidelidade') {
@@ -1463,6 +1467,18 @@ async function loadNfeReal() {
     console.error('Erro ao carregar NF-e:', error);
     showToast('Falha ao carregar módulo NF-e.', 'error');
     renderModuleError('nfeContainer', 'NF-e', 'Não foi possível carregar o módulo NF-e.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadFiliaisReal() {
+  showGlobalLoader('Carregando filiais...');
+  try {
+    await initFiliaisModule();
+  } catch (error) {
+    console.error('Erro ao carregar filiais:', error);
+    renderModuleError('filiaisContainer', 'Multi-filial', 'Nao foi possivel carregar o modulo.');
   } finally {
     hideGlobalLoader();
   }
