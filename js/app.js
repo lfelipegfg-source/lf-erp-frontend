@@ -23,6 +23,7 @@ import { initCaixaModule } from './caixa.js';
 import { initDevolucoesModule } from './devolucoes.js';
 import { initAlertasModule } from './alertas.js';
 import { initConciliacaoModule } from './conciliacaoBancaria.js';
+import { initMarketplaceModule } from './marketplace.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
 
 const AppState = {
@@ -79,6 +80,7 @@ const VIEW_CONFIG = {
   devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
   alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
   nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  marketplace: { title: 'Marketplace', subtitle: 'Integração com Mercado Livre e Shopee' },
   configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
 };
 
@@ -684,6 +686,8 @@ async function loadCurrentView(view) {
     await loadPedidosReal();
   } else if (view === 'nfe') {
     await loadNfeReal();
+  } else if (view === 'marketplace') {
+    await loadMarketplaceReal();
   } else if (view === 'configuracoes') {
     await loadConfigReal();
   } else {
@@ -1431,6 +1435,18 @@ async function loadNfeReal() {
     console.error('Erro ao carregar NF-e:', error);
     showToast('Falha ao carregar módulo NF-e.', 'error');
     renderModuleError('nfeContainer', 'NF-e', 'Não foi possível carregar o módulo NF-e.');
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadMarketplaceReal() {
+  showGlobalLoader('Carregando marketplace...');
+  try {
+    await initMarketplaceModule();
+  } catch (error) {
+    console.error('Erro ao carregar marketplace:', error);
+    renderModuleError('marketplaceContainer', 'Marketplace', 'Não foi possível carregar o módulo Marketplace.');
   } finally {
     hideGlobalLoader();
   }

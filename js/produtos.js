@@ -168,9 +168,10 @@ const ProdutosModule = {
         })), 'produtos');
         return;
       }
-      if (action === 'produtosRefreshBtn') { await this.load(); return; }
-      if (action === 'produtosNewBtn')     { this.openCreateModal(); return; }
-      if (action === 'produtosLoteBtn')    { this.imprimirLote(); return; }
+      if (action === 'produtosRefreshBtn')     { await this.load(); return; }
+      if (action === 'produtosNewBtn')         { this.openCreateModal(); return; }
+      if (action === 'produtosLoteBtn')        { this.imprimirLote(); return; }
+      if (action === 'produtosMarketplaceBtn') { await this.abrirMarketplace(); return; }
 
       // ── modal básico
       if (action === 'produtoCancelBtn' || action === 'produtoModalCloseBtn') {
@@ -331,6 +332,9 @@ const ProdutosModule = {
         <div class="module-card__header">
           <div><h3>Produtos</h3><p>Cadastro, edição, estoque e consulta</p></div>
           <div class="module-card__actions">
+            <button type="button" class="btn btn-light" id="produtosMarketplaceBtn">
+              <i class="fa-solid fa-store"></i> Marketplace
+            </button>
             <button type="button" class="btn btn-light" id="produtosLoteBtn" style="display:none">
               <i class="fa-solid fa-tags"></i>
               Etiquetas <span id="produtosLoteBadge" class="badge badge--primary" style="margin-left:4px;font-size:.75rem">0</span>
@@ -1060,6 +1064,158 @@ const ProdutosModule = {
     this.cacheElements();
     if (this.el.toolbarRefresh) this.el.toolbarRefresh.disabled = value;
     if (this.el.toolbarNew) this.el.toolbarNew.disabled = value;
+  },
+
+  // ── Marketplace ──────────────────────────────────────────────────────────────
+
+  async abrirMarketplace() {
+    if (!document.getElementById('mktModal')) {
+      const el = document.createElement('div');
+      el.className = 'modal-overlay hidden';
+      el.id = 'mktModal';
+      el.innerHTML = `
+        <div class="modal-card" style="max-width:720px;width:95vw">
+          <div class="modal-card__header">
+            <div>
+              <h3><i class="fa-solid fa-store" style="margin-right:8px"></i>Marketplace</h3>
+              <p style="color:var(--text-muted);font-size:.9rem">Sincronize produtos com Mercado Livre e Shopee</p>
+            </div>
+            <button type="button" class="icon-button" onclick="document.getElementById('mktModal').classList.add('hidden')">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div id="mktCorpo" style="padding:20px 24px;overflow-y:auto;max-height:70vh"></div>
+          <div class="modal-card__footer" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+            <button type="button" class="btn btn-light" onclick="document.getElementById('mktModal').classList.add('hidden')">Fechar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(el);
+    }
+    document.getElementById('mktModal').classList.remove('hidden');
+    await this._renderMarketplace();
+  },
+
+  async _renderMarketplace() {
+    const corpo = document.getElementById('mktCorpo');
+    if (!corpo) return;
+    corpo.innerHTML = `<div class="module-feedback module-feedback--info">Carregando...</div>`;
+
+    try {
+      const [cfgData, prodData] = await Promise.all([
+        api.request('/marketplace/config'),
+        api.request('/marketplace/produtos')
+      ]);
+
+      const plataformas = cfgData.plataformas || [];
+      const produtos    = prodData.produtos    || [];
+
+      const statusBadge = (s) => s === 'conectado'
+        ? `<span class="badge badge--success">Conectado</span>`
+        : `<span class="badge badge--warning">Desconectado</span>`;
+
+      corpo.innerHTML = `
+        <!-- Plataformas conectadas -->
+        <h4 style="font-size:.9rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px">Plataformas</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+          ${['mercadolivre', 'shopee'].map((plat) => {
+            const cfg = plataformas.find((p) => p.plataforma === plat);
+            return `
+              <div style="border:1px solid var(--border);border-radius:14px;padding:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                  <strong style="text-transform:capitalize">${plat.replace('mercadolivre','Mercado Livre')}</strong>
+                  ${statusBadge(cfg?.status_conexao || 'desconectado')}
+                </div>
+                ${cfg?.seller_id ? `<div style="font-size:.8rem;color:var(--text-muted)">Seller ID: ${cfg.seller_id}</div>` : ''}
+                <div style="margin-top:10px;display:flex;gap:8px">
+                  <button class="btn btn-light btn-sm" onclick="ProdutosModule._configurarMkt('${plat}')">
+                    <i class="fa-solid fa-gear"></i> Config
+                  </button>
+                  ${plat === 'mercadolivre' ? `
+                    <button class="btn btn-light btn-sm" onclick="ProdutosModule._autorizarMkt('${plat}')">
+                      <i class="fa-solid fa-link"></i> Autorizar
+                    </button>` : ''}
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+
+        <!-- Produtos vinculados -->
+        <h4 style="font-size:.9rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px">
+          Produtos vinculados (${produtos.length})
+        </h4>
+        ${produtos.length === 0
+          ? `<div class="empty-state">Nenhum produto vinculado ainda. Use o botão na linha do produto para vincular.</div>`
+          : `<div class="table-wrapper">
+             <table class="data-table">
+               <thead><tr>
+                 <th>Produto</th><th>Plataforma</th><th>Listing ID</th>
+                 <th class="text-right">Est. LF</th><th class="text-right">Est. pub.</th>
+                 <th class="text-right">Ações</th>
+               </tr></thead>
+               <tbody>
+                 ${produtos.map((p) => `
+                   <tr>
+                     <td><strong>${escapeHtml(p.produto_nome)}</strong></td>
+                     <td style="text-transform:capitalize">${escapeHtml(p.plataforma.replace('mercadolivre','ML'))}</td>
+                     <td><code style="font-size:.82rem">${escapeHtml(p.listing_id)}</code></td>
+                     <td class="text-right">${p.estoque_lferp}</td>
+                     <td class="text-right">${p.estoque_publicado}</td>
+                     <td class="text-right">
+                       <button class="btn-inline" onclick="ProdutosModule._syncEstoque(${p.produto_id},'${p.plataforma}')">
+                         <i class="fa-solid fa-sync"></i> Sync
+                       </button>
+                       <button class="btn-inline btn-inline--danger" onclick="ProdutosModule._desvincular(${p.id})">
+                         <i class="fa-solid fa-unlink"></i>
+                       </button>
+                     </td>
+                   </tr>`).join('')}
+               </tbody>
+             </table>
+             </div>`}`;
+    } catch (err) {
+      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message)}</div>`;
+    }
+  },
+
+  async _configurarMkt(plataforma) {
+    const appId = prompt(`App ID (Client ID) do ${plataforma}:`);
+    if (!appId?.trim()) return;
+    const secret = prompt('Client Secret:') || '';
+    try {
+      await api.request('/marketplace/config', {
+        method: 'PUT',
+        body: { plataforma, app_id: appId.trim(), client_secret: secret }
+      });
+      showToast('Configuração salva! Agora clique em Autorizar.', 'success');
+      await this._renderMarketplace();
+    } catch (e) { showToast(e.message, 'error'); }
+  },
+
+  async _autorizarMkt(plataforma) {
+    try {
+      const data = await api.request('/marketplace/oauth/url', { method: 'GET', query: { plataforma } });
+      if (data.url) window.open(data.url, '_blank', 'width=600,height=700');
+    } catch (e) { showToast(e.message, 'error'); }
+  },
+
+  async _syncEstoque(produtoId, plataforma) {
+    try {
+      const r = await api.request('/marketplace/sync-estoque', {
+        method: 'POST',
+        body: { produto_id: produtoId, plataforma }
+      });
+      showToast(r.mensagem || 'Sincronizado!', 'success');
+      await this._renderMarketplace();
+    } catch (e) { showToast(e.message, 'error'); }
+  },
+
+  async _desvincular(id) {
+    if (!confirm('Remover vínculo com esta plataforma?')) return;
+    try {
+      await api.request(`/marketplace/vincular/${id}`, { method: 'DELETE' });
+      showToast('Vínculo removido', 'success');
+      await this._renderMarketplace();
+    } catch (e) { showToast(e.message, 'error'); }
   },
 
   atualizarBotaoLote() {
