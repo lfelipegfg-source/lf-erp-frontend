@@ -299,7 +299,13 @@ function bindSidebarEvents() {
   }
 
   if (mobileSidebarBtn) {
-    mobileSidebarBtn.addEventListener('click', openMobileSidebar);
+    mobileSidebarBtn.addEventListener('click', () => {
+      if (window.innerWidth > 1200) {
+        toggleSidebarCollapse();
+      } else {
+        openMobileSidebar();
+      }
+    });
   }
 
   if (sidebarOverlay) {

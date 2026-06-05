@@ -632,6 +632,11 @@ img {
   width: 100%;
 }
 
+/* Botão mobile do topbar — oculto por padrão, só mostra em telas <= 1200px */
+.topbar-mobile-btn {
+  display: none;
+}
+
 .icon-btn,
 .icon-button {
   width: 42px;
