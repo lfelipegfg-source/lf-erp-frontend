@@ -48,6 +48,12 @@
       });
     </script>
     -->
+    <script>
+      (function () {
+        var t = localStorage.getItem('lf_erp_theme');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      })();
+    </script>
   </head>
   <body>
     <div id="app" class="app-shell">

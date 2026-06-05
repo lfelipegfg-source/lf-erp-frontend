@@ -54,6 +54,92 @@
   --transition: 0.22s ease;
 }
 
+/* ── Dark mode ─────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg:        #0f172a;
+  --bg-soft:   #0d1525;
+  --surface:   #1e293b;
+  --surface-2: #162030;
+  --surface-3: #0f172a;
+  --border:        #334155;
+  --border-strong: #475569;
+
+  --text:       #f1f5f9;
+  --text-soft:  #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+
+  --primary:       #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-soft:  rgba(59, 130, 246, 0.18);
+
+  --success:      #22c55e;
+  --success-soft: rgba(34, 197, 94, 0.15);
+
+  --warning:      #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.15);
+
+  --danger:      #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.15);
+
+  --info:      #06b6d4;
+  --info-soft: rgba(6, 182, 212, 0.15);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 8px 18px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Topbar — fundo hardcoded precisa de override */
+[data-theme="dark"] .topbar {
+  background: rgba(15, 23, 42, 0.88);
+}
+
+/* App-shell — gradient sutil no dark */
+[data-theme="dark"] .app-shell {
+  background:
+    radial-gradient(circle at top left,  rgba(59, 130, 246, 0.06), transparent 28%),
+    radial-gradient(circle at top right, rgba(6, 182, 212, 0.06),  transparent 24%),
+    var(--bg);
+}
+
+/* Inputs/selects/textareas — dark por padrão */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* BI toolbar tem background:#fff hardcoded */
+[data-theme="dark"] .bi-toolbar select,
+[data-theme="dark"] .bi-toolbar input[type="date"] {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Tabela BI — usa #e2e8f0 e #f1f5f9 hardcoded */
+[data-theme="dark"] .bi-table th { border-bottom-color: var(--border); color: var(--text-muted); }
+[data-theme="dark"] .bi-table td { border-bottom-color: var(--border); }
+[data-theme="dark"] .bi-table tr:hover td { background: var(--surface-2); }
+
+/* KPI cards do BI — fundo #fff hardcoded */
+[data-theme="dark"] .bi-kpi { background: var(--surface); border-color: var(--border); }
+[data-theme="dark"] .bi-card { background: var(--surface); border-color: var(--border); }
+
+/* Data-table hover — usa rgba azul sutil */
+[data-theme="dark"] .data-table tr:hover { background: rgba(59, 130, 246, 0.06); }
+
+/* Scrollbar discreta no dark */
+[data-theme="dark"] ::-webkit-scrollbar { width: 6px; height: 6px; }
+[data-theme="dark"] ::-webkit-scrollbar-track { background: var(--surface-2); }
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
 /* RESET */
 * {
   margin: 0;
