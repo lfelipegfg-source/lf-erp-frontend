@@ -74,6 +74,23 @@ function injectStyles() {
     .bi-badge--green { background:#dcfce7; color:#16a34a; }
     .bi-badge--red   { background:#fee2e2; color:#dc2626; }
     .bi-badge--gray  { background:#f1f5f9; color:#64748b; }
+    .bi-ai-card { margin-bottom:24px; }
+    .bi-ai-header { display:flex; align-items:center; gap:10px; margin-bottom:0; }
+    .bi-ai-icon { font-size:18px; }
+    .bi-ai-title { font-size:13px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:.5px; flex:1; margin:0; }
+    .bi-btn-ia { padding:6px 14px; background:linear-gradient(135deg,#7c3aed,#6366f1); color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:opacity .15s; }
+    .bi-btn-ia:hover { opacity:.88; }
+    .bi-btn-ia:disabled { opacity:.6; cursor:not-allowed; }
+    .bi-ai-body { margin-top:14px; }
+    .bi-ai-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#7c3aed; margin:12px 0 4px; }
+    .bi-ai-section-title:first-child { margin-top:0; }
+    .bi-ai-section-text { font-size:13px; color:#334155; line-height:1.65; }
+    .bi-ai-bullet { font-size:13px; color:#334155; line-height:1.65; padding-left:2px; }
+    .bi-ai-footer { font-size:11px; color:#94a3b8; margin-top:12px; padding-top:10px; border-top:1px solid #f1f5f9; display:flex; align-items:center; gap:8px; }
+    .bi-ai-badge { padding:2px 7px; border-radius:99px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+    .bi-ai-badge--new   { background:#ede9fe; color:#7c3aed; }
+    .bi-ai-badge--cache { background:#f0fdf4; color:#16a34a; }
+    .bi-ai-empty { color:#94a3b8; font-size:13px; text-align:center; padding:14px 0; }
     @media(max-width:768px) {
       .bi-grid, .bi-grid--3 { grid-template-columns:1fr; }
       .bi-kpis { grid-template-columns:1fr 1fr; }
@@ -114,6 +131,18 @@ export async function initBiModule() {
           <option value="24">24 meses</option>
         </select>
         <button id="biAtualizar"><i class="fa-solid fa-rotate-right"></i> Atualizar</button>
+      </div>
+      <div class="bi-card bi-ai-card">
+        <div class="bi-ai-header">
+          <span class="bi-ai-icon">✨</span>
+          <span class="bi-ai-title">Análise Executiva IA</span>
+          <button id="biGerarIA" class="bi-btn-ia">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar análise
+          </button>
+        </div>
+        <div id="biInsightsBody" class="bi-ai-body">
+          <div class="bi-ai-empty">Clique em "Gerar análise" para obter um diagnóstico inteligente do seu negócio.</div>
+        </div>
       </div>
       <div id="biKpis" class="bi-kpis">
         <div class="bi-kpi"><div class="bi-kpi__label">Receita do mês</div><div class="bi-kpi__value">—</div></div>
@@ -166,6 +195,7 @@ function bindBiEvents() {
     if (custom) custom.style.display = e.target.value === 'custom' ? 'flex' : 'none';
   });
   document.getElementById('biAtualizar')?.addEventListener('click', () => carregarBI());
+  document.getElementById('biGerarIA')?.addEventListener('click', () => carregarInsightsIA());
 }
 
 function getFiltros() {
@@ -392,6 +422,58 @@ function renderTopClientes(clientes) {
     <td>${fmt(c.total_gasto)}</td>
     <td>${fmt(c.ticket_medio)}</td>
   </tr>`).join('');
+}
+
+// ── Análise IA ───────────────────────────────────────────────────────────────
+
+async function carregarInsightsIA() {
+  const btn  = document.getElementById('biGerarIA');
+  const body = document.getElementById('biInsightsBody');
+  if (!body) return;
+
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analisando...'; }
+  body.innerHTML = '<div class="bi-ai-empty"><i class="fa-solid fa-spinner fa-spin"></i> Gerando análise com IA...</div>';
+
+  try {
+    const data = await api.get('/bi/insights-ia');
+    if (!data?.sucesso) throw new Error(data?.erro || 'Erro desconhecido');
+    renderInsights(data);
+  } catch (err) {
+    body.innerHTML = `<div class="bi-ai-empty" style="color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> ${esc(err.message)}</div>`;
+    showToast('Erro ao gerar análise IA: ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Atualizar'; }
+  }
+}
+
+function renderInsights({ insights, gerado_em, cache }) {
+  const body = document.getElementById('biInsightsBody');
+  if (!body) return;
+
+  const badge = cache
+    ? '<span class="bi-ai-badge bi-ai-badge--cache">cache</span>'
+    : '<span class="bi-ai-badge bi-ai-badge--new">novo</span>';
+
+  body.innerHTML = `
+    <div>${formatInsights(insights || '')}</div>
+    <div class="bi-ai-footer">${badge} Gerado em ${esc(gerado_em)}</div>
+  `;
+}
+
+function formatInsights(text) {
+  return text.split('\n').map(line => {
+    const t = line.trim();
+    if (!t) return '';
+    // Linha toda em maiúsculas com pelo menos uma letra = título de seção
+    if (t === t.toUpperCase() && /[A-ZÁÉÍÓÚÀÂÊÎÔÇÃ]/.test(t) && t.length < 70) {
+      return `<div class="bi-ai-section-title">${esc(t)}</div>`;
+    }
+    // Bullet (• ou -)
+    if (/^[•\-]\s/.test(t)) {
+      return `<div class="bi-ai-bullet">• ${esc(t.replace(/^[•\-]\s*/, ''))}</div>`;
+    }
+    return `<div class="bi-ai-section-text">${esc(t)}</div>`;
+  }).join('');
 }
 
 export default { initBiModule };
