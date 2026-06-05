@@ -972,7 +972,7 @@ function renderAuthenticatedUser() {
   if (sidebarUserAvatar) sidebarUserAvatar.textContent = getInitials(userName);
 
   const adminLink = document.getElementById('adminNavLink');
-  if (adminLink && AppState.user?.tipo === 'admin') {
+  if (adminLink && AppState.user?.is_saas_owner) {
     adminLink.style.display = 'block';
   }
 }

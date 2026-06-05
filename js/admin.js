@@ -3,13 +3,41 @@
 (function () {
   'use strict';
 
-  // ── Auth guard ──────────────────────────────────────
+  // ── Helpers locais (não dependem de api.js como módulo ES) ──
+  function getStoredAuth() {
+    try {
+      const raw = localStorage.getItem('lf_erp_auth') || sessionStorage.getItem('lf_erp_auth');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }
+
+  function buildUrl(path, query) {
+    const base = localStorage.getItem('lf_erp_api_url') || 'https://lf-erp-backend.onrender.com';
+    const url = new URL((base.replace(/\/+$/, '')) + (path.startsWith('/') ? path : '/' + path));
+    if (query) {
+      Object.entries(query).forEach(([k, v]) => {
+        if (v != null && v !== '') url.searchParams.append(k, v);
+      });
+    }
+    return url.toString();
+  }
+
+  function buildHeaders() {
+    const a = getStoredAuth();
+    const token = a?.authToken || a?.token;
+    const h = { 'Content-Type': 'application/json', Accept: 'application/json' };
+    if (token) h.Authorization = `Bearer ${token}`;
+    return h;
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  // ── Auth guard — apenas SaaS owner ──────────────────────────
   const auth = getStoredAuth();
   if (!auth || !auth.authToken) {
     window.location.href = './index.html';
     return;
   }
-  if (auth.user?.tipo !== 'admin') {
+  if (!auth.user?.is_saas_owner) {
     window.location.href = './index.html';
     return;
   }
