@@ -981,6 +981,8 @@ function renderTrialBanner() {
   const banner = document.getElementById('trialBanner');
   if (!banner) return;
 
+  if (AppState.user?.is_saas_owner) { banner.style.display = 'none'; return; }
+
   const a = AppState.assinatura;
   if (!a) { banner.style.display = 'none'; return; }
 
