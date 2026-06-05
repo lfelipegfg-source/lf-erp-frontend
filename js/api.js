@@ -298,13 +298,8 @@ async function updateMePerfil(payload) {
 
 async function getProdutos(params = {}) {
   const empresa = ensureEmpresa();
-
-  return request(`/produtos/${empresa}`, {
-    method: 'GET',
-    query: {
-      ...params
-    }
-  });
+  const r = await request(`/produtos/${empresa}`, { method: 'GET', query: { ...params } });
+  return r?.dados ?? r;
 }
 
 async function createProduto(payload) {
@@ -506,13 +501,8 @@ async function deleteCliente(id) {
 
 async function getFornecedores(params = {}) {
   const empresa = ensureEmpresa();
-
-  return request(`/fornecedores/${empresa}`, {
-    method: 'GET',
-    query: {
-      ...params
-    }
-  });
+  const r = await request(`/fornecedores/${empresa}`, { method: 'GET', query: { ...params } });
+  return r?.dados ?? r;
 }
 
 async function createFornecedor(payload) {
@@ -999,55 +989,32 @@ async function getRelatorioFinanceiroResumo(params = {}) {
 
 async function getRelatorioFinanceiroContasReceber(params = {}) {
   const empresa = ensureEmpresa();
-
-  return request(`/relatorios/financeiro/contas-receber/${empresa}`, {
-    method: 'GET',
-    query: {
-      ...params
-    }
-  });
+  const r = await request(`/relatorios/financeiro/contas-receber/${empresa}`, { method: 'GET', query: { ...params } });
+  return r?.dados ?? r;
 }
 
 async function getRelatorioFinanceiroContasPagar(params = {}) {
   const empresa = ensureEmpresa();
-
-  return request(`/relatorios/financeiro/contas-pagar/${empresa}`, {
-    method: 'GET',
-    query: {
-      ...params
-    }
-  });
+  const r = await request(`/relatorios/financeiro/contas-pagar/${empresa}`, { method: 'GET', query: { ...params } });
+  return r?.dados ?? r;
 }
 
 async function getRelatorioFinanceiroFluxoCaixa(params = {}) {
   const empresa = ensureEmpresa();
-
-  return request(`/relatorios/financeiro/fluxo-caixa/${empresa}`, {
-    method: 'GET',
-    query: {
-      ...params
-    }
-  });
+  const r = await request(`/relatorios/financeiro/fluxo-caixa/${empresa}`, { method: 'GET', query: { ...params } });
+  return r?.dados ?? r;
 }
 
 async function getRelatorioFinanceiroLucratividade(params = {}) {
   const empresa = ensureEmpresa();
-
-  return request(`/relatorios/financeiro/lucratividade/${empresa}`, {
-    method: 'GET',
-    query: {
-      ...params
-    }
-  });
+  const r = await request(`/relatorios/financeiro/lucratividade/${empresa}`, { method: 'GET', query: { ...params } });
+  return r?.dados ?? r;
 }
 
 async function getRelatorioVendasPorGrade(params = {}) {
   const empresa = ensureEmpresa();
-
-  return request(`/relatorios/vendas/por-grade/${empresa}`, {
-    method: 'GET',
-    query: { ...params }
-  });
+  const r = await request(`/relatorios/vendas/por-grade/${empresa}`, { method: 'GET', query: { ...params } });
+  return r?.dados ?? r;
 }
 
 async function getRelatorioDRE(params = {}) {
