@@ -1361,6 +1361,19 @@ const PDVModule = {
     this.el.clienteNomeInfo.textContent = `Cliente selecionado: ${this.state.clienteNome}`;
   },
 
+  togglePrimeiroVencimentoField() {
+    const field = document.getElementById('pdvPrimeiroVencimentoField');
+    if (!field) return;
+
+    const exibir = this.state.pagamento === 'Promissória';
+    field.style.display = exibir ? 'block' : 'none';
+
+    if (!exibir) {
+      this.state.primeiroVencimento = '';
+      if (this.el.primeiroVencimento) this.el.primeiroVencimento.value = '';
+    }
+  },
+
   filterProdutos(term) {
     const normalized = String(term || '')
       .trim()
