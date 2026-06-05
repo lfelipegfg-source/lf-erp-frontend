@@ -760,9 +760,14 @@ function updateNavigationState(view) {
 
 function getParentViewFromChild(view) {
   const groups = {
-    cadastros: ['produtos', 'clientes', 'fornecedores', 'usuarios'],
-    movimentacoes: ['vendas', 'compras', 'estoque'],
-    financeiro: ['contas-receber', 'contas-pagar', 'fluxo-caixa', 'lancamentos', 'conciliacao']
+    cadastros:     ['produtos', 'clientes', 'fornecedores', 'usuarios'],
+    movimentacoes: ['vendas', 'compras', 'estoque', 'devolucoes', 'caixa'],
+    financeiro:    ['contas-receber', 'contas-pagar', 'fluxo-caixa', 'lancamentos', 'conciliacao'],
+    fiscal:        ['nfe', 'orcamentos', 'pedidos'],
+    relatorios:    ['relatorios', 'bi', 'exportacao-contabil'],
+    comercial:     ['crm', 'comissoes', 'fidelidade', 'alertas'],
+    integracoes:   ['whatsapp', 'marketplace', 'api-publica', 'checkout-links'],
+    operacoes:     ['filiais', 'rastreabilidade'],
   };
 
   for (const [parent, children] of Object.entries(groups)) {

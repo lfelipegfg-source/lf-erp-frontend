@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -301,204 +301,158 @@
           </div>
 
           <nav class="sidebar__nav">
+
+            <!-- Topo -->
             <button class="nav-item active" data-view="dashboard">
               <span class="nav-item__icon"><i class="fa-solid fa-chart-pie"></i></span>
               <span class="nav-item__label">Dashboard</span>
-              <span id="alertasBadge" style="display:none;background:var(--danger);color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:auto"></span>
+              <span id="alertasBadge" class="nav-badge hidden"></span>
             </button>
 
-            <button class="nav-item" data-view="pdv">
+            <button class="nav-item nav-item--pdv" data-view="pdv">
               <span class="nav-item__icon"><i class="fa-solid fa-cash-register"></i></span>
               <span class="nav-item__label">PDV</span>
             </button>
 
+            <div class="nav-divider"></div>
+
+            <!-- Cadastros -->
             <div class="nav-group" data-group="cadastros">
               <button class="nav-group__toggle" type="button">
                 <span class="nav-group__left">
                   <span class="nav-item__icon"><i class="fa-solid fa-database"></i></span>
                   <span class="nav-item__label">Cadastros</span>
                 </span>
-                <span class="nav-group__arrow">
-                  <i class="fa-solid fa-chevron-down"></i>
-                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
               </button>
-
               <div class="nav-group__menu">
-                <button class="nav-subitem" data-view="produtos">
-                  <i class="fa-solid fa-box-open"></i>
-                  <span>Produtos</span>
-                </button>
-                <button class="nav-subitem" data-view="clientes">
-                  <i class="fa-solid fa-users"></i>
-                  <span>Clientes</span>
-                </button>
-                <button class="nav-subitem" data-view="fornecedores">
-                  <i class="fa-solid fa-truck-field"></i>
-                  <span>Fornecedores</span>
-                </button>
-                <button class="nav-subitem" data-view="usuarios">
-                  <i class="fa-solid fa-user-shield"></i>
-                  <span>Usuários</span>
-                </button>
+                <button class="nav-subitem" data-view="produtos"><i class="fa-solid fa-box-open"></i><span>Produtos</span></button>
+                <button class="nav-subitem" data-view="clientes"><i class="fa-solid fa-users"></i><span>Clientes</span></button>
+                <button class="nav-subitem" data-view="fornecedores"><i class="fa-solid fa-truck-field"></i><span>Fornecedores</span></button>
+                <button class="nav-subitem" data-view="usuarios"><i class="fa-solid fa-user-shield"></i><span>Usuários</span></button>
               </div>
             </div>
 
+            <!-- Movimentacoes -->
             <div class="nav-group" data-group="movimentacoes">
               <button class="nav-group__toggle" type="button">
                 <span class="nav-group__left">
-                  <span class="nav-item__icon"
-                    ><i class="fa-solid fa-arrow-right-arrow-left"></i
-                  ></span>
+                  <span class="nav-item__icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>
                   <span class="nav-item__label">Movimentações</span>
                 </span>
-                <span class="nav-group__arrow">
-                  <i class="fa-solid fa-chevron-down"></i>
-                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
               </button>
-
               <div class="nav-group__menu">
-                <button class="nav-subitem" data-view="vendas">
-                  <i class="fa-solid fa-cart-shopping"></i>
-                  <span>Vendas</span>
-                </button>
-                <button class="nav-subitem" data-view="compras">
-                  <i class="fa-solid fa-basket-shopping"></i>
-                  <span>Compras</span>
-                </button>
-                <button class="nav-subitem" data-view="estoque">
-                  <i class="fa-solid fa-warehouse"></i>
-                  <span>Estoque</span>
-                </button>
+                <button class="nav-subitem" data-view="vendas"><i class="fa-solid fa-cart-shopping"></i><span>Vendas</span></button>
+                <button class="nav-subitem" data-view="compras"><i class="fa-solid fa-basket-shopping"></i><span>Compras</span></button>
+                <button class="nav-subitem" data-view="estoque"><i class="fa-solid fa-warehouse"></i><span>Estoque</span></button>
+                <button class="nav-subitem" data-view="devolucoes"><i class="fa-solid fa-rotate-left"></i><span>Devoluções</span></button>
+                <button class="nav-subitem" data-view="caixa"><i class="fa-solid fa-vault"></i><span>Caixa</span></button>
               </div>
             </div>
 
+            <!-- Financeiro -->
             <div class="nav-group" data-group="financeiro">
               <button class="nav-group__toggle" type="button">
                 <span class="nav-group__left">
                   <span class="nav-item__icon"><i class="fa-solid fa-wallet"></i></span>
                   <span class="nav-item__label">Financeiro</span>
                 </span>
-                <span class="nav-group__arrow">
-                  <i class="fa-solid fa-chevron-down"></i>
-                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
               </button>
-
               <div class="nav-group__menu">
-                <button class="nav-subitem" data-view="contas-receber">
-                  <i class="fa-solid fa-money-bill-trend-up"></i>
-                  <span>Contas a Receber</span>
-                </button>
-                <button class="nav-subitem" data-view="contas-pagar">
-                  <i class="fa-solid fa-money-bill-transfer"></i>
-                  <span>Contas a Pagar</span>
-                </button>
-                <button class="nav-subitem" data-view="fluxo-caixa">
-                  <i class="fa-solid fa-arrow-trend-up"></i>
-                  <span>Fluxo de Caixa</span>
-                </button>
-
-                <button class="nav-subitem" data-view="lancamentos">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                  <span>Lançamentos</span>
-                </button>
-
-                <button class="nav-subitem" data-view="conciliacao">
-                  <i class="fa-solid fa-building-columns"></i>
-                  <span>Conciliação</span>
-                </button>
+                <button class="nav-subitem" data-view="contas-receber"><i class="fa-solid fa-money-bill-trend-up"></i><span>Contas a Receber</span></button>
+                <button class="nav-subitem" data-view="contas-pagar"><i class="fa-solid fa-money-bill-transfer"></i><span>Contas a Pagar</span></button>
+                <button class="nav-subitem" data-view="fluxo-caixa"><i class="fa-solid fa-arrow-trend-up"></i><span>Fluxo de Caixa</span></button>
+                <button class="nav-subitem" data-view="lancamentos"><i class="fa-solid fa-pen-to-square"></i><span>Lançamentos</span></button>
+                <button class="nav-subitem" data-view="conciliacao"><i class="fa-solid fa-building-columns"></i><span>Conciliação</span></button>
               </div>
             </div>
 
-            <button class="nav-item" data-view="relatorios">
-              <span class="nav-item__icon"><i class="fa-solid fa-file-lines"></i></span>
-              <span class="nav-item__label">Relatórios</span>
-            </button>
+            <!-- Fiscal e Documentos -->
+            <div class="nav-group" data-group="fiscal">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"><i class="fa-solid fa-file-invoice"></i></span>
+                  <span class="nav-item__label">Fiscal &amp; Docs</span>
+                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
+              </button>
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="nfe"><i class="fa-solid fa-file-invoice"></i><span>NF-e / NFC-e</span></button>
+                <button class="nav-subitem" data-view="orcamentos"><i class="fa-solid fa-file-lines"></i><span>Orçamentos</span></button>
+                <button class="nav-subitem" data-view="pedidos"><i class="fa-solid fa-clipboard-list"></i><span>Pedidos</span></button>
+              </div>
+            </div>
 
-            <button class="nav-item" data-view="bi">
-              <span class="nav-item__icon"><i class="fa-solid fa-chart-line"></i></span>
-              <span class="nav-item__label">BI Executivo</span>
-            </button>
+            <!-- Relatorios e BI -->
+            <div class="nav-group" data-group="relatorios">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"><i class="fa-solid fa-chart-bar"></i></span>
+                  <span class="nav-item__label">Relatórios &amp; BI</span>
+                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
+              </button>
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="relatorios"><i class="fa-solid fa-file-lines"></i><span>Relatórios</span></button>
+                <button class="nav-subitem" data-view="bi"><i class="fa-solid fa-chart-line"></i><span>BI Executivo</span></button>
+                <button class="nav-subitem" data-view="exportacao-contabil"><i class="fa-solid fa-file-export"></i><span>Exportação Contábil</span></button>
+              </div>
+            </div>
 
-            <button class="nav-item" data-view="exportacao-contabil">
-              <span class="nav-item__icon"><i class="fa-solid fa-file-export"></i></span>
-              <span class="nav-item__label">Exportação</span>
-            </button>
+            <!-- Comercial -->
+            <div class="nav-group" data-group="comercial">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"><i class="fa-solid fa-handshake"></i></span>
+                  <span class="nav-item__label">Comercial</span>
+                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
+              </button>
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="crm"><i class="fa-solid fa-chart-gantt"></i><span>CRM</span></button>
+                <button class="nav-subitem" data-view="comissoes"><i class="fa-solid fa-percent"></i><span>Comissões</span></button>
+                <button class="nav-subitem" data-view="fidelidade"><i class="fa-solid fa-star"></i><span>Fidelidade</span></button>
+                <button class="nav-subitem" data-view="alertas"><i class="fa-solid fa-bell"></i><span>Alertas</span></button>
+              </div>
+            </div>
 
-            <button class="nav-item" data-view="alertas">
-              <span class="nav-item__icon"><i class="fa-solid fa-bell"></i></span>
-              <span class="nav-item__label">Alertas</span>
-            </button>
+            <!-- Integracoes -->
+            <div class="nav-group" data-group="integracoes">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"><i class="fa-solid fa-plug-circle-bolt"></i></span>
+                  <span class="nav-item__label">Integrações</span>
+                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
+              </button>
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="whatsapp"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></button>
+                <button class="nav-subitem" data-view="marketplace"><i class="fa-solid fa-store"></i><span>Marketplace</span></button>
+                <button class="nav-subitem" data-view="api-publica"><i class="fa-solid fa-plug"></i><span>API / Webhooks</span></button>
+                <button class="nav-subitem" data-view="checkout-links"><i class="fa-solid fa-link"></i><span>Link Pagamento</span></button>
+              </div>
+            </div>
 
-            <button class="nav-item" data-view="filiais">
-              <span class="nav-item__icon"><i class="fa-solid fa-code-branch"></i></span>
-              <span class="nav-item__label">Multi-filial</span>
-            </button>
+            <!-- Operacoes -->
+            <div class="nav-group" data-group="operacoes">
+              <button class="nav-group__toggle" type="button">
+                <span class="nav-group__left">
+                  <span class="nav-item__icon"><i class="fa-solid fa-gears"></i></span>
+                  <span class="nav-item__label">Operações</span>
+                </span>
+                <span class="nav-group__arrow"><i class="fa-solid fa-chevron-down"></i></span>
+              </button>
+              <div class="nav-group__menu">
+                <button class="nav-subitem" data-view="filiais"><i class="fa-solid fa-code-branch"></i><span>Multi-filial</span></button>
+                <button class="nav-subitem" data-view="rastreabilidade"><i class="fa-solid fa-boxes-stacked"></i><span>Rastreabilidade</span></button>
+              </div>
+            </div>
 
-            <button class="nav-item" data-view="checkout-links">
-              <span class="nav-item__icon"><i class="fa-solid fa-link"></i></span>
-              <span class="nav-item__label">Link Pagamento</span>
-            </button>
+            <div class="nav-divider"></div>
 
-            <button class="nav-item" data-view="fidelidade">
-              <span class="nav-item__icon"><i class="fa-solid fa-star"></i></span>
-              <span class="nav-item__label">Fidelidade</span>
-            </button>
-
-            <button class="nav-item" data-view="whatsapp">
-              <span class="nav-item__icon"><i class="fa-brands fa-whatsapp"></i></span>
-              <span class="nav-item__label">WhatsApp</span>
-            </button>
-
-            <button class="nav-item" data-view="devolucoes">
-              <span class="nav-item__icon"><i class="fa-solid fa-rotate-left"></i></span>
-              <span class="nav-item__label">Devoluções</span>
-            </button>
-
-            <button class="nav-item" data-view="caixa">
-              <span class="nav-item__icon"><i class="fa-solid fa-cash-register"></i></span>
-              <span class="nav-item__label">Caixa</span>
-            </button>
-
-            <button class="nav-item" data-view="comissoes">
-              <span class="nav-item__icon"><i class="fa-solid fa-percent"></i></span>
-              <span class="nav-item__label">Comissões</span>
-            </button>
-
-            <button class="nav-item" data-view="orcamentos">
-              <span class="nav-item__icon"><i class="fa-solid fa-file-lines"></i></span>
-              <span class="nav-item__label">Orçamentos</span>
-            </button>
-
-            <button class="nav-item" data-view="pedidos">
-              <span class="nav-item__icon"><i class="fa-solid fa-cart-shopping"></i></span>
-              <span class="nav-item__label">Pedidos</span>
-            </button>
-
-            <button class="nav-item" data-view="nfe">
-              <span class="nav-item__icon"><i class="fa-solid fa-file-invoice"></i></span>
-              <span class="nav-item__label">NF-e</span>
-            </button>
-
-            <button class="nav-item" data-view="crm">
-              <span class="nav-item__icon"><i class="fa-solid fa-chart-gantt"></i></span>
-              <span class="nav-item__label">CRM</span>
-            </button>
-
-            <button class="nav-item" data-view="marketplace">
-              <span class="nav-item__icon"><i class="fa-solid fa-store"></i></span>
-              <span class="nav-item__label">Marketplace</span>
-            </button>
-
-            <button class="nav-item" data-view="rastreabilidade">
-              <span class="nav-item__icon"><i class="fa-solid fa-boxes-stacked"></i></span>
-              <span class="nav-item__label">Rastreabilidade</span>
-            </button>
-
-            <button class="nav-item" data-view="api-publica">
-              <span class="nav-item__icon"><i class="fa-solid fa-plug"></i></span>
-              <span class="nav-item__label">API / Webhooks</span>
-            </button>
-
+            <!-- Rodape -->
             <button class="nav-item" data-view="configuracoes">
               <span class="nav-item__icon"><i class="fa-solid fa-gear"></i></span>
               <span class="nav-item__label">Configurações</span>
@@ -510,6 +464,7 @@
                 <span class="nav-item__label">Admin</span>
               </button>
             </a>
+
           </nav>
 
           <div class="sidebar__footer">

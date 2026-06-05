@@ -2051,6 +2051,44 @@ select {
    COLAR NO FINAL DO style.css
 ========================= */
 
+/* Nav divider entre seções */
+.nav-divider {
+  height: 1px;
+  background: var(--sidebar-border);
+  margin: 8px 6px 10px;
+}
+
+/* PDV — destaque visual */
+.nav-item--pdv {
+  background: rgba(37, 99, 235, 0.14);
+  color: #93c5fd;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  margin-bottom: 2px;
+}
+
+.nav-item--pdv:hover {
+  background: rgba(37, 99, 235, 0.26);
+  color: #fff;
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.nav-item--pdv.active {
+  background: var(--sidebar-active);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Badge de alertas no nav (substitui inline style) */
+.nav-badge {
+  background: var(--danger);
+  color: #fff;
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: auto;
+}
+
 /* SUBMENU MAIS PROFISSIONAL */
 .nav-group__menu {
   display: none;

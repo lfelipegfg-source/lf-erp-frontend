@@ -841,9 +841,9 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
     if (badge) {
       if (totalAlertas > 0) {
         badge.textContent = totalAlertas;
-        badge.style.display = 'inline-block';
+        badge.classList.remove('hidden');
       } else {
-        badge.style.display = 'none';
+        badge.classList.add('hidden');
       }
     }
 
