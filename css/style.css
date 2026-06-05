@@ -2058,6 +2058,40 @@ select {
   margin: 8px 6px 10px;
 }
 
+/* PDV — atalhos de teclado */
+.pdv-shortcuts-hint {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pdv-shortcuts-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pdv-shortcuts-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-soft);
+  box-shadow: 0 1px 0 var(--border-strong);
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .pdv-shortcuts-hint { display: none; }
+}
+
 /* PDV — destaque visual */
 .nav-item--pdv {
   background: rgba(37, 99, 235, 0.14);

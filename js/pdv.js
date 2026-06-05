@@ -207,6 +207,99 @@ const PDVModule = {
         this.updateQuantidade(index, 1);
       }
     });
+
+    this.bindKeyboardShortcuts();
+  },
+
+  bindKeyboardShortcuts() {
+    if (this._keyboardBound) return;
+    this._keyboardBound = true;
+
+    document.addEventListener('keydown', (e) => {
+      // Só ativa quando o PDV está visível
+      if (!document.getElementById('pdvBuscaProduto')) return;
+
+      const tag      = document.activeElement?.tagName?.toLowerCase();
+      const inInput  = ['input', 'textarea', 'select'].includes(tag);
+      const inBusca  = document.activeElement === this.el.buscaProduto;
+
+      // F2 — focar campo de busca de produto
+      if (e.key === 'F2') {
+        e.preventDefault();
+        this.el.buscaProduto?.focus();
+        this.el.buscaProduto?.select();
+        return;
+      }
+
+      // / — focar busca se não estiver em nenhum input
+      if (e.key === '/' && !inInput) {
+        e.preventDefault();
+        this.el.buscaProduto?.focus();
+        this.el.buscaProduto?.select();
+        return;
+      }
+
+      // F9 — finalizar venda
+      if (e.key === 'F9') {
+        e.preventDefault();
+        if (!this.state.salvando && this.state.carrinho.length > 0) {
+          this.finalizarVenda();
+        }
+        return;
+      }
+
+      // F8 — limpar venda
+      if (e.key === 'F8') {
+        e.preventDefault();
+        if (this.state.carrinho.length > 0) this.resetVenda();
+        return;
+      }
+
+      // Escape — fecha modal de grade, ou limpa o campo de busca
+      if (e.key === 'Escape') {
+        const gradeModal = document.getElementById('pdvGradeModal');
+        if (gradeModal && !gradeModal.classList.contains('hidden')) {
+          this.closeGradeSelector();
+          return;
+        }
+        if (inBusca) {
+          this.el.buscaProduto.value = '';
+          this.filterProdutos('');
+        }
+        return;
+      }
+
+      // Enter na busca — adiciona o primeiro produto visível e limpa a busca
+      if (e.key === 'Enter' && inBusca) {
+        e.preventDefault();
+        const primeiroBtn = this.el.listaProdutos
+          ?.querySelector("[data-action='pdv-add-produto']");
+        if (primeiroBtn) {
+          this.addProduto(Number(primeiroBtn.dataset.id));
+          this.el.buscaProduto.value = '';
+          this.filterProdutos('');
+          this.el.buscaProduto.focus();
+        }
+        return;
+      }
+
+      // + / = — aumentar quantidade do último item do carrinho
+      if (!inInput && (e.key === '+' || e.key === '=')) {
+        e.preventDefault();
+        if (this.state.carrinho.length > 0) {
+          this.updateQuantidade(this.state.carrinho.length - 1, 1);
+        }
+        return;
+      }
+
+      // - — diminuir quantidade do último item do carrinho
+      if (!inInput && e.key === '-') {
+        e.preventDefault();
+        if (this.state.carrinho.length > 0) {
+          this.updateQuantidade(this.state.carrinho.length - 1, -1);
+        }
+      }
+    });
   },
 
   async load() {
@@ -320,6 +413,13 @@ const PDVModule = {
                     autocomplete="off"
                     placeholder="Nome, categoria ou código de barras"
                   />
+                  <div class="pdv-shortcuts-hint">
+                    <span><kbd>F2</kbd> Focar busca</span>
+                    <span><kbd>Enter</kbd> Adicionar</span>
+                    <span><kbd>F9</kbd> Finalizar</span>
+                    <span><kbd>F8</kbd> Limpar</span>
+                    <span><kbd>Esc</kbd> Limpar busca</span>
+                  </div>
                 </div>
               </div>
             </div>
