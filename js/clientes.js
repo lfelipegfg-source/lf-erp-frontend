@@ -11,7 +11,11 @@ const ClientesModule = {
     editingId: null,
     initialized: false,
     eventsBound: false,
-    loading: false
+    loading: false,
+    carregandoMais: false,
+    total: 0,
+    offset: 0,
+    limite: 100
   },
 
   init() {
@@ -140,9 +144,14 @@ const ClientesModule = {
 
 
     try {
-      const data = await api.getClientes();
-      this.state.items = Array.isArray(data) ? data : [];
-      this.state.filteredItems = [...this.state.items];
+      const res = await api.getClientes({ limit: this.state.limite, offset: 0 });
+      const { dados = [], total = 0, limite = 100 } = (res && !Array.isArray(res)) ? res : { dados: Array.isArray(res) ? res : [] };
+
+      this.state.items        = dados;
+      this.state.filteredItems = [...dados];
+      this.state.total        = total || dados.length;
+      this.state.offset       = 0;
+      this.state.limite       = limite;
 
       this.render();
       this.cache();
@@ -332,6 +341,56 @@ const ClientesModule = {
     `
       )
       .join('');
+
+    // Rodapé de paginação
+    const jaCarregados = this.state.items.length;
+    const restantes    = this.state.total - jaCarregados;
+
+    let footer = document.getElementById('clientesPaginacaoFooter');
+    if (!footer) {
+      footer = document.createElement('div');
+      footer.id = 'clientesPaginacaoFooter';
+      footer.style.cssText = 'padding:14px 0;text-align:center;';
+      this.el.table?.closest('table')?.parentElement?.after(footer);
+    }
+
+    if (restantes > 0) {
+      footer.innerHTML = `
+        <span style="font-size:12px;color:var(--text-muted);margin-right:12px">
+          Exibindo ${jaCarregados.toLocaleString('pt-BR')} de ${this.state.total.toLocaleString('pt-BR')} clientes
+        </span>
+        <button id="clientesCarregarMaisBtn" class="btn btn-light" style="font-size:13px">
+          <i class="fa-solid fa-chevron-down"></i> Carregar mais ${restantes.toLocaleString('pt-BR')}
+        </button>`;
+      document.getElementById('clientesCarregarMaisBtn')
+        ?.addEventListener('click', () => this.carregarMais());
+    } else if (this.state.total > this.state.limite) {
+      footer.innerHTML = `<span style="font-size:12px;color:var(--text-muted)">${jaCarregados.toLocaleString('pt-BR')} clientes carregados</span>`;
+    } else {
+      footer.innerHTML = '';
+    }
+  },
+
+  async carregarMais() {
+    if (this.state.carregandoMais || this.state.loading) return;
+    const novoOffset = this.state.offset + this.state.limite;
+    if (novoOffset >= this.state.total) return;
+
+    this.state.carregandoMais = true;
+    const btn = document.getElementById('clientesCarregarMaisBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Carregando...'; }
+
+    try {
+      const res = await api.getClientes({ limit: this.state.limite, offset: novoOffset });
+      const { dados = [] } = (res && !Array.isArray(res)) ? res : { dados: Array.isArray(res) ? res : [] };
+      this.state.items  = [...this.state.items, ...dados];
+      this.state.offset = novoOffset;
+      this.search(this.el.search?.value || '');
+    } catch (e) {
+      showToast('Erro ao carregar mais clientes', 'error');
+    } finally {
+      this.state.carregandoMais = false;
+    }
   },
 
   search(term) {

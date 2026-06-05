@@ -11,6 +11,10 @@ const VendasModule = {
     vendas: [],
     vendasFiltradas: [],
     loading: false,
+    carregandoMais: false,
+    total: 0,
+    offset: 0,
+    limite: 100,
     vendaDetalheAtual: null,
     produtosAdicionar: [],
     filtros: {
@@ -321,9 +325,13 @@ const VendasModule = {
     this.setLoading(true);
 
     try {
-      const vendas = await this.fetchVendas();
+      const res = await this.fetchVendas({ offset: 0 });
+      const { dados = [], total = 0, limite = 100 } = res || {};
 
-      this.state.vendas = Array.isArray(vendas) ? vendas : [];
+      this.state.vendas  = dados;
+      this.state.total   = total;
+      this.state.offset  = 0;
+      this.state.limite  = limite;
       this.applyLocalFilters();
       this.setFeedback('', '');
     } catch (error) {
@@ -343,30 +351,38 @@ const VendasModule = {
     }
   },
 
-  async fetchVendas() {
+  async fetchVendas({ offset = 0 } = {}) {
     const filtrosGlobais = this.getGlobalFilters();
+    const params = { ...filtrosGlobais, limit: this.state.limite, offset };
 
-    const params = {
-      ...filtrosGlobais
-    };
-
-    if (this.state.filtros.dataInicial) {
-      params.data_inicial = this.state.filtros.dataInicial;
-    }
-
-    if (this.state.filtros.dataFinal) {
-      params.data_final = this.state.filtros.dataFinal;
-    }
-
-    if (this.state.filtros.pagamento) {
-      params.pagamento = this.state.filtros.pagamento;
-    }
-
-    if (this.state.filtros.status) {
-      params.status_pagamento = this.state.filtros.status;
-    }
+    if (this.state.filtros.dataInicial) params.data_inicial = this.state.filtros.dataInicial;
+    if (this.state.filtros.dataFinal)   params.data_final   = this.state.filtros.dataFinal;
+    if (this.state.filtros.pagamento)   params.pagamento     = this.state.filtros.pagamento;
+    if (this.state.filtros.status)      params.status_pagamento = this.state.filtros.status;
 
     return api.getVendas(params);
+  },
+
+  async carregarMais() {
+    if (this.state.carregandoMais || this.state.loading) return;
+    const novoOffset = this.state.offset + this.state.limite;
+    if (novoOffset >= this.state.total) return;
+
+    this.state.carregandoMais = true;
+    const btn = document.getElementById('vendasCarregarMaisBtn');
+    if (btn) btn.disabled = true;
+
+    try {
+      const res = await this.fetchVendas({ offset: novoOffset });
+      const { dados = [] } = res || {};
+      this.state.vendas  = [...this.state.vendas, ...dados];
+      this.state.offset  = novoOffset;
+      this.applyLocalFilters();
+    } catch (e) {
+      showToast('Erro ao carregar mais vendas', 'error');
+    } finally {
+      this.state.carregandoMais = false;
+    }
   },
 
   getGlobalFilters() {
@@ -660,6 +676,35 @@ const VendasModule = {
       `;
       })
       .join('');
+
+    // Rodapé de paginação
+    const jaCarregados = this.state.vendas.length;
+    const restantes    = this.state.total - jaCarregados;
+
+    let footer = document.getElementById('vendasPaginacaoFooter');
+    if (!footer) {
+      footer = document.createElement('div');
+      footer.id = 'vendasPaginacaoFooter';
+      footer.style.cssText = 'padding:14px 0;text-align:center;';
+      const tbl = this.el.tbody?.closest('table');
+      if (tbl?.parentElement) tbl.parentElement.after(footer);
+    }
+
+    if (restantes > 0) {
+      footer.innerHTML = `
+        <span style="font-size:12px;color:var(--text-muted);margin-right:12px">
+          Exibindo ${jaCarregados.toLocaleString('pt-BR')} de ${this.state.total.toLocaleString('pt-BR')} vendas
+        </span>
+        <button id="vendasCarregarMaisBtn" class="btn btn-light" style="font-size:13px">
+          <i class="fa-solid fa-chevron-down"></i> Carregar mais ${restantes.toLocaleString('pt-BR')}
+        </button>`;
+      document.getElementById('vendasCarregarMaisBtn')
+        ?.addEventListener('click', () => this.carregarMais());
+    } else if (this.state.total > this.state.limite) {
+      footer.innerHTML = `<span style="font-size:12px;color:var(--text-muted)">${jaCarregados.toLocaleString('pt-BR')} vendas carregadas</span>`;
+    } else {
+      footer.innerHTML = '';
+    }
   },
 
   toggleEmptyState(customMessage = '') {
