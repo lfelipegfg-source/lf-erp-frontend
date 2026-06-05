@@ -1054,7 +1054,8 @@ const PDVModule = {
   },
 
   async fetchClientes() {
-    return api.getClientes();
+    const r = await api.getClientes();
+    return r?.dados ?? r;
   },
 
   async fetchProdutos() {
