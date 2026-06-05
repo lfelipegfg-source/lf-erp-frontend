@@ -732,8 +732,31 @@ img {
 .sidebar.collapsed .nav-item__label,
 .sidebar.collapsed .nav-group__arrow,
 .sidebar.collapsed .nav-group__menu,
-.sidebar.collapsed .sidebar-user__info {
+.sidebar.collapsed .sidebar-user__info,
+.sidebar.collapsed .nav-badge,
+.sidebar.collapsed .nav-divider__label {
   display: none;
+}
+
+/* Ícones centralizados no modo colapsado */
+.sidebar.collapsed .nav-item,
+.sidebar.collapsed .nav-group__toggle {
+  justify-content: center;
+  padding: 0;
+  gap: 0;
+}
+
+/* Tooltip via title nativo — hint visual para grupos colapsados */
+.sidebar.collapsed .nav-item__icon,
+.sidebar.collapsed .nav-group__icon {
+  width: 24px;
+  text-align: center;
+}
+
+/* PDV item colapsado — manter destaque mas centralizar */
+.sidebar.collapsed .nav-item--pdv {
+  padding: 0;
+  justify-content: center;
 }
 
 .sidebar__nav {
