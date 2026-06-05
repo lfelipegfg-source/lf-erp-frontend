@@ -22,6 +22,16 @@ const state = {
   loading: false
 };
 
+function salvarFiltrosCR() {
+  try { sessionStorage.setItem('lf_filtros_cr', JSON.stringify(state.filtros)); } catch {}
+}
+function carregarFiltrosCR() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('lf_filtros_cr') || 'null');
+    if (s) Object.assign(state.filtros, s);
+  } catch {}
+}
+
 function showMessage(message, type = 'info') {
   const feedback = document.getElementById('contasReceberFeedback');
 
@@ -107,6 +117,7 @@ function buildFriendlyError(error) {
 export async function initContasReceberModule() {
   try {
     state.loading = true;
+    carregarFiltrosCR();
     renderSkeleton();
 
     await Promise.all([carregarClientes(), carregarContas()]);
@@ -492,17 +503,13 @@ function bindEventos() {
     state.filtros.busca = busca?.value?.trim() || '';
     state.filtros.status = status?.value || '';
     state.filtros.cliente_id = cliente?.value || '';
-
+    salvarFiltrosCR();
     await recarregar();
   });
 
   btnLimpar?.addEventListener('click', async () => {
-    state.filtros = {
-      status: '',
-      cliente_id: '',
-      busca: ''
-    };
-
+    state.filtros = { status: '', cliente_id: '', busca: '' };
+    salvarFiltrosCR();
     await recarregar();
   });
 
@@ -511,6 +518,7 @@ function bindEventos() {
       state.filtros.busca = busca.value.trim();
       state.filtros.status = status?.value || '';
       state.filtros.cliente_id = cliente?.value || '';
+      salvarFiltrosCR();
 
       await recarregar();
     }

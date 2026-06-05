@@ -21,6 +21,16 @@ const state = {
   loading: false
 };
 
+function salvarFiltrosCP() {
+  try { sessionStorage.setItem('lf_filtros_cp', JSON.stringify(state.filtros)); } catch {}
+}
+function carregarFiltrosCP() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('lf_filtros_cp') || 'null');
+    if (s) Object.assign(state.filtros, s);
+  } catch {}
+}
+
 function showMessage(message, type = 'info') {
   const feedback = document.getElementById('contasPagarFeedback');
 
@@ -76,6 +86,7 @@ function buildFriendlyError(error) {
 export async function initContasPagarModule() {
   try {
     state.loading = true;
+    carregarFiltrosCP();
     renderSkeleton();
 
     await Promise.all([carregarFornecedores(), carregarContas()]);
@@ -402,17 +413,13 @@ function bindEventos() {
     state.filtros.busca = busca?.value?.trim() || '';
     state.filtros.status = status?.value || '';
     state.filtros.fornecedor_id = fornecedor?.value || '';
-
+    salvarFiltrosCP();
     await recarregar();
   });
 
   btnLimpar?.addEventListener('click', async () => {
-    state.filtros = {
-      status: '',
-      fornecedor_id: '',
-      busca: ''
-    };
-
+    state.filtros = { status: '', fornecedor_id: '', busca: '' };
+    salvarFiltrosCP();
     await recarregar();
   });
 
@@ -421,7 +428,7 @@ function bindEventos() {
       state.filtros.busca = busca.value.trim();
       state.filtros.status = status?.value || '';
       state.filtros.fornecedor_id = fornecedor?.value || '';
-
+      salvarFiltrosCP();
       await recarregar();
     }
   });

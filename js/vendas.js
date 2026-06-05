@@ -31,6 +31,7 @@ const VendasModule = {
 
     if (!this.state.initialized) {
       this.state.initialized = true;
+      this.carregarFiltros();
       this.render();
       this.cache();
       this.bindEvents();
@@ -77,6 +78,7 @@ const VendasModule = {
       if (event.target.id === 'vendasBusca') {
         this.state.filtros.busca = event.target.value || '';
         this.applyLocalFilters();
+        this.salvarFiltros();
       }
 
       if (event.target.id === 'buscaProdutoAdd') {
@@ -88,19 +90,23 @@ const VendasModule = {
       if (event.target.id === 'vendasPagamento') {
         this.state.filtros.pagamento = event.target.value || '';
         this.applyLocalFilters();
+        this.salvarFiltros();
       }
 
       if (event.target.id === 'vendasStatus') {
         this.state.filtros.status = event.target.value || '';
         this.applyLocalFilters();
+        this.salvarFiltros();
       }
 
       if (event.target.id === 'vendasDataInicial') {
         this.state.filtros.dataInicial = event.target.value || '';
+        this.salvarFiltros();
       }
 
       if (event.target.id === 'vendasDataFinal') {
         this.state.filtros.dataFinal = event.target.value || '';
+        this.salvarFiltros();
       }
 
       if (event.target.dataset.action === 'editar-qtd-item-venda') {
@@ -718,6 +724,17 @@ const VendasModule = {
     this.el.empty.textContent = customMessage || 'Nenhuma venda encontrada.';
   },
 
+  salvarFiltros() {
+    try { sessionStorage.setItem('lf_filtros_vendas', JSON.stringify(this.state.filtros)); } catch {}
+  },
+
+  carregarFiltros() {
+    try {
+      const s = JSON.parse(sessionStorage.getItem('lf_filtros_vendas') || 'null');
+      if (s) Object.assign(this.state.filtros, s);
+    } catch {}
+  },
+
   clearFilters() {
     this.state.filtros = {
       busca: '',
@@ -726,7 +743,7 @@ const VendasModule = {
       dataInicial: '',
       dataFinal: ''
     };
-
+    this.salvarFiltros();
     this.render();
     this.applyLocalFilters();
   },
