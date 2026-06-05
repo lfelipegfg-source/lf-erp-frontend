@@ -550,7 +550,8 @@ const RastreabilidadeModule = {
   },
 
   injectStyles() {
-    if (document.getElementById('rast-styles')) return;
+    // estilos migrados para style.css
+    if (true) return;
     const s = document.createElement('style');
     s.id = 'rast-styles';
     s.textContent = `

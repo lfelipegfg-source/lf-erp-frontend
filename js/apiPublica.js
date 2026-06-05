@@ -411,7 +411,8 @@ if (sig !== req.headers['x-lf-signature'].replace('sha256=','')) {
   },
 
   injectStyles() {
-    if (document.getElementById('apipub-styles')) return;
+    // estilos migrados para style.css
+    if (true) return;
     const s = document.createElement('style');
     s.id = 'apipub-styles';
     s.textContent = `

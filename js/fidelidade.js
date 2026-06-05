@@ -458,7 +458,8 @@ const FidelidadeModule = {
   },
 
   injectStyles() {
-    if (document.getElementById('fid-styles')) return;
+    // estilos migrados para style.css
+    if (true) return;
     const s = document.createElement('style');
     s.id = 'fid-styles';
     s.textContent = `

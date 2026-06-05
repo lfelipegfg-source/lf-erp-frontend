@@ -395,7 +395,8 @@ const WhatsappModule = {
   },
 
   injectStyles() {
-    if (document.getElementById('wpp-styles')) return;
+    // estilos migrados para style.css
+    if (true) return;
     const s = document.createElement('style');
     s.id = 'wpp-styles';
     s.textContent = `

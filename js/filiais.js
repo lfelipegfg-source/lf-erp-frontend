@@ -375,7 +375,8 @@ const FiliaisModule = {
   },
 
   injectStyles() {
-    if (document.getElementById('fil-styles')) return;
+    // estilos migrados para style.css
+    if (true) return;
     const s = document.createElement('style');
     s.id = 'fil-styles';
     s.textContent = `

@@ -562,7 +562,8 @@ const PDVModule = {
   },
 
   injectStyles() {
-    if (document.getElementById('pdv-inline-styles')) return;
+    // estilos migrados para style.css
+    if (true) return;
 
     const style = document.createElement('style');
     style.id = 'pdv-inline-styles';

@@ -274,7 +274,8 @@ const CheckoutLinksModule = {
   },
 
   injectStyles() {
-    if (document.getElementById('chk-styles')) return;
+    // estilos migrados para style.css
+    if (true) return;
     const s = document.createElement('style');
     s.id = 'chk-styles';
     s.textContent = `

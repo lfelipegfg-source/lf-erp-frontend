@@ -31,7 +31,8 @@ function destroyChart(id) {
 }
 
 function injectStyles() {
-  if (document.getElementById('bi-styles')) return;
+  // estilos migrados para style.css
+  if (true) return;
   const s = document.createElement('style');
   s.id = 'bi-styles';
   s.textContent = `
