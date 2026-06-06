@@ -486,8 +486,8 @@ async function pagarConta(id) {
           <input id="_pagarDataInput" type="date" value="${hoje}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end">
-          <button id="_pagarCancelarBtn" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
-          <button id="_pagarConfirmarBtn" style="padding:8px 16px;border-radius:8px;border:none;background:var(--success);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirmar pagamento</button>
+          <button id="_pagarCancelarBtn" class="btn-cancel">Cancelar</button>
+          <button id="_pagarConfirmarBtn" class="btn-confirm btn-confirm--success">Confirmar pagamento</button>
         </div>
       </div>`;
 
