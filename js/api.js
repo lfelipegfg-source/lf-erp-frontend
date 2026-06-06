@@ -1261,9 +1261,15 @@ function clearApiBaseUrl() {
   API_CONFIG.BASE_URL = 'https://lf-erp-backend.onrender.com';
 }
 
+// Método genérico GET — usado pelo módulo BI e outros que constroem URLs manualmente
+async function get(path, query = {}) {
+  return request(path, { method: 'GET', query });
+}
+
 const api = {
   config: API_CONFIG,
   request,
+  get,
   fetchAPI,
   login,
   validateSession,
