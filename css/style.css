@@ -667,6 +667,11 @@ img {
   min-height: 100vh;
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
+  transition: grid-template-columns var(--transition);
+}
+
+.main-screen.sidebar-collapsed {
+  grid-template-columns: var(--sidebar-collapsed-width) 1fr;
 }
 
 /* SIDEBAR */
@@ -2284,6 +2289,72 @@ select {
 
 .sidebar:not(.collapsed) .nav-subitem span {
   display: inline-block;
+}
+
+/* DASHBOARD CONFIG MODAL */
+.dash-config-group-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  padding: 14px 0 4px;
+}
+
+.dash-config-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.dash-config-item:last-child {
+  border-bottom: none;
+}
+
+.dash-toggle {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.dash-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.dash-toggle__track {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: var(--border-strong);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.dash-toggle__track::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition);
+}
+
+.dash-toggle input:checked + .dash-toggle__track {
+  background: var(--primary);
+}
+
+.dash-toggle input:checked + .dash-toggle__track::after {
+  transform: translateX(18px);
 }
 
 /* CARD DO MÓDULO MAIS PARECIDO COM O ANTERIOR */

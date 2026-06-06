@@ -586,6 +586,7 @@ function togglePasswordVisibility() {
 
 async function toggleSidebarCollapse() {
   const sidebar = document.getElementById('sidebar');
+  const mainScreen = document.getElementById('mainScreen');
   if (!sidebar) return;
 
   if (AppState.sidebarCollapsed) {
@@ -595,6 +596,7 @@ async function toggleSidebarCollapse() {
       AppState.sidebarCollapsed = false;
       sidebar.classList.remove('collapsed');
       sidebar.classList.add('expanded');
+      mainScreen?.classList.remove('sidebar-collapsed');
       await setActiveView(parentView);
       return;
     }
@@ -602,12 +604,14 @@ async function toggleSidebarCollapse() {
     AppState.sidebarCollapsed = false;
     sidebar.classList.remove('collapsed');
     sidebar.classList.add('expanded');
+    mainScreen?.classList.remove('sidebar-collapsed');
     return;
   }
 
   AppState.sidebarCollapsed = true;
   sidebar.classList.add('collapsed');
   sidebar.classList.remove('expanded');
+  mainScreen?.classList.add('sidebar-collapsed');
 
   document.querySelectorAll('.nav-group').forEach((group) => {
     group.classList.remove('open');

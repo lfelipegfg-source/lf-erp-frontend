@@ -803,6 +803,115 @@ function renderErrorState(message = 'Não foi possível carregar o dashboard.') 
   setHtml('dashboardTabelaPrecos', `<div class="empty-state">Sem dados disponíveis.</div>`);
 }
 
+// ─── Dashboard Customization ─────────────────────────────────────────────────
+
+const DASHBOARD_WIDGETS = [
+  { id: 'kpi-faturamento',       label: 'KPI: Faturamento',            group: 'KPIs',     defaultOn: true },
+  { id: 'kpi-vendas',            label: 'KPI: Vendas',                 group: 'KPIs',     defaultOn: true },
+  { id: 'kpi-receber',           label: 'KPI: A Receber',              group: 'KPIs',     defaultOn: true },
+  { id: 'kpi-pagar',             label: 'KPI: A Pagar',                group: 'KPIs',     defaultOn: true },
+  { id: 'kpi-estoque',           label: 'KPI: Estoque',                group: 'KPIs',     defaultOn: true },
+  { id: 'kpi-clientes',          label: 'KPI: Clientes',               group: 'KPIs',     defaultOn: true },
+  { id: 'panel-resumo',          label: 'Resumo de performance',       group: 'Painéis',  defaultOn: true },
+  { id: 'panel-top-produtos',    label: 'Top produtos',                group: 'Painéis',  defaultOn: true },
+  { id: 'panel-alertas',         label: 'Alertas financeiros',         group: 'Painéis',  defaultOn: true },
+  { id: 'panel-tabela-precos',   label: 'Tabelas de Preço',            group: 'Painéis',  defaultOn: true },
+  { id: 'chart-vendas',          label: 'Gráfico: Faturamento por dia',group: 'Gráficos', defaultOn: true },
+  { id: 'chart-forma-pagamento', label: 'Gráfico: Formas de pagamento',group: 'Gráficos', defaultOn: true },
+];
+
+const DASH_CONFIG_KEY = 'lf_dashboard_config';
+
+function getDashboardConfig() {
+  try {
+    const raw = localStorage.getItem(DASH_CONFIG_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveDashboardConfig(config) {
+  try {
+    localStorage.setItem(DASH_CONFIG_KEY, JSON.stringify(config));
+  } catch { /* silencioso */ }
+}
+
+function applyDashboardConfig(config) {
+  DASHBOARD_WIDGETS.forEach(({ id, defaultOn }) => {
+    const isOn = config ? (config[id] ?? defaultOn) : defaultOn;
+    const el = document.querySelector(`[data-widget="${id}"]`);
+    if (el) el.style.display = isOn ? '' : 'none';
+  });
+}
+
+export function openDashboardConfig() {
+  const overlay = document.getElementById('dashboardConfigOverlay');
+  const body = document.getElementById('dashboardConfigBody');
+  if (!overlay || !body) return;
+
+  const config = getDashboardConfig() || {};
+  const groups = [...new Set(DASHBOARD_WIDGETS.map(w => w.group))];
+
+  body.innerHTML = groups.map(group => {
+    const widgets = DASHBOARD_WIDGETS.filter(w => w.group === group);
+    return `
+      <div class="dash-config-group-label">${group}</div>
+      ${widgets.map(w => {
+        const isOn = config[w.id] ?? w.defaultOn;
+        return `
+          <div class="dash-config-item">
+            <span style="font-size:0.9rem;color:var(--text)">${w.label}</span>
+            <label class="dash-toggle">
+              <input type="checkbox" data-widget-id="${w.id}"${isOn ? ' checked' : ''}>
+              <span class="dash-toggle__track"></span>
+            </label>
+          </div>`;
+      }).join('')}`;
+  }).join('');
+
+  overlay.classList.remove('hidden');
+}
+
+let _dashConfigBound = false;
+
+export function bindDashboardConfig() {
+  if (_dashConfigBound) return;
+  _dashConfigBound = true;
+
+  const overlay = document.getElementById('dashboardConfigOverlay');
+
+  document.getElementById('dashboardConfigBtn')?.addEventListener('click', openDashboardConfig);
+
+  document.getElementById('dashboardConfigClose')?.addEventListener('click', () => {
+    overlay?.classList.add('hidden');
+  });
+
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.add('hidden');
+  });
+
+  document.getElementById('dashboardConfigReset')?.addEventListener('click', () => {
+    document.querySelectorAll('#dashboardConfigBody input[data-widget-id]').forEach(cb => {
+      const w = DASHBOARD_WIDGETS.find(x => x.id === cb.dataset.widgetId);
+      if (w) cb.checked = w.defaultOn;
+    });
+  });
+
+  document.getElementById('dashboardConfigSave')?.addEventListener('click', () => {
+    const newConfig = {};
+    document.querySelectorAll('#dashboardConfigBody input[data-widget-id]').forEach(cb => {
+      newConfig[cb.dataset.widgetId] = cb.checked;
+    });
+    saveDashboardConfig(newConfig);
+    applyDashboardConfig(newConfig);
+    overlay?.classList.add('hidden');
+    showMessage('Configuração do dashboard salva.', 'success');
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function loadDashboard({ filters = {}, state = {} } = {}) {
   try {
     lastDashboardContext = {
@@ -847,12 +956,16 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
       }
     }
 
+    bindDashboardConfig();
+
     renderKpis(payload, financeiro, filters);
     renderResumoExecutivo(payload, financeiro, state, rawEmpresaStatus);
     renderTopProdutos(payload);
     renderAlertas(payload, financeiro);
     renderTabelaPrecos(rawTabelaPrecos);
     renderGraficos(params);
+
+    applyDashboardConfig(getDashboardConfig());
 
     return {
       dashboard: payload,
@@ -877,7 +990,9 @@ export function resetDashboard(message) {
 
 const dashboard = {
   loadDashboard,
-  resetDashboard
+  resetDashboard,
+  openDashboardConfig,
+  bindDashboardConfig
 };
 
 window.LfErpDashboard = dashboard;
