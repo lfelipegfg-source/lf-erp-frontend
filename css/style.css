@@ -4389,6 +4389,26 @@ select {
 .pdv-tabs { display:none; gap:0; border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:16px; }
 .pdv-tab { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:12px 8px; border:none; background:var(--surface-2); color:var(--text-muted); font-size:0.9rem; font-weight:700; cursor:pointer; position:relative; }
 .pdv-tab--active { background:var(--primary,#2563eb); color:#fff; }
+
+/* Indicador offline do PDV */
+.pdv-offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid #fde68a;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .pdv-offline-badge {
+  background: #451a03;
+  color: #fcd34d;
+  border-color: #78350f;
+}
 .pdv-tab-badge { position:absolute; top:6px; right:10px; background:#ef4444; color:#fff; font-size:0.7rem; font-weight:800; border-radius:999px; padding:1px 6px; min-width:18px; text-align:center; }
 .pdv-mobile-sticky { display:none; }
 .pdv-split-lista { display:flex; flex-direction:column; gap:8px; }

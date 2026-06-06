@@ -1,6 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast } from './feedback.js';
+import * as PdvOffline from './pdvOffline.js';
 
 const PDVModule = {
   state: {
@@ -27,6 +28,7 @@ const PDVModule = {
     this.render();
     this.cache();
     this.bindLocalEvents();
+    this.bindOfflineEvents();
   },
 
   resolveEmpresa() {
@@ -311,34 +313,69 @@ const PDVModule = {
       return;
     }
 
+    const isOnline = navigator.onLine;
+    this.updateOfflineIndicator(isOnline);
     this.setLoading(true);
     this.setFeedback('Carregando dados do PDV...', 'info');
 
     try {
-      const [clientes, produtos] = await Promise.all([this.fetchClientes(), this.fetchProdutos()]);
+      if (isOnline) {
+        await this.syncPendentesIfOnline().catch(() => {});
+        const [clientes, produtos] = await Promise.all([this.fetchClientes(), this.fetchProdutos()]);
+        this.state.clientes = Array.isArray(clientes) ? clientes : [];
+        this.state.produtos = Array.isArray(produtos) ? produtos : [];
+        PdvOffline.salvarProdutos(this.state.produtos).catch(() => {});
+        PdvOffline.salvarClientes(this.state.clientes).catch(() => {});
+      } else {
+        const [produtos, clientes] = await Promise.all([PdvOffline.getProdutos(), PdvOffline.getClientes()]);
+        this.state.produtos = produtos;
+        this.state.clientes = clientes;
+      }
 
-      this.state.clientes = Array.isArray(clientes) ? clientes : [];
-      this.state.produtos = Array.isArray(produtos) ? produtos : [];
       this.state.produtosFiltrados = [...this.state.produtos];
-
       this.renderClientes();
       this.renderProdutos();
       this.renderCarrinho();
       this.renderResumo();
       this.togglePrimeiroVencimentoField();
-      this.setFeedback('', 'info');
+
+      if (!isOnline) {
+        const pendentes = await PdvOffline.contarVendasPendentes();
+        if (!this.state.produtos.length) {
+          this.setFeedback('Sem conexão e sem dados em cache. Aguarde a conexão.', 'error');
+        } else {
+          const msg = pendentes > 0
+            ? `Offline — ${this.state.produtos.length} produto(s) em cache. ${pendentes} venda(s) aguardando sincronização.`
+            : `Offline — ${this.state.produtos.length} produto(s) em cache.`;
+          this.setFeedback(msg, 'warning');
+        }
+      } else {
+        this.setFeedback('', 'info');
+      }
     } catch (error) {
       console.error('Erro ao carregar PDV:', error);
+
+      if (!navigator.onLine) {
+        try {
+          this.state.produtos = await PdvOffline.getProdutos();
+          this.state.clientes = await PdvOffline.getClientes();
+          this.state.produtosFiltrados = [...this.state.produtos];
+          this.renderClientes();
+          this.renderProdutos();
+          this.renderCarrinho();
+          this.renderResumo();
+          this.setFeedback(`Sem conexão — usando ${this.state.produtos.length} produto(s) do cache.`, 'warning');
+          return;
+        } catch { /* sem cache */ }
+      }
 
       this.state.clientes = [];
       this.state.produtos = [];
       this.state.produtosFiltrados = [];
-
       this.renderClientes();
       this.renderProdutos();
       this.renderCarrinho();
       this.renderResumo();
-
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
       showToast(message, 'error');
@@ -358,6 +395,10 @@ const PDVModule = {
             <h3>PDV</h3>
             <p>Ponto de venda rápido e profissional</p>
           </div>
+
+          <span id="pdvOfflineIndicator" class="pdv-offline-badge hidden">
+            <i class="fa-solid fa-wifi-slash"></i> Offline
+          </span>
 
           <div class="module-card__actions">
             <button type="button" class="btn btn-light" id="pdvAtualizarBtn">
@@ -1727,6 +1768,35 @@ const PDVModule = {
       conta_receber: null
     };
 
+    // Offline — salvar na fila local
+    if (!navigator.onLine) {
+      this.state.salvando = true;
+      this.setLoading(true);
+      if (this.el.finalizarBtn) {
+        this.el.finalizarBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando offline...';
+      }
+      try {
+        const pendingId = await PdvOffline.salvarVendaPendente(payload);
+        const msg = pendingId
+          ? `Venda salva offline (fila #${pendingId}). Será enviada quando a conexão retornar.`
+          : 'Venda salva offline. Será enviada quando a conexão retornar.';
+        this.setFeedback(msg, 'warning');
+        showToast(msg, 'warning');
+        this.resetVenda();
+        await this.load();
+      } catch {
+        this.setFeedback('Erro ao salvar a venda offline.', 'error');
+        showToast('Não foi possível salvar a venda offline.', 'error');
+      } finally {
+        this.state.salvando = false;
+        this.setLoading(false);
+        if (this.el.finalizarBtn) {
+          this.el.finalizarBtn.innerHTML = '<i class="fa-solid fa-check"></i> Finalizar venda';
+        }
+      }
+      return;
+    }
+
     this.state.salvando = true;
     this.setLoading(true);
     this.setFeedback('Finalizando venda...', 'info');
@@ -1870,6 +1940,55 @@ const PDVModule = {
     }
 
     return error.message || 'Falha ao concluir a venda.';
+  },
+
+  updateOfflineIndicator(isOnline) {
+    const el = document.getElementById('pdvOfflineIndicator');
+    if (el) el.classList.toggle('hidden', isOnline);
+  },
+
+  async syncPendentesIfOnline() {
+    if (!navigator.onLine) return 0;
+    const pendentes = await PdvOffline.getVendasPendentes();
+    if (!pendentes.length) return 0;
+
+    let sincronizadas = 0;
+    let erros = 0;
+
+    for (const venda of pendentes) {
+      try {
+        const { id: localId, _queued_at, ...payload } = venda;
+        await this.postVenda(payload);
+        await PdvOffline.removerVendaPendente(localId);
+        sincronizadas++;
+      } catch (err) {
+        console.error('[PDV Sync] Erro ao sincronizar venda pendente:', err);
+        erros++;
+      }
+    }
+
+    if (sincronizadas > 0) {
+      showToast(`${sincronizadas} venda(s) offline sincronizada(s) com sucesso!`, 'success');
+    }
+    if (erros > 0) {
+      showToast(`${erros} venda(s) falharam na sincronização. Verifique e tente novamente.`, 'error');
+    }
+
+    return sincronizadas;
+  },
+
+  bindOfflineEvents() {
+    window.addEventListener('online', async () => {
+      this.updateOfflineIndicator(true);
+      showToast('Conexão restaurada. Sincronizando vendas pendentes...', 'success');
+      await this.syncPendentesIfOnline().catch(() => {});
+      await this.load();
+    });
+
+    window.addEventListener('offline', () => {
+      this.updateOfflineIndicator(false);
+      showToast('Sem conexão. Modo offline ativado — vendas serão salvas localmente.', 'warning');
+    });
   },
 
   parseMoneyInput(value) {
