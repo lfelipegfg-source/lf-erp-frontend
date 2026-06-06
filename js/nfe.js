@@ -338,7 +338,7 @@ const NfeModule = {
               </div>
               <div class="form-field">
                 <label>Ambiente</label>
-                <select id="nfeCfgAmbiente">
+                <select id="nfeCfgAmbiente" class="filter-input">
                   <option value="2" ${Number(cfg.ambiente) !== 1 ? 'selected' : ''}>Homologação (Testes)</option>
                   <option value="1" ${Number(cfg.ambiente) === 1 ? 'selected' : ''}>Produção</option>
                 </select>
@@ -382,7 +382,7 @@ const NfeModule = {
               </div>
               <div class="form-field form-field--span-2">
                 <label>CRT — Regime Tributário</label>
-                <select id="nfeCfgCrt">
+                <select id="nfeCfgCrt" class="filter-input">
                   <option value="1" ${Number(emp.crt) === 1 ? 'selected' : ''}>1 — Simples Nacional</option>
                   <option value="2" ${Number(emp.crt) === 2 ? 'selected' : ''}>2 — Simples Nacional Excesso</option>
                   <option value="3" ${Number(emp.crt) === 3 ? 'selected' : ''}>3 — Regime Normal (Lucro Presumido/Real)</option>

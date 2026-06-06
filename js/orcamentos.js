@@ -249,7 +249,7 @@ const OrcamentosModule = {
         <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
           <h3 style="margin:0 0 8px;font-size:16px;font-weight:700">${titulo}</h3>
           <p style="font-size:13px;color:var(--text-muted);margin:0 0 14px">${descricao}</p>
-          <select id="_orcFormaSelect" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:14px">
+          <select id="_orcFormaSelect" class="filter-input" style="width:100%;margin-bottom:14px">
             <option value="">Não informado</option>
             <option value="Dinheiro">Dinheiro</option>
             <option value="Pix">Pix</option>
@@ -258,8 +258,8 @@ const OrcamentosModule = {
             <option value="Promissória">Promissória</option>
           </select>
           <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button id="_orcCancelarConv" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
-            <button id="_orcConfirmarConv" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Converter</button>
+            <button id="_orcCancelarConv" class="btn-cancel">Cancelar</button>
+            <button id="_orcConfirmarConv" class="btn-confirm">Converter</button>
           </div>
         </div>
       `;

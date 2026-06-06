@@ -535,7 +535,7 @@ const ProdutosModule = {
               <div class="inline-add-form" style="grid-template-columns:1fr 120px auto">
                 <div>
                   <label style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block">Produto componente *</label>
-                  <select id="kitProdutoSelect" style="width:100%">
+                  <select id="kitProdutoSelect" class="filter-input" style="width:100%">
                     <option value="">Selecione o produto...</option>
                   </select>
                 </div>

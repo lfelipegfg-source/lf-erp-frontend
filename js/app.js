@@ -1815,12 +1815,12 @@ function mostrarWizardBoasVindas(nomeEmpresa) {
           ${steps.map((_, i) => `<div style="width:${i===currentStep?24:8}px;height:8px;border-radius:999px;background:${i===currentStep?'var(--primary)':'var(--border)'};transition:all .2s"></div>`).join('')}
         </div>
         <div style="display:flex;gap:10px;justify-content:center">
-          ${currentStep > 0 ? `<button id="_wzVoltar" style="padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:var(--surface-3);font-size:14px;cursor:pointer">Voltar</button>` : ''}
-          <button id="_wzProximo" style="padding:10px 24px;border-radius:12px;border:none;background:var(--primary);color:#fff;font-size:14px;font-weight:700;cursor:pointer">
+          ${currentStep > 0 ? `<button id="_wzVoltar" class="btn-cancel">Voltar</button>` : ''}
+          <button id="_wzProximo" class="btn-confirm" style="font-size:14px;padding:10px 24px">
             ${isLast ? `<i class="fa-solid fa-check"></i> ` : ''}${s.btn}
           </button>
         </div>
-        <button id="_wzPular" style="margin-top:14px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:underline">Pular tutorial</button>
+        <button id="_wzPular" style="margin-top:14px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:underline;display:block;margin-inline:auto">Pular tutorial</button>
       </div>`;
 
     document.getElementById('_wzProximo')?.addEventListener('click', async () => {

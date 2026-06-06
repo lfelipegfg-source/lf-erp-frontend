@@ -203,7 +203,7 @@ const UsuariosModule = {
 
             <div class="form-field">
               <label for="usuarioTipo">Perfil</label>
-              <select id="usuarioTipo" required>
+              <select id="usuarioTipo" class="filter-input" required>
                 <option value="admin">Admin</option>
                 <option value="gerente">Gerente</option>
                 <option value="funcionario">Funcionário</option>

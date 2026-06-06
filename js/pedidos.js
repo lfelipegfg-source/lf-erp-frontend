@@ -242,7 +242,7 @@ const PedidosModule = {
           <div style="display:grid;gap:12px;margin-bottom:16px">
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px">Forma de pagamento</label>
-              <select id="_pedFormaSelect" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box">
+              <select id="_pedFormaSelect" class="filter-input" style="width:100%">
                 <option value="Dinheiro">Dinheiro</option>
                 <option value="Pix">Pix</option>
                 <option value="Cartão de Débito">Cartão de Débito</option>
@@ -252,7 +252,7 @@ const PedidosModule = {
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px">Data da venda</label>
-              <input type="date" id="_pedDataVenda" value="${hoje}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+              <input type="date" id="_pedDataVenda" class="filter-input" style="width:100%" value="${hoje}" />
             </div>
             <div>
               <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px">Observação (opcional)</label>
@@ -261,8 +261,8 @@ const PedidosModule = {
           </div>
 
           <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button id="_pedCancelarConv" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
-            <button id="_pedConfirmarConv" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Converter em Venda</button>
+            <button id="_pedCancelarConv" class="btn-cancel">Cancelar</button>
+            <button id="_pedConfirmarConv" class="btn-confirm">Converter em Venda</button>
           </div>
         </div>
       `;

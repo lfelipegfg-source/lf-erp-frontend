@@ -332,7 +332,7 @@ const ComissoesModule = {
           <div class="form-grid">
             <div class="form-field">
               <label>Vendedor</label>
-              <select id="comVendedorSelect">
+              <select id="comVendedorSelect" class="filter-input">
                 <option value="">Selecione um usuário</option>
                 ${vendedoresDisponiveis.map((u) => `
                   <option value="${u.id}">${this.esc(u.nome_completo || u.usuario || String(u.id))}</option>
@@ -432,11 +432,11 @@ const ComissoesModule = {
           <div style="display:grid;gap:12px;margin-bottom:16px">
             <div>
               <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase">Data do pagamento</label>
-              <input type="date" id="_comDataPgto" value="${hoje}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+              <input type="date" id="_comDataPgto" class="filter-input" style="width:100%" value="${hoje}" />
             </div>
             <div>
               <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase">Forma de pagamento</label>
-              <select id="_comFormaPgto" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box">
+              <select id="_comFormaPgto" class="filter-input" style="width:100%">
                 <option value="Dinheiro">Dinheiro</option>
                 <option value="Pix">Pix</option>
                 <option value="Transferência">Transferência</option>
