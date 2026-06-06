@@ -1,6 +1,6 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const FornecedoresModule = {
   state: {
@@ -409,7 +409,8 @@ const FornecedoresModule = {
   },
 
   async delete(id) {
-    if (!confirm('Deseja realmente excluir este fornecedor?')) return;
+    const ok = await confirmarAcao('Excluir este fornecedor? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
+    if (!ok) return;
 
     try {
       this.setFeedback('Excluindo fornecedor...', 'info');

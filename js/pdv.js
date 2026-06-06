@@ -1736,8 +1736,11 @@ const PDVModule = {
     }
 
     try {
-      await this.postVenda(payload);
-      const message = 'Venda finalizada com sucesso.';
+      const result = await this.postVenda(payload);
+      const vendaId = result?.id || result?.venda_id || null;
+      const message = vendaId
+        ? `Venda #${vendaId} finalizada com sucesso!`
+        : 'Venda finalizada com sucesso.';
       this.setFeedback(message, 'success');
       showToast(message, 'success');
       this.resetVenda();

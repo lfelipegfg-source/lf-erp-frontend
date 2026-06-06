@@ -2357,6 +2357,46 @@ select {
   transform: translateX(18px);
 }
 
+/* ── Botões de período rápido do dashboard ───────────────────────────────── */
+.dash-periodo-rapido {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.btn-periodo-rapido {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: transparent;
+  color: var(--text-muted, #64748b);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-periodo-rapido:hover {
+  background: var(--primary, #6366f1);
+  border-color: var(--primary, #6366f1);
+  color: #fff;
+}
+
+.btn-periodo-rapido.active {
+  background: var(--primary, #6366f1);
+  border-color: var(--primary, #6366f1);
+  color: #fff;
+}
+
+.dash-atualizacao {
+  font-size: 0.74rem;
+  color: var(--text-muted, #94a3b8);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* CARD DO MÓDULO MAIS PARECIDO COM O ANTERIOR */
 .module-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));

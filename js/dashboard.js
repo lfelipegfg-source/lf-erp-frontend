@@ -967,6 +967,12 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
 
     applyDashboardConfig(getDashboardConfig());
 
+    const tsEl = document.getElementById('dashUltimaAtualizacao');
+    if (tsEl) {
+      const agora = new Date();
+      tsEl.textContent = `Atualizado às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
     return {
       dashboard: payload,
       financeiro,

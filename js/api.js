@@ -111,10 +111,21 @@ async function parseResponse(response) {
 
   // 🔴 TRATAMENTO DE ERRO PADRONIZADO
   if (!response.ok) {
+    const statusMessages = {
+      400: 'Dados inválidos. Verifique os campos e tente novamente.',
+      401: 'Sessão expirada. Faça login novamente.',
+      403: 'Sem permissão para esta ação.',
+      404: 'Registro não encontrado.',
+      429: 'Muitas tentativas. Aguarde um momento.',
+      500: 'Erro interno do servidor. Tente novamente.',
+      502: 'Servidor temporariamente indisponível.',
+      503: 'Serviço em manutenção. Tente novamente em instantes.'
+    };
     const message =
       payload?.erro ||
       payload?.message ||
       (typeof payload === 'string' && payload) ||
+      statusMessages[response.status] ||
       `Erro HTTP ${response.status}`;
 
     const error = new Error(message);

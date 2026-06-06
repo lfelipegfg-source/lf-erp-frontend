@@ -403,6 +403,18 @@ function bindFilterEvents() {
   if (clearGlobalFiltersBtn) {
     clearGlobalFiltersBtn.addEventListener('click', clearGlobalFilters);
   }
+
+  // Botões de período rápido do dashboard
+  document.querySelectorAll('[data-quick-period]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const periodo = btn.dataset.quickPeriod;
+      AppState.filters.periodo = periodo;
+      applyDefaultPeriodDates();
+      if (filtroPeriodo) filtroPeriodo.value = periodo;
+      updateFiltersUI();
+      applyGlobalFilters();
+    });
+  });
 }
 
 // ── Notificações in-app ─────────────────────────────────────────────────────

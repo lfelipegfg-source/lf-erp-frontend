@@ -1,6 +1,6 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV } from './exportUtils.js';
 
 const ClientesModule = {
@@ -501,7 +501,8 @@ const ClientesModule = {
   },
 
   async delete(id) {
-    if (!confirm('Deseja realmente excluir este cliente?')) return;
+    const ok = await confirmarAcao('Excluir este cliente? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
+    if (!ok) return;
 
     try {
       this.setFeedback('Excluindo cliente...', 'info');
