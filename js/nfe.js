@@ -555,8 +555,8 @@ const NfeModule = {
           <textarea id="_nfeJustInput" rows="3" placeholder="Motivo do cancelamento..."
             style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;resize:vertical;margin-bottom:14px"></textarea>
           <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button id="_nfeCancelarAbort" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Voltar</button>
-            <button id="_nfeCancelarConfirm" style="padding:8px 16px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirmar cancelamento</button>
+            <button id="_nfeCancelarAbort" class="btn-cancel">Voltar</button>
+            <button id="_nfeCancelarConfirm" class="btn-confirm btn-confirm--danger">Confirmar cancelamento</button>
           </div>
         </div>
       `;

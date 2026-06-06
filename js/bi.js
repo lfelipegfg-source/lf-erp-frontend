@@ -114,24 +114,24 @@ export async function initBiModule() {
   container.innerHTML = `
     <div class="bi-wrap">
       <div class="bi-toolbar">
-        <label style="font-size:13px;font-weight:500">Período:</label>
-        <select id="biPeriodo">
+        <label class="bi-toolbar__label">Período:</label>
+        <select id="biPeriodo" class="filter-input">
           <option value="mes_atual">Mês atual</option>
           <option value="30d">Últimos 30 dias</option>
           <option value="90d">Últimos 90 dias</option>
           <option value="custom">Personalizado</option>
         </select>
-        <span id="biCustomDates" style="display:none;gap:8px;align-items:center;display:none">
-          <input type="date" id="biInicio">
-          <span style="font-size:13px">até</span>
-          <input type="date" id="biFim">
+        <span id="biCustomDates" style="display:none;gap:8px;align-items:center">
+          <input type="date" id="biInicio" class="filter-input">
+          <span class="bi-toolbar__label">até</span>
+          <input type="date" id="biFim" class="filter-input">
         </span>
-        <select id="biMeses" title="Meses de tendência">
+        <select id="biMeses" class="filter-input" title="Meses de tendência">
           <option value="6">6 meses</option>
           <option value="12" selected>12 meses</option>
           <option value="24">24 meses</option>
         </select>
-        <button id="biAtualizar"><i class="fa-solid fa-rotate-right"></i> Atualizar</button>
+        <button id="biAtualizar" class="btn btn-primary btn-sm"><i class="fa-solid fa-rotate-right"></i> Atualizar</button>
       </div>
       <div class="bi-card bi-ai-card">
         <div class="bi-ai-header">

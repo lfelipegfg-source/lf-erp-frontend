@@ -195,8 +195,8 @@ const ConfigModule = {
           <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">Esta ação <strong>apagará permanentemente</strong> todos os dados operacionais da empresa. Digite <strong>RESETAR</strong> para confirmar.</p>
           <input id="_resetConfirmInput" placeholder="Digite RESETAR" style="width:100%;padding:9px 12px;border:1px solid var(--danger);border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:16px" />
           <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button id="_resetCancelarBtn" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
-            <button id="_resetConfirmarBtn" style="padding:8px 16px;border-radius:8px;border:none;background:var(--danger);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Resetar dados</button>
+            <button id="_resetCancelarBtn" class="btn-cancel">Cancelar</button>
+            <button id="_resetConfirmarBtn" class="btn-confirm btn-confirm--danger">Resetar dados</button>
           </div>
         </div>`;
       document.body.appendChild(overlay);

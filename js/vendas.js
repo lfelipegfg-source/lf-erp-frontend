@@ -2192,7 +2192,7 @@ const VendasModule = {
           </div>
           <div style="padding:14px 24px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center">
             <label style="font-size:.88rem;font-weight:600">Período:</label>
-            <input type="month" id="metasPeriodoInput" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:.9rem" />
+            <input type="month" id="metasPeriodoInput" class="filter-input" />
             <button class="btn btn-light btn-sm" id="metasCarregarBtn">
               <i class="fa-solid fa-search"></i> Carregar
             </button>

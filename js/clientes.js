@@ -592,8 +592,8 @@ const ClientesModule = {
           O cliente acessa em: <strong>/portal.html</strong> com seu CPF/CNPJ + esta senha.
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end">
-          <button id="_portalCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
-          <button id="_portalSalvar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar senha</button>
+          <button id="_portalCancelar" class="btn-cancel">Cancelar</button>
+          <button id="_portalSalvar" class="btn-confirm">Salvar senha</button>
         </div>
         <div id="_portalFeedback" style="margin-top:10px;font-size:13px;display:none"></div>
       </div>

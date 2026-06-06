@@ -222,7 +222,7 @@ const ComissoesModule = {
             </button>
           `).join('')}
         </div>
-        <select id="comFiltroVendedor" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+        <select id="comFiltroVendedor" class="filter-input">
           <option value="">Todos os vendedores</option>
           ${vendedores.map(([id, nome]) => `<option value="${id}" ${String(this.state.filtroUsuario) === String(id) ? 'selected' : ''}>${this.esc(nome || String(id))}</option>`).join('')}
         </select>
@@ -445,8 +445,8 @@ const ComissoesModule = {
             </div>
           </div>
           <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button id="_comCancelarPgto" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
-            <button id="_comConfirmarPgto" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Confirmar pagamento</button>
+            <button id="_comCancelarPgto" class="btn-cancel">Cancelar</button>
+            <button id="_comConfirmarPgto" class="btn-confirm">Confirmar pagamento</button>
           </div>
         </div>
       `;

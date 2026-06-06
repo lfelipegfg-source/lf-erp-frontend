@@ -4208,7 +4208,45 @@ select {
 /* ── Módulos C3-C5 — CSS migrado de injectStyles() ─────────────────────── */
 
 /* Compartilhado */
-.btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+.btn-sm { padding: 8px 14px; font-size: 13px; height: auto; min-height: unset; }
+
+/* Label padrão de toolbar / filtro */
+.bi-toolbar__label,
+.toolbar-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Botão secundário compacto para modais e confirmações inline */
+.btn-cancel {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background var(--transition);
+}
+.btn-cancel:hover { background: var(--surface-2); }
+
+.btn-confirm {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.btn-confirm:hover { opacity: .88; }
+.btn-confirm--danger { background: var(--danger); }
+.btn-confirm--success { background: var(--success); }
 .btn-icon.danger:hover { color: var(--danger); }
 
 /* ── PDV ────────────────────────────────────────────────────────────────── */

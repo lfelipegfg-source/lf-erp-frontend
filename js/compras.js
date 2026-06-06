@@ -262,7 +262,7 @@ const ComprasModule = {
           <form id="compraForm" class="form-grid">
             <div class="form-field">
               <label for="compraFornecedor">Fornecedor</label>
-              <select id="compraFornecedor" required>
+              <select id="compraFornecedor" class="filter-input" required>
                 <option value="">Selecione...</option>
                 ${this.state.fornecedores
                   .map(
@@ -278,12 +278,12 @@ const ComprasModule = {
 
             <div class="form-field">
               <label for="compraData">Data da compra</label>
-              <input type="date" id="compraData" value="${getTodayDate()}" required />
+              <input type="date" id="compraData" class="filter-input" value="${getTodayDate()}" required />
             </div>
 
             <div class="form-field">
               <label for="compraFormaPagamento">Forma de pagamento</label>
-              <select id="compraFormaPagamento" required>
+              <select id="compraFormaPagamento" class="filter-input" required>
                 <option value="Dinheiro">Dinheiro</option>
                 <option value="Pix">Pix</option>
                 <option value="Cartão de Débito">Cartão de Débito</option>
@@ -300,7 +300,7 @@ const ComprasModule = {
 
             <div class="form-field hidden" id="compraPrimeiroVencimentoField">
               <label for="compraPrimeiroVencimento">Primeiro vencimento</label>
-              <input type="date" id="compraPrimeiroVencimento" />
+              <input type="date" id="compraPrimeiroVencimento" class="filter-input" />
             </div>
 
             <div class="form-field form-field--span-2">
