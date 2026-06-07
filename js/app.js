@@ -420,6 +420,9 @@ function bindFilterEvents() {
 // ── Notificações in-app ─────────────────────────────────────────────────────
 
 let _notifCarregadas = false;
+let _sseEventSource = null;
+let _sseReconnectTimer = null;
+let _sseReconnectDelay = 3000;
 
 async function carregarNotificacoes() {
   try {
@@ -469,6 +472,93 @@ async function carregarNotificacoes() {
     });
   } catch {
     /* silencioso — notificações não podem impedir o carregamento */
+  }
+}
+
+function _aplicarDadosNotificacoes(dados) {
+  const lista = dados.notificacoes || [];
+
+  const badge = document.getElementById('notifBadge');
+  if (badge) {
+    if (lista.length > 0) {
+      badge.textContent = String(lista.length);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+
+  // Se o dropdown estiver aberto, atualiza a lista em tempo real
+  const dropdown = document.getElementById('notifDropdown');
+  const listaEl = document.getElementById('notifLista');
+  if (!dropdown?.classList.contains('hidden') && listaEl) {
+    if (!lista.length) {
+      listaEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.88rem">
+        <i class="fa-solid fa-check-circle" style="font-size:1.5rem;color:var(--success,#38a169);margin-bottom:8px;display:block"></i>
+        Tudo em ordem!
+      </div>`;
+      return;
+    }
+    listaEl.innerHTML = lista.map((n) => `
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:12px;align-items:flex-start"
+        class="notif-item" data-view="${n.link || ''}">
+        <div style="width:34px;height:34px;border-radius:10px;background:${n.cor}22;color:${n.cor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fa-solid ${n.icone}" style="font-size:.85rem"></i>
+        </div>
+        <div style="min-width:0">
+          <div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:2px">${n.titulo}</div>
+          <div style="font-size:.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.texto}</div>
+        </div>
+      </div>`).join('');
+    listaEl.querySelectorAll('.notif-item[data-view]').forEach((el) => {
+      el.addEventListener('click', () => {
+        dropdown?.classList.add('hidden');
+        const view = el.dataset.view;
+        if (view) setActiveView(view);
+      });
+    });
+  }
+}
+
+function conectarSSE() {
+  desconectarSSE();
+
+  const token   = api.getAuthToken();
+  const baseUrl = api.getApiBaseUrl().replace(/\/+$/, '');
+  if (!token || !baseUrl) return;
+
+  const url = `${baseUrl}/sse-notificacoes?token=${encodeURIComponent(token)}`;
+  const es = new EventSource(url);
+  _sseEventSource = es;
+  _sseReconnectDelay = 3000;
+
+  es.addEventListener('notificacoes', (e) => {
+    try {
+      const dados = JSON.parse(e.data);
+      _notifCarregadas = true;
+      _aplicarDadosNotificacoes(dados);
+    } catch { /* silencioso */ }
+  });
+
+  es.onerror = () => {
+    es.close();
+    _sseEventSource = null;
+    // Reconexão com backoff exponencial (máx 60s)
+    _sseReconnectTimer = setTimeout(() => {
+      _sseReconnectDelay = Math.min(_sseReconnectDelay * 2, 60000);
+      conectarSSE();
+    }, _sseReconnectDelay);
+  };
+}
+
+function desconectarSSE() {
+  if (_sseReconnectTimer) {
+    clearTimeout(_sseReconnectTimer);
+    _sseReconnectTimer = null;
+  }
+  if (_sseEventSource) {
+    _sseEventSource.close();
+    _sseEventSource = null;
   }
 }
 
@@ -1041,11 +1131,9 @@ function showMainScreen() {
   if (loginScreen) loginScreen.classList.add('hidden');
   if (mainScreen) mainScreen.classList.remove('hidden');
 
-  // Carrega notificações 2s após a tela aparecer (não bloqueia)
-  setTimeout(() => {
-    _notifCarregadas = false;
-    carregarNotificacoes();
-  }, 2000);
+  // Conecta SSE para notificações em tempo real (sem polling)
+  _notifCarregadas = false;
+  conectarSSE();
 }
 
 function showLoginScreen() {
@@ -1066,6 +1154,7 @@ function handleLogout(showMessage = true) {
 
   localStorage.removeItem(STORAGE_KEYS.currentView);
 
+  desconectarSSE();
   authLogout();
   showLoginScreen();
   clearLoginInputs();
