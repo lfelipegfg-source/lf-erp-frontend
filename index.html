@@ -460,6 +460,11 @@
             <div class="nav-divider"></div>
 
             <!-- Rodape -->
+            <button id="lixeiraNavBtn" class="nav-item hidden" data-view="lixeira" title="Lixeira">
+              <span class="nav-item__icon"><i class="fa-solid fa-trash-can-arrow-up"></i></span>
+              <span class="nav-item__label">Lixeira</span>
+            </button>
+
             <button class="nav-item" data-view="configuracoes" title="Configurações">
               <span class="nav-item__icon"><i class="fa-solid fa-gear"></i></span>
               <span class="nav-item__label">Configurações</span>
@@ -1379,6 +1384,19 @@
             </section>
 
             <!-- CONFIGURAÇÕES -->
+            <!-- LIXEIRA -->
+            <section class="view-section" data-view="lixeira">
+              <div class="section-header">
+                <div>
+                  <h2>Lixeira</h2>
+                  <p>Recupere registros excluídos recentemente</p>
+                </div>
+              </div>
+              <div id="lixeiraContainer" class="module-placeholder">
+                Carregando lixeira...
+              </div>
+            </section>
+
             <section class="view-section" data-view="configuracoes">
               <div class="section-header">
                 <div>

@@ -10,6 +10,7 @@ import { initContasPagarModule } from './contasPagar.js';
 import { initFluxoCaixaModule } from './fluxoCaixa.js';
 import { initLancamentosModule } from './lancamentosFinanceiros.js';
 import { initAuditoriaFinanceiraModule } from './auditoriaFinanceira.js';
+import { initLixeiraModule } from './lixeira.js';
 import { initRelatoriosFinanceirosModule } from './relatoriosFinanceiros.js';
 import { initFornecedoresModule } from './fornecedores.js';
 import { initComprasModule } from './compras.js';
@@ -799,6 +800,8 @@ async function loadCurrentView(view) {
     await loadConciliacaoReal();
   } else if (view === 'auditoria-financeira') {
     await loadAuditoriaFinanceiraReal();
+  } else if (view === 'lixeira') {
+    await loadLixeiraReal();
   } else if (view === 'relatorios') {
     await loadRelatoriosFinanceirosReal();
   } else if (view === 'fornecedores') {
@@ -1089,6 +1092,14 @@ function renderAuthenticatedUser() {
   const adminLink = document.getElementById('adminNavLink');
   if (adminLink && AppState.user?.is_saas_owner) {
     adminLink.style.display = 'block';
+  }
+
+  const lixeiraBtn = document.getElementById('lixeiraNavBtn');
+  if (lixeiraBtn) {
+    const tipo = AppState.user?.tipo;
+    if (tipo === 'admin' || tipo === 'gerente' || AppState.user?.is_saas_owner) {
+      lixeiraBtn.classList.remove('hidden');
+    }
   }
 }
 
@@ -1425,6 +1436,19 @@ async function loadConciliacaoReal() {
       'Conciliação Bancária',
       'Não foi possível carregar o módulo de conciliação.'
     );
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
+async function loadLixeiraReal() {
+  showGlobalLoader('Carregando lixeira...');
+  try {
+    await initLixeiraModule();
+  } catch (error) {
+    console.error('Erro ao carregar lixeira:', error);
+    showToast('Erro ao carregar lixeira', 'error');
+    renderModuleError('lixeiraContainer', 'Lixeira', 'Não foi possível carregar a lixeira.');
   } finally {
     hideGlobalLoader();
   }
@@ -1770,6 +1794,7 @@ function renderViewFeedback(view) {
     lancamentos: 'lancamentosContainer',
     conciliacao: 'conciliacaoContainer',
     'auditoria-financeira': 'auditoriaFinanceiraContainer',
+    lixeira: 'lixeiraContainer',
     pdv: 'pdvContainer',
     usuarios: 'usuariosContainer',
     estoque: 'estoqueContainer',
