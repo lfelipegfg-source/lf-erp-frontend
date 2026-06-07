@@ -217,6 +217,18 @@ const UsuariosModule = {
               </select>
             </div>
 
+            ${this.state.editingId ? `
+            <div class="form-field form-field--span-2">
+              <details id="permissoesSection">
+                <summary style="cursor:pointer;font-weight:600;font-size:.88rem;color:var(--text-muted);padding:4px 0;user-select:none">
+                  <i class="fa-solid fa-shield-halved" style="margin-right:6px"></i>Permissões avançadas
+                </summary>
+                <div id="permissoesGrid" style="margin-top:12px">
+                  <div style="font-size:.8rem;color:var(--text-muted);padding:8px 0">Carregando…</div>
+                </div>
+              </details>
+            </div>` : ''}
+
             <div class="modal-card__footer">
               <button type="button" class="btn btn-light" id="cancelUsuarioFooter">
                 Cancelar
@@ -383,6 +395,62 @@ const UsuariosModule = {
     if (this.el.usuario) this.el.usuario.value = usuario.usuario || '';
     if (this.el.senha) this.el.senha.value = '';
     if (this.el.tipo) this.el.tipo.value = usuario.tipo || 'funcionario';
+
+    this.carregarPermissoes(Number(id));
+  },
+
+  async carregarPermissoes(usuarioId) {
+    const grid = document.getElementById('permissoesGrid');
+    if (!grid) return;
+    try {
+      const data = await api.request(`/usuarios/${usuarioId}/permissoes`, { method: 'GET' });
+      this.renderPermissoesGrid(grid, data.permissoes, data.tipo);
+    } catch {
+      grid.innerHTML = '<div style="font-size:.8rem;color:var(--text-muted)">Não foi possível carregar permissões.</div>';
+    }
+  },
+
+  renderPermissoesGrid(container, permissoes, tipo) {
+    const LABELS = {
+      produtos: 'Produtos', clientes: 'Clientes', fornecedores: 'Fornecedores',
+      compras: 'Compras', vendas: 'Vendas', estoque: 'Estoque',
+      financeiro: 'Financeiro', relatorios: 'Relatórios',
+      dre: 'DRE', lucratividade: 'Lucratividade',
+      usuarios: 'Usuários', configuracoes: 'Configurações'
+    };
+    const ACOES = ['ver', 'criar', 'editar', 'deletar'];
+
+    const rows = Object.entries(permissoes).map(([modulo, p]) => {
+      const label = LABELS[modulo] || modulo;
+      const checks = ACOES.map((acao) => {
+        const val = p[`pode_${acao}`] ? 'checked' : '';
+        return `<td style="text-align:center">
+          <input type="checkbox" ${val}
+            data-perm-modulo="${modulo}" data-perm-acao="${acao}"
+            style="width:15px;height:15px;cursor:pointer">
+        </td>`;
+      }).join('');
+      return `<tr>
+        <td style="font-size:.82rem;padding:4px 8px 4px 0;white-space:nowrap">${label}</td>
+        ${checks}
+      </tr>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:6px">
+        Perfil base: <strong>${tipo}</strong> — marque para sobrescrever individualmente
+      </div>
+      <div style="overflow-x:auto">
+        <table style="border-collapse:collapse;width:100%">
+          <thead>
+            <tr>
+              <th style="text-align:left;font-size:.75rem;padding:2px 8px 6px 0;color:var(--text-muted);font-weight:600">Módulo</th>
+              ${ACOES.map((a) => `<th style="font-size:.75rem;text-align:center;padding:2px 4px 6px;color:var(--text-muted);font-weight:600">${a.charAt(0).toUpperCase()+a.slice(1)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
   },
 
   async save() {
@@ -426,6 +494,7 @@ const UsuariosModule = {
 
       if (this.state.editingId) {
         await fetchAPI(`/usuarios/${this.state.editingId}`, 'PUT', payload);
+        await this.salvarPermissoes(this.state.editingId);
       } else {
         await fetchAPI(`/usuarios`, 'POST', payload);
       }
@@ -436,6 +505,28 @@ const UsuariosModule = {
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
       this.setFeedback(error.message || 'Erro ao salvar usuário.', 'error');
+    }
+  },
+
+  async salvarPermissoes(usuarioId) {
+    const checks = document.querySelectorAll('[data-perm-modulo]');
+    if (!checks.length) return;
+
+    const permissoes = {};
+    checks.forEach((el) => {
+      const m = el.dataset.permModulo;
+      const a = el.dataset.permAcao;
+      if (!permissoes[m]) permissoes[m] = {};
+      permissoes[m][`pode_${a}`] = el.checked;
+    });
+
+    try {
+      await api.request(`/usuarios/${usuarioId}/permissoes`, {
+        method: 'PUT',
+        body: JSON.stringify({ permissoes })
+      });
+    } catch (err) {
+      console.warn('[permissoes] Erro ao salvar:', err.message);
     }
   },
 
