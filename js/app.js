@@ -9,6 +9,7 @@ import { initContasReceberModule } from './contasReceber.js';
 import { initContasPagarModule } from './contasPagar.js';
 import { initFluxoCaixaModule } from './fluxoCaixa.js';
 import { initLancamentosModule } from './lancamentosFinanceiros.js';
+import { initAuditoriaFinanceiraModule } from './auditoriaFinanceira.js';
 import { initRelatoriosFinanceirosModule } from './relatoriosFinanceiros.js';
 import { initFornecedoresModule } from './fornecedores.js';
 import { initComprasModule } from './compras.js';
@@ -796,6 +797,8 @@ async function loadCurrentView(view) {
     await loadLancamentosReal();
   } else if (view === 'conciliacao') {
     await loadConciliacaoReal();
+  } else if (view === 'auditoria-financeira') {
+    await loadAuditoriaFinanceiraReal();
   } else if (view === 'relatorios') {
     await loadRelatoriosFinanceirosReal();
   } else if (view === 'fornecedores') {
@@ -874,7 +877,7 @@ function getParentViewFromChild(view) {
   const groups = {
     cadastros:     ['produtos', 'clientes', 'fornecedores', 'usuarios'],
     movimentacoes: ['vendas', 'compras', 'estoque', 'devolucoes', 'caixa'],
-    financeiro:    ['contas-receber', 'contas-pagar', 'fluxo-caixa', 'lancamentos', 'conciliacao'],
+    financeiro:    ['contas-receber', 'contas-pagar', 'fluxo-caixa', 'lancamentos', 'conciliacao', 'auditoria-financeira'],
     fiscal:        ['nfe', 'orcamentos', 'pedidos'],
     relatorios:    ['relatorios', 'bi', 'exportacao-contabil'],
     comercial:     ['crm', 'comissoes', 'fidelidade', 'alertas'],
@@ -1427,6 +1430,23 @@ async function loadConciliacaoReal() {
   }
 }
 
+async function loadAuditoriaFinanceiraReal() {
+  showGlobalLoader('Carregando auditoria financeira...');
+  try {
+    await initAuditoriaFinanceiraModule();
+  } catch (error) {
+    console.error('Erro ao carregar auditoria financeira:', error);
+    showToast('Erro ao carregar auditoria financeira', 'error');
+    renderModuleError(
+      'auditoriaFinanceiraContainer',
+      'Auditoria Financeira',
+      'Não foi possível carregar o histórico de auditoria.'
+    );
+  } finally {
+    hideGlobalLoader();
+  }
+}
+
 async function loadRelatoriosFinanceirosReal() {
   showGlobalLoader('Carregando relatórios financeiros...');
 
@@ -1749,6 +1769,7 @@ function renderViewFeedback(view) {
     'fluxo-caixa': 'fluxoCaixaContainer',
     lancamentos: 'lancamentosContainer',
     conciliacao: 'conciliacaoContainer',
+    'auditoria-financeira': 'auditoriaFinanceiraContainer',
     pdv: 'pdvContainer',
     usuarios: 'usuariosContainer',
     estoque: 'estoqueContainer',
