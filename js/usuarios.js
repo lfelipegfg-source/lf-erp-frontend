@@ -54,6 +54,9 @@ const UsuariosModule = {
       if (e.target.id === 'usuariosSearch') {
         this.search(e.target.value);
       }
+      if (e.target.id === 'usuarioSenha') {
+        this.atualizarMedidorSenha(e.target.value);
+      }
     });
 
     document.addEventListener('click', async (e) => {
@@ -199,6 +202,10 @@ const UsuariosModule = {
                 type="password"
                 placeholder="${this.state.editingId ? 'Deixe em branco para manter a senha atual' : 'Informe a senha inicial'}"
               />
+              <div id="senhaMedidor" class="senha-medidor hidden">
+                <div class="senha-barra"><div id="senhaBarra" class="senha-barra__fill"></div></div>
+                <span id="senhaLabel" class="senha-label"></span>
+              </div>
             </div>
 
             <div class="form-field">
@@ -317,6 +324,41 @@ const UsuariosModule = {
     }
   },
 
+  atualizarMedidorSenha(senha) {
+    const medidor = document.getElementById('senhaMedidor');
+    const barra   = document.getElementById('senhaBarra');
+    const label   = document.getElementById('senhaLabel');
+    if (!medidor || !barra || !label) return;
+
+    if (!senha) {
+      medidor.classList.add('hidden');
+      return;
+    }
+
+    medidor.classList.remove('hidden');
+
+    const tem8    = senha.length >= 8;
+    const temMaiu = /[A-Z]/.test(senha);
+    const temNum  = /[0-9]/.test(senha);
+    const temEsp  = /[^A-Za-z0-9]/.test(senha);
+    const pontos  = [tem8, temMaiu, temNum, temEsp].filter(Boolean).length;
+
+    barra.className = 'senha-barra__fill';
+    if (pontos <= 1) {
+      barra.classList.add('senha-barra__fill--fraco');
+      label.textContent = 'Fraca';
+      label.style.color = 'var(--danger, #e53e3e)';
+    } else if (pontos === 2) {
+      barra.classList.add('senha-barra__fill--medio');
+      label.textContent = 'Média';
+      label.style.color = '#d69e2e';
+    } else {
+      barra.classList.add('senha-barra__fill--forte');
+      label.textContent = 'Forte';
+      label.style.color = 'var(--success, #38a169)';
+    }
+  },
+
   closeModal() {
     this.cache();
 
@@ -366,6 +408,14 @@ const UsuariosModule = {
     if (!this.state.editingId && !payload.senha) {
       this.setFeedback('Informe a senha para o novo usuário.', 'error');
       return;
+    }
+
+    if (payload.senha) {
+      const s = payload.senha;
+      if (s.length < 8 || !/[A-Z]/.test(s) || !/[0-9]/.test(s)) {
+        this.setFeedback('Senha fraca: use 8+ caracteres, 1 maiúscula e 1 número.', 'error');
+        return;
+      }
     }
 
     try {
