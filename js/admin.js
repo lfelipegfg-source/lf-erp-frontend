@@ -356,16 +356,28 @@
 
   window.exportarEmpresa = async function (id, nome) {
     try {
-      showToast('Exportando dados...');
-      const data = await api(`/admin/empresas/${id}/exportar`);
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      showToast('Gerando backup...');
+      const token   = api.getAuthToken();
+      const baseUrl = api.getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/admin/empresas/${id}/exportar`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.erro || `Erro ${res.status}`);
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get('content-disposition') || '';
+      const match = cd.match(/filename="(.+?)"/);
+      const filename = match ? match[1] : `lferp-backup-${nome.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.json`;
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `lferp-export-${nome.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
-      showToast('Exportado com sucesso!', 'success');
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+      showToast('Backup exportado com sucesso!', 'success');
     } catch (err) {
       showToast('Erro ao exportar: ' + err.message, 'error');
     }

@@ -84,7 +84,7 @@ const ConfigModule = {
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...'; }
 
       const token = api.getAuthToken();
-      const baseUrl = api.config?.BASE_URL || 'https://lf-erp-backend.onrender.com';
+      const baseUrl = api.getApiBaseUrl();
       const url = `${baseUrl}/empresa/exportar-dados`;
 
       const res = await fetch(url, {
