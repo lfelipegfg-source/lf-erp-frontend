@@ -170,8 +170,10 @@ const ProdutosModule = {
       }
       if (action === 'produtosRefreshBtn')     { await this.load(); return; }
       if (action === 'produtosNewBtn')         { this.openCreateModal(); return; }
-      if (action === 'produtosLoteBtn')        { this.imprimirLote(); return; }
-      if (action === 'produtosMarketplaceBtn') { await this.abrirMarketplace(); return; }
+      if (action === 'produtosLoteBtn')             { this.imprimirLote(); return; }
+      if (action === 'produtosMarketplaceBtn')       { await this.abrirMarketplace(); return; }
+      if (action === 'produtosTodasEtiquetasBtn')    { this.imprimirTodas(); return; }
+      if (action === 'produtosHojeEtiquetasBtn')     { await this.imprimirHoje(); return; }
 
       // ── modal básico
       if (action === 'produtoCancelBtn' || action === 'produtoModalCloseBtn') {
@@ -338,6 +340,12 @@ const ProdutosModule = {
             <button type="button" class="btn btn-light" id="produtosLoteBtn" style="display:none">
               <i class="fa-solid fa-tags"></i>
               Etiquetas <span id="produtosLoteBadge" class="badge badge--primary" style="margin-left:4px;font-size:.75rem">0</span>
+            </button>
+            <button type="button" class="btn btn-light" id="produtosTodasEtiquetasBtn" title="Gera etiquetas de todos os produtos carregados em folhas A4">
+              <i class="fa-solid fa-print"></i> Todas as Etiquetas
+            </button>
+            <button type="button" class="btn btn-light" id="produtosHojeEtiquetasBtn" title="Gera etiquetas dos produtos registrados hoje (cadastros, compras ou movimentações)">
+              <i class="fa-solid fa-calendar-day"></i> Etiquetas de Hoje
             </button>
             <button type="button" class="btn btn-light" id="produtosExportBtn"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
             <button type="button" class="btn btn-light" id="produtosRefreshBtn"><i class="fa-solid fa-rotate"></i> Atualizar</button>
@@ -1280,6 +1288,58 @@ const ProdutosModule = {
       localStorage.setItem('lf_erp_etiquetas', JSON.stringify(dados));
       window.open('./etiquetas.html', '_blank');
     };
+  },
+
+  imprimirTodas() {
+    const lista = this.state.filteredItems.length
+      ? this.state.filteredItems
+      : this.state.items;
+
+    if (!lista.length) {
+      showToast('Nenhum produto carregado para imprimir', 'warning');
+      return;
+    }
+
+    const dados = lista.map((item) => ({
+      nome:          item.nome || '',
+      preco:         Number(item.preco || 0),
+      codigo_barras: item.codigo_barras || '',
+      categoria:     item.categoria || '',
+      empresa_nome:  this.state.empresa || 'LF ERP',
+      variacao:      '',
+      quantidade:    1
+    }));
+
+    localStorage.setItem('lf_erp_etiquetas', JSON.stringify(dados));
+    window.open('./etiquetas.html', '_blank');
+  },
+
+  async imprimirHoje() {
+    try {
+      showToast('Buscando produtos de hoje…', 'info');
+      const resp = await api.request(`/produtos/etiquetas-hoje/${this.state.empresa}`);
+      const itens = (resp && resp.dados) ? resp.dados : [];
+
+      if (!itens.length) {
+        showToast('Nenhum produto registrado hoje', 'warning');
+        return;
+      }
+
+      const dados = itens.map((item) => ({
+        nome:          item.nome || '',
+        preco:         Number(item.preco || 0),
+        codigo_barras: item.codigo_barras || '',
+        categoria:     item.categoria || '',
+        empresa_nome:  this.state.empresa || 'LF ERP',
+        variacao:      '',
+        quantidade:    1
+      }));
+
+      localStorage.setItem('lf_erp_etiquetas', JSON.stringify(dados));
+      window.open('./etiquetas.html', '_blank');
+    } catch (e) {
+      showToast(e.message || 'Erro ao buscar produtos de hoje', 'error');
+    }
   },
 
   abrirEtiqueta(produtoId) {
