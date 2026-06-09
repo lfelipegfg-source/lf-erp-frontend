@@ -44,8 +44,12 @@
 
   document.getElementById('adminUserName').textContent = auth.user?.usuario || 'Admin';
 
+  // ── Escape HTML ──────────────────────────────────────
+  function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
   // ── State ────────────────────────────────────────────
   let planosCache = [];
+  let _empresasNomeMap = new Map();
 
   // ── Toast ────────────────────────────────────────────
   function showToast(msg, type = '') {
@@ -135,8 +139,8 @@
               <tbody>
                 ${(d.ultimas_empresas || []).map(e => `
                   <tr style="border-top:1px solid var(--border)">
-                    <td style="padding:10px 14px;font-weight:600">${e.nome}</td>
-                    <td style="padding:10px 14px;color:var(--text-muted)">${e.plano_nome || '—'}</td>
+                    <td style="padding:10px 14px;font-weight:600">${esc(e.nome)}</td>
+                    <td style="padding:10px 14px;color:var(--text-muted)">${esc(e.plano_nome) || '—'}</td>
                     <td style="padding:10px 14px">${badgeEmpresa(e)}</td>
                     <td style="padding:10px 14px;font-size:12px;color:var(--text-muted)">${formatDate(e.criado_em)}</td>
                   </tr>`).join('')}
@@ -145,7 +149,7 @@
           </div>
         </div>`;
     } catch (e) {
-      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${esc(e.message)}</div>`;
     }
   }
 
@@ -209,6 +213,8 @@
   }
 
   function renderEmpresas(empresas) {
+    _empresasNomeMap = new Map(empresas.map(e => [e.id, e.nome]));
+
     const tbody = document.getElementById('empresasBody');
     if (!empresas.length) {
       tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa fa-building"></i><p>Nenhuma empresa cadastrada</p></div></td></tr>`;
@@ -217,23 +223,23 @@
 
     tbody.innerHTML = empresas.map(e => `
       <tr>
-        <td><strong>${e.nome}</strong>${e.email ? `<br><small style="color:var(--text-muted)">${e.email}</small>` : ''}</td>
+        <td><strong>${esc(e.nome)}</strong>${e.email ? `<br><small style="color:var(--text-muted)">${esc(e.email)}</small>` : ''}</td>
         <td>${badgeEmpresa(e)}</td>
-        <td>${e.plano_nome || '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>${e.plano_nome ? esc(e.plano_nome) : '<span style="color:var(--text-muted)">—</span>'}</td>
         <td>${e.trial_fim ? formatDate(e.trial_fim) : '—'}</td>
-        <td style="text-align:center">${e.total_usuarios}</td>
-        <td style="text-align:center">${e.total_vendas}</td>
+        <td style="text-align:center">${Number(e.total_usuarios)}</td>
+        <td style="text-align:center">${Number(e.total_vendas)}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="verDetalheEmpresa(${e.id}, '${e.nome.replace(/'/g, "\\'")}')"><i class="fa fa-eye"></i></button>
-          <button class="btn btn-secondary btn-sm" onclick="editarEmpresa(${e.id})"><i class="fa fa-pencil"></i> Editar</button>
-          <button class="btn btn-secondary btn-sm" onclick="exportarEmpresa(${e.id}, '${e.nome.replace(/'/g, "\\'")}')"><i class="fa fa-download"></i></button>
+          <button class="btn btn-secondary btn-sm" onclick="verDetalheEmpresa(${Number(e.id)})"><i class="fa fa-eye"></i></button>
+          <button class="btn btn-secondary btn-sm" onclick="editarEmpresa(${Number(e.id)})"><i class="fa fa-pencil"></i> Editar</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportarEmpresa(${Number(e.id)})"><i class="fa fa-download"></i></button>
         </td>
       </tr>
     `).join('');
   }
 
-  window.verDetalheEmpresa = async function (id, nome) {
-    document.getElementById('modalDetalheTitulo').textContent = nome;
+  window.verDetalheEmpresa = async function (id) {
+    document.getElementById('modalDetalheTitulo').textContent = _empresasNomeMap.get(id) || `Empresa #${id}`;
     document.getElementById('modalDetalheConteudo').innerHTML =
       '<div style="text-align:center;padding:24px;color:var(--text-muted)"><i class="fa fa-spinner fa-spin"></i> Carregando...</div>';
     openModal('modalDetalheEmpresa');
@@ -245,19 +251,19 @@
       document.getElementById('modalDetalheConteudo').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
           <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Status</span><br>${badgeEmpresa(e)}</div>
-          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Plano</span><br>${e.plano_nome || '—'}</div>
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Plano</span><br>${esc(e.plano_nome) || '—'}</div>
           <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Trial até</span><br>${formatDate(e.trial_fim)}</div>
           <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Criada em</span><br>${formatDate(e.criado_em)}</div>
-          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Total vendas</span><br><strong>${d.resumo_vendas.total}</strong> (R$ ${Number(d.resumo_vendas.valor_total).toFixed(2)})</div>
+          <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Total vendas</span><br><strong>${Number(d.resumo_vendas.total)}</strong> (R$ ${Number(d.resumo_vendas.valor_total).toFixed(2)})</div>
           <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Usuários</span><br><strong>${d.usuarios.length}</strong></div>
         </div>
 
         <p style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">Usuários</p>
         <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px">
           ${d.usuarios.map(u => `<tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:6px 8px">${u.nome_completo || u.usuario}</td>
-            <td style="padding:6px 8px;color:var(--text-muted)">${u.usuario}</td>
-            <td style="padding:6px 8px"><span class="badge badge-${u.tipo === 'admin' ? 'bloqueado' : u.tipo === 'gerente' ? 'trial' : 'ativo'}">${u.tipo}</span></td>
+            <td style="padding:6px 8px">${esc(u.nome_completo || u.usuario)}</td>
+            <td style="padding:6px 8px;color:var(--text-muted)">${esc(u.usuario)}</td>
+            <td style="padding:6px 8px"><span class="badge badge-${u.tipo === 'admin' ? 'bloqueado' : u.tipo === 'gerente' ? 'trial' : 'ativo'}">${esc(u.tipo)}</span></td>
           </tr>`).join('')}
         </table>
 
@@ -265,15 +271,15 @@
         <table style="width:100%;border-collapse:collapse;font-size:12px">
           ${d.ultimos_acessos.map(l => `<tr style="border-bottom:1px solid var(--border)">
             <td style="padding:5px 8px;color:var(--text-muted)">${formatDateTime(l.criado_em)}</td>
-            <td style="padding:5px 8px">${l.usuario_nome || '—'}</td>
-            <td style="padding:5px 8px;color:var(--text-muted)">${l.acao}</td>
-            <td style="padding:5px 8px;color:var(--text-muted)">${l.ip || '—'}</td>
+            <td style="padding:5px 8px">${esc(l.usuario_nome) || '—'}</td>
+            <td style="padding:5px 8px;color:var(--text-muted)">${esc(l.acao)}</td>
+            <td style="padding:5px 8px;color:var(--text-muted)">${esc(l.ip) || '—'}</td>
           </tr>`).join('')}
         </table>
       `;
     } catch (err) {
       document.getElementById('modalDetalheConteudo').innerHTML =
-        `<p style="color:var(--danger)">Erro ao carregar: ${err.message}</p>`;
+        `<p style="color:var(--danger)">Erro ao carregar: ${esc(err.message)}</p>`;
     }
   };
 
@@ -354,11 +360,13 @@
     }
   };
 
-  window.exportarEmpresa = async function (id, nome) {
+  window.exportarEmpresa = async function (id) {
+    const nome = _empresasNomeMap.get(id) || `empresa-${id}`;
     try {
       showToast('Gerando backup...');
-      const token   = api.getAuthToken();
-      const baseUrl = api.getApiBaseUrl();
+      const a = getStoredAuth();
+      const token   = a?.authToken || a?.token || '';
+      const baseUrl = localStorage.getItem('lf_erp_api_url') || 'https://lf-erp-backend.onrender.com';
       const res = await fetch(`${baseUrl}/admin/empresas/${id}/exportar`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -531,11 +539,11 @@
     tbody.innerHTML = logs.map(l => `
       <tr>
         <td style="white-space:nowrap;font-size:12px">${formatDateTime(l.criado_em)}</td>
-        <td>${l.empresa || '<span style="color:var(--text-muted)">—</span>'}</td>
-        <td>${l.usuario_nome || '<span style="color:var(--text-muted)">—</span>'}</td>
-        <td><code style="font-size:12px">${l.modulo}</code></td>
-        <td>${acaoBadge(l.acao)}</td>
-        <td style="font-size:12px;color:var(--text-muted)">${l.ip || '—'}</td>
+        <td>${l.empresa ? esc(l.empresa) : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>${l.usuario_nome ? esc(l.usuario_nome) : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td><code style="font-size:12px">${esc(l.modulo)}</code></td>
+        <td>${acaoBadge(esc(l.acao))}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${esc(l.ip) || '—'}</td>
       </tr>
     `).join('');
   }
@@ -632,7 +640,7 @@
           </table>
         </div>`;
     } catch (e) {
-      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${esc(e.message)}</div>`;
     }
   };
 
@@ -734,7 +742,7 @@
           </div>
         </div>`;
     } catch (e) {
-      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${e.message}</div>`;
+      if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${esc(e.message)}</div>`;
     }
   }
 

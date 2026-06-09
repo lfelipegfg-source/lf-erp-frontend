@@ -2248,10 +2248,10 @@ const VendasModule = {
           <div style="border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
               <div>
-                <strong style="font-size:.95rem">${m.vendedor_nome || m.vendedor_usuario || 'Meta global da empresa'}</strong>
-                ${m.descricao ? `<div style="font-size:.8rem;color:var(--text-muted)">${m.descricao}</div>` : ''}
+                <strong style="font-size:.95rem">${escapeHtml(m.vendedor_nome || m.vendedor_usuario || 'Meta global da empresa')}</strong>
+                ${m.descricao ? `<div style="font-size:.8rem;color:var(--text-muted)">${escapeHtml(m.descricao)}</div>` : ''}
               </div>
-              <button class="btn-inline btn-inline--danger" onclick="VendasModule.excluirMeta(${m.id}, '${periodo}')">
+              <button class="btn-inline btn-inline--danger js-excluir-meta" data-meta-id="${Number(m.id)}" aria-label="Excluir meta">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
@@ -2267,8 +2267,13 @@ const VendasModule = {
           </div>`;
       }).join('');
 
+      corpo.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('.js-excluir-meta');
+        if (btn) VendasModule.excluirMeta(Number(btn.dataset.metaId), periodo);
+      }, { once: true });
+
     } catch (err) {
-      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${err.message || 'Erro ao carregar metas'}</div>`;
+      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message) || 'Erro ao carregar metas'}</div>`;
     }
   },
 

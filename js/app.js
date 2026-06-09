@@ -426,6 +426,8 @@ let _sseEventSource = null;
 let _sseReconnectTimer = null;
 let _sseReconnectDelay = 3000;
 
+function _escNotif(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 async function carregarNotificacoes() {
   try {
     const data = await api.request('/notificacoes', { method: 'GET' });
@@ -452,17 +454,21 @@ async function carregarNotificacoes() {
       return;
     }
 
-    listaEl.innerHTML = lista.map((n) => `
+    listaEl.innerHTML = lista.map((n) => {
+      const cor = _escNotif(n.cor || 'var(--primary)');
+      const icone = _escNotif(n.icone || 'fa-bell');
+      return `
       <div style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:12px;align-items:flex-start"
-        class="notif-item" data-view="${n.link || ''}">
-        <div style="width:34px;height:34px;border-radius:10px;background:${n.cor}22;color:${n.cor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <i class="fa-solid ${n.icone}" style="font-size:.85rem"></i>
+        class="notif-item" data-view="${_escNotif(n.link || '')}">
+        <div style="width:34px;height:34px;border-radius:10px;background:${cor}22;color:${cor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fa-solid ${icone}" style="font-size:.85rem"></i>
         </div>
         <div style="min-width:0">
-          <div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:2px">${n.titulo}</div>
-          <div style="font-size:.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.texto}</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:2px">${_escNotif(n.titulo)}</div>
+          <div style="font-size:.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escNotif(n.texto)}</div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     // Clique em item → navega para a view
     listaEl.querySelectorAll('.notif-item[data-view]').forEach((el) => {
@@ -501,17 +507,21 @@ function _aplicarDadosNotificacoes(dados) {
       </div>`;
       return;
     }
-    listaEl.innerHTML = lista.map((n) => `
+    listaEl.innerHTML = lista.map((n) => {
+      const cor = _escNotif(n.cor || 'var(--primary)');
+      const icone = _escNotif(n.icone || 'fa-bell');
+      return `
       <div style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:12px;align-items:flex-start"
-        class="notif-item" data-view="${n.link || ''}">
-        <div style="width:34px;height:34px;border-radius:10px;background:${n.cor}22;color:${n.cor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <i class="fa-solid ${n.icone}" style="font-size:.85rem"></i>
+        class="notif-item" data-view="${_escNotif(n.link || '')}">
+        <div style="width:34px;height:34px;border-radius:10px;background:${cor}22;color:${cor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="fa-solid ${icone}" style="font-size:.85rem"></i>
         </div>
         <div style="min-width:0">
-          <div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:2px">${n.titulo}</div>
-          <div style="font-size:.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.texto}</div>
+          <div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:2px">${_escNotif(n.titulo)}</div>
+          <div style="font-size:.8rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_escNotif(n.texto)}</div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     listaEl.querySelectorAll('.notif-item[data-view]').forEach((el) => {
       el.addEventListener('click', () => {
         dropdown?.classList.add('hidden');
