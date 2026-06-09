@@ -4911,6 +4911,20 @@ select {
 .exp-integracao-form { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; }
 .exp-integracao-section { margin-bottom:20px; }
 
+/* ── Responsividade mobile — C3-C5 ──────────────────────────────────────── */
+@media (max-width:768px) {
+  .crm-form-row,.wpp-form-row,.fid-form-row,.chk-form-row,.fil-form-row,.rast-form-row { grid-template-columns:1fr; }
+  .chk-toolbar { flex-wrap:wrap; gap:8px; }
+  .fil-grid { grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); }
+}
+@media (max-width:600px) {
+  .rast-table-wrap,.fid-table-wrap,.chk-table-wrap,.fil-table-wrap,.apipub-table-wrap { overflow-x:auto; }
+  .fid-alert,.apipub-ep-head,.wpp-template-head { flex-wrap:wrap; gap:8px; }
+  .fid-top-list { max-width:100%; }
+  .fil-bars { gap:8px; padding:12px; }
+  .fil-kpi,.fid-kpi,.chk-kpi,.rast-kpi { min-width:100px; }
+}
+
 /* ── Medidor de força de senha ───────────────────────────────────────────── */
 .senha-medidor { margin-top:6px; display:flex; align-items:center; gap:8px; }
 .senha-barra { flex:1; height:4px; background:var(--border); border-radius:4px; overflow:hidden; }
