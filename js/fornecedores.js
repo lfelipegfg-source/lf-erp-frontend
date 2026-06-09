@@ -250,8 +250,10 @@ const FornecedoresModule = {
       this.el.table.innerHTML = `
         <tr>
           <td colspan="5">
-            <div class="module-feedback module-feedback--info" style="margin: 12px;">
-              Nenhum fornecedor encontrado.
+            <div class="empty-state" style="padding:36px 24px">
+              <i class="fa-solid fa-truck"></i>
+              <strong>Nenhum fornecedor encontrado</strong>
+              <p>Tente ajustar a busca ou cadastre um novo fornecedor.</p>
             </div>
           </td>
         </tr>

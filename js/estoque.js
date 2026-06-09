@@ -216,8 +216,10 @@ const EstoqueModule = {
       this.el.table.innerHTML = `
         <tr>
           <td colspan="8">
-            <div class="module-feedback module-feedback--info" style="margin: 12px;">
-              Nenhum produto encontrado no estoque.
+            <div class="empty-state" style="padding:36px 24px">
+              <i class="fa-solid fa-warehouse"></i>
+              <strong>Nenhum produto encontrado</strong>
+              <p>Tente ajustar os filtros de busca ou status.</p>
             </div>
           </td>
         </tr>

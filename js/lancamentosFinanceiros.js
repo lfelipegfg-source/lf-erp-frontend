@@ -258,9 +258,10 @@ function filtrarItens() {
 
 function renderTabela(itens) {
   if (!itens.length) {
-    return `<div class="empty-state" style="padding:40px;text-align:center;color:var(--text-muted)">
-      <i class="fa-solid fa-file-invoice-dollar" style="font-size:2rem;margin-bottom:12px;opacity:.3"></i>
-      <p>Nenhum lançamento encontrado.</p>
+    return `<div class="empty-state" style="padding:40px">
+      <i class="fa-solid fa-file-invoice-dollar"></i>
+      <strong>Nenhum lançamento encontrado</strong>
+      <p>Tente ajustar os filtros de período ou tipo.</p>
     </div>`;
   }
 

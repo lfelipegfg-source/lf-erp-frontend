@@ -308,6 +308,7 @@ function renderLinhas() {
       <tr>
         <td colspan="7">
           <div class="empty-table-state">
+            <i class="fa-solid fa-file-invoice" style="font-size:2rem;opacity:.22;margin-bottom:4px"></i>
             <strong>Nenhuma conta encontrada</strong>
             <span>Use os filtros acima ou gere contas a pagar por compras parceladas.</span>
           </div>

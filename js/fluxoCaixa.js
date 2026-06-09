@@ -378,6 +378,7 @@ function renderMovimentos(movimentos) {
   if (!movimentos.length) {
     return `
       <div class="empty-table-state">
+        <i class="fa-solid fa-chart-line" style="font-size:2rem;opacity:.22;margin-bottom:4px"></i>
         <strong>Nenhum movimento encontrado</strong>
         <span>O fluxo mostra apenas valores recebidos ou pagos no período filtrado.</span>
       </div>

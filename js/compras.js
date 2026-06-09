@@ -396,6 +396,7 @@ const ComprasModule = {
         <tr>
           <td colspan="6">
             <div class="empty-table-state">
+              <i class="fa-solid fa-basket-shopping" style="font-size:2rem;opacity:.22;margin-bottom:4px"></i>
               <strong>Nenhuma compra encontrada</strong>
               <span>Cadastre uma nova compra para movimentar estoque e financeiro.</span>
             </div>
