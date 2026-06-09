@@ -1808,11 +1808,25 @@ const PDVModule = {
     try {
       const result = await this.postVenda(payload);
       const vendaId = result?.id || result?.venda_id || null;
-      const message = vendaId
-        ? `Venda #${vendaId} finalizada com sucesso!`
-        : 'Venda finalizada com sucesso.';
-      this.setFeedback(message, 'success');
-      showToast(message, 'success');
+
+      const pixEntries = this.state.pagamentos.filter(
+        (p) => (p.forma || '').toLowerCase() === 'pix'
+      );
+
+      if (pixEntries.length > 0) {
+        const valorPix = pixEntries.reduce((s, p) => s + Number(p.valor || 0), 0);
+        const msg = vendaId ? `Venda #${vendaId} registrada. Gerando QR Code PIX...` : 'Venda registrada. Gerando QR Code PIX...';
+        this.setFeedback(msg, 'info');
+        showToast(msg, 'info');
+        await this.abrirModalPix(vendaId, valorPix, this.state.clienteNome || '');
+      } else {
+        const message = vendaId
+          ? `Venda #${vendaId} finalizada com sucesso!`
+          : 'Venda finalizada com sucesso.';
+        this.setFeedback(message, 'success');
+        showToast(message, 'success');
+      }
+
       this.resetVenda();
       await this.load();
     } catch (error) {
@@ -1855,6 +1869,157 @@ const PDVModule = {
     this.renderCarrinho();
     this.renderResumo();
     this.setFeedback('', 'info');
+  },
+
+  async abrirModalPix(vendaId, valor, clienteNome) {
+    const empresa = this.state.empresa;
+
+    return new Promise((resolve) => {
+      let pollInterval = null;
+      let txid = null;
+      let segundosRestantes = 900; // 15 minutos
+      let timerInterval = null;
+
+      const fmtValor = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      const fmtTempo = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:3000;display:flex;align-items:center;justify-content:center;padding:16px';
+
+      overlay.innerHTML = `
+        <div id="_pixModal" style="background:var(--surface);border-radius:20px;padding:32px 28px;max-width:420px;width:100%;box-shadow:0 32px 64px rgba(0,0,0,.3);text-align:center;position:relative">
+          <button id="_pixFechar" style="position:absolute;top:14px;right:16px;background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted)" title="Fechar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <div id="_pixConteudo">
+            <div style="font-size:36px;color:#32b768;margin-bottom:8px"><i class="fa-brands fa-pix"></i></div>
+            <h3 style="margin:0 0 4px;font-size:18px;font-weight:800">PIX — ${fmtValor(valor)}</h3>
+            ${clienteNome ? `<p style="margin:0 0 16px;font-size:13px;color:var(--text-muted)">${clienteNome}</p>` : '<div style="margin-bottom:16px"></div>'}
+            <div id="_pixStatus" style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
+              <i class="fa-solid fa-spinner fa-spin"></i> Gerando QR Code...
+            </div>
+            <div id="_pixQrArea" style="display:none">
+              <div id="_pixQrImg" style="margin:0 auto 12px;width:200px;height:200px;border:2px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden"></div>
+              <div style="margin-bottom:12px">
+                <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:4px">PIX Copia e Cola</label>
+                <div style="display:flex;gap:6px">
+                  <input id="_pixCopiaCola" readonly style="flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-family:monospace;background:var(--surface-2);color:var(--text);min-width:0" />
+                  <button id="_pixCopiar" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px" title="Copiar código">
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="_pixTimer" style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
+                Expira em <strong id="_pixTempoRestante">15:00</strong>
+              </div>
+              <div id="_pixStatusPagamento" style="padding:10px;border-radius:10px;background:var(--surface-2);font-size:13px;font-weight:600;color:var(--text-muted)">
+                <i class="fa-solid fa-clock"></i> Aguardando pagamento...
+              </div>
+            </div>
+            <div id="_pixErroArea" style="display:none;color:#ef4444;font-size:13px;padding:12px;background:#fef2f2;border-radius:10px;margin-top:8px"></div>
+          </div>
+          <div id="_pixSucessoArea" style="display:none">
+            <div style="font-size:56px;color:#22c55e;margin-bottom:12px"><i class="fa-solid fa-circle-check"></i></div>
+            <h3 style="margin:0 0 6px;font-size:20px;font-weight:800;color:#22c55e">Pagamento Confirmado!</h3>
+            <p style="margin:0;font-size:14px;color:var(--text-muted)">PIX recebido com sucesso.<br>Obrigado!</p>
+          </div>
+        </div>`;
+
+      document.body.appendChild(overlay);
+
+      const fechar = () => {
+        clearInterval(pollInterval);
+        clearInterval(timerInterval);
+        if (overlay.parentNode) document.body.removeChild(overlay);
+        resolve();
+      };
+
+      overlay.querySelector('#_pixFechar').onclick = fechar;
+
+      const mostrarSucesso = () => {
+        clearInterval(pollInterval);
+        clearInterval(timerInterval);
+        overlay.querySelector('#_pixConteudo').style.display = 'none';
+        overlay.querySelector('#_pixSucessoArea').style.display = 'block';
+        showToast('PIX recebido! Pagamento confirmado.', 'success');
+        setTimeout(fechar, 2500);
+      };
+
+      const iniciarPoll = () => {
+        if (!txid) return;
+        pollInterval = setInterval(async () => {
+          try {
+            const st = await api.request(`/pagamentos/pix/status/${txid}`);
+            if (st?.status === 'CONCLUIDA') mostrarSucesso();
+          } catch { /* silencioso — continua tentando */ }
+        }, 4000);
+      };
+
+      const iniciarTimer = (expiracaoISO) => {
+        if (!expiracaoISO) return;
+        const expMs = new Date(expiracaoISO).getTime();
+        timerInterval = setInterval(() => {
+          segundosRestantes = Math.max(0, Math.round((expMs - Date.now()) / 1000));
+          const el = overlay.querySelector('#_pixTempoRestante');
+          if (el) el.textContent = fmtTempo(segundosRestantes);
+          if (segundosRestantes === 0) {
+            clearInterval(timerInterval);
+            const sp = overlay.querySelector('#_pixStatusPagamento');
+            if (sp) { sp.style.color = '#ef4444'; sp.innerHTML = '<i class="fa-solid fa-clock"></i> QR Code expirado. Gere um novo.'; }
+          }
+        }, 1000);
+      };
+
+      // Gera o QR Code
+      (async () => {
+        try {
+          const dados = await api.request('/pagamentos/pix/gerar', {
+            method: 'POST',
+            body: { empresa, valor: Number(valor), cliente_nome: clienteNome || '' }
+          });
+
+          txid = dados?.txid || null;
+
+          const qrArea = overlay.querySelector('#_pixQrArea');
+          const qrImg  = overlay.querySelector('#_pixQrImg');
+          const ccInput = overlay.querySelector('#_pixCopiaCola');
+          const st      = overlay.querySelector('#_pixStatus');
+
+          if (st) st.style.display = 'none';
+
+          if (dados?.qr_image) {
+            qrImg.innerHTML = `<img src="data:image/png;base64,${dados.qr_image}" style="width:100%;height:100%;object-fit:contain" alt="QR Code PIX" />`;
+          } else {
+            qrImg.innerHTML = `<div style="padding:16px;font-size:11px;color:var(--text-muted);line-height:1.5"><i class="fa-solid fa-qrcode" style="font-size:32px;display:block;margin-bottom:8px"></i>QR Code disponível<br>em produção</div>`;
+          }
+
+          if (ccInput && dados?.pix_copia_e_cola) ccInput.value = dados.pix_copia_e_cola;
+
+          qrArea.style.display = 'block';
+          iniciarTimer(dados?.expiracao);
+          iniciarPoll();
+
+          const btnCopiar = overlay.querySelector('#_pixCopiar');
+          if (btnCopiar) {
+            btnCopiar.onclick = async () => {
+              try {
+                await navigator.clipboard.writeText(dados.pix_copia_e_cola || '');
+                btnCopiar.innerHTML = '<i class="fa-solid fa-check"></i>';
+                setTimeout(() => { btnCopiar.innerHTML = '<i class="fa-solid fa-copy"></i>'; }, 1800);
+              } catch { /* fallback silencioso */ }
+            };
+          }
+        } catch (e) {
+          const errArea = overlay.querySelector('#_pixErroArea');
+          const st = overlay.querySelector('#_pixStatus');
+          if (st) st.style.display = 'none';
+          if (errArea) {
+            errArea.style.display = 'block';
+            errArea.textContent = `Erro ao gerar PIX: ${e.message || 'verifique as configurações de PIX nas Configurações do sistema.'}`;
+          }
+        }
+      })();
+    });
   },
 
   async salvarOrcamento() {
