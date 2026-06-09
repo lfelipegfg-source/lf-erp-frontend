@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV, numCSV } from './exportUtils.js';
 
 const ComissoesModule = {
@@ -11,23 +11,24 @@ const ComissoesModule = {
     usuarios: [],
     filtroStatus: '',
     filtroUsuario: '',
+    filtroPeriodo: 'mes_atual',
     carregando: false
   },
 
   init() {
     this.render();
     this.bindShellEvents();
-    this.load();
   },
 
   async load() {
     this.state.carregando = true;
     this.setFeedback('Carregando...', 'info');
+    const periodo = this._calcPeriodo();
     try {
       const [resumoRes, configsRes, comissoesRes, usuariosRes] = await Promise.allSettled([
-        api.getComissoesResumo(),
+        api.getComissoesResumo(periodo),
         api.getComissoesConfig(),
-        api.getComissoes(),
+        api.getComissoes(periodo),
         api.getUsuarios()
       ]);
 
@@ -46,6 +47,33 @@ const ComissoesModule = {
     } finally {
       this.state.carregando = false;
     }
+  },
+
+  _calcPeriodo() {
+    const tz     = { timeZone: 'America/Fortaleza' };
+    const fmtISO = (d) => new Intl.DateTimeFormat('en-CA', tz).format(d);
+    const hoje   = fmtISO(new Date());
+    const [ano, mes] = hoje.split('-').map(Number);
+    const p = this.state.filtroPeriodo;
+    if (p === 'todos') return {};
+    if (p === 'mes_atual') {
+      return { data_inicial: `${ano}-${String(mes).padStart(2, '0')}-01`, data_final: hoje };
+    }
+    if (p === 'mes_passado') {
+      const mesAnt = mes === 1 ? 12 : mes - 1;
+      const anoAnt = mes === 1 ? ano - 1 : ano;
+      const ultimo = fmtISO(new Date(anoAnt, mesAnt, 0));
+      return { data_inicial: `${anoAnt}-${String(mesAnt).padStart(2, '0')}-01`, data_final: ultimo };
+    }
+    if (p === 'trimestre') {
+      const d = new Date();
+      d.setMonth(d.getMonth() - 3);
+      return { data_inicial: fmtISO(d), data_final: hoje };
+    }
+    if (p === 'ano_atual') {
+      return { data_inicial: `${ano}-01-01`, data_final: hoje };
+    }
+    return {};
   },
 
   render() {
@@ -73,6 +101,15 @@ const ComissoesModule = {
             <button class="btn-inline" data-com-aba="detalhes">Detalhes</button>
             <button class="btn-inline" data-com-aba="config">Configuração</button>
           </div>
+          <select id="comFiltroPeriodo" class="filter-input">
+            ${[
+              ['mes_atual',   'Este mês'],
+              ['mes_passado', 'Mês passado'],
+              ['trimestre',   'Últimos 3 meses'],
+              ['ano_atual',   'Este ano'],
+              ['todos',       'Todos']
+            ].map(([v, l]) => `<option value="${v}"${this.state.filtroPeriodo === v ? ' selected' : ''}>${l}</option>`).join('')}
+          </select>
         </div>
 
         <div id="comConteudo"></div>
@@ -86,6 +123,10 @@ const ComissoesModule = {
 
     document.getElementById('comAtualizarBtn')?.addEventListener('click', () => this.load());
     document.getElementById('comExportarBtn')?.addEventListener('click', () => this.exportar());
+    document.getElementById('comFiltroPeriodo')?.addEventListener('change', (e) => {
+      this.state.filtroPeriodo = e.target.value;
+      this.load();
+    });
 
     c.addEventListener('click', async (e) => {
       const abaBtn = e.target.closest('[data-com-aba]');
@@ -406,11 +447,11 @@ const ComissoesModule = {
         await api.pagarComissao(id, dados);
         showToast('Comissão marcada como paga.', 'success');
       } else if (acao === 'cancelar') {
-        if (!confirm('Cancelar esta comissão?')) { if (btnEl) btnEl.disabled = false; return; }
+        if (!await confirmarAcao('Cancelar esta comissão?')) { if (btnEl) btnEl.disabled = false; return; }
         await api.cancelarComissao(id);
         showToast('Comissão cancelada.', 'info');
       } else if (acao === 'del-config') {
-        if (!confirm('Remover configuração de comissão deste vendedor?')) { if (btnEl) btnEl.disabled = false; return; }
+        if (!await confirmarAcao('Remover configuração de comissão deste vendedor?')) { if (btnEl) btnEl.disabled = false; return; }
         await api.deleteComissaoConfig(id);
         showToast('Configuração removida.', 'success');
       }
@@ -423,7 +464,7 @@ const ComissoesModule = {
 
   promptPagamento() {
     return new Promise((resolve) => {
-      const hoje = new Date().toISOString().slice(0, 10);
+      const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date());
       const overlay = document.createElement('div');
       overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
       overlay.innerHTML = `
@@ -515,7 +556,7 @@ const ComissoesModule = {
 
 export async function initComissoesModule() {
   ComissoesModule.init();
-  await ComissoesModule.load();
+  await ComissoesModule.load();  // init() não chama load() — responsabilidade aqui
 }
 
 export default ComissoesModule;
