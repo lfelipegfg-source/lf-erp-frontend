@@ -172,6 +172,9 @@ function renderKpis(payload, financeiro, filters = {}) {
     setTrend('kpiVendasTrend',      payload.vendas,   c.vendas);
     setTrend('kpiClientesTrend',    payload.clientes, c.clientes);
   }
+
+  renderKpiProgress(financeiro);
+  renderTicketMedio(payload, financeiro);
 }
 
 function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = null) {
@@ -570,6 +573,64 @@ function renderTabelaPrecos(data) {
   `;
 }
 
+// ─── Sparkline SVG ────────────────────────────────────────────────────────────
+
+function makeSvgSparkline(values, width = 72, height = 32) {
+  if (!values || values.length < 2) return '';
+  const nums = values.map(v => Number(v) || 0);
+  const min = Math.min(...nums);
+  const max = Math.max(...nums);
+  const range = max - min || 1;
+  const pad = 3;
+
+  const pts = nums.map((v, i) => {
+    const x = (i / (nums.length - 1)) * width;
+    const y = height - pad - ((v - min) / range) * (height - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  const isUp = nums[nums.length - 1] >= nums[0];
+  const color = isUp ? 'var(--success)' : 'var(--danger)';
+  const lastX = width;
+  const lastY = height - pad - ((nums[nums.length - 1] - min) / range) * (height - pad * 2);
+
+  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none">
+    <polyline points="${pts}" stroke="${color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="2.5" fill="${color}"/>
+  </svg>`;
+}
+
+function renderSparklineKpi(vendasPorDia = []) {
+  const el = document.getElementById('kpiFaturamentoSparkline');
+  if (!el || !vendasPorDia.length) return;
+  el.innerHTML = makeSvgSparkline(vendasPorDia.map(d => d.total));
+}
+
+function renderKpiProgress(financeiro) {
+  function setProgress(elId, pago, total) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (total <= 0) { el.innerHTML = ''; return; }
+    const pct = Math.min(100, (pago / total) * 100);
+    const cls = pct >= 80 ? 'success' : pct >= 40 ? 'warning' : 'danger';
+    el.innerHTML = `<div class="kpi-progress__fill kpi-progress__fill--${cls}" style="width:${pct.toFixed(1)}%" title="${pct.toFixed(0)}% liquidado"></div>`;
+  }
+
+  const crTotal = financeiro.contasReceberPago + financeiro.contasReceberPendente + financeiro.contasReceberAtrasado;
+  const cpTotal = financeiro.contasPagarPago + financeiro.contasPagarPendente + financeiro.contasPagarAtrasado;
+  setProgress('kpiReceberProgress', financeiro.contasReceberPago, crTotal);
+  setProgress('kpiPagarProgress', financeiro.contasPagarPago, cpTotal);
+}
+
+function renderTicketMedio(payload, financeiro) {
+  const el = document.getElementById('kpiTicketMedio');
+  if (!el) return;
+  if (payload.vendas <= 0) { el.innerHTML = ''; return; }
+  const faturamento = financeiro.fluxoEntradas || payload.faturamento;
+  const ticket = faturamento / payload.vendas;
+  el.innerHTML = `Ticket médio: <strong>${toCurrency(ticket)}</strong>`;
+}
+
 // ─── GRÁFICOS (Chart.js) ──────────────────────────────────────────────────────
 
 let _chartVendas = null;
@@ -723,13 +784,24 @@ function renderChartFormaPagamento(formasPagamento = []) {
   }
 }
 
+function _setChartSkeletons(visible) {
+  ['chartVendasSkeleton', 'chartFormaSkeleton'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden', !visible);
+  });
+}
+
 async function renderGraficos(params = {}) {
   destroyCharts();
+  _setChartSkeletons(true);
   try {
     const data = await api.getDashboardGrafico(params);
+    _setChartSkeletons(false);
     renderChartVendas(data?.vendas_por_dia || []);
     renderChartFormaPagamento(data?.forma_pagamento || []);
+    renderSparklineKpi(data?.vendas_por_dia || []);
   } catch (_) {
+    _setChartSkeletons(false);
     // falha silenciosa — gráficos são complementares, não críticos
   }
 }
@@ -770,13 +842,26 @@ function renderDashboardSkeleton() {
     if (el) el.innerHTML = '';
   });
 
+  // Limpar sparkline e ticket médio
+  const sparkEl = document.getElementById('kpiFaturamentoSparkline');
+  if (sparkEl) sparkEl.innerHTML = '';
+  const ticketEl = document.getElementById('kpiTicketMedio');
+  if (ticketEl) ticketEl.innerHTML = '<span class="skeleton skeleton-text" style="display:inline-block;width:70%"></span>';
+
+  // Progress bars — estado inicial de carregamento
+  ['kpiReceberProgress', 'kpiPagarProgress'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<div class="kpi-progress__fill kpi-progress__fill--warning" style="width:35%;transition:none"></div>';
+  });
+
   // Panels — mostrar rows de skeleton
   setHtml('dashboardResumo',       skeletonRows(6, [2, 1]));
   setHtml('dashboardTopProdutos',  skeletonRows(5, [3, 1]));
   setHtml('dashboardAlertas',      skeletonRows(4, [4]));
   setHtml('dashboardTabelaPrecos', skeletonRows(3, [2, 1]));
-  // Os containers de gráfico não recebem skeleton para preservar os <canvas>
-  // que renderGraficos() precisa encontrar após as chamadas de API.
+
+  // Chart containers — mostrar skeleton overlay
+  _setChartSkeletons(true);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -641,6 +641,7 @@
                     <button type="button" class="btn-periodo-rapido" data-quick-period="hoje">Hoje</button>
                     <button type="button" class="btn-periodo-rapido" data-quick-period="7dias">7 dias</button>
                     <button type="button" class="btn-periodo-rapido" data-quick-period="mesAtual">Mês</button>
+                    <button type="button" class="btn-periodo-rapido" data-quick-period="mesAnterior">Mês ant.</button>
                   </div>
                   <span class="dash-atualizacao" id="dashUltimaAtualizacao"></span>
                   <button class="btn btn-light" type="button" id="dashboardConfigBtn">
@@ -663,6 +664,7 @@
                     <span id="kpiFaturamentoTrend" class="kpi-trend"></span>
                     <small id="kpiFaturamentoMeta">Carregando...</small>
                   </div>
+                  <div id="kpiFaturamentoSparkline" class="kpi-sparkline"></div>
                 </article>
 
                 <article class="kpi-card" data-widget="kpi-vendas">
@@ -672,6 +674,7 @@
                     <strong id="kpiVendas">0</strong>
                     <span id="kpiVendasTrend" class="kpi-trend"></span>
                     <small id="kpiVendasInfo">Carregando...</small>
+                    <small id="kpiTicketMedio" class="kpi-ticket"></small>
                   </div>
                 </article>
 
@@ -681,6 +684,7 @@
                     <span>A Receber</span>
                     <strong id="kpiReceber">R$ 0,00</strong>
                     <small id="kpiReceberInfo">Carregando...</small>
+                    <div id="kpiReceberProgress" class="kpi-progress"><div class="kpi-progress__fill kpi-progress__fill--warning" style="width:40%"></div></div>
                   </div>
                 </article>
 
@@ -690,6 +694,7 @@
                     <span>A Pagar</span>
                     <strong id="kpiPagar">R$ 0,00</strong>
                     <small id="kpiPagarInfo">Carregando...</small>
+                    <div id="kpiPagarProgress" class="kpi-progress"><div class="kpi-progress__fill kpi-progress__fill--warning" style="width:40%"></div></div>
                   </div>
                 </article>
 
@@ -773,6 +778,7 @@
                     </div>
                   </div>
                   <div class="panel-card__body chart-container">
+                    <div class="chart-skeleton" id="chartVendasSkeleton"></div>
                     <canvas id="chartVendasDia"></canvas>
                   </div>
                 </article>
@@ -785,6 +791,7 @@
                     </div>
                   </div>
                   <div class="panel-card__body chart-container chart-container--donut">
+                    <div class="chart-skeleton" id="chartFormaSkeleton"></div>
                     <canvas id="chartFormaPagamento"></canvas>
                     <div id="chartFormaPagamentoLegenda" class="chart-legend"></div>
                   </div>
