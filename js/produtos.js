@@ -381,7 +381,11 @@ const ProdutosModule = {
             <tbody id="produtosTableBody"></tbody>
           </table>
         </div>
-        <div class="empty-state hidden" id="produtosEmptyState">Nenhum produto encontrado.</div>
+        <div class="empty-state hidden" id="produtosEmptyState">
+          <i class="fa-solid fa-box-open"></i>
+          <strong>Nenhum produto encontrado</strong>
+          <p>Tente ajustar os filtros ou cadastre um novo produto.</p>
+        </div>
       </section>
 
       <!-- MODAL PRODUTO -->

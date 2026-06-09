@@ -295,8 +295,10 @@ const ClientesModule = {
       this.el.table.innerHTML = `
         <tr>
           <td colspan="5">
-            <div class="module-feedback module-feedback--info" style="margin: 12px;">
-              Nenhum cliente encontrado.
+            <div class="empty-state" style="padding:36px 24px">
+              <i class="fa-solid fa-users"></i>
+              <strong>Nenhum cliente encontrado</strong>
+              <p>Tente ajustar a busca ou cadastre um novo cliente.</p>
             </div>
           </td>
         </tr>

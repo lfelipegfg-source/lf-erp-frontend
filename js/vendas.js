@@ -529,7 +529,9 @@ const VendasModule = {
         </div>
 
         <div class="empty-state hidden" id="vendasEmptyState">
-          Nenhuma venda encontrada.
+          <i class="fa-solid fa-cart-shopping"></i>
+          <strong>Nenhuma venda encontrada</strong>
+          <p>Tente ajustar os filtros ou registre uma nova venda pelo PDV.</p>
         </div>
       </section>
     `;
