@@ -35,7 +35,7 @@ import { initFidelidadeModule } from './fidelidade.js';
 import { initCheckoutLinksModule } from './checkoutLinks.js';
 import { initFiliaisModule } from './filiais.js';
 import { initBiModule } from './bi.js';
-import { login as authLogin, logout as authLogout, getAuth, validateSession } from './auth.js';
+import { login as authLogin, logout as authLogout, getAuth, validateSession, scheduleTokenRefresh } from './auth.js';
 
 const AppState = {
   isAuthenticated: false,
@@ -662,6 +662,7 @@ async function handleLoginSubmit(event) {
     applyAuthData(loginResult);
     renderAuthenticatedUser();
     showMainScreen();
+    scheduleTokenRefresh();
     await setActiveView('dashboard');
     setLoginMessage('', 'info');
     showToast(`Bem-vindo, ${AppState.user?.nome || 'usuário'}!`, 'success');
@@ -1043,6 +1044,7 @@ async function restoreAuthSession() {
     renderAuthenticatedUser();
     renderTrialBanner();
     showMainScreen();
+    scheduleTokenRefresh();
     await setActiveView(AppState.currentView || 'dashboard');
     showToast('Sessão restaurada com sucesso.', 'success');
   } catch (error) {

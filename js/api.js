@@ -236,6 +236,10 @@ async function validateSession() {
   });
 }
 
+async function refreshToken() {
+  return request('/auth/refresh', { method: 'POST' });
+}
+
 function ensureEmpresa() {
   const empresa = getEmpresaNome();
 
@@ -1284,6 +1288,7 @@ const api = {
   fetchAPI,
   login,
   validateSession,
+  refreshToken,
   getDashboard,
   getDashboardGrafico,
   getEmpresaStatus,
