@@ -662,6 +662,7 @@ function formatDia(isoDate) {
 function renderChartVendas(vendasPorDia = []) {
   const canvas = document.getElementById('chartVendasDia');
   if (!canvas || typeof Chart === 'undefined') return;
+  if (!vendasPorDia.length) return;
 
   const labels = vendasPorDia.map((r) => formatDia(r.data));
   const totais  = vendasPorDia.map((r) => r.total);
@@ -802,7 +803,11 @@ async function renderGraficos(params = {}) {
     renderSparklineKpi(data?.vendas_por_dia || []);
   } catch (_) {
     _setChartSkeletons(false);
-    // falha silenciosa — gráficos são complementares, não críticos
+    const emptyMsg = `<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted)">Gráfico indisponível</div>`;
+    ['chartVendasDia','chartFormaPagamento'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el?.parentElement) el.parentElement.innerHTML = emptyMsg;
+    });
   }
 }
 

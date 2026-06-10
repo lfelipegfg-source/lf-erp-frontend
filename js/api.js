@@ -168,6 +168,12 @@ async function request(path, options = {}) {
 
   try {
     const response = await withTimeout(fetch(url, fetchOptions), timeout);
+    if (response.status === 401 && !API_CONFIG._isRedirecting401) {
+      API_CONFIG._isRedirecting401 = true;
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('lferp:session-expired'));
+      }
+    }
     return parseResponse(response);
   } catch (error) {
     if (typeof window !== 'undefined' && window.showToast) {

@@ -78,7 +78,11 @@ export async function validateSession() {
   try {
     return await api.validateSession();
   } catch (error) {
-    clearAuth();
+    // Não encerrar sessão em falha de rede — apenas em resposta 401/403 do servidor
+    const status = error?.status;
+    if (status === 401 || status === 403) {
+      clearAuth();
+    }
     throw error;
   }
 }

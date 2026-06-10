@@ -220,6 +220,7 @@ function bindLoginEvents() {
         user: { ...data.user, empresa_id: data.empresa?.id, empresa: data.empresa?.nome }
       };
       authLogin(authPayload, true);
+      scheduleTokenRefresh();
 
       document.getElementById('registroScreen')?.classList.add('hidden');
       applyAuthData(authPayload);
@@ -1192,6 +1193,14 @@ function handleLogout(showMessage = true) {
     showToast('Sessão encerrada com sucesso.', 'success');
   }
 }
+
+// Intercepta 401 global disparado por api.js — evita múltiplos redirecionamentos
+window.addEventListener('lferp:session-expired', () => {
+  if (AppState.isAuthenticated) {
+    handleLogout(false);
+    showToast('Sua sessão expirou. Faça login novamente.', 'warning');
+  }
+}, { once: false });
 
 function clearLoginInputs() {
   const loginUsuario = document.getElementById('loginUsuario');
