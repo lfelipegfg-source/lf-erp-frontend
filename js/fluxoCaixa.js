@@ -16,7 +16,9 @@ const state = {
   },
   loading: false,
   cashflowFuturo: null,
-  diasProjecao: 30
+  diasProjecao: 30,
+  pagina: 1,
+  itensPorPagina: 50
 };
 
 function showMessage(message, type = 'info') {
@@ -120,6 +122,15 @@ function getFiltrosGlobais() {
   };
 }
 
+function getMovimentosPaginados(filtrados) {
+  const inicio = (state.pagina - 1) * state.itensPorPagina;
+  return filtrados.slice(inicio, inicio + state.itensPorPagina);
+}
+
+function getTotalPaginasFluxo(filtrados) {
+  return Math.ceil(filtrados.length / state.itensPorPagina) || 1;
+}
+
 function getMovimentosFiltrados() {
   const busca = String(state.filtros.busca || '')
     .trim()
@@ -171,6 +182,8 @@ function render() {
   if (!container) return;
 
   const movimentosFiltrados = getMovimentosFiltrados();
+  const totalPaginasFluxo = getTotalPaginasFluxo(movimentosFiltrados);
+  const movimentosPaginados = getMovimentosPaginados(movimentosFiltrados);
 
   if (!movimentosFiltrados.length) {
     setTimeout(() => {
@@ -297,8 +310,19 @@ function render() {
           </div>
 
           <div class="fluxo-movimentos-list">
-            ${renderMovimentos(movimentosFiltrados)}
+            ${renderMovimentos(movimentosPaginados)}
           </div>
+
+          ${totalPaginasFluxo > 1 ? `
+          <div class="lf-pagination">
+            <button class="lf-pagination__btn" type="button" data-action="fluxo-pagina" data-page="prev" ${state.pagina <= 1 ? 'disabled' : ''} aria-label="Página anterior">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="lf-pagination__info">Página ${state.pagina} de ${totalPaginasFluxo} <small>(${movimentosFiltrados.length} movimento(s))</small></span>
+            <button class="lf-pagination__btn" type="button" data-action="fluxo-pagina" data-page="next" ${state.pagina >= totalPaginasFluxo ? 'disabled' : ''} aria-label="Próxima página">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>` : ''}
         </section>
 
         <aside class="fluxo-panel">
@@ -608,6 +632,7 @@ function bindEventos() {
     state.filtros.busca = busca?.value?.trim() || '';
     state.filtros.tipo = tipo?.value || '';
     state.filtros.origem = origem?.value || '';
+    state.pagina = 1;
 
     render();
   });
@@ -619,6 +644,7 @@ function bindEventos() {
       tipo: '',
       origem: ''
     };
+    state.pagina = 1;
 
     render();
   });
@@ -628,9 +654,21 @@ function bindEventos() {
       state.filtros.busca = busca.value.trim();
       state.filtros.tipo = tipo?.value || '';
       state.filtros.origem = origem?.value || '';
+      state.pagina = 1;
 
       render();
     }
+  });
+
+  document.querySelectorAll("[data-action='fluxo-pagina']").forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const page = btn.dataset.page;
+      const filtrados = getMovimentosFiltrados();
+      const total = getTotalPaginasFluxo(filtrados);
+      if (page === 'prev' && state.pagina > 1) state.pagina--;
+      else if (page === 'next' && state.pagina < total) state.pagina++;
+      render();
+    });
   });
 }
 
@@ -1066,6 +1104,30 @@ function injectFluxoCaixaStyles() {
         padding-left: 54px;
       }
     }
+
+    .lf-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 0 4px;
+    }
+    .lf-pagination__btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+    .lf-pagination__btn:hover:not(:disabled) { background: var(--surface-2); }
+    .lf-pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .lf-pagination__info { font-size: 0.88rem; font-weight: 700; color: var(--text-muted); }
+    .lf-pagination__info small { font-weight: 600; font-size: 0.8rem; }
   `;
 
   document.head.appendChild(style);

@@ -3,9 +3,13 @@ import { showToast, confirmarAcao } from './feedback.js';
 
 const state = {
   itens:   [],
-  editId:  null,   // null = criar, number = editar
+  editId:  null,
   loading: false,
-  filtros: { tipo: '', status: '', busca: '' }
+  filtros: { tipo: '', status: '', busca: '' },
+  pagina: 1,
+  totalPaginas: 1,
+  totalRegistros: 0,
+  resumoGlobal: null
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -73,6 +77,7 @@ function showMsg(msg, type = 'info') {
 // ─── Resumo ───────────────────────────────────────────────────────────────────
 
 function calcResumo() {
+  if (state.resumoGlobal) return state.resumoGlobal;
   let receitas = 0, despesas = 0;
   for (const i of state.itens) {
     if (i.tipo === 'receita') receitas += Number(i.valor || 0);
@@ -117,9 +122,20 @@ export async function initLancamentosModule() {
 async function carregarLancamentos() {
   const data = await api.getLancamentosFinanceiros({
     ...getFiltrosGlobais(),
-    ...state.filtros
+    ...state.filtros,
+    page: state.pagina,
+    limit: 50
   });
-  state.itens = Array.isArray(data) ? data : [];
+  if (data?.itens) {
+    state.itens = Array.isArray(data.itens) ? data.itens : [];
+    state.resumoGlobal = data.resumo || null;
+    if (data.paginacao) {
+      state.totalPaginas = data.paginacao.total_paginas || 1;
+      state.totalRegistros = data.paginacao.total || 0;
+    }
+  } else {
+    state.itens = Array.isArray(data) ? data : [];
+  }
 }
 
 function renderSkeleton() {
@@ -236,6 +252,17 @@ function render() {
 
       <!-- Tabela -->
       ${renderTabela(itensFiltrados)}
+
+      ${state.totalPaginas > 1 ? `
+      <div class="lf-pagination">
+        <button class="lf-pagination__btn" type="button" data-action="lf-pagina" data-page="prev" ${state.pagina <= 1 ? 'disabled' : ''} aria-label="Página anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <span class="lf-pagination__info">Página ${state.pagina} de ${state.totalPaginas} <small>(${state.totalRegistros} registro(s))</small></span>
+        <button class="lf-pagination__btn" type="button" data-action="lf-pagina" data-page="next" ${state.pagina >= state.totalPaginas ? 'disabled' : ''} aria-label="Próxima página">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>` : ''}
 
     </div>
 
@@ -417,6 +444,7 @@ function bindEventos() {
     state.filtros.tipo   = document.getElementById('lfTipo').value;
     state.filtros.status = document.getElementById('lfStatus').value;
     state.filtros.busca  = document.getElementById('lfBusca').value.trim();
+    state.pagina = 1;
     await carregarLancamentos();
     render();
   };
@@ -424,6 +452,7 @@ function bindEventos() {
   // Limpar filtros
   document.getElementById('lfBtnLimpar').onclick = async () => {
     state.filtros = { tipo: '', status: '', busca: '' };
+    state.pagina = 1;
     await carregarLancamentos();
     render();
   };
@@ -438,9 +467,15 @@ function bindEventos() {
   document.querySelectorAll('[data-action]').forEach((btn) => {
     btn.onclick = () => {
       const id = Number(btn.dataset.id);
-      if (btn.dataset.action === 'pagar')  pagar(id);
-      if (btn.dataset.action === 'editar') editar(id);
+      if (btn.dataset.action === 'pagar')   pagar(id);
+      if (btn.dataset.action === 'editar')  editar(id);
       if (btn.dataset.action === 'excluir') excluir(id);
+      if (btn.dataset.action === 'lf-pagina') {
+        const page = btn.dataset.page;
+        if (page === 'prev' && state.pagina > 1) state.pagina--;
+        else if (page === 'next' && state.pagina < state.totalPaginas) state.pagina++;
+        carregarLancamentos().then(() => render());
+      }
     };
   });
 }

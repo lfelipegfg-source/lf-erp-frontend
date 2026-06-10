@@ -19,6 +19,9 @@ const state = {
     fornecedor_id: '',
     busca: ''
   },
+  pagina: 1,
+  totalPaginas: 1,
+  totalRegistros: 0,
   loading: false
 };
 
@@ -113,7 +116,9 @@ async function carregarContas() {
 
   const response = await api.getContasPagar({
     ...filtrosGlobais,
-    ...state.filtros
+    ...state.filtros,
+    page: state.pagina,
+    limit: 50
   });
 
   state.contas = Array.isArray(response?.contas) ? response.contas : [];
@@ -127,6 +132,11 @@ async function carregarContas() {
     qtd_pendente: 0,
     qtd_atrasado: 0
   };
+
+  if (response?.paginacao) {
+    state.totalPaginas = response.paginacao.total_paginas || 1;
+    state.totalRegistros = response.paginacao.total || 0;
+  }
 }
 
 function getFiltrosGlobais() {
@@ -255,7 +265,7 @@ function render() {
         <article class="mini-stat cp-stat-card cp-stat-card--total">
           <span>Total de títulos</span>
           <strong>${formatCurrency(state.resumo.total)}</strong>
-          <small>${state.contas.length} registro(s)</small>
+          <small>${state.totalRegistros || state.contas.length} registro(s)</small>
         </article>
 
         <article class="mini-stat cp-stat-card cp-stat-card--pendente">
@@ -296,6 +306,17 @@ function render() {
           </tbody>
         </table>
       </div>
+
+      ${state.totalPaginas > 1 ? `
+      <div class="lf-pagination">
+        <button class="lf-pagination__btn" type="button" data-action="cp-pagina" data-page="prev" ${state.pagina <= 1 ? 'disabled' : ''} aria-label="Página anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <span class="lf-pagination__info">Página ${state.pagina} de ${state.totalPaginas} <small>(${state.totalRegistros} registro(s))</small></span>
+        <button class="lf-pagination__btn" type="button" data-action="cp-pagina" data-page="next" ${state.pagina >= state.totalPaginas ? 'disabled' : ''} aria-label="Próxima página">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>` : ''}
     </section>
   `;
 
@@ -415,12 +436,14 @@ function bindEventos() {
     state.filtros.busca = busca?.value?.trim() || '';
     state.filtros.status = status?.value || '';
     state.filtros.fornecedor_id = fornecedor?.value || '';
+    state.pagina = 1;
     salvarFiltrosCP();
     await recarregar();
   });
 
   btnLimpar?.addEventListener('click', async () => {
     state.filtros = { status: '', fornecedor_id: '', busca: '' };
+    state.pagina = 1;
     salvarFiltrosCP();
     await recarregar();
   });
@@ -430,9 +453,19 @@ function bindEventos() {
       state.filtros.busca = busca.value.trim();
       state.filtros.status = status?.value || '';
       state.filtros.fornecedor_id = fornecedor?.value || '';
+      state.pagina = 1;
       salvarFiltrosCP();
       await recarregar();
     }
+  });
+
+  document.querySelectorAll("[data-action='cp-pagina']").forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const page = btn.dataset.page;
+      if (page === 'prev' && state.pagina > 1) state.pagina--;
+      else if (page === 'next' && state.pagina < state.totalPaginas) state.pagina++;
+      await recarregar();
+    });
   });
 
   document.querySelectorAll("[data-action='pagar-cp']").forEach((button) => {
@@ -1271,6 +1304,30 @@ function injectContasPagarStyles() {
         grid-template-columns: 1fr;
       }
     }
+
+    .lf-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 0 4px;
+    }
+    .lf-pagination__btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+    }
+    .lf-pagination__btn:hover:not(:disabled) { background: var(--surface-2); }
+    .lf-pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .lf-pagination__info { font-size: 0.88rem; font-weight: 700; color: var(--text-muted); }
+    .lf-pagination__info small { font-weight: 600; font-size: 0.8rem; }
   `;
 
   document.head.appendChild(style);
