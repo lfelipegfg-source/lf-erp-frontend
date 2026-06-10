@@ -479,6 +479,12 @@ const ClientesModule = {
       return;
     }
 
+    const cpfNums = payload.cpf.replace(/\D/g, '');
+    if (cpfNums.length > 0 && !validarCPF(cpfNums)) {
+      this.setFeedback('CPF inválido. Verifique os dígitos.', 'error');
+      return;
+    }
+
     try {
       const message = this.state.editingId ? 'Atualizando cliente...' : 'Salvando cliente...';
 
@@ -935,6 +941,19 @@ function maskCPF(value) {
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+
+function validarCPF(cpf) {
+  const n = String(cpf).replace(/\D/g, '');
+  if (n.length !== 11 || /^(\d)\1+$/.test(n)) return false;
+  let s = 0;
+  for (let i = 0; i < 9; i++) s += parseInt(n[i]) * (10 - i);
+  let d1 = (s * 10) % 11; if (d1 >= 10) d1 = 0;
+  if (d1 !== parseInt(n[9])) return false;
+  s = 0;
+  for (let i = 0; i < 10; i++) s += parseInt(n[i]) * (11 - i);
+  let d2 = (s * 10) % 11; if (d2 >= 10) d2 = 0;
+  return d2 === parseInt(n[10]);
 }
 
 function maskPhone(value) {

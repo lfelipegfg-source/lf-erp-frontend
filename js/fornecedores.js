@@ -387,6 +387,12 @@ const FornecedoresModule = {
       return;
     }
 
+    const cnpjNums = payload.cnpj.replace(/\D/g, '');
+    if (cnpjNums.length > 0 && !validarCNPJ(cnpjNums)) {
+      this.setFeedback('CNPJ inválido. Verifique os dígitos.', 'error');
+      return;
+    }
+
     try {
       const message = this.state.editingId ? 'Atualizando fornecedor...' : 'Salvando fornecedor...';
 
@@ -505,6 +511,18 @@ function maskCNPJ(value) {
     .replace(/\.(\d{3})(\d)/, '.$1/$2')
     .replace(/(\d{4})(\d)/, '$1-$2')
     .slice(0, 18);
+}
+
+function validarCNPJ(cnpj) {
+  const n = String(cnpj).replace(/\D/g, '');
+  if (n.length !== 14 || /^(\d)\1+$/.test(n)) return false;
+  const calc = (len) => {
+    let s = 0, p = len - 7;
+    for (let i = 0; i < len; i++) { s += parseInt(n[i]) * p--; if (p < 2) p = 9; }
+    const r = s % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  return calc(12) === parseInt(n[12]) && calc(13) === parseInt(n[13]);
 }
 
 function escapeHtml(value) {

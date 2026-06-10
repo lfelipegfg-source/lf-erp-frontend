@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const EstoqueModule = {
   state: {
@@ -488,14 +488,42 @@ const EstoqueModule = {
   },
 
   async criarDeposito() {
-    const nome = prompt('Nome do novo depósito:');
-    if (!nome?.trim()) return;
-    const descricao = prompt('Descrição (opcional):') || '';
+    const dados = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+          <p style="font-weight:600;margin:0 0 16px;font-size:15px">Novo Depósito</p>
+          <label style="display:block;font-size:13px;margin-bottom:4px">Nome <span style="color:var(--danger)">*</span></label>
+          <input id="_dep_nome" type="text" autocomplete="off" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:12px;box-sizing:border-box" placeholder="Ex: Depósito Principal" />
+          <label style="display:block;font-size:13px;margin-bottom:4px">Descrição (opcional)</label>
+          <input id="_dep_desc" type="text" autocomplete="off" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:20px;box-sizing:border-box" />
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button id="_dep_cancel" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+            <button id="_dep_criar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Criar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      let done = false;
+      const fechar = (val) => { if (done) return; done = true; overlay.remove(); resolve(val); };
+      overlay.querySelector('#_dep_criar').addEventListener('click', () => {
+        const nome = overlay.querySelector('#_dep_nome').value.trim();
+        const desc = overlay.querySelector('#_dep_desc').value.trim();
+        fechar(nome ? { nome, descricao: desc } : null);
+      });
+      overlay.querySelector('#_dep_cancel').addEventListener('click', () => fechar(null));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) fechar(null); });
+      document.addEventListener('keydown', function onKey(e) {
+        if (e.key === 'Escape') { document.removeEventListener('keydown', onKey); fechar(null); }
+      });
+      overlay.querySelector('#_dep_nome').focus();
+    });
+    if (!dados) return;
     try {
       const empresa = this.state.empresa || '';
       await api.request('/depositos', {
         method: 'POST',
-        body: { nome: nome.trim(), descricao, empresa }
+        body: { nome: dados.nome, descricao: dados.descricao, empresa }
       });
       showToast('Depósito criado!', 'success');
       await this._renderDepositos();
@@ -505,7 +533,8 @@ const EstoqueModule = {
   },
 
   async excluirDeposito(id) {
-    if (!confirm('Excluir este depósito? Só é possível se não houver estoque.')) return;
+    const ok = await confirmarAcao('Excluir este depósito? Só é possível se não houver estoque.', 'Excluir');
+    if (!ok) return;
     try {
       await api.request(`/depositos/${id}`, { method: 'DELETE' });
       showToast('Depósito excluído!', 'success');

@@ -191,7 +191,8 @@ const ProdutosModule = {
       if (action === 'gradeAddBtn')     { await this.handleGradeAdd(); return; }
       if (t.dataset.action === 'gradeDelete')  { await this.handleGradeDelete(Number(t.dataset.id)); return; }
       if (t.dataset.action === 'gradeEdit')    { this.handleGradeEditInline(Number(t.dataset.id)); return; }
-      if (t.dataset.action === 'gradeEditSave'){ await this.handleGradeEditSave(Number(t.dataset.id)); return; }
+      if (t.dataset.action === 'gradeEditSave')  { await this.handleGradeEditSave(Number(t.dataset.id)); return; }
+      if (t.dataset.action === 'gradeEditCancel') { this.renderGrades(); return; }
 
       // ── KIT
       if (action === 'kitToggleBtn')  { await this.handleKitToggle(); return; }
@@ -735,6 +736,15 @@ const ProdutosModule = {
 
   async handleImagemUpload(file) {
     if (!file || !this.state.editingId) return;
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedMimes.includes(file.type)) {
+      showToast('Apenas imagens JPG, PNG ou WebP são permitidas.', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('A imagem deve ter no máximo 5 MB.', 'error');
+      return;
+    }
     const btn = document.getElementById('imagemUploadBtn');
     if (btn) btn.textContent = 'Enviando...';
     try {
@@ -899,7 +909,7 @@ const ProdutosModule = {
       <input type="number" value="${Number(grade.estoque||0)}" id="gradeEditEstoque_${gradeId}" style="width:100%;margin-bottom:4px;padding:5px;border:1px solid var(--border);border-radius:4px;font-size:12px" />
       <div class="grade-card__actions">
         <button type="button" class="btn-inline" data-action="gradeEditSave" data-id="${gradeId}">Salvar</button>
-        <button type="button" class="btn-inline btn-inline--danger" onclick="this.closest('.grade-card').parentNode && location.reload()">×</button>
+        <button type="button" class="btn-inline btn-inline--danger" data-action="gradeEditCancel" data-id="${gradeId}">×</button>
       </div>`;
   },
 
@@ -1190,13 +1200,41 @@ const ProdutosModule = {
   },
 
   async _configurarMkt(plataforma) {
-    const appId = prompt(`App ID (Client ID) do ${plataforma}:`);
-    if (!appId?.trim()) return;
-    const secret = prompt('Client Secret:') || '';
+    const resultado = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:400px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+          <p style="font-weight:600;margin:0 0 16px;font-size:15px">Configurar ${escapeHtml(plataforma)}</p>
+          <label style="display:block;font-size:13px;margin-bottom:4px">App ID / Client ID</label>
+          <input id="_mkt_appid" type="text" autocomplete="off" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:12px;box-sizing:border-box" />
+          <label style="display:block;font-size:13px;margin-bottom:4px">Client Secret</label>
+          <input id="_mkt_secret" type="password" autocomplete="new-password" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:20px;box-sizing:border-box" />
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button id="_mkt_cancel" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+            <button id="_mkt_save" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      let done = false;
+      const fechar = (val) => { if (done) return; done = true; overlay.remove(); resolve(val); };
+      overlay.querySelector('#_mkt_save').addEventListener('click', () => {
+        const appId = overlay.querySelector('#_mkt_appid').value.trim();
+        const secret = overlay.querySelector('#_mkt_secret').value;
+        fechar(appId ? { appId, secret } : null);
+      });
+      overlay.querySelector('#_mkt_cancel').addEventListener('click', () => fechar(null));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) fechar(null); });
+      document.addEventListener('keydown', function onKey(e) {
+        if (e.key === 'Escape') { document.removeEventListener('keydown', onKey); fechar(null); }
+      });
+      overlay.querySelector('#_mkt_appid').focus();
+    });
+    if (!resultado) return;
     try {
       await api.request('/marketplace/config', {
         method: 'PUT',
-        body: { plataforma, app_id: appId.trim(), client_secret: secret }
+        body: { plataforma, app_id: resultado.appId, client_secret: resultado.secret }
       });
       showToast('Configuração salva! Agora clique em Autorizar.', 'success');
       await this._renderMarketplace();

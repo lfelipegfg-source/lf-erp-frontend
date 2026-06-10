@@ -176,11 +176,6 @@ async function request(path, options = {}) {
     }
     return parseResponse(response);
   } catch (error) {
-    if (typeof window !== 'undefined' && window.showToast) {
-      const message = error?.message || 'Erro na requisição.';
-      window.showToast(message, 'error');
-    }
-
     throw error;
   }
 }

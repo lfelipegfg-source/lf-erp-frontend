@@ -1,5 +1,6 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
+import { confirmarAcao } from './feedback.js';
 
 const UsuariosModule = {
   state: {
@@ -94,7 +95,7 @@ const UsuariosModule = {
     this.setFeedback('Carregando usuários...', 'info');
 
     try {
-      const data = await fetchAPI(`/usuarios/${encodeURIComponent(this.state.empresa)}`);
+      const data = await api.getUsuarios({ empresa: this.state.empresa });
       this.state.items = Array.isArray(data) ? data : [];
       this.state.filteredItems = [...this.state.items];
 
@@ -493,10 +494,10 @@ const UsuariosModule = {
       );
 
       if (this.state.editingId) {
-        await fetchAPI(`/usuarios/${this.state.editingId}`, 'PUT', payload);
+        await api.updateUsuario(this.state.editingId, payload);
         await this.salvarPermissoes(this.state.editingId);
       } else {
-        await fetchAPI(`/usuarios`, 'POST', payload);
+        await api.createUsuario(payload);
       }
 
       this.closeModal();
@@ -523,7 +524,7 @@ const UsuariosModule = {
     try {
       await api.request(`/usuarios/${usuarioId}/permissoes`, {
         method: 'PUT',
-        body: JSON.stringify({ permissoes })
+        body: { permissoes }
       });
     } catch (err) {
       console.warn('[permissoes] Erro ao salvar:', err.message);
@@ -531,12 +532,13 @@ const UsuariosModule = {
   },
 
   async delete(id) {
-    if (!confirm('Deseja realmente excluir este usuário?')) return;
+    const ok = await confirmarAcao('Deseja realmente excluir este usuário?', 'Excluir');
+    if (!ok) return;
 
     try {
       this.setFeedback('Excluindo usuário...', 'info');
 
-      await fetchAPI(`/usuarios/${id}?empresa=${encodeURIComponent(this.state.empresa)}`, 'DELETE');
+      await api.deleteUsuario(id);
 
       await this.load();
       this.setFeedback('Usuário excluído com sucesso.', 'success');
