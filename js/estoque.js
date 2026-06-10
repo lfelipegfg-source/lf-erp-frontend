@@ -76,6 +76,22 @@ const EstoqueModule = {
       if (btn.id === 'depositoNovoBtn') {
         await this.criarDeposito();
       }
+
+      if (btn.id === 'depositosFecharBtn2') {
+        document.getElementById('depositosModal')?.classList.add('hidden');
+      }
+
+      if (btn.dataset.action === 'verEstoqueDeposito') {
+        await this.verEstoqueDeposito(Number(btn.dataset.id), btn.dataset.nome || '');
+      }
+
+      if (btn.dataset.action === 'excluirDeposito') {
+        await this.excluirDeposito(Number(btn.dataset.id));
+      }
+
+      if (btn.dataset.action === 'renderDepositos') {
+        await this._renderDepositos();
+      }
     });
   },
 
@@ -414,7 +430,7 @@ const EstoqueModule = {
               <h3><i class="fa-solid fa-warehouse" style="margin-right:8px"></i>Depósitos</h3>
               <p style="color:var(--text-muted);font-size:.9rem">Gerencie locais de armazenamento</p>
             </div>
-            <button type="button" class="icon-button" id="depositosFecharBtn">
+            <button type="button" class="icon-button" id="depositosFecharBtn" aria-label="Fechar">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -423,7 +439,7 @@ const EstoqueModule = {
             <button type="button" class="btn btn-primary" id="depositoNovoBtn">
               <i class="fa-solid fa-plus"></i> Novo depósito
             </button>
-            <button type="button" class="btn btn-light" id="depositosFecharBtn2" onclick="document.getElementById('depositosModal').classList.add('hidden')">Fechar</button>
+            <button type="button" class="btn btn-light" id="depositosFecharBtn2">Fechar</button>
           </div>
         </div>`;
       document.body.appendChild(el);
@@ -469,12 +485,12 @@ const EstoqueModule = {
                 <td>${d.total_unidades || 0}</td>
                 <td><span class="badge ${d.ativo ? 'badge--success' : 'badge--warning'}">${d.ativo ? 'Ativo' : 'Inativo'}</span></td>
                 <td class="text-right">
-                  <button class="btn-inline" onclick="EstoqueModule.verEstoqueDeposito(${d.id}, '${escapeHtml(d.nome)}')">
+                  <button class="btn-inline" type="button" data-action="verEstoqueDeposito" data-id="${d.id}" data-nome="${escapeHtml(d.nome)}">
                     <i class="fa-solid fa-eye"></i> Ver estoque
                   </button>
                   ${!d.principal ? `
-                    <button class="btn-inline btn-inline--danger"
-                      onclick="EstoqueModule.excluirDeposito(${d.id})">
+                    <button class="btn-inline btn-inline--danger" type="button"
+                      data-action="excluirDeposito" data-id="${d.id}" aria-label="Excluir depósito ${escapeHtml(d.nome)}">
                       <i class="fa-solid fa-trash"></i>
                     </button>` : ''}
                 </td>
@@ -549,7 +565,7 @@ const EstoqueModule = {
     if (!corpo) return;
     corpo.innerHTML = `
       <div style="margin-bottom:16px">
-        <button type="button" class="btn btn-light btn-sm" onclick="EstoqueModule._renderDepositos()">
+        <button type="button" class="btn btn-light btn-sm" type="button" data-action="renderDepositos">
           <i class="fa-solid fa-arrow-left"></i> Voltar
         </button>
         <strong style="margin-left:12px">${escapeHtml(nome)}</strong>
@@ -586,7 +602,7 @@ const EstoqueModule = {
 
       corpo.innerHTML = `
         <div style="margin-bottom:16px">
-          <button type="button" class="btn btn-light btn-sm" onclick="EstoqueModule._renderDepositos()">
+          <button type="button" class="btn btn-light btn-sm" type="button" data-action="renderDepositos">
             <i class="fa-solid fa-arrow-left"></i> Voltar
           </button>
           <strong style="margin-left:12px">${escapeHtml(nome)}</strong>
@@ -708,5 +724,3 @@ export async function initEstoqueModule() {
   await EstoqueModule.load();
 }
 
-// Expõe globalmente para os onclick inline dentro do modal de depósitos
-window.EstoqueModule = EstoqueModule;

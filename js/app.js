@@ -757,6 +757,7 @@ function closeMobileSidebar() {
 }
 
 async function setActiveView(view) {
+  AppState.loadingCount = 0;
   AppState.currentView = view;
   saveCurrentViewToStorage();
 

@@ -221,7 +221,7 @@ async function login(usuario, senha) {
     method: 'POST',
     body: { usuario, senha }
   });
-
+  API_CONFIG._isRedirecting401 = false;
   return normalizeLoginResponse(response);
 }
 

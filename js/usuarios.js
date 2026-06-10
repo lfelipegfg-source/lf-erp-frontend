@@ -188,12 +188,12 @@ const UsuariosModule = {
           <form id="usuarioForm" class="form-grid">
             <div class="form-field form-field--span-2">
               <label for="usuarioNome">Nome</label>
-              <input id="usuarioNome" required />
+              <input id="usuarioNome" type="text" autocomplete="name" required />
             </div>
 
             <div class="form-field">
               <label for="usuarioLogin">Login</label>
-              <input id="usuarioLogin" required />
+              <input id="usuarioLogin" type="text" autocomplete="username" required />
             </div>
 
             <div class="form-field">
