@@ -1,5 +1,6 @@
 import api from './api.js';
 import { showToast } from './feedback.js';
+import { todayFortaleza } from './utils.js';
 
 const state = {
   contas: [],
@@ -478,10 +479,14 @@ async function pagarConta(id) {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
 
-    const hoje = new Date().toISOString().slice(0, 10);
+    const hoje = todayFortaleza();
     overlay.innerHTML = `
       <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
         <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar pagamento</h3>
+        <div style="margin-bottom:16px">
+          <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Valor pago (R$)</label>
+          <input id="_pagarValorInput" type="number" min="0.01" step="0.01" placeholder="Deixe em branco para pagar total" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+        </div>
         <div style="margin-bottom:16px">
           <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Data do pagamento</label>
           <input id="_pagarDataInput" type="date" value="${hoje}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
@@ -497,9 +502,11 @@ async function pagarConta(id) {
     overlay.querySelector('#_pagarCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(null); };
     overlay.querySelector('#_pagarConfirmarBtn').onclick = async () => {
       const data = overlay.querySelector('#_pagarDataInput').value;
+      const valorStr = overlay.querySelector('#_pagarValorInput').value;
+      const valor_pago = valorStr ? Number(valorStr) : undefined;
       document.body.removeChild(overlay);
       try {
-        await api.pagarContaPagar(id, { data_pagamento: data || undefined });
+        await api.pagarContaPagar(id, { data_pagamento: data || undefined, valor_pago });
         await recarregar();
       } catch (error) {
         console.error('Erro ao pagar conta:', error);

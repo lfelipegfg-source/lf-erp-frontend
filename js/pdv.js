@@ -1718,14 +1718,21 @@ const PDVModule = {
 
     // Validação do split
     const restante = this.getPagamentoRestante();
-    if (Math.abs(restante) >= 0.01) {
-      this.showMessage(
-        restante > 0
-          ? `Faltam ${this.toCurrency(restante)} para cobrir o total.`
-          : `O total dos pagamentos excede o valor da venda em ${this.toCurrency(Math.abs(restante))}.`,
-        'error'
-      );
+    if (restante > 0.01) {
+      this.showMessage(`Faltam ${this.toCurrency(restante)} para cobrir o total.`, 'error');
       return;
+    }
+    const troco = restante < -0.01 ? Math.abs(restante) : 0;
+    if (troco > 0) {
+      const todosDinheiro = this.state.pagamentos.every((p) => p.forma === 'Dinheiro');
+      if (!todosDinheiro) {
+        this.showMessage(`O total dos pagamentos excede o valor da venda em ${this.toCurrency(troco)}.`, 'error');
+        return;
+      }
+      // Troco em Dinheiro: registra o valor real da venda, devolve o troco fisicamente
+      this.state.pagamentos = this.state.pagamentos.map((p) =>
+        p.forma === 'Dinheiro' ? { ...p, valor: Number((Number(p.valor || 0) - troco).toFixed(2)) } : p
+      );
     }
 
     // Valida vencimento para Promissória
@@ -1820,9 +1827,10 @@ const PDVModule = {
         showToast(msg, 'info');
         await this.abrirModalPix(vendaId, valorPix, this.state.clienteNome || '');
       } else {
+        const trocoMsg = troco > 0 ? ` | Troco: ${this.toCurrency(troco)}` : '';
         const message = vendaId
-          ? `Venda #${vendaId} finalizada com sucesso!`
-          : 'Venda finalizada com sucesso.';
+          ? `Venda #${vendaId} finalizada com sucesso!${trocoMsg}`
+          : `Venda finalizada com sucesso.${trocoMsg}`;
         this.setFeedback(message, 'success');
         showToast(message, 'success');
       }
@@ -2162,7 +2170,7 @@ const PDVModule = {
   },
 
   today() {
-    return new Date().toISOString().slice(0, 10);
+    return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Fortaleza' });
   },
 
   toCurrency(value) {

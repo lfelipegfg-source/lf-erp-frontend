@@ -1,5 +1,6 @@
 import api from './api.js';
 import { exportCSV, numCSV } from './exportUtils.js';
+import { showToast } from './feedback.js';
 
 const state = {
   resumo: null,
@@ -746,7 +747,6 @@ function renderTabelaLucratividade() {
           ${state.lucratividade
             .map(
               (item) => `
-            <tr>
               <tr>
   <td>
     <span class="badge ${
@@ -952,6 +952,10 @@ function exportarAbaAtual() {
       'Estoque Atual':    r.estoque_atual || 0,
       'Ultima Venda':     formatDate(r.ultima_venda)
     })), 'vendas_por_variacao');
+    return;
+  }
+  if (aba === 'resumo' || aba === 'inadimplencia') {
+    showToast('Exportação não disponível para esta aba. Use as abas de Receber, Pagar ou Fluxo.', 'info');
     return;
   }
   if (aba === 'dre' && state.dre?.mensal?.length) {

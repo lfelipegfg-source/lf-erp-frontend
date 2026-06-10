@@ -2,6 +2,7 @@ import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV, numCSV } from './exportUtils.js';
+import { todayFortaleza } from './utils.js';
 
 const VendasModule = {
   state: {
@@ -1300,7 +1301,7 @@ const VendasModule = {
     });
 
     const valorSugerido = Number(conta?.valor_atualizado || conta?.valor || 0);
-    const hoje = new Date().toISOString().slice(0, 10);
+    const hoje = todayFortaleza();
 
     const resultado = await new Promise((resolve) => {
       const overlay = document.createElement('div');
@@ -1344,7 +1345,7 @@ const VendasModule = {
 
       await api.baixarContaReceber(id, {
         valor_pago: valorNormalizado,
-        data_pagamento: resultado.data || new Date().toISOString().slice(0, 10),
+        data_pagamento: resultado.data || todayFortaleza(),
         empresa: this.state.empresa,
         empresa_id: api.getEmpresaId()
       });

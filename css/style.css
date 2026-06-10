@@ -3135,6 +3135,11 @@ select {
   color: var(--warning);
 }
 
+.badge--neutral {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
 /* CHECKBOX PROFISSIONAL */
 
 .form-field--checkbox {

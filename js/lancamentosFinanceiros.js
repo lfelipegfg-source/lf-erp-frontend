@@ -90,8 +90,14 @@ function badgeTipo(tipo) {
 
 function badgeStatus(status) {
   const s = String(status || 'pendente').toLowerCase();
-  const cls = s === 'pago' ? 'badge--success' : 'badge--warning';
-  const label = s === 'pago' ? 'Pago' : 'Pendente';
+  const map = {
+    pago:             ['badge--success', 'Pago'],
+    parcial:          ['badge--warning', 'Parcial'],
+    parcial_atrasado: ['badge--danger',  'Parcial em atraso'],
+    atrasado:         ['badge--danger',  'Atrasado'],
+    estornado:        ['badge--neutral', 'Estornado'],
+  };
+  const [cls, label] = map[s] ?? ['badge--warning', 'Pendente'];
   return `<span class="badge ${cls}">${label}</span>`;
 }
 
