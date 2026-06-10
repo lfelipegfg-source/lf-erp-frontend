@@ -2,6 +2,7 @@ import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV, numCSV } from './exportUtils.js';
+import { escapeHtml, buildFriendlyError } from './utils.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -9,18 +10,6 @@ function toCurrency(v) {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function escapeHtml(v) {
-  return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
-}
-
-function buildFriendlyError(error) {
-  if (!error) return 'Erro inesperado.';
-  if (error.status === 400) return error.message || 'Dados inválidos.';
-  if (error.status === 403) return error.message || 'Sem permissão.';
-  if (error.status === 404) return error.message || 'Não encontrado.';
-  if (String(error.message || '').includes('Failed to fetch')) return 'Não foi possível conectar ao backend.';
-  return error.message || 'Falha na operação.';
-}
 
 // ─── Module ───────────────────────────────────────────────────────────────────
 

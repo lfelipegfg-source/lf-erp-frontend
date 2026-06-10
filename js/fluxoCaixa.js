@@ -1,5 +1,6 @@
 import api from './api.js';
 import { showToast } from './feedback.js';
+import { escapeHtml, buildFriendlyError } from './utils.js';
 
 const state = {
   resumo: {
@@ -59,19 +60,6 @@ function setLoading(value) {
   }
 }
 
-function buildFriendlyError(error) {
-  const message = error?.message || '';
-
-  if (message.includes('Failed to fetch')) {
-    return 'Não foi possível conectar ao backend.';
-  }
-
-  if (error?.status === 403) {
-    return 'Acesso negado ou limite do plano atingido.';
-  }
-
-  return message || 'Não foi possível carregar o fluxo de caixa.';
-}
 
 export async function initFluxoCaixaModule() {
   try {
@@ -753,15 +741,6 @@ function formatDate(value) {
   }
 
   return date.toLocaleDateString('pt-BR');
-}
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
 }
 
 function injectFluxoCaixaStyles() {

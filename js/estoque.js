@@ -1,5 +1,6 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { escapeHtml } from './utils.js';
 
 const EstoqueModule = {
   state: {
@@ -710,14 +711,6 @@ function formatCurrency(value) {
   });
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
 
 export async function initEstoqueModule() {
   EstoqueModule.init();

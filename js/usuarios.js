@@ -1,6 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { confirmarAcao } from './feedback.js';
+import { escapeHtml } from './utils.js';
 
 const UsuariosModule = {
   state: {
@@ -581,14 +582,6 @@ function formatTipo(tipo) {
   return mapa[tipo] || tipo || '-';
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
 
 async function fetchAPI(path, method = 'GET', body) {
   const auth = getAuth();

@@ -1,5 +1,6 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { escapeHtml, buildFriendlyError } from './utils.js';
 
 const state = {
   sessoes:   [],
@@ -11,11 +12,7 @@ const state = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function esc(v) {
-  return String(v ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+const esc = escapeHtml;
 
 function toCurrency(v) {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -28,12 +25,6 @@ function formatDate(d) {
   return `${day}/${m}/${y}`;
 }
 
-function buildFriendlyError(error) {
-  const msg = error?.message || '';
-  if (msg.includes('Failed to fetch')) return 'Não foi possível conectar ao servidor.';
-  if (error?.status === 403) return 'Acesso negado.';
-  return msg || 'Erro na operação.';
-}
 
 function showMsg(msg, type = 'info') {
   const el = document.getElementById('cbFeedback');

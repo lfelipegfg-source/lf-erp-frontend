@@ -1,5 +1,6 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { escapeHtml, buildFriendlyError } from './utils.js';
 
 const state = {
   itens:   [],
@@ -14,13 +15,7 @@ const state = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function esc(v) {
-  return String(v ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+const esc = escapeHtml;
 
 function toCurrency(v) {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -38,12 +33,6 @@ function toInputDate(d) {
   return String(d).slice(0, 10);
 }
 
-function buildFriendlyError(error) {
-  const msg = error?.message || '';
-  if (msg.includes('Failed to fetch')) return 'Não foi possível conectar ao servidor.';
-  if (error?.status === 403) return 'Acesso negado ou plano limitado.';
-  return msg || 'Não foi possível concluir a operação.';
-}
 
 function getFiltrosGlobais() {
   return {

@@ -1,6 +1,7 @@
 import api from './api.js';
 import { exportCSV, numCSV } from './exportUtils.js';
 import { showToast } from './feedback.js';
+import { escapeHtml } from './utils.js';
 
 const state = {
   resumo: null,
@@ -1069,11 +1070,3 @@ function formatDate(value) {
   return d.toLocaleDateString('pt-BR');
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}

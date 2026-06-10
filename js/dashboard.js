@@ -1,5 +1,6 @@
 import api from './api.js';
 import { showToast } from './feedback.js';
+import { buildFriendlyError } from './utils.js';
 
 let lastDashboardContext = {
   filters: {},
@@ -10,19 +11,6 @@ function showMessage(message, type = 'info') {
   showToast(message, type);
 }
 
-function buildFriendlyError(error) {
-  const message = error?.message || '';
-
-  if (message.includes('Failed to fetch')) {
-    return 'Não foi possível conectar ao servidor.';
-  }
-
-  if (error?.status === 403) {
-    return 'Acesso negado ou plano limitado.';
-  }
-
-  return message || 'Erro ao carregar dashboard.';
-}
 
 function toCurrency(value) {
   const numericValue = Number(value) || 0;

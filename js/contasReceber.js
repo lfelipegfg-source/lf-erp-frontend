@@ -1,6 +1,7 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { gerarPIX } from './pix.js';
+import { escapeHtml, buildFriendlyError } from './utils.js';
 
 const state = {
   contas: [],
@@ -73,49 +74,6 @@ function setLoading(value) {
   }
 }
 
-function buildFriendlyError(error) {
-  const message = error?.message || '';
-  const codigo = error?.payload?.codigo || '';
-  const status = error?.status;
-
-  if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
-    return 'Não foi possível conectar ao servidor. Verifique sua conexão.';
-  }
-
-  if (codigo === 'TOKEN_EXPIRADO' || codigo === 'TOKEN_INVALIDO') {
-    return 'Sua sessão expirou. Faça login novamente.';
-  }
-
-  if (codigo === 'SEM_TOKEN') {
-    return 'Acesso negado. Faça login para continuar.';
-  }
-
-  if (codigo === 'EMPRESA_NAO_IDENTIFICADA') {
-    return 'Empresa não identificada na sessão. Faça login novamente.';
-  }
-
-  if (codigo === 'SEM_PERMISSAO') {
-    return 'Você não tem permissão para realizar esta ação.';
-  }
-
-  if (status === 403) {
-    return 'Acesso negado. Verifique suas permissões ou faça login novamente.';
-  }
-
-  if (status === 404) {
-    return 'Registro não encontrado.';
-  }
-
-  if (status === 429) {
-    return message || 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
-  }
-
-  if (status >= 500) {
-    return 'Erro no servidor. Tente novamente em instantes.';
-  }
-
-  return message || 'Não foi possível concluir a operação.';
-}
 
 export async function initContasReceberModule() {
   try {
@@ -1514,14 +1472,6 @@ function formatDate(value) {
   return date.toLocaleDateString('pt-BR');
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 function capitalize(value) {
   const text = String(value || '').trim();

@@ -2,7 +2,7 @@ import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV, numCSV } from './exportUtils.js';
-import { todayFortaleza } from './utils.js';
+import { todayFortaleza, escapeHtml } from './utils.js';
 
 const VendasModule = {
   state: {
@@ -2415,14 +2415,6 @@ function formatDate(value) {
   return date.toLocaleDateString('pt-BR');
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 function capitalize(value) {
   const text = String(value || '').trim();

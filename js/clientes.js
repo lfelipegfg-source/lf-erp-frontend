@@ -2,6 +2,7 @@ import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV } from './exportUtils.js';
+import { escapeHtml, maskPhone } from './utils.js';
 
 const ClientesModule = {
   state: {
@@ -956,13 +957,6 @@ function validarCPF(cpf) {
   return d2 === parseInt(n[10]);
 }
 
-function maskPhone(value) {
-  return String(value || '')
-    .replace(/\D/g, '')
-    .replace(/(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d)/, '$1-$2')
-    .slice(0, 15);
-}
 
 function formatDate(value) {
   if (!value) return '-';
@@ -983,14 +977,6 @@ function normalizeDateInput(value) {
   return date.toISOString().slice(0, 10);
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
 
 export async function initClientesModule() {
   ClientesModule.init();

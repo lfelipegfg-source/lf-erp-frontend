@@ -1,6 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { escapeHtml, maskPhone } from './utils.js';
 
 const FornecedoresModule = {
   state: {
@@ -495,13 +496,6 @@ const FornecedoresModule = {
   }
 };
 
-function maskPhone(value) {
-  return String(value || '')
-    .replace(/\D/g, '')
-    .replace(/(\d{2})(\d)/, '($1) $2')
-    .replace(/(\d{5})(\d)/, '$1-$2')
-    .slice(0, 15);
-}
 
 function maskCNPJ(value) {
   return String(value || '')
@@ -525,14 +519,6 @@ function validarCNPJ(cnpj) {
   return calc(12) === parseInt(n[12]) && calc(13) === parseInt(n[13]);
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
 
 export async function initFornecedoresModule() {
   FornecedoresModule.init();

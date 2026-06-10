@@ -1,6 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
+import { escapeHtml } from './utils.js';
 
 const ComprasModule = {
   state: {
@@ -1514,14 +1515,6 @@ function getTodayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 function capitalize(value) {
   const text = String(value || '').trim();
