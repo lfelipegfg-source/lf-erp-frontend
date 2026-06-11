@@ -65,7 +65,8 @@ const PDVModule = {
     this.cache();
 
     this.el.buscaProduto?.addEventListener('input', (event) => {
-      this.filterProdutos(event.target.value);
+      clearTimeout(this._buscaTimer);
+      this._buscaTimer = setTimeout(() => this.filterProdutos(event.target.value), 250);
     });
 
     this.el.desconto?.addEventListener('input', (event) => {
@@ -208,6 +209,25 @@ const PDVModule = {
         const index = Number(button.dataset.index);
         this.updateQuantidade(index, 1);
       }
+    });
+
+    this.el.carrinhoBody?.addEventListener('input', (e) => {
+      if (!e.target.classList.contains('pdv-item-desc')) return;
+      const idx = Number(e.target.dataset.index);
+      if (isNaN(idx) || !this.state.carrinho[idx]) return;
+      this.state.carrinho[idx].desconto_pct = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+      this.renderResumo();
+    });
+
+    this.el.carrinhoBody?.addEventListener('change', (e) => {
+      if (!e.target.classList.contains('pdv-item-desc')) return;
+      const idx = Number(e.target.dataset.index);
+      if (isNaN(idx) || !this.state.carrinho[idx]) return;
+      const val = Math.min(100, Math.max(0, Number(e.target.value) || 0));
+      e.target.value = val || '';
+      this.state.carrinho[idx].desconto_pct = val;
+      this.renderCarrinho();
+      this.renderResumo();
     });
 
     this.bindKeyboardShortcuts();
@@ -487,6 +507,7 @@ const PDVModule = {
                     <th>Produto</th>
                     <th>Qtd</th>
                     <th>Preço</th>
+                    <th>Desc%</th>
                     <th>Total</th>
                     <th class="text-right">Ações</th>
                   </tr>
@@ -1185,7 +1206,9 @@ const PDVModule = {
 
     this.el.carrinhoBody.innerHTML = this.state.carrinho
       .map((item, index) => {
-        const totalItem = Number(item.quantidade || 0) * Number(item.preco_unitario || 0);
+        const descPct = Number(item.desconto_pct || 0);
+        const precoComDesconto = Number(item.preco_unitario || 0) * (1 - descPct / 100);
+        const totalItem = Number(item.quantidade || 0) * precoComDesconto;
 
         return `
           <tr>
@@ -1208,7 +1231,27 @@ const PDVModule = {
               </div>
             </td>
 
-            <td data-label="Preço">${this.toCurrency(item.preco_unitario)}</td>
+            <td data-label="Preço">
+              ${descPct > 0
+                ? `<span style="text-decoration:line-through;color:var(--text-muted);font-size:.82em;display:block">${this.toCurrency(item.preco_unitario)}</span><span style="color:var(--success,#16a34a);font-weight:700">${this.toCurrency(precoComDesconto)}</span>`
+                : this.toCurrency(item.preco_unitario)
+              }
+            </td>
+
+            <td data-label="Desc%">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value="${descPct || ''}"
+                placeholder="0"
+                class="pdv-item-desc"
+                data-index="${index}"
+                style="width:56px;text-align:center;padding:4px 6px;border:1px solid var(--border);border-radius:8px;font-size:.88rem;background:var(--surface)"
+              />
+            </td>
+
             <td data-label="Total">${this.toCurrency(totalItem)}</td>
 
             <td class="text-right">
@@ -1481,7 +1524,8 @@ const PDVModule = {
         preco_unitario: preco,
         preco_padrao: Number(produto.preco || 0),
         custo_unitario: Number(produto.custo || 0),
-        estoque_disponivel: estoqueDisponivel
+        estoque_disponivel: estoqueDisponivel,
+        desconto_pct: 0
       });
     }
 
@@ -1558,7 +1602,8 @@ const PDVModule = {
         preco_unitario: preco,
         preco_padrao: precoBase,
         custo_unitario: Number(produto.custo || 0),
-        estoque_disponivel: estoque
+        estoque_disponivel: estoque,
+        desconto_pct: 0
       });
     }
 
@@ -1693,7 +1738,9 @@ const PDVModule = {
 
   getSubtotal() {
     return this.state.carrinho.reduce((acc, item) => {
-      return acc + Number(item.quantidade || 0) * Number(item.preco_unitario || 0);
+      const descPct = Number(item.desconto_pct || 0);
+      const precoComDesconto = Number(item.preco_unitario || 0) * (1 - descPct / 100);
+      return acc + Number(item.quantidade || 0) * precoComDesconto;
     }, 0);
   },
 
@@ -1750,13 +1797,17 @@ const PDVModule = {
       empresa: this.state.empresa,
       cliente_id: this.state.clienteId ? Number(this.state.clienteId) : null,
       cliente_nome: this.state.clienteNome || '',
-      itens: this.state.carrinho.map((item) => ({
-        produto_id: Number(item.produto_id),
-        grade_id: item.grade_id ? Number(item.grade_id) : null,
-        quantidade: Number(item.quantidade),
-        preco_unitario: Number(item.preco_unitario),
-        custo_unitario: Number(item.custo_unitario)
-      })),
+      itens: this.state.carrinho.map((item) => {
+        const descPct = Number(item.desconto_pct || 0);
+        const precoFinal = Number((Number(item.preco_unitario || 0) * (1 - descPct / 100)).toFixed(2));
+        return {
+          produto_id: Number(item.produto_id),
+          grade_id: item.grade_id ? Number(item.grade_id) : null,
+          quantidade: Number(item.quantidade),
+          preco_unitario: precoFinal,
+          custo_unitario: Number(item.custo_unitario)
+        };
+      }),
       subtotal,
       desconto,
       acrescimo,
