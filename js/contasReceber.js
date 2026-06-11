@@ -1211,9 +1211,9 @@ async function gerarBoleto(contaReceberID) {
         </div>
       </div>`;
 
-    if (url) {
+    if (url && String(url).startsWith('https://')) {
       linkBtn.style.display = 'inline-flex';
-      linkBtn.onclick = () => window.open(url, '_blank');
+      linkBtn.onclick = () => window.open(url, '_blank', 'noopener,noreferrer');
     }
 
     // Copia linha ao clicar
