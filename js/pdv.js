@@ -1902,7 +1902,7 @@ const PDVModule = {
           <div id="_pixConteudo">
             <div style="font-size:36px;color:#32b768;margin-bottom:8px"><i class="fa-brands fa-pix"></i></div>
             <h3 style="margin:0 0 4px;font-size:18px;font-weight:800">PIX — ${fmtValor(valor)}</h3>
-            ${clienteNome ? `<p style="margin:0 0 16px;font-size:13px;color:var(--text-muted)">${clienteNome}</p>` : '<div style="margin-bottom:16px"></div>'}
+            ${clienteNome ? `<p style="margin:0 0 16px;font-size:13px;color:var(--text-muted)">${this.escapeHtml(clienteNome)}</p>` : '<div style="margin-bottom:16px"></div>'}
             <div id="_pixStatus" style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
               <i class="fa-solid fa-spinner fa-spin"></i> Gerando QR Code...
             </div>

@@ -1,6 +1,6 @@
 import api from './api.js';
 import { showToast } from './feedback.js';
-import { buildFriendlyError } from './utils.js';
+import { buildFriendlyError, escapeHtml } from './utils.js';
 
 let lastDashboardContext = {
   filters: {},
@@ -766,7 +766,7 @@ function renderChartFormaPagamento(formasPagamento = []) {
       return `
         <div class="chart-legend__item">
           <span class="chart-legend__dot" style="background:${cores[i]}"></span>
-          <span class="chart-legend__label">${r.forma}</span>
+          <span class="chart-legend__label">${escapeHtml(r.forma)}</span>
           <span class="chart-legend__value">${pct}%</span>
         </div>`;
     }).join('');
