@@ -232,20 +232,29 @@ const CheckoutLinksModule = {
       const data = await api.fetchAPI('/checkout', 'POST', payload);
       const url  = `${FRONTEND_BASE}/checkout.html#${data.link.token}`;
 
-      document.getElementById('chkResultado').innerHTML = `
+      const resultado = document.getElementById('chkResultado');
+      resultado.innerHTML = `
         <div class="chk-link-gerado">
           <i class="fa fa-circle-check" style="font-size:24px;color:var(--success);display:block;margin-bottom:10px;"></i>
           <strong>Link criado com sucesso!</strong>
           <div class="chk-link-url" id="chkLinkUrl">${esc(url)}</div>
           <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
-            <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText('${url}').then(()=>{this.innerHTML='<i class=\\'fa fa-check\\'></i> Copiado!';setTimeout(()=>{this.innerHTML='<i class=\\'fa fa-copy\\'></i> Copiar link'},2000)})">
+            <button class="btn btn-primary btn-sm" id="chkCopiarBtn">
               <i class="fa fa-copy"></i> Copiar link
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="window.open('${url}','_blank')">
+            <button class="btn btn-secondary btn-sm" id="chkAbrirBtn">
               <i class="fa fa-external-link"></i> Abrir
             </button>
           </div>
         </div>`;
+
+      document.getElementById('chkCopiarBtn')?.addEventListener('click', (e) => {
+        navigator.clipboard.writeText(url).then(() => {
+          e.currentTarget.innerHTML = '<i class="fa fa-check"></i> Copiado!';
+          setTimeout(() => { e.currentTarget.innerHTML = '<i class="fa fa-copy"></i> Copiar link'; }, 2000);
+        });
+      });
+      document.getElementById('chkAbrirBtn')?.addEventListener('click', () => window.open(url, '_blank'));
 
       showToast('Link gerado! Compartilhe com o cliente.', 'success');
     } catch (err) { showToast(err.message || 'Erro ao criar link', 'error'); }
