@@ -336,6 +336,7 @@ function renderLinhas() {
     .map((conta) => {
       const status = normalizarStatus(conta.status);
       const statusLabel = getStatusLabel(status);
+      const diasAtrasoHtml = getDiasAtrasoHtml(status, conta.data_vencimento);
 
       return `
       <tr>
@@ -371,6 +372,7 @@ function renderLinhas() {
           <span class="${getStatusBadgeClass(status)}">
             ${statusLabel}
           </span>
+          ${diasAtrasoHtml}
         </td>
 
         <td class="text-right">
@@ -1429,6 +1431,17 @@ function getStatusBadgeClass(status) {
   if (normalized === 'parcial_atrasado') return 'badge badge--warning';
 
   return 'badge badge--info';
+}
+
+function getDiasAtrasoHtml(status, dataVencimento) {
+  if (status !== 'atrasado' && status !== 'parcial_atrasado') return '';
+  if (!dataVencimento) return '';
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  const venc = new Date(`${dataVencimento}T00:00:00`);
+  if (isNaN(venc.getTime())) return '';
+  const dias = Math.round((hoje.getTime() - venc.getTime()) / 86400000);
+  if (dias <= 0) return '';
+  return `<small style="display:block;color:#dc2626;font-weight:800;font-size:11px;margin-top:3px">${dias} dia(s)</small>`;
 }
 
 function getVencimentoInfo(dataVencimento) {

@@ -338,7 +338,7 @@ const EstoqueModule = {
     const estoqueMinimo = Number(produto.estoque_minimo || 0);
 
     if (estoque === 0) {
-      return `<span class="badge badge--danger">Sem estoque</span>`;
+      return `<span class="badge badge--danger">Crítico</span>`;
     }
 
     if (estoqueMinimo > 0 && estoque <= estoqueMinimo) {

@@ -13,7 +13,9 @@ const ComprasModule = {
     initialized: false,
     eventsBound: false,
     itensCompra: [],
-    loading: false
+    loading: false,
+    filtroStatus: '',
+    filtroFornecedor: ''
   },
 
   init() {
@@ -77,6 +79,11 @@ const ComprasModule = {
         const file = e.target.files?.[0];
         if (file) this.importarXML(file);
         e.target.value = '';
+      }
+      if (e.target.id === 'comprasFiltroStatus' || e.target.id === 'comprasFiltroFornecedor') {
+        this.state.filtroStatus = document.getElementById('comprasFiltroStatus')?.value || '';
+        this.state.filtroFornecedor = document.getElementById('comprasFiltroFornecedor')?.value || '';
+        this.search(this.el.search?.value || '');
       }
     });
 
@@ -212,10 +219,22 @@ const ComprasModule = {
             />
           </div>
 
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="comprasFiltroStatus" class="input" style="height:38px;min-width:140px;font-size:13px">
+              <option value="">Todos os status</option>
+              <option value="finalizada" ${this.state.filtroStatus === 'finalizada' ? 'selected' : ''}>Finalizada</option>
+              <option value="pendente" ${this.state.filtroStatus === 'pendente' ? 'selected' : ''}>Pendente</option>
+            </select>
+            <select id="comprasFiltroFornecedor" class="input" style="height:38px;min-width:160px;font-size:13px">
+              <option value="">Todos os fornecedores</option>
+              ${this.state.fornecedores.map(f => `<option value="${f.id}" ${String(this.state.filtroFornecedor) === String(f.id) ? 'selected' : ''}>${escapeHtml(f.nome)}</option>`).join('')}
+            </select>
+          </div>
+
           <div class="module-toolbar__stats">
             <div class="mini-stat">
               <span>Total</span>
-              <strong>${this.state.items.length}</strong>
+              <strong>${this.state.filteredItems.length}</strong>
             </div>
 
             <div class="mini-stat">
@@ -468,17 +487,21 @@ const ComprasModule = {
   },
 
   search(value) {
-    const termo = String(value || '')
-      .trim()
-      .toLowerCase();
+    const termo = String(value || '').trim().toLowerCase();
+    const filtroStatus = this.state.filtroStatus;
+    const filtroFornecedor = String(this.state.filtroFornecedor || '');
 
-    if (!termo) {
+    if (!termo && !filtroStatus && !filtroFornecedor) {
       this.state.filteredItems = [...this.state.items];
       this.renderTable();
       return;
     }
 
     this.state.filteredItems = this.state.items.filter((item) => {
+      if (filtroStatus && (item.status || 'finalizada') !== filtroStatus) return false;
+      if (filtroFornecedor && String(item.fornecedor_id) !== filtroFornecedor) return false;
+      if (!termo) return true;
+
       const texto = [
         item.id,
         item.fornecedor_nome,

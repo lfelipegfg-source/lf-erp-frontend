@@ -308,8 +308,12 @@ const ClientesModule = {
     }
 
     this.el.table.innerHTML = this.state.filteredItems
-      .map(
-        (cliente) => `
+      .map((cliente) => {
+        const emAberto = Number(cliente.total_em_aberto || 0);
+        const emAbertoHtml = emAberto > 0
+          ? `<span style="display:inline-block;margin-top:3px;padding:1px 8px;background:rgba(220,38,38,0.1);color:#dc2626;border-radius:99px;font-size:11px;font-weight:700">${emAberto.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})} em aberto</span>`
+          : '';
+        return `
       <tr>
         <td>
           <div class="table-primary">
@@ -317,6 +321,7 @@ const ClientesModule = {
             <small style="display:block; color: var(--text-muted); margin-top:4px;">
               ID: ${cliente.id}
             </small>
+            ${emAbertoHtml}
           </div>
         </td>
 
@@ -341,8 +346,8 @@ const ClientesModule = {
           </div>
         </td>
       </tr>
-    `
-      )
+    `;
+      })
       .join('');
 
     // Rodapé de paginação
