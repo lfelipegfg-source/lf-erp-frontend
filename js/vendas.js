@@ -193,6 +193,35 @@ const VendasModule = {
       const button = event.target.closest('button');
       if (!button) return;
 
+      if (button.dataset.preset) {
+        event.preventDefault();
+        const today = todayFortaleza();
+        const [y, m] = today.split('-').map(Number);
+        let ini = today;
+        if (button.dataset.preset === 'hoje') {
+          ini = today;
+        } else if (button.dataset.preset === 'semana') {
+          const d = new Date(`${today}T12:00:00`);
+          d.setDate(d.getDate() - d.getDay());
+          ini = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        } else if (button.dataset.preset === 'mes') {
+          ini = `${y}-${String(m).padStart(2,'0')}-01`;
+        } else if (button.dataset.preset === 'trimestre') {
+          let tm = m - 3, ty = y;
+          if (tm <= 0) { tm += 12; ty -= 1; }
+          ini = `${ty}-${String(tm).padStart(2,'0')}-01`;
+        }
+        this.state.filtros.dataInicial = ini;
+        this.state.filtros.dataFinal   = today;
+        const iniEl = document.getElementById('vendasDataInicial');
+        const fimEl = document.getElementById('vendasDataFinal');
+        if (iniEl) iniEl.value = ini;
+        if (fimEl) fimEl.value = today;
+        this.salvarFiltros();
+        await this.load();
+        return;
+      }
+
       if (button.id === 'vendasFiltrarBtn') {
         event.preventDefault();
         await this.load();
@@ -455,6 +484,14 @@ const VendasModule = {
               <strong id="vendasStatsItens">0</strong>
             </div>
           </div>
+        </div>
+
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 0 2px">
+          <span style="font-size:12px;color:var(--text-muted);font-weight:700;white-space:nowrap">Período rápido:</span>
+          <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-preset="hoje">Hoje</button>
+          <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-preset="semana">Esta semana</button>
+          <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-preset="mes">Este mês</button>
+          <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-preset="trimestre">3 meses</button>
         </div>
 
         <div class="vendas-filters-grid">

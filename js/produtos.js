@@ -23,7 +23,9 @@ const ProdutosModule = {
     initialized: false,
     eventsBound: false,
     activeTab: 'dados',
-    selectedIds: new Set(),  // IDs selecionados para impressão em lote
+    selectedIds: new Set(),
+    filtroCategoria: '',
+    filtroAlerta: '',
     // grade
     grades: [],
     // kit
@@ -104,6 +106,14 @@ const ProdutosModule = {
 
     document.addEventListener('input', (e) => {
       if (e.target?.id === 'produtosSearchInput') this.applySearch(e.target.value);
+    });
+
+    document.addEventListener('change', (e) => {
+      if (e.target.id === 'produtosFiltroCategoria' || e.target.id === 'produtosFiltroAlerta') {
+        this.state.filtroCategoria = document.getElementById('produtosFiltroCategoria')?.value || '';
+        this.state.filtroAlerta    = document.getElementById('produtosFiltroAlerta')?.value || '';
+        this.applySearch(document.getElementById('produtosSearchInput')?.value || '');
+      }
     });
 
     // Checkboxes de seleção para impressão em lote
@@ -228,6 +238,7 @@ const ProdutosModule = {
       this.state.selectedIds.clear();
       this.atualizarBotaoLote();
       this.renderStats();
+      this.popularCategorias();
       this.renderTable();
       this.toggleEmptyState();
       this.showModuleMessage('', 'info');
@@ -306,12 +317,28 @@ const ProdutosModule = {
   },
 
   applySearch(term) {
-    const q = String(term||'').trim().toLowerCase();
-    this.state.filteredItems = q
-      ? this.state.items.filter((i) => [i.nome, i.categoria, i.codigo_barras].filter(Boolean).some((f) => String(f).toLowerCase().includes(q)))
-      : [...this.state.items];
+    const q    = String(term||'').trim().toLowerCase();
+    const cat  = this.state.filtroCategoria || '';
+    const alrt = this.state.filtroAlerta    || '';
+
+    this.state.filteredItems = this.state.items.filter((i) => {
+      if (q && ![i.nome, i.categoria, i.codigo_barras].filter(Boolean).some((f) => String(f).toLowerCase().includes(q))) return false;
+      if (cat && (i.categoria || '') !== cat) return false;
+      if (alrt === 'alerta' && !Boolean(i.alerta_estoque)) return false;
+      if (alrt === 'ok'     && Boolean(i.alerta_estoque))  return false;
+      return true;
+    });
     this.renderTable();
     this.toggleEmptyState();
+  },
+
+  popularCategorias() {
+    const sel = document.getElementById('produtosFiltroCategoria');
+    if (!sel) return;
+    const cats = [...new Set(this.state.items.map((i) => i.categoria).filter(Boolean))].sort();
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">Todas as categorias</option>' +
+      cats.map((c) => `<option value="${escapeHtml(c)}" ${prev === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
   },
 
   // ── Modal ──────────────────────────────────────────────────────────────────
@@ -346,6 +373,16 @@ const ProdutosModule = {
           <div class="module-toolbar__search">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="produtosSearchInput" placeholder="Buscar por nome, categoria ou código" />
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="produtosFiltroCategoria" class="input" style="height:38px;min-width:150px;font-size:13px">
+              <option value="">Todas as categorias</option>
+            </select>
+            <select id="produtosFiltroAlerta" class="input" style="height:38px;min-width:140px;font-size:13px">
+              <option value="">Todos os status</option>
+              <option value="alerta">Em alerta</option>
+              <option value="ok">Estoque ok</option>
+            </select>
           </div>
           <div class="module-toolbar__stats">
             <div class="mini-stat"><span>Total</span><strong id="produtosStatsTotal">0</strong></div>

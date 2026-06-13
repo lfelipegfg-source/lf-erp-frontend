@@ -1,7 +1,7 @@
 import api from './api.js';
 import { exportCSV, numCSV } from './exportUtils.js';
 import { showToast } from './feedback.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, todayFortaleza } from './utils.js';
 
 const state = {
   resumo: null,
@@ -109,6 +109,9 @@ function render() {
         </div>
 
         <div class="module-card__actions">
+          <button class="btn btn-light" id="btnImprimirRelatorios">
+            <i class="fa-solid fa-print"></i> Imprimir PDF
+          </button>
           <button class="btn btn-light" id="btnExportarRelatorios">
             <i class="fa-solid fa-file-csv"></i> Exportar CSV
           </button>
@@ -116,6 +119,15 @@ function render() {
             Atualizar
           </button>
         </div>
+      </div>
+
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 0 4px">
+        <span style="font-size:12px;color:var(--text-muted);font-weight:700;white-space:nowrap">Período rápido:</span>
+        <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="hoje">Hoje</button>
+        <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="semana">Esta semana</button>
+        <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="mes">Este mês</button>
+        <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="trimestre">3 meses</button>
+        <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="ano">Este ano</button>
       </div>
 
       <div class="module-toolbar">
@@ -984,6 +996,39 @@ function bindEventos() {
     ?.addEventListener('click', async () => {
       await recarregarModulo('Relatórios atualizados.');
     });
+
+  document
+    .getElementById('btnImprimirRelatorios')
+    ?.addEventListener('click', () => { window.print(); });
+
+  document.querySelectorAll('[data-rel-preset]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const today = todayFortaleza();
+      const [y, m] = today.split('-').map(Number);
+      let ini = today;
+      const preset = btn.dataset.relPreset;
+      if (preset === 'hoje') {
+        ini = today;
+      } else if (preset === 'semana') {
+        const d = new Date(`${today}T12:00:00`);
+        d.setDate(d.getDate() - d.getDay());
+        ini = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      } else if (preset === 'mes') {
+        ini = `${y}-${String(m).padStart(2,'0')}-01`;
+      } else if (preset === 'trimestre') {
+        let tm = m - 3, ty = y;
+        if (tm <= 0) { tm += 12; ty -= 1; }
+        ini = `${ty}-${String(tm).padStart(2,'0')}-01`;
+      } else if (preset === 'ano') {
+        ini = `${y}-01-01`;
+      }
+      const iniEl = document.getElementById('filtroDataInicial');
+      const fimEl = document.getElementById('filtroDataFinal');
+      if (iniEl) iniEl.value = ini;
+      if (fimEl) fimEl.value = today;
+      await recarregarModulo('Período atualizado.');
+    });
+  });
 
   document.querySelectorAll('[data-aba]').forEach((btn) => {
     btn.addEventListener('click', () => {

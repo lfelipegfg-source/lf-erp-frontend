@@ -263,8 +263,13 @@ const FornecedoresModule = {
     }
 
     this.el.table.innerHTML = this.state.filteredItems
-      .map(
-        (fornecedor) => `
+      .map((fornecedor) => {
+        const totalCompras = Number(fornecedor.total_compras || 0);
+        const valorCompras = Number(fornecedor.valor_total_compras || 0);
+        const comprasHtml = totalCompras > 0
+          ? `<span style="display:inline-block;margin-top:3px;padding:1px 8px;background:rgba(37,99,235,0.08);color:var(--primary,#2563eb);border-radius:99px;font-size:11px;font-weight:700">${totalCompras} compra(s) · ${valorCompras.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</span>`
+          : '';
+        return `
       <tr>
         <td>
           <div class="table-primary">
@@ -272,6 +277,7 @@ const FornecedoresModule = {
             <small style="display:block; color: var(--text-muted); margin-top:4px;">
               ID: ${fornecedor.id}
             </small>
+            ${comprasHtml}
           </div>
         </td>
 
@@ -291,8 +297,8 @@ const FornecedoresModule = {
           </div>
         </td>
       </tr>
-    `
-      )
+    `;
+      })
       .join('');
   },
 
