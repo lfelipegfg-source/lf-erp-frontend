@@ -871,8 +871,7 @@ function getStatusBadgeClass(status) {
 function getVencimentoInfo(dataVencimento) {
   if (!dataVencimento) return 'Sem vencimento';
 
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+  const hoje = new Date(`${todayFortaleza()}T00:00:00`);
 
   const vencimento = new Date(`${dataVencimento}T00:00:00`);
 

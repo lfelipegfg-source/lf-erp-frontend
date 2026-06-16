@@ -1,7 +1,7 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { gerarPIX } from './pix.js';
-import { escapeHtml, buildFriendlyError } from './utils.js';
+import { escapeHtml, buildFriendlyError, todayFortaleza } from './utils.js';
 
 const state = {
   contas: [],
@@ -1436,7 +1436,7 @@ function getStatusBadgeClass(status) {
 function getDiasAtrasoHtml(status, dataVencimento) {
   if (status !== 'atrasado' && status !== 'parcial_atrasado') return '';
   if (!dataVencimento) return '';
-  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  const hoje = new Date(`${todayFortaleza()}T00:00:00`);
   const venc = new Date(`${dataVencimento}T00:00:00`);
   if (isNaN(venc.getTime())) return '';
   const dias = Math.round((hoje.getTime() - venc.getTime()) / 86400000);
@@ -1447,8 +1447,7 @@ function getDiasAtrasoHtml(status, dataVencimento) {
 function getVencimentoInfo(dataVencimento) {
   if (!dataVencimento) return 'Sem vencimento';
 
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+  const hoje = new Date(`${todayFortaleza()}T00:00:00`);
 
   const vencimento = new Date(`${dataVencimento}T00:00:00`);
 
