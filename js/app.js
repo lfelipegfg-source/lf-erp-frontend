@@ -35,7 +35,7 @@ import { initFidelidadeModule } from './fidelidade.js';
 import { initCheckoutLinksModule } from './checkoutLinks.js';
 import { initFiliaisModule } from './filiais.js';
 import { initBiModule } from './bi.js';
-import { login as authLogin, logout as authLogout, getAuth, validateSession, scheduleTokenRefresh } from './auth.js';
+import { login as authLogin, logout as authLogout, getAuth, validateSession, scheduleTokenRefresh, saveAuth } from './auth.js';
 
 const AppState = {
   isAuthenticated: false,
@@ -219,7 +219,7 @@ function bindLoginEvents() {
         empresaId: data.empresa?.id,
         user: { ...data.user, empresa_id: data.empresa?.id, empresa: data.empresa?.nome }
       };
-      authLogin(authPayload, true);
+      saveAuth(authPayload, true);
       scheduleTokenRefresh();
 
       document.getElementById('registroScreen')?.classList.add('hidden');
