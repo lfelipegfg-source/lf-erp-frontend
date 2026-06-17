@@ -88,6 +88,9 @@ const ProdutosModule = {
       tabImagens:     document.getElementById('produtoTabImagens'),
       tabGrade:       document.getElementById('produtoTabGrade'),
       tabKit:         document.getElementById('produtoTabKit'),
+      colsBtn:        document.getElementById('produtosColsBtn'),
+      colsDropdown:   document.getElementById('colPickerDropdown'),
+      produtosTable:  document.querySelector('#produtosSection .data-table'),
     };
   },
 
@@ -222,6 +225,47 @@ const ProdutosModule = {
     document.addEventListener('click', (e) => {
       if (e.target === document.getElementById('produtoModal')) this.closeModal();
     });
+
+    // ── Col-picker (colunas configuráveis)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#produtosColsBtn');
+      const dropdown = document.getElementById('colPickerDropdown');
+      if (!dropdown) return;
+      if (btn) { dropdown.classList.toggle('hidden'); return; }
+      if (!e.target.closest('#colPickerDropdown') && !e.target.closest('#colPickerWrapper')) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    document.addEventListener('change', (e) => {
+      if (!e.target.matches('#colPickerDropdown input[data-col]')) return;
+      const col = e.target.dataset.col;
+      const table = document.querySelector('#produtosSection .data-table');
+      if (!table) return;
+      table.classList.toggle(`hide-col-${col}`, !e.target.checked);
+      this._saveColState();
+    });
+  },
+
+  _saveColState() {
+    const checks = document.querySelectorAll('#colPickerDropdown input[data-col]');
+    const state = {};
+    checks.forEach((chk) => { state[chk.dataset.col] = chk.checked; });
+    localStorage.setItem('lf_cols_produtos', JSON.stringify(state));
+  },
+
+  _restoreColState() {
+    const table = document.querySelector('#produtosSection .data-table');
+    if (!table) return;
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem('lf_cols_produtos') || 'null'); } catch { saved = null; }
+    const checks = document.querySelectorAll('#colPickerDropdown input[data-col]');
+    checks.forEach((chk) => {
+      const col = chk.dataset.col;
+      const visible = saved ? (saved[col] !== false) : true;
+      chk.checked = visible;
+      table.classList.toggle(`hide-col-${col}`, !visible);
+    });
   },
 
   // ── Load & Render ──────────────────────────────────────────────────────────
@@ -229,6 +273,7 @@ const ProdutosModule = {
   async load() {
     this.resolveEmpresa();
     this.cacheElements();
+    this._restoreColState();
     if (!this.state.empresa) { this.showModuleMessage('Empresa não identificada.', 'error'); return; }
     this.setLoading(true);
     this.showModuleMessage('Carregando...', 'info');
@@ -356,7 +401,7 @@ const ProdutosModule = {
     const container = document.getElementById('produtosContainer');
     if (!container) return;
     container.innerHTML = `
-      <section class="module-card">
+      <section class="module-card" id="produtosSection">
         <div class="module-card__header">
           <div><h3>Produtos</h3><p>Cadastro, edição, estoque e consulta</p></div>
           <div class="module-card__actions">
@@ -374,6 +419,24 @@ const ProdutosModule = {
               <i class="fa-solid fa-calendar-day"></i> Etiquetas de Hoje
             </button>
             <button type="button" class="btn btn-light" id="produtosExportBtn"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
+            <div class="col-picker-wrapper" id="colPickerWrapper">
+              <button type="button" class="btn btn-light" id="produtosColsBtn" title="Configurar colunas visíveis">
+                <i class="fa-solid fa-table-columns"></i>
+              </button>
+              <div class="col-picker-dropdown hidden" id="colPickerDropdown">
+                <div class="col-picker-dropdown__title">Colunas visíveis</div>
+                <label class="col-picker-item"><input type="checkbox" data-col="2" /> Produto</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="3" /> Categoria</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="4" /> Código</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="5" /> Preço</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="6" /> Custo Médio</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="7" /> Lucro</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="8" /> Margem</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="9" /> Estoque</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="10" /> Mínimo</label>
+                <label class="col-picker-item"><input type="checkbox" data-col="11" /> Status</label>
+              </div>
+            </div>
             <button type="button" class="btn btn-light" id="produtosRefreshBtn"><i class="fa-solid fa-rotate"></i> Atualizar</button>
             <button type="button" class="btn btn-primary" id="produtosNewBtn"><i class="fa-solid fa-plus"></i> Novo produto</button>
           </div>

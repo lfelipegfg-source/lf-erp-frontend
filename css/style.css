@@ -5486,3 +5486,161 @@ select {
   #cmdPaletteOverlay { padding: 12px; align-items: flex-start; padding-top: 60px; }
   .cmd-palette { border-radius: 14px; }
 }
+
+/* ── WIZARD DE BOAS-VINDAS ───────────────────────────────────────────────── */
+
+.wizard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .6);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.wizard-card {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 36px 32px 28px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, .28);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.wizard-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--primary-soft, rgba(37, 99, 235, .12));
+  color: var(--primary);
+  font-size: 1.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.wizard-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: var(--text);
+}
+
+.wizard-text {
+  color: var(--text-muted);
+  font-size: .9rem;
+  margin: 0 0 24px;
+  line-height: 1.65;
+}
+
+.wizard-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.wizard-dot {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: width .2s, background .2s;
+  width: 8px;
+}
+
+.wizard-dot.active {
+  width: 24px;
+  background: var(--primary);
+}
+
+.wizard-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.wizard-skip {
+  margin-top: 14px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.wizard-skip:hover { color: var(--text); }
+
+/* ── COLUNAS CONFIGURÁVEIS ───────────────────────────────────────────────── */
+
+.col-picker-wrapper { position: relative; }
+
+.col-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  min-width: 196px;
+  z-index: 200;
+  padding: 6px 0;
+}
+
+.col-picker-dropdown.hidden { display: none; }
+
+.col-picker-dropdown__title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 14px 4px;
+}
+
+.col-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  user-select: none;
+}
+
+.col-picker-item:hover { background: var(--surface-2); }
+
+.col-picker-item input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* Produto table — column hiding by nth-child */
+#produtosSection .data-table.hide-col-2 th:nth-child(2), #produtosSection .data-table.hide-col-2 td:nth-child(2) { display: none; }
+#produtosSection .data-table.hide-col-3 th:nth-child(3), #produtosSection .data-table.hide-col-3 td:nth-child(3) { display: none; }
+#produtosSection .data-table.hide-col-4 th:nth-child(4), #produtosSection .data-table.hide-col-4 td:nth-child(4) { display: none; }
+#produtosSection .data-table.hide-col-5 th:nth-child(5), #produtosSection .data-table.hide-col-5 td:nth-child(5) { display: none; }
+#produtosSection .data-table.hide-col-6 th:nth-child(6), #produtosSection .data-table.hide-col-6 td:nth-child(6) { display: none; }
+#produtosSection .data-table.hide-col-7 th:nth-child(7), #produtosSection .data-table.hide-col-7 td:nth-child(7) { display: none; }
+#produtosSection .data-table.hide-col-8 th:nth-child(8), #produtosSection .data-table.hide-col-8 td:nth-child(8) { display: none; }
+#produtosSection .data-table.hide-col-9 th:nth-child(9), #produtosSection .data-table.hide-col-9 td:nth-child(9) { display: none; }
+#produtosSection .data-table.hide-col-10 th:nth-child(10), #produtosSection .data-table.hide-col-10 td:nth-child(10) { display: none; }
+#produtosSection .data-table.hide-col-11 th:nth-child(11), #produtosSection .data-table.hide-col-11 td:nth-child(11) { display: none; }

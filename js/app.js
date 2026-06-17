@@ -1993,33 +1993,45 @@ function wait(ms) {
 function mostrarWizardBoasVindas(nomeEmpresa) {
   if (document.getElementById('wizardBoasVindas')) return;
 
-  const wizard = document.createElement('div');
-  wizard.id = 'wizardBoasVindas';
-  wizard.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+  const overlay = document.createElement('div');
+  overlay.id = 'wizardBoasVindas';
+  overlay.className = 'wizard-overlay';
 
   const steps = [
     {
       icon: 'fa-rocket',
-      titulo: `Bem-vindo ao LF ERP!`,
-      texto: `Sua conta <strong>${nomeEmpresa || ''}</strong> foi criada com sucesso. Você tem <strong>14 dias</strong> para explorar tudo gratuitamente.`,
-      btn: 'Configurar minha empresa'
+      titulo: 'Bem-vindo ao LF ERP!',
+      texto: `Sua conta <strong>${nomeEmpresa || 'sua empresa'}</strong> foi criada com sucesso. Você tem <strong>14 dias grátis</strong> para explorar tudo sem cartão de crédito.`,
+      btn: 'Vamos começar'
     },
     {
-      icon: 'fa-box',
-      titulo: 'Adicione seu primeiro produto',
-      texto: 'Cadastre produtos no menu <strong>Cadastros → Produtos</strong> para começar a vender. Você pode importar depois também.',
+      icon: 'fa-gear',
+      titulo: 'Configure sua empresa',
+      texto: 'Acesse <strong>Configurações</strong> para adicionar logo, CNPJ, endereço e personalizar os dados da empresa nos documentos.',
+      btn: 'Ir para Configurações'
+    },
+    {
+      icon: 'fa-box-open',
+      titulo: 'Adicione seus produtos',
+      texto: 'Cadastre produtos em <strong>Cadastros → Produtos</strong>. Defina preço, custo, estoque mínimo e categorias para controle completo.',
       btn: 'Ir para Produtos'
     },
     {
+      icon: 'fa-users',
+      titulo: 'Cadastre seus clientes',
+      texto: 'Em <strong>Cadastros → Clientes</strong> você registra clientes, histórico de compras e acesso ao portal de segunda via.',
+      btn: 'Ir para Clientes'
+    },
+    {
       icon: 'fa-cash-register',
-      titulo: 'PDV pronto para usar',
-      texto: 'Use o <strong>PDV</strong> para registrar vendas rapidamente. Funciona no celular, tablet e computador.',
+      titulo: 'PDV pronto para vender',
+      texto: 'Use o <strong>PDV</strong> para registrar vendas rapidamente com atalhos de teclado. Funciona no celular, tablet e computador.',
       btn: 'Ir para o PDV'
     },
     {
       icon: 'fa-circle-check',
       titulo: 'Tudo pronto!',
-      texto: 'Seu sistema está configurado. Explore os módulos no menu lateral. Em caso de dúvida, acesse <strong>Ajuda</strong> a qualquer momento.',
+      texto: 'Explore os módulos no menu lateral. Pressione <strong>Ctrl+K</strong> para busca rápida ou <strong>?</strong> para ver todos os atalhos.',
       btn: 'Ir para o Dashboard'
     }
   ];
@@ -2029,48 +2041,45 @@ function mostrarWizardBoasVindas(nomeEmpresa) {
   function renderStep() {
     const s = steps[currentStep];
     const isLast = currentStep === steps.length - 1;
-    wizard.innerHTML = `
-      <div style="background:var(--surface);border-radius:20px;padding:32px;max-width:480px;width:100%;box-shadow:0 30px 60px rgba(0,0,0,.3);text-align:center">
-        <div style="width:64px;height:64px;border-radius:50%;background:var(--primary-soft,rgba(37,99,235,.12));color:var(--primary);font-size:1.8rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-          <i class="fa-solid ${s.icon}"></i>
+    overlay.innerHTML = `
+      <div class="wizard-card">
+        <div class="wizard-icon"><i class="fa-solid ${s.icon}"></i></div>
+        <h3 class="wizard-title">${s.titulo}</h3>
+        <p class="wizard-text">${s.texto}</p>
+        <div class="wizard-dots">
+          ${steps.map((_, i) => `<div class="wizard-dot${i === currentStep ? ' active' : ''}"></div>`).join('')}
         </div>
-        <h3 style="font-size:1.25rem;font-weight:800;margin:0 0 10px">${s.titulo}</h3>
-        <p style="color:var(--text-muted);font-size:.95rem;margin:0 0 24px;line-height:1.6">${s.texto}</p>
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px">
-          ${steps.map((_, i) => `<div style="width:${i===currentStep?24:8}px;height:8px;border-radius:999px;background:${i===currentStep?'var(--primary)':'var(--border)'};transition:all .2s"></div>`).join('')}
-        </div>
-        <div style="display:flex;gap:10px;justify-content:center">
-          ${currentStep > 0 ? `<button id="_wzVoltar" class="btn-cancel">Voltar</button>` : ''}
-          <button id="_wzProximo" class="btn-confirm" style="font-size:14px;padding:10px 24px">
-            ${isLast ? `<i class="fa-solid fa-check"></i> ` : ''}${s.btn}
+        <div class="wizard-actions">
+          ${currentStep > 0 ? `<button id="_wzVoltar" class="btn btn-light">Voltar</button>` : ''}
+          <button id="_wzProximo" class="btn btn-primary">
+            ${isLast ? '<i class="fa-solid fa-check"></i> ' : ''}${s.btn}
           </button>
         </div>
-        <button id="_wzPular" style="margin-top:14px;background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:underline;display:block;margin-inline:auto">Pular tutorial</button>
+        <button class="wizard-skip" id="_wzPular">Pular tutorial</button>
       </div>`;
 
     document.getElementById('_wzProximo')?.addEventListener('click', async () => {
-      if (currentStep === steps.length - 1) {
-        wizard.remove();
-        return;
-      }
+      if (currentStep === steps.length - 1) { overlay.remove(); return; }
       currentStep++;
       renderStep();
-      // Navega para a view relevante ao avançar
-      if (currentStep === 1) await setActiveView('produtos');
-      if (currentStep === 2) await setActiveView('pdv');
-      if (currentStep === 3) await setActiveView('dashboard');
+      if (currentStep === 1) await setActiveView('configuracoes');
+      if (currentStep === 2) await setActiveView('produtos');
+      if (currentStep === 3) await setActiveView('clientes');
+      if (currentStep === 4) await setActiveView('pdv');
+      if (currentStep === 5) await setActiveView('dashboard');
     });
 
-    document.getElementById('_wzVoltar')?.addEventListener('click', () => {
-      currentStep--;
-      renderStep();
-    });
-
-    document.getElementById('_wzPular')?.addEventListener('click', () => wizard.remove());
+    document.getElementById('_wzVoltar')?.addEventListener('click', () => { currentStep--; renderStep(); });
+    document.getElementById('_wzPular')?.addEventListener('click', () => overlay.remove());
   }
 
   renderStep();
-  document.body.appendChild(wizard);
+  document.body.appendChild(overlay);
+}
+
+function reiniciarWizard() {
+  const nome = AppState.empresa?.nome || AppState.user?.empresa || '';
+  mostrarWizardBoasVindas(nome);
 }
 
 // Registro do Service Worker (PWA)
@@ -2228,3 +2237,8 @@ function _cpUpdateSelection(items) {
   items.forEach((btn, i) => btn.classList.toggle('selected', i === _cpSelectedIdx));
   if (_cpSelectedIdx >= 0) items[_cpSelectedIdx]?.scrollIntoView({ block: 'nearest' });
 }
+
+// Exposição global para handlers inline no HTML
+window.openShortcutsModal  = openShortcutsModal;
+window.closeShortcutsModal = closeShortcutsModal;
+window.reiniciarWizard     = reiniciarWizard;
