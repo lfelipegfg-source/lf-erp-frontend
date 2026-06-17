@@ -505,7 +505,7 @@ async function pagarConta(id) {
         <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar pagamento</h3>
         <div style="margin-bottom:16px">
           <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Valor pago (R$)</label>
-          <input id="_pagarValorInput" type="number" min="0.01" step="0.01" placeholder="Deixe em branco para pagar total" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+          <input id="_pagarValorInput" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Deixe em branco para pagar total" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
         </div>
         <div style="margin-bottom:16px">
           <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Data do pagamento</label>

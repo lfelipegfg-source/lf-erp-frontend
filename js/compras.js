@@ -351,7 +351,7 @@ const ComprasModule = {
 
             <div class="form-field">
               <label for="compraCustoUnitario">Custo unitário</label>
-              <input type="number" id="compraCustoUnitario" min="0" step="0.01" value="0" />
+              <input type="number" id="compraCustoUnitario" min="0" step="0.01" inputmode="decimal" value="0" />
             </div>
 
             <div class="form-field">

@@ -1348,7 +1348,7 @@ const VendasModule = {
           <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar recebimento</h3>
           <div style="margin-bottom:12px">
             <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Valor pago (R$)</label>
-            <input id="_bpValor" type="number" step="0.01" min="0.01" value="${valorSugerido.toFixed(2)}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+            <input id="_bpValor" type="number" step="0.01" min="0.01" inputmode="decimal" value="${valorSugerido.toFixed(2)}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
           </div>
           <div style="margin-bottom:20px">
             <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Data do pagamento</label>
@@ -2335,7 +2335,7 @@ const VendasModule = {
   },
 
   async excluirMeta(id, periodo) {
-    if (!confirm('Excluir esta meta?')) return;
+    if (!await confirmarAcao('Excluir esta meta?', 'Excluir', 'danger')) return;
     try {
       await api.request(`/metas-vendas/${id}`, { method: 'DELETE' });
       showToast('Meta excluída', 'success');

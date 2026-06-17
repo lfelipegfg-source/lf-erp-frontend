@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const STATUS_BADGE = {
   rascunho:   'badge--info',
@@ -215,7 +215,7 @@ const OrcamentosModule = {
         await api.recusarOrcamento(id);
         showToast('Orçamento recusado.', 'info');
       } else if (acao === 'excluir') {
-        if (!confirm('Excluir este orçamento em rascunho?')) return;
+        if (!await confirmarAcao('Excluir este orçamento em rascunho?', 'Excluir', 'danger')) return;
         await api.deleteOrcamento(id);
         showToast('Orçamento excluído.', 'success');
       } else if (acao === 'converter') {

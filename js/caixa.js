@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const CaixaModule = {
   state: {
@@ -282,7 +282,7 @@ const CaixaModule = {
     document.getElementById('caixaFecharBtn')?.addEventListener('click', async () => {
       const saldoContado = Number(document.getElementById('caixaSaldoFechamento')?.value);
       if (isNaN(saldoContado)) { showToast('Informe o saldo contado para fechar.', 'error'); return; }
-      if (!confirm(`Fechar o caixa com saldo contado de ${this.fmtCur(saldoContado)}?`)) return;
+      if (!await confirmarAcao(`Fechar o caixa com saldo contado de ${this.fmtCur(saldoContado)}?`, 'Fechar caixa', 'warning')) return;
 
       const btn = document.getElementById('caixaFecharBtn');
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Fechando...'; }

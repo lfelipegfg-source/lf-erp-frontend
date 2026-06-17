@@ -828,6 +828,7 @@ function abrirModalBaixaConta(conta) {
               max="${valorAtual}"
               id="crBaixaValor"
               class="input"
+              inputmode="decimal"
               value="${valorAtual}"
             />
             <small>Para baixa parcial, informe somente o valor recebido.</small>
@@ -2139,6 +2140,7 @@ function abrirModalContaManual() {
               step="0.01"
               id="crManualValor"
               class="input"
+              inputmode="decimal"
               placeholder="0,00"
             />
           </div>

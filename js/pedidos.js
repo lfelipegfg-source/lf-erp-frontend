@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const STATUS_BADGE = {
   pendente:      'badge--warning',
@@ -201,7 +201,7 @@ const PedidosModule = {
         await api.separacaoPedido(id);
         showToast('Pedido em separação.', 'success');
       } else if (acao === 'cancelar') {
-        if (!confirm('Cancelar este pedido?')) { if (btnEl) btnEl.disabled = false; return; }
+        if (!await confirmarAcao('Cancelar este pedido?', 'Cancelar', 'danger')) { if (btnEl) btnEl.disabled = false; return; }
         await api.cancelarPedido(id);
         showToast('Pedido cancelado.', 'info');
       } else if (acao === 'converter') {

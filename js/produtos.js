@@ -180,7 +180,7 @@ const ProdutosModule = {
         this.closeModal(); return;
       }
       if (t.dataset.action === 'etiqueta') { this.abrirEtiqueta(Number(t.dataset.id)); return; }
-      if (t.dataset.action === 'edit')    { this.openEditModal(Number(t.dataset.id)); return; }
+      if (t.dataset.action === 'edit')    { this.openEditModal(Number(t.dataset.id)).catch((err) => { console.error('Erro ao abrir modal de edição:', err); showToast('Erro ao abrir produto para edição.', 'error'); }); return; }
       if (t.dataset.action === 'delete')  { await this.handleDelete(Number(t.dataset.id)); return; }
 
       // ── tabs
@@ -1294,7 +1294,7 @@ const ProdutosModule = {
   },
 
   async _desvincular(id) {
-    if (!confirm('Remover vínculo com esta plataforma?')) return;
+    if (!await confirmarAcao('Remover vínculo com esta plataforma?', 'Remover', 'danger')) return;
     try {
       await api.request(`/marketplace/vincular/${id}`, { method: 'DELETE' });
       showToast('Vínculo removido', 'success');

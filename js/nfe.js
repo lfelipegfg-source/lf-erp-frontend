@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast } from './feedback.js';
+import { showToast, confirmarAcao } from './feedback.js';
 
 const NfeModule = {
   state: {
@@ -793,7 +793,7 @@ const NfeModule = {
 
       corpo.querySelectorAll('[data-nfse-cancelar]').forEach((btn) => {
         btn.addEventListener('click', async () => {
-          if (!confirm('Cancelar esta NFS-e?')) return;
+          if (!await confirmarAcao('Cancelar esta NFS-e?', 'Cancelar', 'danger')) return;
           try {
             await api.request(`/nfse/cancelar/${btn.dataset.nfseCancelar}`, { method: 'POST', body: {} });
             showToast('Cancelamento solicitado!', 'success');

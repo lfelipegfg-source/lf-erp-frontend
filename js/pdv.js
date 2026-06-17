@@ -1248,6 +1248,7 @@ const PDVModule = {
                 placeholder="0"
                 class="pdv-item-desc"
                 data-index="${index}"
+                inputmode="decimal"
                 style="width:56px;text-align:center;padding:4px 6px;border:1px solid var(--border);border-radius:8px;font-size:.88rem;background:var(--surface)"
               />
             </td>
@@ -1382,7 +1383,7 @@ const PDVModule = {
         <div class="pdv-split-row" data-idx="${i}">
           <select class="pdv-split-forma form-control" data-idx="${i}">${opcoesForma}</select>
           <input type="number" class="pdv-split-valor form-control" data-idx="${i}"
-            min="0" step="0.01" value="${Number(p.valor || 0).toFixed(2)}" />
+            min="0" step="0.01" inputmode="decimal" value="${Number(p.valor || 0).toFixed(2)}" />
           ${ehPromissoria ? `
             <div class="pdv-split-promissoria">
               <select class="pdv-split-parcelas form-control" data-idx="${i}">
