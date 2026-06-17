@@ -486,7 +486,7 @@ const FidelidadeModule = {
       .fid-regras { display:flex; flex-direction:column; gap:8px; font-size:13px; color:var(--text-muted); max-width:420px; }
       .fid-regras i { color:#f59e0b; margin-right:6px; }
 
-      .fid-alert { background:var(--warning-soft); border:1px solid #fcd34d; border-radius:10px; padding:12px 16px; font-size:13px; color:#92400e; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+      .fid-alert { background:var(--warning-soft); border:1px solid var(--warning); border-radius:10px; padding:12px 16px; font-size:13px; color:var(--warning); margin-bottom:20px; display:flex; align-items:center; gap:8px; }
       .fid-info-box { padding:12px 16px; background:var(--surface-2); border-radius:8px; font-size:12px; color:var(--text-muted); display:flex; gap:8px; }
       .fid-success-box { background:var(--success-soft); border:1px solid #86efac; border-radius:10px; padding:14px 16px; font-size:13px; display:flex; align-items:flex-start; gap:10px; color:var(--success); }
 

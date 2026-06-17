@@ -435,7 +435,7 @@ const WhatsappModule = {
       .wpp-resumo-item strong { font-size:1.4rem; font-weight:700; }
       .wpp-resumo-item span { font-size:11px; color:var(--text-muted); }
       .wpp-resumo-item--ok   { background:var(--success-soft); color:var(--success); }
-      .wpp-resumo-item--link { background:#ede9fe; color:#7c3aed; }
+      .wpp-resumo-item--link { background:var(--accent-purple-soft); color:var(--accent-purple); }
       .wpp-resumo-item--err  { background:var(--danger-soft); color:var(--danger); }
     `;
     document.head.appendChild(s);

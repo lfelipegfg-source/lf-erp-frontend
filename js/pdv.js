@@ -1976,7 +1976,7 @@ const PDVModule = {
                 <i class="fa-solid fa-clock"></i> Aguardando pagamento...
               </div>
             </div>
-            <div id="_pixErroArea" style="display:none;color:#ef4444;font-size:13px;padding:12px;background:#fef2f2;border-radius:10px;margin-top:8px"></div>
+            <div id="_pixErroArea" style="display:none;color:var(--danger);font-size:13px;padding:12px;background:var(--danger-soft);border-radius:10px;margin-top:8px"></div>
           </div>
           <div id="_pixSucessoArea" style="display:none">
             <div style="font-size:56px;color:#22c55e;margin-bottom:12px"><i class="fa-solid fa-circle-check"></i></div>

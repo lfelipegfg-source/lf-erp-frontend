@@ -1921,7 +1921,7 @@ function injectContasReceberStyles() {
 .cr-detail-card select:focus,
 .cr-detail-card textarea:focus {
   border-color: var(--primary);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 

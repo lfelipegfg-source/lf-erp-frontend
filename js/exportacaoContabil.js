@@ -313,28 +313,28 @@ const ExportacaoModule = {
           </div>
         </div>
         <div class="exp-kpi-card">
-          <div class="exp-kpi-icon" style="background:#fce7f3;color:#db2777"><i class="fa fa-truck"></i></div>
+          <div class="exp-kpi-icon" style="background:var(--danger-soft);color:var(--danger)"><i class="fa fa-truck"></i></div>
           <div class="exp-kpi-body">
             <div class="exp-kpi-label">Compras (${p.compras.qtd})</div>
             <div class="exp-kpi-value">${brl(p.compras.total)}</div>
           </div>
         </div>
         <div class="exp-kpi-card">
-          <div class="exp-kpi-icon" style="background:#d1fae5;color:#059669"><i class="fa fa-arrow-down-to-line"></i></div>
+          <div class="exp-kpi-icon" style="background:var(--success-soft);color:var(--success)"><i class="fa fa-arrow-down-to-line"></i></div>
           <div class="exp-kpi-body">
             <div class="exp-kpi-label">A Receber (em aberto)</div>
             <div class="exp-kpi-value">${brl(p.cr_pendente)}</div>
           </div>
         </div>
         <div class="exp-kpi-card">
-          <div class="exp-kpi-icon" style="background:#fee2e2;color:#dc2626"><i class="fa fa-arrow-up-from-line"></i></div>
+          <div class="exp-kpi-icon" style="background:var(--danger-soft);color:var(--danger)"><i class="fa fa-arrow-up-from-line"></i></div>
           <div class="exp-kpi-body">
             <div class="exp-kpi-label">A Pagar (em aberto)</div>
             <div class="exp-kpi-value">${brl(p.cp_pendente)}</div>
           </div>
         </div>
         <div class="exp-kpi-card exp-kpi-card--resultado">
-          <div class="exp-kpi-icon" style="background:${res >= 0 ? '#d1fae5' : '#fee2e2'};color:${resCor}"><i class="fa ${resIcon}"></i></div>
+          <div class="exp-kpi-icon" style="background:${res >= 0 ? 'var(--success-soft)' : 'var(--danger-soft)'};color:${resCor}"><i class="fa ${resIcon}"></i></div>
           <div class="exp-kpi-body">
             <div class="exp-kpi-label">Resultado Operacional</div>
             <div class="exp-kpi-value" style="color:${resCor}">${brl(res)}</div>

@@ -557,8 +557,8 @@ const RastreabilidadeModule = {
     s.textContent = `
       .rast-kpis { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
       .rast-kpi { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 18px; min-width:120px; flex:1; }
-      .rast-kpi--danger { border-color:#fca5a5; background:#fff5f5; }
-      .rast-kpi--warn   { border-color:#fcd34d; background:#fffbeb; }
+      .rast-kpi--danger { border-color:var(--danger);  background:var(--danger-soft); }
+      .rast-kpi--warn   { border-color:var(--warning); background:var(--warning-soft); }
       .rast-kpi-label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
       .rast-kpi-val { font-size:1.6rem; font-weight:700; }
       .rast-kpi--danger .rast-kpi-val { color:var(--danger); }
