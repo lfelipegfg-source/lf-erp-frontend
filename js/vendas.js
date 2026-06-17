@@ -570,6 +570,9 @@ const VendasModule = {
           <i class="fa-solid fa-cart-shopping"></i>
           <strong>Nenhuma venda encontrada</strong>
           <p>Tente ajustar os filtros ou registre uma nova venda pelo PDV.</p>
+          <button class="btn btn-primary" onclick="document.querySelector('.nav-item[data-view=pdv], .nav-subitem[data-view=pdv]')?.click()">
+            <i class="fa-solid fa-cash-register"></i> Ir para o PDV
+          </button>
         </div>
       </section>
     `;
@@ -761,7 +764,8 @@ const VendasModule = {
     const isEmpty = !this.state.vendasFiltradas.length;
 
     this.el.empty.classList.toggle('hidden', !isEmpty);
-    this.el.empty.textContent = customMessage || 'Nenhuma venda encontrada.';
+    const emptyStrong = this.el.empty.querySelector('strong');
+    if (emptyStrong) emptyStrong.textContent = customMessage || 'Nenhuma venda encontrada.';
   },
 
   salvarFiltros() {

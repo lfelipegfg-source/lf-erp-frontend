@@ -1,4 +1,4 @@
-import api from './api.js';
+﻿import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { escapeHtml } from './utils.js';
@@ -193,7 +193,7 @@ const ComprasModule = {
         <div class="module-card__header">
           <div>
             <h3>Compras</h3>
-            <p>Lançamentos, histórico, estoque e financeiro vinculados</p>
+            <p>LanÃ§amentos, histÃ³rico, estoque e financeiro vinculados</p>
           </div>
 
           <div class="module-card__actions">
@@ -214,7 +214,7 @@ const ComprasModule = {
             <i class="fa-solid fa-search"></i>
             <input
               id="comprasSearch"
-              placeholder="Buscar por fornecedor, data ou número da compra..."
+              placeholder="Buscar por fornecedor, data ou nÃºmero da compra..."
               value="${escapeHtml(this.getCurrentSearchValue())}"
             />
           </div>
@@ -258,7 +258,7 @@ const ComprasModule = {
                 <th>Data</th>
                 <th>Status</th>
                 <th class="text-right">Total</th>
-                <th class="text-right">Ações</th>
+                <th class="text-right">AÃ§Ãµes</th>
               </tr>
             </thead>
             <tbody id="comprasTable"></tbody>
@@ -306,10 +306,10 @@ const ComprasModule = {
               <select id="compraFormaPagamento" class="filter-input" required>
                 <option value="Dinheiro">Dinheiro</option>
                 <option value="Pix">Pix</option>
-                <option value="Cartão de Débito">Cartão de Débito</option>
-                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="CartÃ£o de DÃ©bito">CartÃ£o de DÃ©bito</option>
+                <option value="CartÃ£o de CrÃ©dito">CartÃ£o de CrÃ©dito</option>
                 <option value="Boleto">Boleto</option>
-                <option value="Promissoria">Promissória</option>
+                <option value="Promissoria">PromissÃ³ria</option>
               </select>
             </div>
 
@@ -324,8 +324,8 @@ const ComprasModule = {
             </div>
 
             <div class="form-field form-field--span-2">
-              <label for="compraObservacao">Observação</label>
-              <textarea id="compraObservacao" placeholder="Observações internas da compra"></textarea>
+              <label for="compraObservacao">ObservaÃ§Ã£o</label>
+              <textarea id="compraObservacao" placeholder="ObservaÃ§Ãµes internas da compra"></textarea>
             </div>
 
             <div class="form-field">
@@ -350,7 +350,7 @@ const ComprasModule = {
             </div>
 
             <div class="form-field">
-              <label for="compraCustoUnitario">Custo unitário</label>
+              <label for="compraCustoUnitario">Custo unitÃ¡rio</label>
               <input type="number" id="compraCustoUnitario" min="0" step="0.01" inputmode="decimal" value="0" />
             </div>
 
@@ -371,7 +371,7 @@ const ComprasModule = {
                       <th>Qtd.</th>
                       <th>Custo unit.</th>
                       <th class="text-right">Subtotal</th>
-                      <th class="text-right">Ações</th>
+                      <th class="text-right">AÃ§Ãµes</th>
                     </tr>
                   </thead>
                   <tbody id="compraItensTable"></tbody>
@@ -403,7 +403,6 @@ const ComprasModule = {
       </div>
     `;
 
-    this.injectProfessionalStyles();
   },
 
   renderTable() {
@@ -419,6 +418,9 @@ const ComprasModule = {
               <i class="fa-solid fa-basket-shopping" style="font-size:2rem;opacity:.22;margin-bottom:4px"></i>
               <strong>Nenhuma compra encontrada</strong>
               <span>Cadastre uma nova compra para movimentar estoque e financeiro.</span>
+              <button class="btn btn-primary" onclick="document.getElementById('novaCompraBtn')?.click()" style="margin-top:8px">
+                <i class="fa-solid fa-plus"></i> Nova compra
+              </button>
             </div>
           </td>
         </tr>
@@ -429,7 +431,7 @@ const ComprasModule = {
     this.el.table.innerHTML = this.state.filteredItems
       .map((item) => {
         const id = Number(item.id || 0);
-        const fornecedor = item.fornecedor_nome || item.fornecedor || 'Fornecedor não informado';
+        const fornecedor = item.fornecedor_nome || item.fornecedor || 'Fornecedor nÃ£o informado';
         const data = formatDate(item.data);
         const total = formatCurrency(item.total || 0);
         const status = item.status || 'finalizada';
@@ -582,7 +584,7 @@ const ComprasModule = {
         if (titulo) titulo.textContent = `Editar Compra #${id}`;
       }, 50);
     } catch (error) {
-      this.showMessage('Erro ao carregar compra para edição.', 'error');
+      this.showMessage('Erro ao carregar compra para ediÃ§Ã£o.', 'error');
     }
   },
 
@@ -607,7 +609,7 @@ const ComprasModule = {
     const exigeVencimento =
       formaPagamento.toLowerCase() === 'boleto' ||
       formaPagamento.toLowerCase() === 'promissoria' ||
-      formaPagamento.toLowerCase() === 'promissória';
+      formaPagamento.toLowerCase() === 'promissÃ³ria';
 
     if (field) {
       field.classList.toggle('hidden', !exigeVencimento);
@@ -632,19 +634,19 @@ const ComprasModule = {
     }
 
     if (!quantidade || quantidade <= 0) {
-      this.showMessage('Informe uma quantidade válida.', 'error');
+      this.showMessage('Informe uma quantidade vÃ¡lida.', 'error');
       return;
     }
 
     if (custoUnitario < 0) {
-      this.showMessage('Informe um custo válido.', 'error');
+      this.showMessage('Informe um custo vÃ¡lido.', 'error');
       return;
     }
 
     const produto = this.state.produtos.find((p) => Number(p.id) === produtoId);
 
     if (!produto) {
-      this.showMessage('Produto não encontrado.', 'error');
+      this.showMessage('Produto nÃ£o encontrado.', 'error');
       return;
     }
 
@@ -763,7 +765,7 @@ const ComprasModule = {
     }
 
     if (!this.state.itensCompra.length) {
-      this.showMessage('Adicione pelo menos um item à compra.', 'error');
+      this.showMessage('Adicione pelo menos um item Ã  compra.', 'error');
       return;
     }
 
@@ -801,13 +803,13 @@ const ComprasModule = {
   },
 
   async remove(id) {
-    const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serão ajustados.', 'Excluir', 'danger');
+    const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serÃ£o ajustados.', 'Excluir', 'danger');
 
     if (!confirmar) return;
 
     try {
       await api.deleteCompra(id);
-      this.showMessage('Compra excluída com sucesso.', 'success');
+      this.showMessage('Compra excluÃ­da com sucesso.', 'success');
       await this.load();
     } catch (error) {
       console.error('Erro ao excluir compra:', error);
@@ -844,7 +846,7 @@ const ComprasModule = {
           <div>
             <span class="compra-detail-eyebrow">Compra #${escapeHtml(compra?.id || '-')}</span>
             <h3>Detalhes da compra</h3>
-            <p>${escapeHtml(compra?.fornecedor_nome || 'Fornecedor não informado')}</p>
+            <p>${escapeHtml(compra?.fornecedor_nome || 'Fornecedor nÃ£o informado')}</p>
           </div>
 
           <button type="button" class="icon-button" id="fecharCompraDetalhe" aria-label="Fechar">
@@ -877,8 +879,8 @@ const ComprasModule = {
           </section>
 
           <section class="compra-detail-note">
-            <span>Observação</span>
-            <p>${escapeHtml(compra?.observacao || 'Nenhuma observação registrada.')}</p>
+            <span>ObservaÃ§Ã£o</span>
+            <p>${escapeHtml(compra?.observacao || 'Nenhuma observaÃ§Ã£o registrada.')}</p>
           </section>
 
           <section class="compra-detail-section">
@@ -924,7 +926,7 @@ const ComprasModule = {
             <div class="compra-detail-section__header">
               <div>
                 <h4>Contas a pagar</h4>
-                <p>Parcelas financeiras vinculadas à compra</p>
+                <p>Parcelas financeiras vinculadas Ã  compra</p>
               </div>
               <span>${contas.length} parcela(s)</span>
             </div>
@@ -1013,14 +1015,14 @@ const ComprasModule = {
     const message = error?.message || '';
 
     if (message.includes('Failed to fetch')) {
-      return 'Não foi possível conectar ao backend.';
+      return 'NÃ£o foi possÃ­vel conectar ao backend.';
     }
 
     if (error?.status === 403) {
       return 'Acesso negado ou limite do plano atingido.';
     }
 
-    return message || 'Não foi possível concluir a operação.';
+    return message || 'NÃ£o foi possÃ­vel concluir a operaÃ§Ã£o.';
   },
 
   getCurrentSearchValue() {
@@ -1037,311 +1039,6 @@ const ComprasModule = {
     );
 
     return fornecedores.size;
-  },
-
-  injectProfessionalStyles() {
-    if (document.getElementById('comprasProfessionalStyles')) return;
-
-    const style = document.createElement('style');
-    style.id = 'comprasProfessionalStyles';
-    style.textContent = `
-      .compra-total-box {
-        border: 1px solid var(--border);
-        background: linear-gradient(135deg, var(--surface-2), var(--surface));
-        border-radius: 18px;
-        padding: 18px 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-      }
-
-      .compra-total-box span {
-        color: var(--text-muted);
-        font-weight: 800;
-        font-size: 0.9rem;
-      }
-
-      .compra-total-box strong {
-        color: var(--text);
-        font-size: 1.55rem;
-        font-weight: 800;
-        letter-spacing: -0.04em;
-      }
-
-      .empty-table-state {
-        min-height: 120px;
-        display: grid;
-        place-items: center;
-        text-align: center;
-        color: var(--text-muted);
-        gap: 4px;
-      }
-
-      .empty-table-state strong {
-        display: block;
-        color: var(--text);
-        font-weight: 800;
-      }
-
-      .empty-table-state span {
-        display: block;
-        color: var(--text-muted);
-        font-size: 0.9rem;
-      }
-
-      .empty-table-state.compact {
-        min-height: 60px;
-        font-weight: 700;
-      }
-
-      .table-primary {
-        display: grid;
-        gap: 3px;
-      }
-
-      .table-primary small {
-        color: var(--text-muted);
-        font-size: 0.78rem;
-        font-weight: 600;
-      }
-
-      .compra-detail-overlay {
-        padding: 18px;
-        align-items: center;
-      }
-
-      .compra-detail-card {
-        width: min(100%, 760px);
-        max-height: calc(100vh - 36px);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        border-radius: 26px;
-        padding: 0;
-      }
-
-      .compra-detail-header {
-        padding: 20px 22px 16px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        background:
-          radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 32%),
-          var(--surface);
-      }
-
-      .compra-detail-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        width: fit-content;
-        padding: 5px 10px;
-        margin-bottom: 8px;
-        border-radius: 999px;
-        background: var(--primary-soft);
-        color: var(--primary-hover);
-        font-size: 0.74rem;
-        font-weight: 800;
-      }
-
-      .compra-detail-header h3 {
-        font-size: 1.28rem;
-        font-weight: 800;
-        letter-spacing: -0.04em;
-        color: var(--text);
-        margin-bottom: 4px;
-      }
-
-      .compra-detail-header p {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        font-weight: 600;
-      }
-
-      .compra-detail-body {
-        padding: 18px 22px;
-        display: grid;
-        gap: 14px;
-        overflow-y: auto;
-      }
-
-      .compra-detail-summary {
-        display: grid;
-        grid-template-columns: 1.25fr repeat(3, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .compra-detail-summary article,
-      .compra-detail-note {
-        border: 1px solid var(--border);
-        background: var(--surface-2);
-        border-radius: 18px;
-        padding: 14px 16px;
-        min-width: 0;
-      }
-
-      .compra-detail-summary article span,
-      .compra-detail-note span {
-        display: block;
-        color: var(--text-muted);
-        font-size: 0.76rem;
-        font-weight: 800;
-        margin-bottom: 6px;
-      }
-
-      .compra-detail-summary article strong {
-        display: block;
-        color: var(--text);
-        font-size: 0.98rem;
-        font-weight: 800;
-        line-height: 1.25;
-        word-break: break-word;
-      }
-
-      .compra-detail-summary__main strong {
-        font-size: 1.35rem !important;
-        letter-spacing: -0.04em;
-      }
-
-      .compra-detail-summary article small {
-        display: block;
-        margin-top: 6px;
-        color: var(--text-muted);
-        font-weight: 700;
-      }
-
-      .compra-detail-note {
-        padding: 12px 16px;
-      }
-
-      .compra-detail-note p {
-        color: var(--text);
-        font-weight: 700;
-        line-height: 1.45;
-      }
-
-      .compra-detail-section {
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        background: var(--surface);
-        overflow: hidden;
-      }
-
-      .compra-detail-section__header {
-        padding: 13px 16px;
-        background: var(--surface-2);
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-      }
-
-      .compra-detail-section__header h4 {
-        color: var(--text);
-        font-size: 0.98rem;
-        font-weight: 800;
-        margin-bottom: 3px;
-      }
-
-      .compra-detail-section__header p {
-        color: var(--text-muted);
-        font-size: 0.82rem;
-        font-weight: 600;
-      }
-
-      .compra-detail-section__header > span {
-        flex-shrink: 0;
-        border-radius: 999px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        color: var(--text-muted);
-        padding: 7px 10px;
-        font-size: 0.78rem;
-        font-weight: 800;
-      }
-
-      .compra-detail-list {
-        display: grid;
-      }
-
-      .compra-detail-row {
-        display: grid;
-        grid-template-columns: 1.4fr 0.8fr 0.8fr;
-        gap: 14px;
-        align-items: center;
-        padding: 13px 16px;
-        border-bottom: 1px solid var(--border);
-      }
-
-      .compra-detail-row:last-child {
-        border-bottom: none;
-      }
-
-      .compra-detail-row strong {
-        color: var(--text);
-        font-size: 0.92rem;
-        font-weight: 800;
-      }
-
-      .compra-detail-row small,
-      .compra-detail-row span {
-        display: block;
-        color: var(--text-muted);
-        font-size: 0.76rem;
-        font-weight: 700;
-        margin-bottom: 3px;
-      }
-
-      .empty-detail-state {
-        padding: 18px 16px;
-        color: var(--text-muted);
-        font-weight: 700;
-      }
-
-      .compra-detail-footer {
-        padding: 14px 22px 18px;
-        border-top: 1px solid var(--border);
-        display: flex;
-        justify-content: flex-end;
-        background: var(--surface);
-      }
-
-      @media (max-width: 820px) {
-        .compra-detail-summary {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .compra-detail-row {
-          grid-template-columns: 1fr;
-          gap: 8px;
-        }
-      }
-
-      @media (max-width: 560px) {
-        .compra-detail-overlay {
-          padding: 10px;
-          align-items: flex-start;
-        }
-
-        .compra-detail-card {
-          max-height: calc(100vh - 20px);
-          border-radius: 20px;
-        }
-
-        .compra-detail-summary {
-          grid-template-columns: 1fr;
-        }
-
-        .compra-detail-body {
-          padding: 14px;
-        }
-      }
-    `;
-
-    document.head.appendChild(style);
   },
 
   // ── Import XML NF de Fornecedor ────────────────────────────────────────────
@@ -1386,7 +1083,7 @@ const ComprasModule = {
         <td style="text-align:right"><strong>${cur(item.total)}</strong></td>
         <td>
           <select class="input xml-produto-select" style="font-size:.8rem;padding:4px 8px" data-idx="${idx}">
-            <option value="">— Vincular produto —</option>
+            <option value="">â€” Vincular produto â€”</option>
             ${this.state.produtos.map(p =>
               `<option value="${p.id}">${esc(p.nome)}</option>`
             ).join('')}
@@ -1403,7 +1100,7 @@ const ComprasModule = {
         <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)">
           <div>
             <h3 style="margin:0;font-size:1rem;font-weight:700">Importar NF do Fornecedor</h3>
-            <p style="margin:4px 0 0;font-size:.83rem;color:var(--text-muted)">NF-e nº ${esc(data.numero_nf || '—')} · ${esc(data.data_emissao || '—')} · Total: ${cur(data.total)}</p>
+            <p style="margin:4px 0 0;font-size:.83rem;color:var(--text-muted)">NF-e nÂº ${esc(data.numero_nf || 'â€”')} Â· ${esc(data.data_emissao || 'â€”')} Â· Total: ${cur(data.total)}</p>
           </div>
           <button id="_xmlFechar" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
         </div>
@@ -1411,7 +1108,7 @@ const ComprasModule = {
         <div style="padding:22px;display:grid;gap:18px">
 
           ${!data.fornecedor_id ? `<div class="module-feedback module-feedback--info" style="margin:0">
-            CNPJ ${esc(data.fornecedor_cnpj)} não encontrado na base. Selecione um fornecedor abaixo ou cadastre-o primeiro.
+            CNPJ ${esc(data.fornecedor_cnpj)} nÃ£o encontrado na base. Selecione um fornecedor abaixo ou cadastre-o primeiro.
           </div>` : `<div class="module-feedback module-feedback--success" style="margin:0">
             Fornecedor identificado: <strong>${esc(data.fornecedor_nome)}</strong>
           </div>`}
@@ -1437,14 +1134,14 @@ const ComprasModule = {
               </select>
             </div>
             <div class="form-field">
-              <label>Observação</label>
+              <label>ObservaÃ§Ã£o</label>
               <input id="_xmlObs" class="input" placeholder="Ex: NF ${esc(data.numero_nf)}" value="NF ${esc(data.numero_nf)}" />
             </div>
           </div>
 
           <div>
             <h4 style="font-size:.9rem;font-weight:700;margin-bottom:10px">Itens da NF (${(data.itens||[]).length})</h4>
-            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px">Vincule cada item da NF a um produto do seu cadastro. Itens sem vínculo serão ignorados.</p>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px">Vincule cada item da NF a um produto do seu cadastro. Itens sem vÃ­nculo serÃ£o ignorados.</p>
             <div class="table-wrapper">
               <table class="data-table" style="font-size:.85rem">
                 <thead>

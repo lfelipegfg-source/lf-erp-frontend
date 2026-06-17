@@ -319,7 +319,8 @@ const ProdutosModule = {
   toggleEmptyState(msg = 'Nenhum produto encontrado.') {
     if (!this.el.emptyState) return;
     if (this.state.filteredItems.length) { this.el.emptyState.classList.add('hidden'); return; }
-    this.el.emptyState.textContent = msg;
+    const strong = this.el.emptyState.querySelector('strong');
+    if (strong) strong.textContent = msg;
     this.el.emptyState.classList.remove('hidden');
   },
 
@@ -420,6 +421,9 @@ const ProdutosModule = {
           <i class="fa-solid fa-box-open"></i>
           <strong>Nenhum produto encontrado</strong>
           <p>Tente ajustar os filtros ou cadastre um novo produto.</p>
+          <button class="btn btn-primary" onclick="document.getElementById('produtosNewBtn')?.click()">
+            <i class="fa-solid fa-plus"></i> Novo produto
+          </button>
         </div>
       </section>
 

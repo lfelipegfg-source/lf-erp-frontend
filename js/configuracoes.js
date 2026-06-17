@@ -188,15 +188,25 @@ const ConfigModule = {
   async resetDados() {
     const confirmado = await new Promise((resolve) => {
       const overlay = document.createElement('div');
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.className = 'modal-overlay';
       overlay.innerHTML = `
-        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
-          <h3 style="margin:0 0 8px;font-size:16px;font-weight:700;color:var(--danger)">Resetar dados do piloto</h3>
-          <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">Esta ação <strong>apagará permanentemente</strong> todos os dados operacionais da empresa. Digite <strong>RESETAR</strong> para confirmar.</p>
-          <input id="_resetConfirmInput" placeholder="Digite RESETAR" style="width:100%;padding:9px 12px;border:1px solid var(--danger);border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:16px" />
-          <div style="display:flex;gap:10px;justify-content:flex-end">
-            <button id="_resetCancelarBtn" class="btn-cancel">Cancelar</button>
-            <button id="_resetConfirmarBtn" class="btn-confirm btn-confirm--danger">Resetar dados</button>
+        <div class="modal-card" style="max-width:420px">
+          <div class="modal-card__header">
+            <div>
+              <h3 style="color:var(--danger)">Resetar dados do piloto</h3>
+              <p>Esta ação é irreversível</p>
+            </div>
+          </div>
+          <div class="modal-card__body">
+            <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">Esta ação <strong>apagará permanentemente</strong> todos os dados operacionais da empresa. Digite <strong>RESETAR</strong> para confirmar.</p>
+            <div class="form-field">
+              <label>Confirmação</label>
+              <input id="_resetConfirmInput" placeholder="Digite RESETAR" style="border-color:var(--danger)" />
+            </div>
+          </div>
+          <div class="modal-card__footer">
+            <button class="btn btn-light" id="_resetCancelarBtn">Cancelar</button>
+            <button class="btn btn-danger" id="_resetConfirmarBtn">Resetar dados</button>
           </div>
         </div>`;
       document.body.appendChild(overlay);
@@ -279,28 +289,28 @@ const ConfigModule = {
       }
       const acaoBadge = (a) => {
         const map = {
-          login: '<span style="background:var(--success-soft);color:var(--success);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">login</span>',
-          logout: '<span style="background:var(--surface-3);color:var(--text-muted);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">logout</span>',
-          login_falha: '<span style="background:var(--danger-soft);color:var(--danger);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">falha</span>',
-          troca_senha: '<span style="background:var(--warning-soft);color:var(--warning);padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">senha</span>'
+          login:       '<span class="badge badge--success">login</span>',
+          logout:      '<span class="badge badge--neutral">logout</span>',
+          login_falha: '<span class="badge badge--danger">falha</span>',
+          troca_senha: '<span class="badge badge--warning">senha</span>'
         };
-        return map[a] || `<span style="padding:2px 8px;border-radius:20px;font-size:11px">${a}</span>`;
+        return map[a] || `<span class="badge">${a}</span>`;
       };
       container.innerHTML = `
-        <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <table class="historico-table">
           <thead>
-            <tr style="border-bottom:1px solid var(--border)">
-              <th style="text-align:left;padding:6px 10px;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase">Data/hora</th>
-              <th style="text-align:left;padding:6px 10px;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase">Ação</th>
-              <th style="text-align:left;padding:6px 10px;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase">IP</th>
+            <tr>
+              <th>Data/hora</th>
+              <th>Ação</th>
+              <th>IP</th>
             </tr>
           </thead>
           <tbody>
             ${dados.map(l => `
-              <tr style="border-bottom:1px solid var(--border)">
-                <td style="padding:7px 10px">${new Date(l.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</td>
-                <td style="padding:7px 10px">${acaoBadge(l.acao)}</td>
-                <td style="padding:7px 10px;color:var(--text-muted)">${l.ip || '—'}</td>
+              <tr>
+                <td>${new Date(l.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                <td>${acaoBadge(l.acao)}</td>
+                <td class="text-muted">${l.ip || '—'}</td>
               </tr>`).join('')}
           </tbody>
         </table>`;

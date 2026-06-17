@@ -300,6 +300,9 @@ const ClientesModule = {
               <i class="fa-solid fa-users"></i>
               <strong>Nenhum cliente encontrado</strong>
               <p>Tente ajustar a busca ou cadastre um novo cliente.</p>
+              <button class="btn btn-primary" onclick="document.getElementById('novoClienteBtn')?.click()">
+                <i class="fa-solid fa-plus"></i> Novo cliente
+              </button>
             </div>
           </td>
         </tr>
