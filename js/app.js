@@ -163,6 +163,8 @@ function bindEvents() {
   bindFilterEvents();
   bindTopbarEvents();
   bindModalEvents();
+  initCommandPalette();
+  bindCommandPaletteShortcut();
 }
 
 function bindLoginEvents() {
@@ -324,8 +326,25 @@ function bindSidebarEvents() {
       const group = button.closest('.nav-group');
       if (!group) return;
       group.classList.toggle('open');
+      _saveNavGroupState();
     });
   });
+}
+
+function _saveNavGroupState() {
+  try {
+    const open = [...document.querySelectorAll('.nav-group.open')].map((g) => g.dataset.group).filter(Boolean);
+    localStorage.setItem('lf_nav_groups', JSON.stringify(open));
+  } catch {}
+}
+
+function restoreNavGroupState() {
+  try {
+    const open = JSON.parse(localStorage.getItem('lf_nav_groups') || '[]');
+    open.forEach((key) => {
+      document.querySelector(`.nav-group[data-group="${key}"]`)?.classList.add('open');
+    });
+  } catch {}
 }
 
 function bindNavigationEvents() {
@@ -1158,6 +1177,8 @@ function showMainScreen() {
 
   if (loginScreen) loginScreen.classList.add('hidden');
   if (mainScreen) mainScreen.classList.remove('hidden');
+
+  restoreNavGroupState();
 
   // Conecta SSE para notificações em tempo real (sem polling)
   _notifCarregadas = false;
@@ -2026,4 +2047,130 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
+}
+
+// ── Command Palette (Ctrl+K) ──────────────────────────────────────────────────
+
+const _CP_NAV = [
+  { label: 'Dashboard',           view: 'dashboard',          icon: 'fa-chart-pie',            group: '' },
+  { label: 'PDV — Ponto de Venda', view: 'pdv',               icon: 'fa-cash-register',         group: '' },
+  { label: 'Produtos',            view: 'produtos',            icon: 'fa-box-open',              group: 'Cadastros' },
+  { label: 'Clientes',            view: 'clientes',            icon: 'fa-users',                 group: 'Cadastros' },
+  { label: 'Fornecedores',        view: 'fornecedores',        icon: 'fa-truck-field',           group: 'Cadastros' },
+  { label: 'Usuários',            view: 'usuarios',            icon: 'fa-user-shield',           group: 'Cadastros' },
+  { label: 'Vendas',              view: 'vendas',              icon: 'fa-cart-shopping',         group: 'Movimentações' },
+  { label: 'Compras',             view: 'compras',             icon: 'fa-basket-shopping',       group: 'Movimentações' },
+  { label: 'Estoque',             view: 'estoque',             icon: 'fa-warehouse',             group: 'Movimentações' },
+  { label: 'Caixa',               view: 'caixa',               icon: 'fa-vault',                 group: 'Movimentações' },
+  { label: 'Contas a Receber',    view: 'contas-receber',      icon: 'fa-money-bill-trend-up',   group: 'Financeiro' },
+  { label: 'Contas a Pagar',      view: 'contas-pagar',        icon: 'fa-money-bill-transfer',   group: 'Financeiro' },
+  { label: 'Fluxo de Caixa',      view: 'fluxo-caixa',         icon: 'fa-arrow-trend-up',        group: 'Financeiro' },
+  { label: 'Lançamentos',         view: 'lancamentos',         icon: 'fa-pen-to-square',         group: 'Financeiro' },
+  { label: 'Relatórios',          view: 'relatorios',          icon: 'fa-file-lines',            group: 'Relatórios & BI' },
+  { label: 'Orçamentos',          view: 'orcamentos',          icon: 'fa-file-lines',            group: 'Fiscal & Docs' },
+  { label: 'Pedidos',             view: 'pedidos',             icon: 'fa-clipboard-list',        group: 'Fiscal & Docs' },
+  { label: 'Configurações',       view: 'configuracoes',       icon: 'fa-gear',                  group: '' },
+];
+
+let _cpSelectedIdx = -1;
+
+function initCommandPalette() {
+  const overlay = document.getElementById('cmdPaletteOverlay');
+  if (!overlay) return;
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCmdPalette(); });
+  document.getElementById('cmdPaletteInput')?.addEventListener('input', _cpRender);
+  document.getElementById('cmdPaletteInput')?.addEventListener('keydown', _cpKeydown);
+  _cpRender();
+}
+
+function bindCommandPaletteShortcut() {
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      const overlay = document.getElementById('cmdPaletteOverlay');
+      if (!overlay) return;
+      if (overlay.classList.contains('hidden')) {
+        openCmdPalette();
+      } else {
+        closeCmdPalette();
+      }
+    }
+  });
+}
+
+function openCmdPalette() {
+  const overlay = document.getElementById('cmdPaletteOverlay');
+  const input   = document.getElementById('cmdPaletteInput');
+  if (!overlay || !input) return;
+  overlay.classList.remove('hidden');
+  input.value = '';
+  _cpSelectedIdx = -1;
+  _cpRender();
+  setTimeout(() => input.focus(), 30);
+}
+
+function closeCmdPalette() {
+  document.getElementById('cmdPaletteOverlay')?.classList.add('hidden');
+  _cpSelectedIdx = -1;
+}
+
+function _cpRender() {
+  const q = (document.getElementById('cmdPaletteInput')?.value || '').toLowerCase().trim();
+  const list = document.getElementById('cmdPaletteList');
+  if (!list) return;
+
+  const filtered = q ? _CP_NAV.filter((i) => i.label.toLowerCase().includes(q) || i.group.toLowerCase().includes(q)) : _CP_NAV;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="cmd-palette__empty"><i class="fa-solid fa-magnifying-glass" style="display:block;font-size:1.5rem;opacity:.25;margin-bottom:8px"></i>Nenhum resultado para "${q}"</div>`;
+    return;
+  }
+
+  let html = '';
+  let lastGroup = null;
+  filtered.forEach((item, idx) => {
+    if (item.group !== lastGroup) {
+      if (item.group) html += `<div class="cmd-palette__group-label">${item.group}</div>`;
+      lastGroup = item.group;
+    }
+    html += `<button class="cmd-palette__item${idx === _cpSelectedIdx ? ' selected' : ''}" data-view="${item.view}">
+      <span class="cmd-palette__item-icon"><i class="fa-solid ${item.icon}"></i></span>
+      <span class="cmd-palette__item-label">${item.label}</span>
+    </button>`;
+  });
+
+  list.innerHTML = html;
+  list.querySelectorAll('.cmd-palette__item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      closeCmdPalette();
+      setActiveView(btn.dataset.view);
+    });
+  });
+}
+
+function _cpKeydown(e) {
+  const list = document.getElementById('cmdPaletteList');
+  const items = list?.querySelectorAll('.cmd-palette__item') || [];
+  if (!items.length) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _cpSelectedIdx = Math.min(_cpSelectedIdx + 1, items.length - 1);
+    _cpUpdateSelection(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _cpSelectedIdx = Math.max(_cpSelectedIdx - 1, 0);
+    _cpUpdateSelection(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    const sel = _cpSelectedIdx >= 0 ? items[_cpSelectedIdx] : items[0];
+    if (sel) { closeCmdPalette(); setActiveView(sel.dataset.view); }
+  } else if (e.key === 'Escape') {
+    closeCmdPalette();
+  }
+}
+
+function _cpUpdateSelection(items) {
+  items.forEach((btn, i) => btn.classList.toggle('selected', i === _cpSelectedIdx));
+  if (_cpSelectedIdx >= 0) items[_cpSelectedIdx]?.scrollIntoView({ block: 'nearest' });
 }

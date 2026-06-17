@@ -12,7 +12,9 @@ const state = {
   grade: [],
   dre: null,
   inadimplencia: null,
-  aba: 'resumo'
+  aba: 'resumo',
+  lucratSubAba: 'financeiro',
+  lucratSort: { key: null, dir: 1 }
 };
 
 export async function initRelatoriosFinanceirosModule() {
@@ -727,145 +729,123 @@ function renderTabelaPagar() {
   `;
 }
 
+function _lucratSorted() {
+  const { key, dir } = state.lucratSort;
+  if (!key) return state.lucratividade;
+  return [...state.lucratividade].sort((a, b) => {
+    const va = Number(a[key] ?? 0);
+    const vb = Number(b[key] ?? 0);
+    return (va - vb) * dir;
+  });
+}
+
+function _thSort(label, key) {
+  const { key: sk, dir } = state.lucratSort;
+  const arrow = sk === key ? (dir === 1 ? ' <i class="fa-solid fa-sort-up" style="opacity:.9"></i>' : ' <i class="fa-solid fa-sort-down" style="opacity:.9"></i>') : ' <i class="fa-solid fa-sort" style="opacity:.25"></i>';
+  return `<th data-sort-key="${key}" style="cursor:pointer;user-select:none;white-space:nowrap">${label}${arrow}</th>`;
+}
+
 function renderTabelaLucratividade() {
   if (!state.lucratividade.length) {
-    return `
-      <div class="module-feedback module-feedback--info">
-        Nenhum dado de lucratividade encontrado no período.
-      </div>
-    `;
+    return `<div class="module-feedback module-feedback--info">Nenhum dado de lucratividade encontrado no período.</div>`;
   }
 
-  return `
+  const sub = state.lucratSubAba;
+  const rows = _lucratSorted();
+
+  const subTabBar = `
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="btn-inline ${sub === 'financeiro' ? 'btn-inline--active' : ''}" data-lucrat-sub="financeiro">
+        <i class="fa-solid fa-chart-line"></i> Financeiro
+      </button>
+      <button class="btn-inline ${sub === 'estoque' ? 'btn-inline--active' : ''}" data-lucrat-sub="estoque">
+        <i class="fa-solid fa-boxes-stacked"></i> Estoque
+      </button>
+    </div>`;
+
+  const abcBadge = (c) => `<span class="badge ${c === 'A' ? 'badge--success' : c === 'B' ? 'badge--warning' : 'badge--danger'}">${escapeHtml(c || 'C')}</span>`;
+
+  if (sub === 'financeiro') {
+    return `${subTabBar}
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
-            <th>ABC</th>
+            ${_thSort('ABC', 'classe_abc')}
             <th>Produto</th>
-            <th>Qtd.</th>
-            <th>Faturamento</th>
-            <th>Custo Médio</th>
-            <th>Lucro Unitário</th>
-            <th>Margem</th>
-            <th>Lucro Total</th>
-            <th>Estoque Investido</th>
-            <th>Lucro Potencial</th>
-            <th>Capital Parado</th>
-            <th>Última Venda</th>
+            ${_thSort('Qtd.', 'quantidade_vendida')}
+            ${_thSort('Faturamento', 'faturamento_total')}
+            ${_thSort('Custo Médio', 'custo_medio')}
+            ${_thSort('Lucro Unit.', 'lucro_unitario')}
+            ${_thSort('Margem %', 'margem_lucro')}
+            ${_thSort('Lucro Total', 'lucro_total')}
           </tr>
         </thead>
-
         <tbody>
-          ${state.lucratividade
-            .map(
-              (item) => `
-              <tr>
-  <td>
-    <span class="badge ${
-      item.classe_abc === 'A'
-        ? 'badge--success'
-        : item.classe_abc === 'B'
-          ? 'badge--warning'
-          : 'badge--danger'
-    }">
-      ${escapeHtml(item.classe_abc || 'C')}
-    </span>
-  </td>
-
-  <td>
-    <strong>${escapeHtml(item.produto_nome || '-')}</strong>
-    <div class="table-muted">
-      ${Number(item.participacao_lucro || 0).toFixed(2)}% do lucro
-    </div>
-  </td>
-
+          ${rows.map((item) => `
+            <tr>
+              <td>${abcBadge(item.classe_abc)}</td>
               <td>
-                ${Number(item.quantidade_vendida || 0)}
+                <strong>${escapeHtml(item.produto_nome || '-')}</strong>
+                <div class="table-muted">${Number(item.participacao_lucro || 0).toFixed(2)}% do lucro</div>
               </td>
-
-              <td>
-                ${formatCurrency(item.faturamento_total)}
-              </td>
-
-              <td>
-                ${formatCurrency(item.custo_medio)}
-              </td>
-
+              <td>${Number(item.quantidade_vendida || 0)}</td>
+              <td>${formatCurrency(item.faturamento_total)}</td>
+              <td>${formatCurrency(item.custo_medio)}</td>
               <td class="${Number(item.lucro_unitario || 0) >= 0 ? 'text-success' : 'text-danger'}">
-                <strong>
-                  ${formatCurrency(item.lucro_unitario)}
-                </strong>
+                <strong>${formatCurrency(item.lucro_unitario)}</strong>
               </td>
-
               <td>
-                <span class="badge ${
-                  Number(item.margem_lucro || 0) >= 30
-                    ? 'badge--success'
-                    : Number(item.margem_lucro || 0) >= 10
-                      ? 'badge--warning'
-                      : 'badge--danger'
-                }">
+                <span class="badge ${Number(item.margem_lucro || 0) >= 30 ? 'badge--success' : Number(item.margem_lucro || 0) >= 10 ? 'badge--warning' : 'badge--danger'}">
                   ${Number(item.margem_lucro || 0).toFixed(2)}%
                 </span>
               </td>
-
               <td class="${Number(item.lucro_total || 0) >= 0 ? 'text-success' : 'text-danger'}">
-                <strong>
-                  ${formatCurrency(item.lucro_total)}
-                </strong>
+                <strong>${formatCurrency(item.lucro_total)}</strong>
               </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
 
+  return `${subTabBar}
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            ${_thSort('ABC', 'classe_abc')}
+            <th>Produto</th>
+            ${_thSort('Estoque Investido', 'estoque_investido')}
+            ${_thSort('Lucro Potencial', 'lucro_potencial')}
+            ${_thSort('Capital Parado', 'capital_parado')}
+            ${_thSort('Última Venda', 'ultima_venda')}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((item) => `
+            <tr>
+              <td>${abcBadge(item.classe_abc)}</td>
               <td>
-                ${formatCurrency(item.estoque_investido)}
+                <strong>${escapeHtml(item.produto_nome || '-')}</strong>
+                <div class="table-muted">${Number(item.participacao_lucro || 0).toFixed(2)}% do lucro</div>
               </td>
-
-              <td class="${
-                Number(item.lucro_potencial || 0) >= 0 ? 'text-success' : 'text-danger'
-              }">
-                <strong>
-                  ${formatCurrency(item.lucro_potencial)}
-                </strong>
+              <td>${formatCurrency(item.estoque_investido)}</td>
+              <td class="${Number(item.lucro_potencial || 0) >= 0 ? 'text-success' : 'text-danger'}">
+                <strong>${formatCurrency(item.lucro_potencial)}</strong>
               </td>
               <td>
                 <strong>${formatCurrency(item.capital_parado || 0)}</strong>
+                ${Number(item.capital_parado || 0) >= 500 ? '<div><span class="badge badge--warning">Capital alto parado</span></div>' : ''}
               </td>
-
               <td>
-  <div class="stock-alert-stack">
-    <span>
-      ${formatDate(item.ultima_venda)}
-    </span>
-
-    ${
-      Number(item.capital_parado || 0) >= 500
-        ? `
-          <span class="badge badge--warning">
-            Capital alto parado
-          </span>
-        `
-        : ''
-    }
-
-    ${
-      Number(item.estoque_parado || 0) >= 20
-        ? `
-          <span class="badge badge--danger">
-            Estoque elevado
-          </span>
-        `
-        : ''
-    }
-  </div>
-</td>
-            </tr>
-          `
-            )
-            .join('')}
+                <span>${formatDate(item.ultima_venda)}</span>
+                ${Number(item.estoque_parado || 0) >= 20 ? '<div><span class="badge badge--danger">Estoque elevado</span></div>' : ''}
+              </td>
+            </tr>`).join('')}
         </tbody>
       </table>
-    </div>
-  `;
+    </div>`;
 }
 
 function renderTabelaFluxo() {
@@ -1033,6 +1013,26 @@ function bindEventos() {
   document.querySelectorAll('[data-aba]').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.aba = btn.dataset.aba;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-lucrat-sub]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.lucratSubAba = btn.dataset.lucratSub;
+      state.lucratSort = { key: null, dir: 1 };
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-sort-key]').forEach((th) => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sortKey;
+      if (state.lucratSort.key === key) {
+        state.lucratSort.dir *= -1;
+      } else {
+        state.lucratSort = { key, dir: 1 };
+      }
       render();
     });
   });
