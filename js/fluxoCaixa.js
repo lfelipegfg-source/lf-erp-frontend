@@ -377,13 +377,13 @@ function getFormaClasse(forma) {
 function getFormaIcone(forma) {
   const f = String(forma || '').toLowerCase();
 
-  if (f.includes('dinheiro')) return '💰';
-  if (f.includes('pix')) return '📱';
-  if (f.includes('cart')) return '💳';
-  if (f.includes('boleto')) return '🧾';
-  if (f.includes('promiss')) return '📄';
+  if (f.includes('dinheiro')) return '<i class="fa-solid fa-money-bill-wave"></i>';
+  if (f.includes('pix')) return '<i class="fa-solid fa-qrcode"></i>';
+  if (f.includes('cart')) return '<i class="fa-solid fa-credit-card"></i>';
+  if (f.includes('boleto')) return '<i class="fa-solid fa-file-invoice-dollar"></i>';
+  if (f.includes('promiss')) return '<i class="fa-solid fa-handshake"></i>';
 
-  return '❓';
+  return '<i class="fa-solid fa-circle-question"></i>';
 }
 
 function renderMovimentos(movimentos) {

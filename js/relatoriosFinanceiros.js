@@ -272,10 +272,10 @@ function renderInadimplencia() {
       <div class="panel-card__body">
         <div style="display:grid;gap:10px">
           ${[
-            { label: '1 a 30 dias',   valor: ag.faixa_1_30,  cor: '#f59e0b' },
-            { label: '31 a 60 dias',  valor: ag.faixa_31_60, cor: '#f97316' },
-            { label: '61 a 90 dias',  valor: ag.faixa_61_90, cor: '#ef4444' },
-            { label: 'Acima de 90',   valor: ag.faixa_90plus, cor: '#b91c1c' }
+            { label: '1 a 30 dias',   valor: ag.faixa_1_30,  cor: 'var(--warning)' },
+            { label: '31 a 60 dias',  valor: ag.faixa_31_60, cor: 'var(--warning-dark, #c05e00)' },
+            { label: '61 a 90 dias',  valor: ag.faixa_61_90, cor: 'var(--danger)' },
+            { label: 'Acima de 90',   valor: ag.faixa_90plus, cor: 'var(--danger-dark, #991b1b)' }
           ].map(({ label, valor, cor }) => `
             <div style="display:flex;align-items:center;gap:12px">
               <div style="width:120px;font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap">${label}</div>

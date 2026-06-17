@@ -289,10 +289,10 @@ const FornecedoresModule = {
         <td class="text-right">
           <div class="table-actions">
             <button class="btn-inline" data-action="edit-fornecedor" data-id="${fornecedor.id}">
-              Editar
+              <i class="fa-solid fa-pen"></i> Editar
             </button>
             <button class="btn-inline btn-inline--danger" data-action="delete-fornecedor" data-id="${fornecedor.id}">
-              Excluir
+              <i class="fa-solid fa-trash"></i> Excluir
             </button>
           </div>
         </td>
