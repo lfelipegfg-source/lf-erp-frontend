@@ -2,14 +2,17 @@
  * exportUtils — LF ERP
  * Exportação CSV com UTF-8 BOM para compatibilidade com Excel em português.
  *
- * Uso:
- *   import { exportCSV } from './exportUtils.js';
- *   exportCSV(linhas, 'relatorio_vendas');
+ * Uso básico (retrocompatível):
+ *   exportCSV(linhas, 'relatorio_vendas')
  *
- * @param {Object[]} linhas  — array de objetos planos; keys viram cabeçalhos
- * @param {string}   arquivo — nome sem extensão (padrão: 'exportacao')
+ * Com metadados (cabeçalho formatado):
+ *   exportCSV(linhas, 'relatorio_vendas', { titulo: 'Relatório de Vendas', periodo: '01/01/2026 – 30/06/2026', empresa: 'Lucileide Variedades' })
+ *
+ * @param {Object[]} linhas    — array de objetos planos; keys viram cabeçalhos
+ * @param {string}   arquivo   — nome sem extensão (padrão: 'exportacao')
+ * @param {Object}   [opcoes]  — { titulo?, empresa?, periodo? }
  */
-export function exportCSV(linhas, arquivo = 'exportacao') {
+export function exportCSV(linhas, arquivo = 'exportacao', opcoes = {}) {
   if (!Array.isArray(linhas) || linhas.length === 0) return;
 
   const cabecalhos = Object.keys(linhas[0]);
@@ -25,8 +28,15 @@ export function exportCSV(linhas, arquivo = 'exportacao') {
       .join(';')
   );
 
+  const metaLinhas = [];
+  if (opcoes.titulo)   metaLinhas.push(`"${opcoes.titulo}"`);
+  if (opcoes.empresa)  metaLinhas.push(`"Empresa: ${opcoes.empresa}"`);
+  if (opcoes.periodo)  metaLinhas.push(`"Período: ${opcoes.periodo}"`);
+  metaLinhas.push(`"Gerado em: ${new Date().toLocaleString('pt-BR')}"`);
+  metaLinhas.push('');
+
   // UTF-8 BOM (﻿) garante que Excel abra o arquivo em português corretamente
-  const csv = '﻿' + [cabecalhos.join(';'), ...linhasCSV].join('\r\n');
+  const csv = '﻿' + [...metaLinhas, cabecalhos.join(';'), ...linhasCSV].join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
 

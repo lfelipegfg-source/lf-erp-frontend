@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initializeApp() {
   cacheInitialState();
   bindEvents();
+  readFiltersFromURL();
   restoreSavedFilters();
   restoreCurrentViewFromStorage();
   applyDefaultPeriodDates();
@@ -996,6 +997,7 @@ function applyDefaultPeriodDates() {
 
 async function applyGlobalFilters() {
   saveFiltersToStorage();
+  syncFiltersToURL();
   showToast('Filtros aplicados com sucesso.', 'success');
 
   if (!AppState.isAuthenticated) {
@@ -1021,6 +1023,35 @@ function clearGlobalFilters() {
 
 function saveFiltersToStorage() {
   localStorage.setItem(STORAGE_KEYS.filters, JSON.stringify(AppState.filters));
+}
+
+function syncFiltersToURL() {
+  try {
+    const f = AppState.filters;
+    const params = new URLSearchParams();
+    if (f.periodo && f.periodo !== '7dias') params.set('periodo', f.periodo);
+    if (f.periodo === 'personalizado') {
+      if (f.dataInicial) params.set('ini', f.dataInicial);
+      if (f.dataFinal)   params.set('fim', f.dataFinal);
+    }
+    const qs = params.toString();
+    history.replaceState({}, '', qs ? `${location.pathname}?${qs}` : location.pathname);
+  } catch {}
+}
+
+function readFiltersFromURL() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const periodo = params.get('periodo');
+    if (!periodo) return;
+    AppState.filters.periodo = periodo;
+    if (periodo === 'personalizado') {
+      const ini = params.get('ini');
+      const fim = params.get('fim');
+      if (ini) AppState.filters.dataInicial = ini;
+      if (fim) AppState.filters.dataFinal   = fim;
+    }
+  } catch {}
 }
 
 function restoreSavedFilters() {

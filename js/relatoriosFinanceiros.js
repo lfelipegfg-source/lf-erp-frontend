@@ -890,6 +890,11 @@ function renderTabelaFluxo() {
 function exportarAbaAtual() {
   const { aba } = state;
 
+  const f = getFiltrosGlobais();
+  const periodo = f.data_inicial && f.data_final
+    ? `${f.data_inicial.split('-').reverse().join('/')} a ${f.data_final.split('-').reverse().join('/')}`
+    : 'Período completo';
+
   if (aba === 'receber') {
     exportCSV(state.receber.map((r) => ({
       'Vencimento':      formatDate(r.data_vencimento),
@@ -897,7 +902,7 @@ function exportarAbaAtual() {
       'Parcela':         `${r.parcela || 1}/${r.total_parcelas || 1}`,
       'Status':          r.status || '-',
       'Valor (R$)':      numCSV(r.valor)
-    })), 'contas_receber');
+    })), 'contas_receber', { titulo: 'Contas a Receber', periodo });
     return;
   }
   if (aba === 'pagar') {
@@ -907,7 +912,7 @@ function exportarAbaAtual() {
       'Parcela':         `${r.parcela || 1}/${r.total_parcelas || 1}`,
       'Status':          r.status || '-',
       'Valor (R$)':      numCSV(r.valor)
-    })), 'contas_pagar');
+    })), 'contas_pagar', { titulo: 'Contas a Pagar', periodo });
     return;
   }
   if (aba === 'fluxo') {
@@ -917,7 +922,7 @@ function exportarAbaAtual() {
       'Origem':      r.origem || '-',
       'Descricao':   r.descricao || '-',
       'Valor (R$)':  numCSV(r.valor)
-    })), 'fluxo_caixa');
+    })), 'fluxo_caixa', { titulo: 'Fluxo de Caixa', periodo });
     return;
   }
   if (aba === 'lucratividade') {
@@ -931,7 +936,7 @@ function exportarAbaAtual() {
       'Margem (%)':       numCSV(r.margem_lucro),
       'Capital Parado (R$)': numCSV(r.capital_parado),
       'Ultima Venda':     formatDate(r.ultima_venda)
-    })), 'lucratividade');
+    })), 'lucratividade', { titulo: 'Lucratividade por Produto', periodo });
     return;
   }
   if (aba === 'grade') {
@@ -944,7 +949,7 @@ function exportarAbaAtual() {
       'Lucro Total (R$)': numCSV(r.lucro_total),
       'Estoque Atual':    r.estoque_atual || 0,
       'Ultima Venda':     formatDate(r.ultima_venda)
-    })), 'vendas_por_variacao');
+    })), 'vendas_por_variacao', { titulo: 'Vendas por Variação', periodo });
     return;
   }
   if (aba === 'resumo' || aba === 'inadimplencia') {
@@ -961,7 +966,7 @@ function exportarAbaAtual() {
       'Despesas (R$)':        numCSV(m.despesas),
       'Resultado Oper (R$)':  numCSV(m.resultado),
       'Margem Oper (%)':      numCSV(m.margem_oper)
-    })), 'dre');
+    })), 'dre', { titulo: 'DRE — Demonstrativo de Resultado', periodo });
     return;
   }
 }
