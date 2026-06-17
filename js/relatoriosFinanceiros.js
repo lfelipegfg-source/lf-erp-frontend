@@ -121,7 +121,7 @@ function render() {
         </div>
       </div>
 
-      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 0 4px">
+      <div class="rel-periodo-rapido" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 0 4px">
         <span style="font-size:12px;color:var(--text-muted);font-weight:700;white-space:nowrap">Período rápido:</span>
         <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="hoje">Hoje</button>
         <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="semana">Esta semana</button>

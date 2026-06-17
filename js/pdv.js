@@ -1753,10 +1753,10 @@ const PDVModule = {
       return;
     }
 
-    const subtotal = this.getSubtotal();
+    const subtotal = Math.round(this.getSubtotal() * 100) / 100;
     const desconto = Number(this.state.desconto || 0);
     const acrescimo = Number(this.state.acrescimo || 0);
-    const total = Math.max(0, subtotal - desconto + acrescimo);
+    const total = Math.round(Math.max(0, subtotal - desconto + acrescimo) * 100) / 100;
 
     if (total <= 0) {
       this.showMessage('O total da venda deve ser maior que zero.', 'error');

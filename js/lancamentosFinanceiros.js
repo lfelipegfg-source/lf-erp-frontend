@@ -66,13 +66,17 @@ function showMsg(msg, type = 'info') {
 // ─── Resumo ───────────────────────────────────────────────────────────────────
 
 function calcResumo() {
-  if (state.resumoGlobal) return state.resumoGlobal;
+  if (state.resumoGlobal) return { ...state.resumoGlobal, parcial: false };
+  // Fallback: a API não retornou o resumo agregado (data.resumo ausente/falhou).
+  // state.itens contém apenas a página atual (limit: 50) — somar aqui NÃO é o total
+  // do período, é só uma estimativa da página carregada. Sinalizamos isso como "parcial"
+  // para a UI deixar claro ao usuário que o valor pode não refletir o total real.
   let receitas = 0, despesas = 0;
   for (const i of state.itens) {
     if (i.tipo === 'receita') receitas += Number(i.valor || 0);
     else                      despesas += Number(i.valor || 0);
   }
-  return { receitas, despesas, saldo: receitas - despesas };
+  return { receitas, despesas, saldo: receitas - despesas, parcial: true };
 }
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
@@ -195,19 +199,26 @@ function render() {
       </div>
 
       <!-- Resumo -->
+      ${r.parcial ? `
+        <div class="module-feedback module-feedback--error" style="margin-bottom:10px">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          Resumo indisponível: não foi possível obter os totais do servidor. Os valores abaixo são uma
+          estimativa baseada apenas nos ${state.itens.length} lançamento(s) desta página, não no total do período.
+        </div>
+      ` : ''}
       <div class="lf-stats-grid">
         <article class="mini-stat lf-stat--receita">
-          <span>Receitas</span>
+          <span>Receitas${r.parcial ? ' (parcial)' : ''}</span>
           <strong>${toCurrency(r.receitas)}</strong>
           <small>${state.itens.filter(i => i.tipo === 'receita').length} lançamento(s)</small>
         </article>
         <article class="mini-stat lf-stat--despesa">
-          <span>Despesas</span>
+          <span>Despesas${r.parcial ? ' (parcial)' : ''}</span>
           <strong>${toCurrency(r.despesas)}</strong>
           <small>${state.itens.filter(i => i.tipo === 'despesa').length} lançamento(s)</small>
         </article>
         <article class="mini-stat lf-stat--saldo ${r.saldo >= 0 ? 'lf-stat--positivo' : 'lf-stat--negativo'}">
-          <span>Saldo</span>
+          <span>Saldo${r.parcial ? ' (parcial)' : ''}</span>
           <strong>${toCurrency(r.saldo)}</strong>
           <small>${r.saldo >= 0 ? 'Superávit' : 'Déficit'}</small>
         </article>

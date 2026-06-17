@@ -24,6 +24,7 @@ const ProdutosModule = {
     eventsBound: false,
     activeTab: 'dados',
     selectedIds: new Set(),
+    searchTerm: '',
     filtroCategoria: '',
     filtroAlerta: '',
     // grade
@@ -234,12 +235,18 @@ const ProdutosModule = {
     try {
       const items = await api.getProdutos();
       this.state.items = Array.isArray(items) ? items : [];
-      this.state.filteredItems = [...this.state.items];
       this.state.selectedIds.clear();
       this.atualizarBotaoLote();
       this.renderStats();
       this.popularCategorias();
-      this.renderTable();
+      // Restaura os valores visuais dos filtros e reaplica sobre a lista recém-carregada,
+      // preservando busca/categoria/alerta entre navegações (ex: ao voltar de outra tela).
+      if (this.el.toolbarSearch) this.el.toolbarSearch.value = this.state.searchTerm || '';
+      const selCategoria = document.getElementById('produtosFiltroCategoria');
+      if (selCategoria) selCategoria.value = this.state.filtroCategoria || '';
+      const selAlerta = document.getElementById('produtosFiltroAlerta');
+      if (selAlerta) selAlerta.value = this.state.filtroAlerta || '';
+      this.applySearch(this.state.searchTerm || '');
       this.toggleEmptyState();
       this.showModuleMessage('', 'info');
     } catch (err) {
@@ -317,6 +324,7 @@ const ProdutosModule = {
   },
 
   applySearch(term) {
+    this.state.searchTerm = term || '';
     const q    = String(term||'').trim().toLowerCase();
     const cat  = this.state.filtroCategoria || '';
     const alrt = this.state.filtroAlerta    || '';

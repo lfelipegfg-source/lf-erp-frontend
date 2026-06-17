@@ -4930,6 +4930,66 @@ select {
   .fil-kpi,.fid-kpi,.chk-kpi,.rast-kpi { min-width:100px; }
 }
 
+/* ── Impressão — Relatórios Financeiros ─────────────────────────────────── */
+@media print {
+  /* Esconde navegação/chrome do app, mantendo apenas o conteúdo do relatório */
+  #sidebar,
+  #sidebarOverlay,
+  .topbar,
+  #trialBanner,
+  #globalFiltersBar,
+  .section-header,
+  #relatoriosFeedback,
+  #relatoriosContainer .module-card__actions,
+  #relatoriosContainer .rel-periodo-rapido,
+  #relatoriosContainer .table-actions {
+    display: none !important;
+  }
+
+  body, .main-content {
+    background: #fff !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  #relatoriosContainer,
+  #relatoriosContainer .module-card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #relatoriosContainer .table-wrapper {
+    overflow: visible !important;
+  }
+
+  #relatoriosContainer table {
+    width: 100% !important;
+    font-size: 11px;
+  }
+
+  #relatoriosContainer .kpi-grid,
+  #relatoriosContainer .dashboard-grid {
+    break-inside: avoid;
+  }
+
+  #relatoriosContainer .panel-card,
+  #relatoriosContainer .kpi-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+
+  #relatoriosContainer tr {
+    break-inside: avoid;
+  }
+}
+
 /* ── Medidor de força de senha ───────────────────────────────────────────── */
 .senha-medidor { margin-top:6px; display:flex; align-items:center; gap:8px; }
 .senha-barra { flex:1; height:4px; background:var(--border); border-radius:4px; overflow:hidden; }
