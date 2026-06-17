@@ -5292,6 +5292,53 @@ select {
   .compra-detail-body    { padding: 14px; }
 }
 
+/* ── MODAL ATALHOS ────────────────────────────────────────────────────────── */
+
+.shortcuts-section { display: flex; flex-direction: column; gap: 8px; }
+
+.shortcuts-section__title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shortcuts-grid { display: flex; flex-direction: column; gap: 4px; }
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.shortcut-row:hover { background: var(--surface-2); }
+
+.shortcut-row kbd {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.shortcut-row span {
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
 /* ── COMMAND PALETTE (Ctrl+K) ─────────────────────────────────────────────── */
 
 #cmdPaletteOverlay {

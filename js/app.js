@@ -2095,7 +2095,30 @@ function bindCommandPaletteShortcut() {
         closeCmdPalette();
       }
     }
+
+    const inInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
+    if (e.key === '?' && !inInput && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      openShortcutsModal();
+    }
+    if (e.key === 'Escape' && !document.getElementById('shortcutsModal')?.classList.contains('hidden')) {
+      closeShortcutsModal();
+    }
   });
+
+  document.getElementById('shortcutsHelpBtn')?.addEventListener('click', openShortcutsModal);
+  document.getElementById('shortcutsModalCloseBtn')?.addEventListener('click', closeShortcutsModal);
+  document.getElementById('shortcutsModal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('shortcutsModal')) closeShortcutsModal();
+  });
+}
+
+function openShortcutsModal() {
+  document.getElementById('shortcutsModal')?.classList.remove('hidden');
+}
+
+function closeShortcutsModal() {
+  document.getElementById('shortcutsModal')?.classList.add('hidden');
 }
 
 function openCmdPalette() {

@@ -515,6 +515,11 @@
             </div>
 
             <div class="topbar__right">
+              <!-- Atalhos de teclado -->
+              <button id="shortcutsHelpBtn" class="btn btn-light" type="button" title="Atalhos de teclado (?)" aria-label="Atalhos de teclado">
+                <i class="fa-solid fa-keyboard"></i>
+              </button>
+
               <!-- Sino de notificações in-app -->
               <div style="position:relative" id="notifWrapper">
                 <button id="notifSinoBtn" class="btn btn-light" type="button" title="Notificações" aria-label="Notificações"
@@ -1435,6 +1440,52 @@
             <span><kbd>↑</kbd><kbd>↓</kbd> navegar</span>
             <span><kbd>Enter</kbd> abrir</span>
             <span><kbd>Ctrl K</kbd> fechar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL ATALHOS DE TECLADO -->
+      <div id="shortcutsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Atalhos de teclado">
+        <div class="modal-card" style="max-width:560px">
+          <div class="modal-card__header">
+            <div>
+              <h3>Atalhos de teclado</h3>
+              <p>Use estes atalhos para navegar mais rápido no sistema</p>
+            </div>
+            <button class="icon-button" id="shortcutsModalCloseBtn" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="modal-card__body" style="display:flex;flex-direction:column;gap:20px">
+
+            <div class="shortcuts-section">
+              <div class="shortcuts-section__title">Global</div>
+              <div class="shortcuts-grid">
+                <div class="shortcut-row"><kbd>Ctrl</kbd><kbd>K</kbd><span>Abrir busca rápida (command palette)</span></div>
+                <div class="shortcut-row"><kbd>?</kbd><span>Abrir esta ajuda de atalhos</span></div>
+                <div class="shortcut-row"><kbd>Esc</kbd><span>Fechar modal / command palette</span></div>
+              </div>
+            </div>
+
+            <div class="shortcuts-section">
+              <div class="shortcuts-section__title"><i class="fa-solid fa-cash-register"></i> PDV — Ponto de Venda</div>
+              <div class="shortcuts-grid">
+                <div class="shortcut-row"><kbd>F2</kbd><span>Focar campo de busca de produto</span></div>
+                <div class="shortcut-row"><kbd>Enter</kbd><span>Adicionar produto ao carrinho</span></div>
+                <div class="shortcut-row"><kbd>+</kbd><span>Aumentar quantidade do último item</span></div>
+                <div class="shortcut-row"><kbd>-</kbd><span>Diminuir quantidade do último item</span></div>
+                <div class="shortcut-row"><kbd>F9</kbd><span>Finalizar venda</span></div>
+                <div class="shortcut-row"><kbd>F8</kbd><span>Limpar / resetar venda</span></div>
+              </div>
+            </div>
+
+            <div class="shortcuts-section">
+              <div class="shortcuts-section__title"><i class="fa-solid fa-magnifying-glass"></i> Busca rápida (Ctrl+K)</div>
+              <div class="shortcuts-grid">
+                <div class="shortcut-row"><kbd>↑</kbd><kbd>↓</kbd><span>Navegar nos resultados</span></div>
+                <div class="shortcut-row"><kbd>Enter</kbd><span>Abrir módulo selecionado</span></div>
+                <div class="shortcut-row"><kbd>Esc</kbd><span>Fechar</span></div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
