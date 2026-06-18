@@ -774,7 +774,7 @@ function abrirModalBaixaConta(conta) {
   if (modalExistente) modalExistente.remove();
 
   const valorAtual = Number(conta?.valor || 0);
-  const hojeISO = new Date().toLocaleDateString('en-CA');
+  const hojeISO = todayFortaleza();
 
   const modal = document.createElement('div');
   modal.id = 'crBaixaModal';

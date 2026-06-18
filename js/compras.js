@@ -179,6 +179,7 @@ const ComprasModule = {
       this.setFeedback(message, 'error');
     } finally {
       this.state.loading = false;
+      this.setLoading(false);
     }
   },
 
@@ -740,6 +741,8 @@ const ComprasModule = {
   },
 
   async save() {
+    if (this.state.saving) return;
+    this.state.saving = true;
     this.cache();
 
     const fornecedorId = Number(this.el.fornecedor?.value || 0);
@@ -765,7 +768,7 @@ const ComprasModule = {
     }
 
     if (!this.state.itensCompra.length) {
-      this.showMessage('Adicione pelo menos um item Ã  compra.', 'error');
+      this.showMessage('Adicione pelo menos um item à compra.', 'error');
       return;
     }
 
@@ -799,6 +802,8 @@ const ComprasModule = {
       console.error('Erro ao salvar compra:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
+    } finally {
+      this.state.saving = false;
     }
   },
 
