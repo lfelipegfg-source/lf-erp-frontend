@@ -1,4 +1,5 @@
 import api from './api.js';
+import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { escapeHtml } from './utils.js';
 
@@ -8,10 +9,14 @@ const EstoqueModule = {
     filteredItems: [],
     initialized: false,
     eventsBound: false,
-    loading: false
+    loading: false,
+    empresa: ''
   },
 
   init() {
+    const auth = getAuth();
+    this.state.empresa = api.getEmpresaNome() || auth?.empresa?.nome || auth?.user?.empresa || '';
+
     if (!this.state.initialized) {
       this.state.initialized = true;
       this.render();

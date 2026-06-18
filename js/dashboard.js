@@ -636,9 +636,31 @@ const CHART_COLORS = {
   palette: ['#2563eb','#16a34a','#d97706','#dc2626','#0891b2','#7c3aed','#db2777','#64748b']
 };
 
+function _showChartPlaceholder(canvasId, message) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.style.display = 'none';
+  const existing = canvas.parentElement?.querySelector('.chart-placeholder');
+  if (existing) { existing.textContent = message; return; }
+  const ph = document.createElement('div');
+  ph.className = 'chart-placeholder empty-state';
+  ph.style.cssText = 'height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted)';
+  ph.textContent = message;
+  canvas.parentElement?.appendChild(ph);
+}
+
+function _clearChartPlaceholder(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.style.display = '';
+  canvas.parentElement?.querySelector('.chart-placeholder')?.remove();
+}
+
 function destroyCharts() {
   if (_chartVendas) { _chartVendas.destroy(); _chartVendas = null; }
   if (_chartForma)  { _chartForma.destroy();  _chartForma  = null; }
+  _clearChartPlaceholder('chartVendasDia');
+  _clearChartPlaceholder('chartFormaPagamento');
 }
 
 function formatDia(isoDate) {
@@ -710,11 +732,6 @@ function renderChartVendas(vendasPorDia = []) {
       }
     }
   });
-
-  if (!vendasPorDia.length) {
-    const parent = canvas.parentElement;
-    parent.innerHTML = `<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center">Sem vendas no período para exibir o gráfico.</div>`;
-  }
 }
 
 function renderChartFormaPagamento(formasPagamento = []) {
@@ -723,8 +740,7 @@ function renderChartFormaPagamento(formasPagamento = []) {
   if (!canvas || typeof Chart === 'undefined') return;
 
   if (!formasPagamento.length) {
-    const parent = canvas.parentElement;
-    parent.innerHTML = `<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center">Sem dados de pagamento no período.</div>`;
+    _showChartPlaceholder('chartFormaPagamento', 'Sem dados de pagamento no período.');
     return;
   }
 
@@ -791,10 +807,8 @@ async function renderGraficos(params = {}) {
     renderSparklineKpi(data?.vendas_por_dia || []);
   } catch (_) {
     _setChartSkeletons(false);
-    const emptyMsg = `<div class="empty-state" style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-muted)">Gráfico indisponível</div>`;
     ['chartVendasDia','chartFormaPagamento'].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el?.parentElement) el.parentElement.innerHTML = emptyMsg;
+      _showChartPlaceholder(id, 'Gráfico indisponível');
     });
   }
 }

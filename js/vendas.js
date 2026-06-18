@@ -1418,7 +1418,7 @@ const VendasModule = {
       overlay.innerHTML = `
         <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:420px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
           <h3 style="margin:0 0 12px;font-size:16px;font-weight:700">Observação da venda</h3>
-          <textarea id="_obsInput" rows="4" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box">${(venda.observacao || '').replace(/</g,'&lt;')}</textarea>
+          <textarea id="_obsInput" rows="4" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box">${escapeHtml(venda.observacao || '')}</textarea>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
             <button id="_obsCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
             <button id="_obsSalvar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar</button>
@@ -1469,7 +1469,7 @@ const VendasModule = {
           <h3 style="margin:0 0 8px;font-size:16px;font-weight:700">Salvar edição da venda</h3>
           <p style="font-size:13px;color:var(--text-muted);margin:0 0 14px">O sistema reprocessará estoque e financeiro com segurança.</p>
           <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Observação</label>
-          <textarea id="_seObs" rows="3" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box">${(venda.observacao || '').replace(/</g,'&lt;')}</textarea>
+          <textarea id="_seObs" rows="3" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;box-sizing:border-box">${escapeHtml(venda.observacao || '')}</textarea>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
             <button id="_seCancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
             <button id="_seConfirmar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Salvar edição</button>
@@ -2251,7 +2251,7 @@ const VendasModule = {
         </div>`;
       document.body.appendChild(el);
 
-      const hoje = new Date().toISOString().slice(0, 7);
+      const hoje = todayFortaleza().slice(0, 7);
       document.getElementById('metasPeriodoInput').value = hoje;
       document.getElementById('metasCarregarBtn').addEventListener('click', () => {
         const p = document.getElementById('metasPeriodoInput').value;

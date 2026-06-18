@@ -17,6 +17,19 @@ const state = {
   lucratSort: { key: null, dir: 1 }
 };
 
+function statusBadge(status) {
+  const s = String(status || '').toLowerCase().trim();
+  const map = {
+    pago:             ['badge--success', 'Pago'],
+    pendente:         ['badge--warning', 'Pendente'],
+    atrasado:         ['badge--danger',  'Atrasado'],
+    parcial:          ['badge--info',    'Parcial'],
+    parcial_atrasado: ['badge--warning', 'Parcial em atraso']
+  };
+  const [cls, label] = map[s] || ['badge--info', status || '-'];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
 export async function initRelatoriosFinanceirosModule() {
   try {
     renderLoading();
@@ -680,7 +693,7 @@ function renderTabelaReceber() {
               <td>${escapeHtml(item.cliente_nome || '-')}</td>
               <td>${Number(item.parcela || 1)}/${Number(item.total_parcelas || 1)}</td>
               <td>${formatDate(item.data_vencimento)}</td>
-              <td>${escapeHtml(item.status || '-')}</td>
+              <td>${statusBadge(item.status)}</td>
               <td class="text-right"><strong>${formatCurrency(item.valor)}</strong></td>
             </tr>
           `
@@ -717,7 +730,7 @@ function renderTabelaPagar() {
               <td>${escapeHtml(item.fornecedor_nome || '-')}</td>
               <td>${Number(item.parcela || 1)}/${Number(item.total_parcelas || 1)}</td>
               <td>${formatDate(item.data_vencimento)}</td>
-              <td>${escapeHtml(item.status || '-')}</td>
+              <td>${statusBadge(item.status)}</td>
               <td class="text-right"><strong>${formatCurrency(item.valor)}</strong></td>
             </tr>
           `

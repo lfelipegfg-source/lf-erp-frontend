@@ -217,11 +217,11 @@ function normalizeLoginResponse(data) {
 }
 
 async function login(usuario, senha) {
+  API_CONFIG._isRedirecting401 = false;
   const response = await request('/login', {
     method: 'POST',
     body: { usuario, senha }
   });
-  API_CONFIG._isRedirecting401 = false;
   return normalizeLoginResponse(response);
 }
 
@@ -1083,7 +1083,9 @@ async function downloadNfePdf(ref) {
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error('DANFE não disponível');
   const blob = await res.blob();
-  return URL.createObjectURL(blob);
+  const blobUrl = URL.createObjectURL(blob);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  return blobUrl;
 }
 
 async function downloadNfeXml(ref) {
@@ -1092,7 +1094,9 @@ async function downloadNfeXml(ref) {
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error('XML não disponível');
   const blob = await res.blob();
-  return URL.createObjectURL(blob);
+  const blobUrl = URL.createObjectURL(blob);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  return blobUrl;
 }
 
 // ── ORÇAMENTOS ───────────────────────────────────────────────────────────────
