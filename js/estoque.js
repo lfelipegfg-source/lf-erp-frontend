@@ -585,7 +585,7 @@ const EstoqueModule = {
     if (!corpo) return;
     corpo.innerHTML = `
       <div style="margin-bottom:16px">
-        <button type="button" class="btn btn-light btn-sm" type="button" data-action="renderDepositos">
+        <button type="button" class="btn btn-light btn-sm" data-action="renderDepositos">
           <i class="fa-solid fa-arrow-left"></i> Voltar
         </button>
         <strong style="margin-left:12px">${escapeHtml(nome)}</strong>
@@ -597,7 +597,7 @@ const EstoqueModule = {
       const itens = data.itens || [];
 
       if (!itens.length) {
-        corpo.querySelector('.module-feedback').outerHTML = `<div class="empty-state">Nenhum produto neste depósito.</div>`;
+        corpo.innerHTML = `<div class="empty-state">Nenhum produto neste depósito.</div>`;
         return;
       }
 
@@ -622,7 +622,7 @@ const EstoqueModule = {
 
       corpo.innerHTML = `
         <div style="margin-bottom:16px">
-          <button type="button" class="btn btn-light btn-sm" type="button" data-action="renderDepositos">
+          <button type="button" class="btn btn-light btn-sm" data-action="renderDepositos">
             <i class="fa-solid fa-arrow-left"></i> Voltar
           </button>
           <strong style="margin-left:12px">${escapeHtml(nome)}</strong>

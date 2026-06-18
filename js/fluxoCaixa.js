@@ -174,9 +174,7 @@ function render() {
   const movimentosPaginados = getMovimentosPaginados(movimentosFiltrados);
 
   if (!movimentosFiltrados.length) {
-    setTimeout(() => {
-      showMessage('Nenhuma movimentação encontrada para o período selecionado.', 'info');
-    }, 100);
+    showMessage('Nenhuma movimentação encontrada para o período selecionado.', 'info');
   }
 
   container.innerHTML = `
@@ -445,7 +443,7 @@ function formatFormaPagamento(value) {
 }
 
 function renderResumoOrigens() {
-  const resumo = state.movimentos.reduce((acc, movimento) => {
+  const resumo = getMovimentosFiltrados().reduce((acc, movimento) => {
     const origem = movimento.origem || 'outros';
     const tipo = String(movimento.tipo || '').toLowerCase();
     const valor = Number(movimento.valor || 0);
@@ -510,7 +508,8 @@ async function carregarCashflowFuturo(dias = 30) {
       query: { dias, empresa }
     });
     state.cashflowFuturo = data;
-  } catch {
+  } catch (err) {
+    console.error('[fluxoCaixa] Erro ao carregar cashflow futuro:', err);
     state.cashflowFuturo = null;
   }
 }

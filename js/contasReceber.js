@@ -572,6 +572,7 @@ function bindEventos() {
 }
 
 async function recarregar() {
+  if (state.loading) return;
   setLoading(true);
   showMessage('Atualizando contas a receber...', 'info');
 
@@ -933,16 +934,18 @@ async function renderDetalheConta(conta) {
 
   let recebimentosParciais = [];
 
-  try {
-    const recebimentosResponse = await api.request(
-      `/contas-receber/${conta.id}/recebimentos-parciais`
-    );
+  if (['parcial', 'parcial_atrasado'].includes(status)) {
+    try {
+      const recebimentosResponse = await api.request(
+        `/contas-receber/${conta.id}/recebimentos-parciais`
+      );
 
-    recebimentosParciais = Array.isArray(recebimentosResponse?.recebimentos)
-      ? recebimentosResponse.recebimentos
-      : [];
-  } catch (error) {
-    console.error('Erro ao carregar recebimentos parciais:', error);
+      recebimentosParciais = Array.isArray(recebimentosResponse?.recebimentos)
+        ? recebimentosResponse.recebimentos
+        : [];
+    } catch (error) {
+      console.error('Erro ao carregar recebimentos parciais:', error);
+    }
   }
 
   const modal = document.createElement('div');

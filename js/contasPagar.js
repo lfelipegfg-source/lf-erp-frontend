@@ -475,6 +475,7 @@ function bindEventos() {
 }
 
 async function recarregar() {
+  if (state.loading) return;
   setLoading(true);
   showMessage('Atualizando contas a pagar...', 'info');
 
@@ -521,15 +522,21 @@ async function pagarConta(id) {
 
     overlay.querySelector('#_pagarCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(null); };
     overlay.querySelector('#_pagarConfirmarBtn').onclick = async () => {
+      const btn = overlay.querySelector('#_pagarConfirmarBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirmando...';
       const data = overlay.querySelector('#_pagarDataInput').value;
       const valorStr = overlay.querySelector('#_pagarValorInput').value;
       const valor_pago = valorStr ? Number(valorStr) : undefined;
-      document.body.removeChild(overlay);
       try {
         await api.pagarContaPagar(id, { data_pagamento: data || undefined, valor_pago });
+        document.body.removeChild(overlay);
+        showMessage('Pagamento registrado com sucesso.', 'success');
         await recarregar();
       } catch (error) {
         console.error('Erro ao pagar conta:', error);
+        btn.disabled = false;
+        btn.innerHTML = 'Confirmar pagamento';
         showMessage(buildFriendlyError(error), 'error');
       }
       resolve();

@@ -396,7 +396,7 @@ const ClientesModule = {
       const { dados = [] } = (res && !Array.isArray(res)) ? res : { dados: Array.isArray(res) ? res : [] };
       this.state.items  = [...this.state.items, ...dados];
       this.state.offset = novoOffset;
-      this.search(this.el.search?.value || '');
+      this.search(this.state.termoBusca || this.el.search?.value || '');
     } catch (e) {
       showToast('Erro ao carregar mais clientes', 'error');
     } finally {
@@ -408,6 +408,8 @@ const ClientesModule = {
     const normalized = String(term || '')
       .trim()
       .toLowerCase();
+
+    this.state.termoBusca = normalized;
 
     this.state.filteredItems = this.state.items.filter((cliente) => {
       const nome = String(cliente.nome || '').toLowerCase();

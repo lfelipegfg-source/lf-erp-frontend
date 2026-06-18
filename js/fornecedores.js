@@ -250,7 +250,7 @@ const FornecedoresModule = {
     if (!this.state.filteredItems.length) {
       this.el.table.innerHTML = `
         <tr>
-          <td colspan="5">
+          <td colspan="6">
             <div class="empty-state" style="padding:36px 24px">
               <i class="fa-solid fa-truck"></i>
               <strong>Nenhum fornecedor encontrado</strong>
