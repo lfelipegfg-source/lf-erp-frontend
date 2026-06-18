@@ -340,8 +340,11 @@ const PDVModule = {
 
     try {
       if (isOnline) {
-        await this.syncPendentesIfOnline().catch(() => {});
-        const [clientes, produtos] = await Promise.all([this.fetchClientes(), this.fetchProdutos()]);
+        const [clientes, produtos] = await Promise.all([
+          this.fetchClientes(),
+          this.fetchProdutos(),
+          this.syncPendentesIfOnline().catch(() => {})
+        ]);
         this.state.clientes = Array.isArray(clientes) ? clientes : [];
         this.state.produtos = Array.isArray(produtos) ? produtos : [];
         PdvOffline.salvarProdutos(this.state.produtos).catch(() => {});
@@ -2001,6 +2004,7 @@ const PDVModule = {
       };
 
       overlay.querySelector('#_pixFechar').onclick = fechar;
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) fechar(); });
 
       const mostrarSucesso = () => {
         clearInterval(pollInterval);
