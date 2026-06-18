@@ -1777,10 +1777,16 @@ const PDVModule = {
         this.showMessage(`O total dos pagamentos excede o valor da venda em ${this.toCurrency(troco)}.`, 'error');
         return;
       }
-      // Troco em Dinheiro: registra o valor real da venda, devolve o troco fisicamente
-      this.state.pagamentos = this.state.pagamentos.map((p) =>
-        p.forma === 'Dinheiro' ? { ...p, valor: Number((Number(p.valor || 0) - troco).toFixed(2)) } : p
-      );
+      // Troco em Dinheiro: subtrai do primeiro pagamento em Dinheiro apenas
+      let trocoRestante = troco;
+      this.state.pagamentos = this.state.pagamentos.map((p) => {
+        if (p.forma === 'Dinheiro' && trocoRestante > 0) {
+          const novoValor = Number((Number(p.valor || 0) - trocoRestante).toFixed(2));
+          trocoRestante = 0;
+          return { ...p, valor: novoValor };
+        }
+        return p;
+      });
     }
 
     // Valida vencimento para Promissória
@@ -2203,6 +2209,8 @@ const PDVModule = {
   },
 
   bindOfflineEvents() {
+    if (this._offlineBound) return;
+    this._offlineBound = true;
     window.addEventListener('online', async () => {
       this.updateOfflineIndicator(true);
       showToast('Conexão restaurada. Sincronizando vendas pendentes...', 'success');

@@ -353,12 +353,12 @@ const ConfigModule = {
         <div class="form-grid" style="max-width: 420px;">
           <div class="form-field">
             <label>Nome completo</label>
-            <input id="cfgNomeCompleto" value="${this.state.user?.nome_completo || ''}" placeholder="Seu nome" />
+            <input id="cfgNomeCompleto" value="${esc(this.state.user?.nome_completo || '')}" placeholder="Seu nome" />
           </div>
           <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="form-field">
               <label>CPF</label>
-              <input id="cfgCpf" value="${this.state.user?.cpf || ''}" placeholder="000.000.000-00" />
+              <input id="cfgCpf" value="${esc(this.state.user?.cpf || '')}" placeholder="000.000.000-00" />
             </div>
             <div class="form-field">
               <label>Nascimento</label>

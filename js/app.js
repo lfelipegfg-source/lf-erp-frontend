@@ -2185,7 +2185,8 @@ function _cpRender() {
   const filtered = q ? _CP_NAV.filter((i) => i.label.toLowerCase().includes(q) || i.group.toLowerCase().includes(q)) : _CP_NAV;
 
   if (!filtered.length) {
-    list.innerHTML = `<div class="cmd-palette__empty"><i class="fa-solid fa-magnifying-glass" style="display:block;font-size:1.5rem;opacity:.25;margin-bottom:8px"></i>Nenhum resultado para "${q}"</div>`;
+    const qSafe = q.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    list.innerHTML = `<div class="cmd-palette__empty"><i class="fa-solid fa-magnifying-glass" style="display:block;font-size:1.5rem;opacity:.25;margin-bottom:8px"></i>Nenhum resultado para "${qSafe}"</div>`;
     return;
   }
 
