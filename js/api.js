@@ -217,11 +217,11 @@ function normalizeLoginResponse(data) {
 }
 
 async function login(usuario, senha) {
-  API_CONFIG._isRedirecting401 = false;
   const response = await request('/login', {
     method: 'POST',
     body: { usuario, senha }
   });
+  API_CONFIG._isRedirecting401 = false;
   return normalizeLoginResponse(response);
 }
 
