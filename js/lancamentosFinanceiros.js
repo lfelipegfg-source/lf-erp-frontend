@@ -6,6 +6,7 @@ const state = {
   itens:   [],
   editId:  null,
   loading: false,
+  saving:  false,
   filtros: { tipo: '', status: '', busca: '' },
   pagina: 1,
   totalPaginas: 1,
@@ -506,6 +507,8 @@ function fecharModal() {
 // ─── Operações ────────────────────────────────────────────────────────────────
 
 async function salvar() {
+  if (state.saving) return;
+  state.saving = true;
   const btn = document.getElementById('lfBtnSalvar');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
@@ -537,6 +540,8 @@ async function salvar() {
     showMsg(buildFriendlyError(error), 'error');
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+  } finally {
+    state.saving = false;
   }
 }
 

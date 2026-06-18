@@ -320,6 +320,16 @@ const PDVModule = {
         if (this.state.carrinho.length > 0) {
           this.updateQuantidade(this.state.carrinho.length - 1, -1);
         }
+        return;
+      }
+
+      // Delete — remover último item do carrinho
+      if (!inInput && e.key === 'Delete') {
+        e.preventDefault();
+        if (this.state.carrinho.length > 0) {
+          this.removeItem(this.state.carrinho.length - 1);
+        }
+        return;
       }
     });
   },

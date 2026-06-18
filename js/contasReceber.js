@@ -2211,8 +2211,17 @@ function abrirModalContaManual() {
 
   document.getElementById('cancelarContaManual')?.addEventListener('click', () => modal.remove());
 
-  document.getElementById('salvarContaManual')?.addEventListener('click', async () => {
-    await salvarContaManual(modal);
+  document.getElementById('salvarContaManual')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+    try {
+      await salvarContaManual(modal);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+    }
   });
 
   modal.addEventListener('click', (event) => {

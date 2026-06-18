@@ -14,7 +14,8 @@ const state = {
   inadimplencia: null,
   aba: 'resumo',
   lucratSubAba: 'financeiro',
-  lucratSort: { key: null, dir: 1 }
+  lucratSort: { key: null, dir: 1 },
+  loading: false
 };
 
 function statusBadge(status) {
@@ -1057,6 +1058,8 @@ function bindEventos() {
 }
 
 async function recarregarModulo(mensagem = '') {
+  if (state.loading) return;
+  state.loading = true;
   try {
     renderLoading();
     await carregarDados();
@@ -1065,6 +1068,8 @@ async function recarregarModulo(mensagem = '') {
   } catch (error) {
     console.error(error);
     renderErro('Não foi possível atualizar os relatórios financeiros.');
+  } finally {
+    state.loading = false;
   }
 }
 
@@ -1109,9 +1114,10 @@ function formatOrigem(origem) {
 
 function formatReferencia(item) {
   if (!item?.referencia_id) return '-';
-  if (item.origem === 'conta_receber') return `Venda #${item.referencia_id}`;
-  if (item.origem === 'conta_pagar') return `Compra #${item.referencia_id}`;
-  return `#${item.referencia_id}`;
+  const id = escapeHtml(String(item.referencia_id));
+  if (item.origem === 'conta_receber') return `Venda #${id}`;
+  if (item.origem === 'conta_pagar') return `Compra #${id}`;
+  return `#${id}`;
 }
 
 function formatCurrency(value) {
@@ -1123,7 +1129,7 @@ function formatCurrency(value) {
 
 function formatDate(value) {
   if (!value) return '-';
-  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(String(value))) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) {
     const [ano, mes, dia] = String(value).split('-');
     return `${dia}/${mes}/${ano}`;
   }
