@@ -193,7 +193,7 @@ const ComprasModule = {
         <div class="module-card__header">
           <div>
             <h3>Compras</h3>
-            <p>LanÃ§amentos, histÃ³rico, estoque e financeiro vinculados</p>
+            <p>Lançamentos, histórico, estoque e financeiro vinculados</p>
           </div>
 
           <div class="module-card__actions">
@@ -214,7 +214,7 @@ const ComprasModule = {
             <i class="fa-solid fa-search"></i>
             <input
               id="comprasSearch"
-              placeholder="Buscar por fornecedor, data ou nÃºmero da compra..."
+              placeholder="Buscar por fornecedor, data ou número da compra..."
               value="${escapeHtml(this.getCurrentSearchValue())}"
             />
           </div>
@@ -258,7 +258,7 @@ const ComprasModule = {
                 <th>Data</th>
                 <th>Status</th>
                 <th class="text-right">Total</th>
-                <th class="text-right">AÃ§Ãµes</th>
+                <th class="text-right">Ações</th>
               </tr>
             </thead>
             <tbody id="comprasTable"></tbody>
@@ -306,10 +306,10 @@ const ComprasModule = {
               <select id="compraFormaPagamento" class="filter-input" required>
                 <option value="Dinheiro">Dinheiro</option>
                 <option value="Pix">Pix</option>
-                <option value="CartÃ£o de DÃ©bito">CartÃ£o de DÃ©bito</option>
-                <option value="CartÃ£o de CrÃ©dito">CartÃ£o de CrÃ©dito</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
                 <option value="Boleto">Boleto</option>
-                <option value="Promissoria">PromissÃ³ria</option>
+                <option value="Promissoria">Promissória</option>
               </select>
             </div>
 
@@ -324,8 +324,8 @@ const ComprasModule = {
             </div>
 
             <div class="form-field form-field--span-2">
-              <label for="compraObservacao">ObservaÃ§Ã£o</label>
-              <textarea id="compraObservacao" placeholder="ObservaÃ§Ãµes internas da compra"></textarea>
+              <label for="compraObservacao">Observação</label>
+              <textarea id="compraObservacao" placeholder="Observações internas da compra"></textarea>
             </div>
 
             <div class="form-field">
@@ -350,7 +350,7 @@ const ComprasModule = {
             </div>
 
             <div class="form-field">
-              <label for="compraCustoUnitario">Custo unitÃ¡rio</label>
+              <label for="compraCustoUnitario">Custo unitário</label>
               <input type="number" id="compraCustoUnitario" min="0" step="0.01" inputmode="decimal" value="0" />
             </div>
 
@@ -371,7 +371,7 @@ const ComprasModule = {
                       <th>Qtd.</th>
                       <th>Custo unit.</th>
                       <th class="text-right">Subtotal</th>
-                      <th class="text-right">AÃ§Ãµes</th>
+                      <th class="text-right">Ações</th>
                     </tr>
                   </thead>
                   <tbody id="compraItensTable"></tbody>
@@ -431,7 +431,7 @@ const ComprasModule = {
     this.el.table.innerHTML = this.state.filteredItems
       .map((item) => {
         const id = Number(item.id || 0);
-        const fornecedor = item.fornecedor_nome || item.fornecedor || 'Fornecedor nÃ£o informado';
+        const fornecedor = item.fornecedor_nome || item.fornecedor || 'Fornecedor não informado';
         const data = formatDate(item.data);
         const total = formatCurrency(item.total || 0);
         const status = item.status || 'finalizada';
@@ -584,7 +584,7 @@ const ComprasModule = {
         if (titulo) titulo.textContent = `Editar Compra #${id}`;
       }, 50);
     } catch (error) {
-      this.showMessage('Erro ao carregar compra para ediÃ§Ã£o.', 'error');
+      this.showMessage('Erro ao carregar compra para edição.', 'error');
     }
   },
 
@@ -609,7 +609,7 @@ const ComprasModule = {
     const exigeVencimento =
       formaPagamento.toLowerCase() === 'boleto' ||
       formaPagamento.toLowerCase() === 'promissoria' ||
-      formaPagamento.toLowerCase() === 'promissÃ³ria';
+      formaPagamento.toLowerCase() === 'promissória';
 
     if (field) {
       field.classList.toggle('hidden', !exigeVencimento);
@@ -634,19 +634,19 @@ const ComprasModule = {
     }
 
     if (!quantidade || quantidade <= 0) {
-      this.showMessage('Informe uma quantidade vÃ¡lida.', 'error');
+      this.showMessage('Informe uma quantidade válida.', 'error');
       return;
     }
 
     if (custoUnitario < 0) {
-      this.showMessage('Informe um custo vÃ¡lido.', 'error');
+      this.showMessage('Informe um custo válido.', 'error');
       return;
     }
 
     const produto = this.state.produtos.find((p) => Number(p.id) === produtoId);
 
     if (!produto) {
-      this.showMessage('Produto nÃ£o encontrado.', 'error');
+      this.showMessage('Produto não encontrado.', 'error');
       return;
     }
 
@@ -803,13 +803,13 @@ const ComprasModule = {
   },
 
   async remove(id) {
-    const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serÃ£o ajustados.', 'Excluir', 'danger');
+    const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serão ajustados.', 'Excluir', 'danger');
 
     if (!confirmar) return;
 
     try {
       await api.deleteCompra(id);
-      this.showMessage('Compra excluÃ­da com sucesso.', 'success');
+      this.showMessage('Compra excluída com sucesso.', 'success');
       await this.load();
     } catch (error) {
       console.error('Erro ao excluir compra:', error);
@@ -846,7 +846,7 @@ const ComprasModule = {
           <div>
             <span class="compra-detail-eyebrow">Compra #${escapeHtml(compra?.id || '-')}</span>
             <h3>Detalhes da compra</h3>
-            <p>${escapeHtml(compra?.fornecedor_nome || 'Fornecedor nÃ£o informado')}</p>
+            <p>${escapeHtml(compra?.fornecedor_nome || 'Fornecedor não informado')}</p>
           </div>
 
           <button type="button" class="icon-button" id="fecharCompraDetalhe" aria-label="Fechar">
@@ -879,8 +879,8 @@ const ComprasModule = {
           </section>
 
           <section class="compra-detail-note">
-            <span>ObservaÃ§Ã£o</span>
-            <p>${escapeHtml(compra?.observacao || 'Nenhuma observaÃ§Ã£o registrada.')}</p>
+            <span>Observação</span>
+            <p>${escapeHtml(compra?.observacao || 'Nenhuma observação registrada.')}</p>
           </section>
 
           <section class="compra-detail-section">
@@ -1015,14 +1015,14 @@ const ComprasModule = {
     const message = error?.message || '';
 
     if (message.includes('Failed to fetch')) {
-      return 'NÃ£o foi possÃ­vel conectar ao backend.';
+      return 'Não foi possível conectar ao backend.';
     }
 
     if (error?.status === 403) {
       return 'Acesso negado ou limite do plano atingido.';
     }
 
-    return message || 'NÃ£o foi possÃ­vel concluir a operaÃ§Ã£o.';
+    return message || 'Não foi possível concluir a operação.';
   },
 
   getCurrentSearchValue() {
@@ -1108,7 +1108,7 @@ const ComprasModule = {
         <div style="padding:22px;display:grid;gap:18px">
 
           ${!data.fornecedor_id ? `<div class="module-feedback module-feedback--info" style="margin:0">
-            CNPJ ${esc(data.fornecedor_cnpj)} nÃ£o encontrado na base. Selecione um fornecedor abaixo ou cadastre-o primeiro.
+            CNPJ ${esc(data.fornecedor_cnpj)} não encontrado na base. Selecione um fornecedor abaixo ou cadastre-o primeiro.
           </div>` : `<div class="module-feedback module-feedback--success" style="margin:0">
             Fornecedor identificado: <strong>${esc(data.fornecedor_nome)}</strong>
           </div>`}
@@ -1134,14 +1134,14 @@ const ComprasModule = {
               </select>
             </div>
             <div class="form-field">
-              <label>ObservaÃ§Ã£o</label>
+              <label>Observação</label>
               <input id="_xmlObs" class="input" placeholder="Ex: NF ${esc(data.numero_nf)}" value="NF ${esc(data.numero_nf)}" />
             </div>
           </div>
 
           <div>
             <h4 style="font-size:.9rem;font-weight:700;margin-bottom:10px">Itens da NF (${(data.itens||[]).length})</h4>
-            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px">Vincule cada item da NF a um produto do seu cadastro. Itens sem vÃ­nculo serÃ£o ignorados.</p>
+            <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px">Vincule cada item da NF a um produto do seu cadastro. Itens sem vínculo serão ignorados.</p>
             <div class="table-wrapper">
               <table class="data-table" style="font-size:.85rem">
                 <thead>
