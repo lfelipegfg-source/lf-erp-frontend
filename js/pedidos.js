@@ -231,7 +231,7 @@ const PedidosModule = {
 
   promptConversao() {
     return new Promise((resolve) => {
-      const hoje = new Date().toISOString().slice(0, 10);
+      const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date());
       const overlay = document.createElement('div');
       overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
       overlay.innerHTML = `

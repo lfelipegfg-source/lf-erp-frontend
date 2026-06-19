@@ -55,6 +55,7 @@ const CrmModule = {
   },
 
   async load() {
+    if (this.state.loading) return;
     this.state.loading = true;
     try {
       const params = {};

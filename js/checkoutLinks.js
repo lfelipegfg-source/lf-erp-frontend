@@ -19,6 +19,7 @@ const CheckoutLinksModule = {
     tab: 'links',
     links: [],
     dashboard: null,
+    loading: false,
     initialized: false
   },
 
@@ -33,11 +34,17 @@ const CheckoutLinksModule = {
   },
 
   async loadTab(tab) {
+    if (this.state.loading) return;
     this.state.tab = tab;
     document.querySelectorAll('.chk-tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-    if (tab === 'links')  await this.loadLinks();
-    if (tab === 'criar')  this.renderCriar();
-    if (tab === 'stats')  await this.loadStats();
+    this.state.loading = true;
+    try {
+      if (tab === 'links')  await this.loadLinks();
+      if (tab === 'criar')  this.renderCriar();
+      if (tab === 'stats')  await this.loadStats();
+    } finally {
+      this.state.loading = false;
+    }
   },
 
   // ── Estatísticas ──────────────────────────────────────────────────────────

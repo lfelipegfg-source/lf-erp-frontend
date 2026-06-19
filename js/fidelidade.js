@@ -17,6 +17,7 @@ const FidelidadeModule = {
     tab: 'dashboard',
     cfg: null,
     clientes: [],
+    loading: false,
     initialized: false
   },
 
@@ -31,12 +32,18 @@ const FidelidadeModule = {
   },
 
   async loadTab(tab) {
+    if (this.state.loading) return;
     this.state.tab = tab;
     document.querySelectorAll('.fid-tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
-    if (tab === 'dashboard') await this.loadDashboard();
-    if (tab === 'config')    await this.loadConfig();
-    if (tab === 'clientes')  await this.loadClientes();
-    if (tab === 'resgatar')  await this.renderResgate();
+    this.state.loading = true;
+    try {
+      if (tab === 'dashboard') await this.loadDashboard();
+      if (tab === 'config')    await this.loadConfig();
+      if (tab === 'clientes')  await this.loadClientes();
+      if (tab === 'resgatar')  await this.renderResgate();
+    } finally {
+      this.state.loading = false;
+    }
   },
 
   // ── Dashboard ─────────────────────────────────────────────────────────────
@@ -185,13 +192,17 @@ const FidelidadeModule = {
       await this.salvarConfig();
     });
 
-    document.getElementById('fidExpirarBtn')?.addEventListener('click', async () => {
+    document.getElementById('fidExpirarBtn')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
       const ok = await confirmarAcao('Processar e remover todos os pontos expirados?');
       if (!ok) return;
+      btn.disabled = true;
       try {
         const data = await api.fetchAPI('/fidelidade/expirar', 'POST');
         showToast(data.mensagem, 'success');
       } catch (err) { showToast(err.message || 'Erro', 'error'); }
+      finally { btn.disabled = false; }
     });
   },
 
@@ -307,7 +318,13 @@ const FidelidadeModule = {
     document.getElementById('fidAjusteCancelBtn')?.addEventListener('click', () => {
       document.getElementById('fidAjusteModal').style.display = 'none';
     });
-    document.getElementById('fidAjusteSalvarBtn')?.addEventListener('click', () => this.aplicarAjuste());
+    document.getElementById('fidAjusteSalvarBtn')?.addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      if (btn.disabled) return;
+      btn.disabled = true;
+      try { await this.aplicarAjuste(); }
+      finally { btn.disabled = false; }
+    });
     document.getElementById('fidExtratoClose')?.addEventListener('click', () => {
       document.getElementById('fidExtratoModal').style.display = 'none';
     });
