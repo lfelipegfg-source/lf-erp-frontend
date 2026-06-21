@@ -377,6 +377,7 @@ const FornecedoresModule = {
   },
 
   async save() {
+    if (this.state.loading) return;
     this.cache();
 
     const payload = {
@@ -400,6 +401,7 @@ const FornecedoresModule = {
       return;
     }
 
+    this.state.loading = true;
     try {
       const message = this.state.editingId ? 'Atualizando fornecedor...' : 'Salvando fornecedor...';
 
@@ -420,6 +422,8 @@ const FornecedoresModule = {
       console.error('Erro ao salvar fornecedor:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 

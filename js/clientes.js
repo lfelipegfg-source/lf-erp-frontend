@@ -474,6 +474,7 @@ const ClientesModule = {
   },
 
   async save() {
+    if (this.state.loading) return;
     this.cache();
 
     const payload = {
@@ -496,6 +497,7 @@ const ClientesModule = {
       return;
     }
 
+    this.state.loading = true;
     try {
       const message = this.state.editingId ? 'Atualizando cliente...' : 'Salvando cliente...';
 
@@ -516,6 +518,8 @@ const ClientesModule = {
       console.error('Erro ao salvar cliente:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 
@@ -984,7 +988,7 @@ function normalizeDateInput(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
 
-  return date.toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(date);
 }
 
 

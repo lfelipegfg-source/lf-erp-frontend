@@ -874,7 +874,10 @@ function abrirModalBaixaConta(conta) {
   document.getElementById('fecharCrBaixa')?.addEventListener('click', () => modal.remove());
   document.getElementById('cancelarCrBaixa')?.addEventListener('click', () => modal.remove());
 
-  document.getElementById('confirmarCrBaixa')?.addEventListener('click', async () => {
+  document.getElementById('confirmarCrBaixa')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    if (btn.disabled) return;
+
     const valorPago = document.getElementById('crBaixaValor')?.value || '';
     const dataPagamento = document.getElementById('crBaixaData')?.value || '';
 
@@ -893,6 +896,8 @@ function abrirModalBaixaConta(conta) {
       return;
     }
 
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirmando...';
     try {
       await api.baixarContaReceber(conta.id, {
         valor_pago: valorPago,
@@ -907,6 +912,8 @@ function abrirModalBaixaConta(conta) {
     } catch (error) {
       console.error('Erro ao baixar conta a receber:', error);
       showMessage(buildFriendlyError(error), 'error');
+      btn.disabled = false;
+      btn.innerHTML = 'Confirmar';
     }
   });
 

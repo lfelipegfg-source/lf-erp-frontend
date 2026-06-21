@@ -36,6 +36,7 @@ import { initCheckoutLinksModule } from './checkoutLinks.js';
 import { initFiliaisModule } from './filiais.js';
 import { initBiModule } from './bi.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession, scheduleTokenRefresh, saveAuth } from './auth.js';
+import { escapeHtml } from './utils.js';
 
 const AppState = {
   isAuthenticated: false,
@@ -1890,7 +1891,7 @@ function renderViewFeedback(view) {
       <p>${config?.subtitle || 'Área do sistema'}</p>
 
       <div class="module-placeholder__meta">
-        <span><strong>Empresa:</strong> ${AppState.empresa?.nome || AppState.user?.empresa || '-'}</span>
+        <span><strong>Empresa:</strong> ${escapeHtml(AppState.empresa?.nome || AppState.user?.empresa || '-')}</span>
         <span><strong>Período:</strong> ${getPeriodLabel()}</span>
       </div>
 
@@ -2001,7 +2002,7 @@ function mostrarWizardBoasVindas(nomeEmpresa) {
     {
       icon: 'fa-rocket',
       titulo: 'Bem-vindo ao LF ERP!',
-      texto: `Sua conta <strong>${nomeEmpresa || 'sua empresa'}</strong> foi criada com sucesso. Você tem <strong>14 dias grátis</strong> para explorar tudo sem cartão de crédito.`,
+      texto: `Sua conta <strong>${escapeHtml(nomeEmpresa || 'sua empresa')}</strong> foi criada com sucesso. Você tem <strong>14 dias grátis</strong> para explorar tudo sem cartão de crédito.`,
       btn: 'Vamos começar'
     },
     {

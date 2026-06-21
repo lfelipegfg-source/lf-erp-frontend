@@ -472,6 +472,7 @@ function bindEventos() {
       if (btn.dataset.action === 'editar')  editar(id);
       if (btn.dataset.action === 'excluir') excluir(id);
       if (btn.dataset.action === 'lf-pagina') {
+        if (state.loading) return;
         const page = btn.dataset.page;
         if (page === 'prev' && state.pagina > 1) state.pagina--;
         else if (page === 'next' && state.pagina < state.totalPaginas) state.pagina++;

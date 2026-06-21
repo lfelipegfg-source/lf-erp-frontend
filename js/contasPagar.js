@@ -528,6 +528,12 @@ async function pagarConta(id) {
       const data = overlay.querySelector('#_pagarDataInput').value;
       const valorStr = overlay.querySelector('#_pagarValorInput').value;
       const valor_pago = valorStr ? Number(valorStr) : undefined;
+      if (valor_pago !== undefined && valor_pago <= 0) {
+        btn.disabled = false;
+        btn.innerHTML = 'Confirmar pagamento';
+        showMessage('Valor pago deve ser maior que zero.', 'error');
+        return;
+      }
       try {
         await api.pagarContaPagar(id, { data_pagamento: data || undefined, valor_pago });
         document.body.removeChild(overlay);

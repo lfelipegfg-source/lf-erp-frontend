@@ -742,7 +742,6 @@ const ComprasModule = {
 
   async save() {
     if (this.state.saving) return;
-    this.state.saving = true;
     this.cache();
 
     const fornecedorId = Number(this.el.fornecedor?.value || 0);
@@ -772,6 +771,7 @@ const ComprasModule = {
       return;
     }
 
+    this.state.saving = true;
     const payload = {
       fornecedor_id: fornecedorId,
       data,
@@ -1237,7 +1237,7 @@ function formatDate(value) {
 }
 
 function getTodayDate() {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date());
 }
 
 

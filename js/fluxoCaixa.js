@@ -660,6 +660,7 @@ function bindEventos() {
 }
 
 async function recarregar() {
+  if (state.loading) return;
   setLoading(true);
   showMessage('Atualizando fluxo de caixa...', 'info');
 

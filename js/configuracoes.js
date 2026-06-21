@@ -9,7 +9,8 @@ function esc(v) {
 const ConfigModule = {
   state: {
     empresa: null,
-    dados: null
+    dados: null,
+    eventsBound: false
   },
 
   init() {
@@ -474,15 +475,18 @@ const ConfigModule = {
       </section>
     `;
 
-    setTimeout(() => {
-      document.getElementById('salvarConfigBtn')?.addEventListener('click', () => this.save());
-      document.getElementById('cfgSalvarPerfilBtn')?.addEventListener('click', () => this.salvarPerfil());
-      document.getElementById('cfgTrocarSenhaBtn')?.addEventListener('click', () => this.trocarSenha());
-      document.getElementById('cfgCarregarHistoricoBtn')?.addEventListener('click', () => this.carregarHistorico());
-      document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
-      document.getElementById('cfgSalvarAsaasBtn')?.addEventListener('click', () => this.salvarAsaas());
-      document.getElementById('exportarDadosBtn')?.addEventListener('click', () => this.exportarDados());
-    }, 0);
+    if (!this.state.eventsBound) {
+      this.state.eventsBound = true;
+      setTimeout(() => {
+        document.getElementById('salvarConfigBtn')?.addEventListener('click', () => this.save());
+        document.getElementById('cfgSalvarPerfilBtn')?.addEventListener('click', () => this.salvarPerfil());
+        document.getElementById('cfgTrocarSenhaBtn')?.addEventListener('click', () => this.trocarSenha());
+        document.getElementById('cfgCarregarHistoricoBtn')?.addEventListener('click', () => this.carregarHistorico());
+        document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
+        document.getElementById('cfgSalvarAsaasBtn')?.addEventListener('click', () => this.salvarAsaas());
+        document.getElementById('exportarDadosBtn')?.addEventListener('click', () => this.exportarDados());
+      }, 0);
+    }
   }
 };
 
