@@ -381,6 +381,9 @@ function bindFilterEvents() {
   if (toggleFiltersBtn && globalFiltersContent) {
     toggleFiltersBtn.addEventListener('click', () => {
       globalFiltersContent.classList.toggle('hidden');
+      if (!globalFiltersContent.classList.contains('hidden')) {
+        updateGlobalFilterContextNote();
+      }
     });
   }
 
@@ -957,6 +960,26 @@ function updateFiltersUI() {
     globalFilterSummary.textContent = `Período: ${getPeriodLabel()}`;
   }
 }
+
+const VIEWS_WITH_GLOBAL_FILTER = new Set(['dashboard']);
+
+function updateGlobalFilterContextNote() {
+  const note = document.getElementById('globalFilterContextNote');
+  if (!note) return;
+
+  const view = AppState.currentView;
+  const uses = VIEWS_WITH_GLOBAL_FILTER.has(view);
+
+  note.className = `global-filter-context-note ${uses ? 'global-filter-context-note--uses' : 'global-filter-context-note--local'}`;
+  note.classList.remove('hidden');
+
+  if (uses) {
+    note.innerHTML = `<i class="fa-solid fa-circle-check" style="margin-top:1px;flex-shrink:0"></i><span>Este módulo usa os filtros globais. Clique em <strong>Aplicar</strong> para recarregar.</span>`;
+  } else {
+    note.innerHTML = `<i class="fa-solid fa-circle-info" style="margin-top:1px;flex-shrink:0"></i><span>Este módulo tem seus próprios filtros internos — o filtro global <strong>não afeta</strong> esta tela.</span>`;
+  }
+}
+
 
 function applyDefaultPeriodDates() {
   const today = new Date();
