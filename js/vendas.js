@@ -2260,7 +2260,7 @@ const VendasModule = {
     }
 
     document.getElementById('metasModal').classList.remove('hidden');
-    const periodo = document.getElementById('metasPeriodoInput').value || new Date().toISOString().slice(0, 7);
+    const periodo = document.getElementById('metasPeriodoInput').value || new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date()).slice(0, 7);
     await this._carregarMetas(periodo);
   },
 
@@ -2320,7 +2320,7 @@ const VendasModule = {
   },
 
   async criarMeta() {
-    const periodo = document.getElementById('metasPeriodoInput')?.value || new Date().toISOString().slice(0, 7);
+    const periodo = document.getElementById('metasPeriodoInput')?.value || new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date()).slice(0, 7);
     const valor = prompt(`Meta de vendas para o período ${periodo} (R$):`);
     if (!valor || isNaN(Number(valor))) return;
 
