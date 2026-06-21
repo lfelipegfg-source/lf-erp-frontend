@@ -185,67 +185,6 @@ const ConfigModule = {
     }
   },
 
-  async resetDados() {
-    const confirmado = await new Promise((resolve) => {
-      const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay';
-      overlay.innerHTML = `
-        <div class="modal-card" style="max-width:420px">
-          <div class="modal-card__header">
-            <div>
-              <h3 style="color:var(--danger)">Resetar dados do piloto</h3>
-              <p>Esta ação é irreversível</p>
-            </div>
-          </div>
-          <div class="modal-card__body">
-            <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">Esta ação <strong>apagará permanentemente</strong> todos os dados operacionais da empresa. Digite <strong>RESETAR</strong> para confirmar.</p>
-            <div class="form-field">
-              <label>Confirmação</label>
-              <input id="_resetConfirmInput" placeholder="Digite RESETAR" style="border-color:var(--danger)" />
-            </div>
-          </div>
-          <div class="modal-card__footer">
-            <button class="btn btn-light" id="_resetCancelarBtn">Cancelar</button>
-            <button class="btn btn-danger" id="_resetConfirmarBtn">Resetar dados</button>
-          </div>
-        </div>`;
-      document.body.appendChild(overlay);
-      overlay.querySelector('#_resetCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(false); };
-      overlay.querySelector('#_resetConfirmarBtn').onclick = () => {
-        const val = overlay.querySelector('#_resetConfirmInput').value.trim();
-        document.body.removeChild(overlay);
-        resolve(val === 'RESETAR');
-      };
-    });
-
-    if (!confirmado) {
-      showToast('Reset cancelado.', 'info');
-      return;
-    }
-
-    try {
-      const btn = document.getElementById('resetDadosBtn');
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Resetando...';
-      }
-
-      await api.fetchAPI('/reset-dados', 'POST', {});
-
-      showToast('Dados resetados com sucesso.', 'success');
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (err) {
-      console.error('Erro ao resetar dados:', err);
-      showToast(err.message || 'Erro ao resetar dados.', 'error');
-    } finally {
-      const btn = document.getElementById('resetDadosBtn');
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = 'Resetar dados do piloto';
-      }
-    }
-  },
-
   async trocarSenha() {
     const atual = document.getElementById('cfgSenhaAtual')?.value;
     const nova = document.getElementById('cfgSenhaNova')?.value;
@@ -532,15 +471,6 @@ const ConfigModule = {
           </button>
         </div>
 
-        <div class="module-card" style="background: var(--danger-soft); border-color: rgba(220,38,38,0.25);">
-          <div class="module-card__header">
-            <div>
-              <h3 style="color: var(--danger);">Área de teste do piloto</h3>
-              <p>Use esta opção apenas em ambiente local para apagar dados operacionais e iniciar o piloto novamente.</p>
-            </div>
-          </div>
-          <button id="resetDadosBtn" class="btn btn-danger">Resetar dados do piloto</button>
-        </div>
       </section>
     `;
 
@@ -549,7 +479,6 @@ const ConfigModule = {
       document.getElementById('cfgSalvarPerfilBtn')?.addEventListener('click', () => this.salvarPerfil());
       document.getElementById('cfgTrocarSenhaBtn')?.addEventListener('click', () => this.trocarSenha());
       document.getElementById('cfgCarregarHistoricoBtn')?.addEventListener('click', () => this.carregarHistorico());
-      document.getElementById('resetDadosBtn')?.addEventListener('click', () => this.resetDados());
       document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
       document.getElementById('cfgSalvarAsaasBtn')?.addEventListener('click', () => this.salvarAsaas());
       document.getElementById('exportarDadosBtn')?.addEventListener('click', () => this.exportarDados());
