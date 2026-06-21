@@ -530,7 +530,7 @@ const CrmModule = {
           ${TIPOS_ATIVIDADE.map((t) => `<option value="${t.key}">${t.label}</option>`).join('')}
         </select>
         <input id="crmAtivDesc" class="filter-input" placeholder="Descreva a atividade..." style="flex:1;min-width:180px;" required>
-        <input id="crmAtivData" class="filter-input" type="date" value="${new Date().toISOString().substring(0,10)}" style="width:140px;">
+        <input id="crmAtivData" class="filter-input" type="date" value="${new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date())}" style="width:140px;">
         <button type="submit" class="btn btn-primary btn-sm">Registrar</button>
       </form>
 

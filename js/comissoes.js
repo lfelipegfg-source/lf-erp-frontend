@@ -322,17 +322,20 @@ const ComissoesModule = {
 
   bindDetalhesEvents() {
     const c = document.getElementById('comConteudo');
-    c?.addEventListener('click', (e) => {
+    if (!c || c.dataset.detBound) return;
+    c.dataset.detBound = '1';
+    c.addEventListener('click', (e) => {
       const statusBtn = e.target.closest('[data-com-status]');
       if (statusBtn) {
         this.state.filtroStatus = statusBtn.dataset.comStatus;
         this.renderConteudo();
-        return;
       }
     });
-    document.getElementById('comFiltroVendedor')?.addEventListener('change', (e) => {
-      this.state.filtroUsuario = e.target.value;
-      this.renderConteudo();
+    c.addEventListener('change', (e) => {
+      if (e.target.id === 'comFiltroVendedor') {
+        this.state.filtroUsuario = e.target.value;
+        this.renderConteudo();
+      }
     });
   },
 

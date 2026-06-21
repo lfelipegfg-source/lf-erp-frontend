@@ -15,7 +15,7 @@ const CaixaModule = {
   init() {
     this.render();
     this.bindShellEvents();
-    this.load();
+    return this.load();
   },
 
   async load() {
@@ -258,24 +258,36 @@ const CaixaModule = {
     document.getElementById('caixaSangriaBtn')?.addEventListener('click', async () => {
       const valor = Number(document.getElementById('caixaSangriaValor')?.value || 0);
       if (!valor || valor <= 0) { showToast('Informe um valor para a sangria.', 'error'); return; }
+      const btn = document.getElementById('caixaSangriaBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
       try {
         await api.sangriaCaixa({ valor, descricao: 'Sangria de caixa' });
         showToast('Sangria registrada.', 'success');
         document.getElementById('caixaSangriaValor').value = '';
         await this.load();
-      } catch (err) { showToast(err.message || 'Erro ao registrar sangria.', 'error'); }
+      } catch (err) {
+        showToast(err.message || 'Erro ao registrar sangria.', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-arrow-down" style="color:var(--danger)"></i> Registrar'; }
+      }
     });
 
     // Suprimento
     document.getElementById('caixaSuprimentoBtn')?.addEventListener('click', async () => {
       const valor = Number(document.getElementById('caixaSuprimentoValor')?.value || 0);
       if (!valor || valor <= 0) { showToast('Informe um valor para o suprimento.', 'error'); return; }
+      const btn = document.getElementById('caixaSuprimentoBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
       try {
         await api.suprimentoCaixa({ valor, descricao: 'Suprimento de caixa' });
         showToast('Suprimento registrado.', 'success');
         document.getElementById('caixaSuprimentoValor').value = '';
         await this.load();
-      } catch (err) { showToast(err.message || 'Erro ao registrar suprimento.', 'error'); }
+      } catch (err) {
+        showToast(err.message || 'Erro ao registrar suprimento.', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-arrow-up" style="color:var(--success)"></i> Registrar'; }
+      }
     });
 
     // Fechar caixa
@@ -367,8 +379,7 @@ const CaixaModule = {
 };
 
 export async function initCaixaModule() {
-  CaixaModule.init();
-  await CaixaModule.load();
+  await CaixaModule.init();
 }
 
 export default CaixaModule;

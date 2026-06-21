@@ -50,7 +50,7 @@ const FiliaisModule = {
 
     const mesAtual = new Date();
     const ini = `${mesAtual.getFullYear()}-${String(mesAtual.getMonth()+1).padStart(2,'0')}-01`;
-    const fim = new Date(mesAtual.getFullYear(), mesAtual.getMonth()+1, 0).toISOString().substring(0,10);
+    const fim = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date(mesAtual.getFullYear(), mesAtual.getMonth()+1, 0));
 
     el.innerHTML = `
       <div class="fil-periodo-bar">
@@ -308,7 +308,13 @@ const FiliaisModule = {
     document.getElementById('filCancelarBtn')?.addEventListener('click', () => this.loadTab('filiais'));
     document.getElementById('filForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      await this.salvar(filial?.id || null);
+      const btn = e.target.querySelector('[type=submit]');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Salvando...'; }
+      try {
+        await this.salvar(filial?.id || null);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-save"></i> Salvar filial'; }
+      }
     });
   },
 

@@ -14,10 +14,12 @@ const MarketplaceModule = {
   },
 
   async init() {
-    this.render();
-    this.bindEvents();
+    if (!this.state.initialized) {
+      this.render();
+      this.bindEvents();
+      this.state.initialized = true;
+    }
     await this.load();
-    this.state.initialized = true;
   },
 
   async load() {
