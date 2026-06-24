@@ -2394,6 +2394,12 @@ img {
   display: none;
 }
 
+/* Actions sempre à direita do toolbar, nunca acima do search */
+.module-toolbar > .module-card__actions {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .sidebar-overlay {
   position: fixed;
   inset: 0;

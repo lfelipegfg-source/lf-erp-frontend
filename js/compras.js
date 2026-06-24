@@ -203,12 +203,12 @@ const ComprasModule = {
           </div>
 
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <select id="comprasFiltroStatus" class="input" style="height:38px;min-width:140px;font-size:13px">
+            <select id="comprasFiltroStatus" class="input" style="height:38px;min-width:140px;width:auto;font-size:13px">
               <option value="">Todos os status</option>
               <option value="finalizada" ${this.state.filtroStatus === 'finalizada' ? 'selected' : ''}>Finalizada</option>
               <option value="pendente" ${this.state.filtroStatus === 'pendente' ? 'selected' : ''}>Pendente</option>
             </select>
-            <select id="comprasFiltroFornecedor" class="input" style="height:38px;min-width:160px;font-size:13px">
+            <select id="comprasFiltroFornecedor" class="input" style="height:38px;min-width:160px;width:auto;font-size:13px">
               <option value="">Todos os fornecedores</option>
               ${this.state.fornecedores.map(f => `<option value="${f.id}" ${String(this.state.filtroFornecedor) === String(f.id) ? 'selected' : ''}>${escapeHtml(f.nome)}</option>`).join('')}
             </select>

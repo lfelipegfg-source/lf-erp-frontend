@@ -418,10 +418,10 @@ const ProdutosModule = {
             <input type="text" id="produtosSearchInput" placeholder="Buscar por nome, categoria ou código" />
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <select id="produtosFiltroCategoria" class="input" style="height:38px;min-width:150px;font-size:13px">
+            <select id="produtosFiltroCategoria" class="input" style="height:38px;min-width:150px;width:auto;font-size:13px">
               <option value="">Todas as categorias</option>
             </select>
-            <select id="produtosFiltroAlerta" class="input" style="height:38px;min-width:140px;font-size:13px">
+            <select id="produtosFiltroAlerta" class="input" style="height:38px;min-width:140px;width:auto;font-size:13px">
               <option value="">Todos os status</option>
               <option value="alerta">Em alerta</option>
               <option value="ok">Estoque ok</option>
