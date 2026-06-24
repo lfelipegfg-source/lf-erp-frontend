@@ -583,43 +583,6 @@ function formatTipo(tipo) {
 }
 
 
-async function fetchAPI(path, method = 'GET', body) {
-  const auth = getAuth();
-  const token = auth?.authToken || auth?.token || '';
-  const baseUrl = api.getApiBaseUrl();
-
-  const response = await fetch(`${baseUrl}${path}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: token ? `Bearer ${token}` : ''
-    },
-    body: body ? JSON.stringify(body) : undefined
-  });
-
-  const contentType = response.headers.get('content-type') || '';
-  const isJson = contentType.includes('application/json');
-
-  let payload = null;
-
-  try {
-    payload = isJson ? await response.json() : await response.text();
-  } catch {
-    payload = null;
-  }
-
-  if (!response.ok) {
-    const message =
-      (typeof payload === 'object' && payload?.message) ||
-      (typeof payload === 'object' && payload?.error) ||
-      (typeof payload === 'string' && payload) ||
-      'Erro na API de usuários';
-
-    throw new Error(message);
-  }
-
-  return payload;
-}
 
 export async function initUsuariosModule() {
   UsuariosModule.init();

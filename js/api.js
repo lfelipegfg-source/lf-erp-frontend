@@ -1,7 +1,23 @@
+const _ALLOWED_API_HOSTS = [
+  'lf-erp-backend.onrender.com',
+  'localhost',
+  '127.0.0.1'
+];
+
+function _validateApiUrl(url) {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return _ALLOWED_API_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h));
+  } catch { return false; }
+}
+
+const _storedApiUrl = localStorage.getItem('lf_erp_api_url');
+
 const API_CONFIG = {
   BASE_URL:
     window.LF_ERP_API_URL ||
-    localStorage.getItem('lf_erp_api_url') ||
+    (_validateApiUrl(_storedApiUrl) ? _storedApiUrl : null) ||
     'https://lf-erp-backend.onrender.com',
   TIMEOUT: 20000,
   STORAGE_KEY: 'lf_erp_auth'
@@ -1271,9 +1287,12 @@ function setApiBaseUrl(url) {
   if (!url || typeof url !== 'string') {
     throw new Error('Informe uma URL válida para a API.');
   }
-
-  localStorage.setItem('lf_erp_api_url', url.trim());
-  API_CONFIG.BASE_URL = url.trim();
+  const trimmed = url.trim();
+  if (!_validateApiUrl(trimmed)) {
+    throw new Error('URL de API não permitida. Domínio não está na lista de hosts autorizados.');
+  }
+  localStorage.setItem('lf_erp_api_url', trimmed);
+  API_CONFIG.BASE_URL = trimmed;
 }
 
 function getApiBaseUrl() {
