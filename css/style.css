@@ -5259,6 +5259,18 @@ select {
   .fil-kpi,.fid-kpi,.chk-kpi,.rast-kpi { min-width:100px; }
 }
 
+/* ── Upgrade visual KPI cards dos módulos especializados ─────────────────── */
+.fil-kpi,
+.bi-kpi,
+.bi-card,
+.chk-kpi,
+.fid-kpi,
+.rast-kpi {
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
 /* ── Impressão — Relatórios Financeiros ─────────────────────────────────── */
 @media print {
   /* Esconde navegação/chrome do app, mantendo apenas o conteúdo do relatório */
