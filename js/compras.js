@@ -192,12 +192,7 @@ const ComprasModule = {
         <div id="comprasFeedback" class="module-feedback"></div>
 
         <div class="module-card__header">
-          <div>
-            <h3>Compras</h3>
-            <p>Lançamentos, histórico, estoque e financeiro vinculados</p>
-          </div>
-
-          <div class="module-card__actions">
+          <div class="module-card__actions" style="margin-left:auto">
             <button class="btn btn-light" id="importarXmlBtn" type="button" title="Importar NF do fornecedor (XML)">
               <i class="fa-solid fa-file-import"></i>
               Importar XML

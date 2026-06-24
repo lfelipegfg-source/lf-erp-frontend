@@ -54,8 +54,7 @@ const CaixaModule = {
     c.innerHTML = `
       <section class="module-card">
         <div class="module-card__header">
-          <div><h3>Controle de Caixa</h3><p>Abertura, movimentações e fechamento do caixa físico</p></div>
-          <div class="module-card__actions">
+          <div class="module-card__actions" style="margin-left:auto">
             <button class="btn btn-light" id="caixaAtualizarBtn">
               <i class="fa-solid fa-rotate"></i> Atualizar
             </button>

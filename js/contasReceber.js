@@ -174,12 +174,7 @@ function render() {
       <div id="contasReceberFeedback" class="module-feedback"></div>
 
       <div class="module-card__header">
-        <div>
-          <h3>Contas a Receber</h3>
-          <p>Controle de títulos pendentes, atrasados e recebidos</p>
-        </div>
-
-        <div class="module-card__actions">
+        <div class="module-card__actions" style="margin-left:auto">
 
           <button class="btn btn-primary" id="btnNovaContaManual" type="button">
             <i class="fa-solid fa-plus"></i>

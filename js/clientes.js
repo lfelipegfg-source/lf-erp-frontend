@@ -183,12 +183,7 @@ const ClientesModule = {
         <div id="clientesFeedback" class="module-feedback"></div>
 
         <div class="module-card__header">
-          <div>
-            <h3>Clientes</h3>
-            <p>Cadastro e relacionamento comercial</p>
-          </div>
-
-          <div class="module-card__actions">
+          <div class="module-card__actions" style="margin-left:auto">
             <button class="btn btn-light" id="abcClientesBtn" title="Segmentação A/B/C por receita">
               <i class="fa-solid fa-chart-bar"></i> Curva ABC
             </button>

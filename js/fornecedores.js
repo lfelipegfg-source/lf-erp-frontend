@@ -138,12 +138,7 @@ const FornecedoresModule = {
         <div id="fornecedoresFeedback" class="module-feedback"></div>
 
         <div class="module-card__header">
-          <div>
-            <h3>Fornecedores</h3>
-            <p>Base completa de fornecedores e apoio às compras</p>
-          </div>
-
-          <div class="module-card__actions">
+          <div class="module-card__actions" style="margin-left:auto">
             <button class="btn btn-primary" id="novoFornecedorBtn">
               <i class="fa-solid fa-plus"></i>
               Novo Fornecedor

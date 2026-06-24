@@ -42,8 +42,7 @@ const AlertasModule = {
     c.innerHTML = `
       <section class="module-card">
         <div class="module-card__header">
-          <div><h3>Alertas de Cobrança</h3><p>Envie lembretes de pagamento por email e WhatsApp</p></div>
-          <div class="module-card__actions">
+          <div class="module-card__actions" style="margin-left:auto">
             <button class="btn btn-light" id="alertasAtualizarBtn">
               <i class="fa-solid fa-rotate"></i> Atualizar
             </button>

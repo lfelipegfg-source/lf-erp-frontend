@@ -171,7 +171,6 @@ const ProdutosModule = {
         })), 'produtos');
         return;
       }
-      if (action === 'produtosRefreshBtn')     { await this.load(); return; }
       if (action === 'produtosNewBtn')         { this.openCreateModal(); return; }
       if (action === 'produtosLoteBtn')             { this.imprimirLote(); return; }
       if (action === 'produtosMarketplaceBtn')       { await this.abrirMarketplace(); return; }
@@ -224,6 +223,17 @@ const ProdutosModule = {
 
     document.addEventListener('click', (e) => {
       if (e.target === document.getElementById('produtoModal')) this.closeModal();
+    });
+
+    // ── "Mais ações" dropdown
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#produtosActionsBtn');
+      const dropdown = document.getElementById('produtosActionsDropdown');
+      if (!dropdown) return;
+      if (btn) { dropdown.classList.toggle('hidden'); return; }
+      if (!e.target.closest('#produtosActionsWrapper')) {
+        dropdown.classList.add('hidden');
+      }
     });
 
     // ── Col-picker (colunas configuráveis)
@@ -403,22 +413,32 @@ const ProdutosModule = {
     container.innerHTML = `
       <section class="module-card" id="produtosSection">
         <div class="module-card__header">
-          <div><h3>Produtos</h3><p>Cadastro, edição, estoque e consulta</p></div>
-          <div class="module-card__actions">
-            <button type="button" class="btn btn-light" id="produtosMarketplaceBtn">
-              <i class="fa-solid fa-store"></i> Marketplace
-            </button>
+          <div class="module-card__actions" style="margin-left:auto">
+            <div class="actions-menu-wrapper" id="produtosActionsWrapper">
+              <button type="button" class="btn btn-light" id="produtosActionsBtn">
+                <i class="fa-solid fa-ellipsis"></i> Mais ações <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px"></i>
+              </button>
+              <div class="actions-menu-dropdown hidden" id="produtosActionsDropdown">
+                <button type="button" class="actions-menu-item" id="produtosMarketplaceBtn">
+                  <i class="fa-solid fa-store"></i> Marketplace
+                </button>
+                <div class="actions-menu-divider"></div>
+                <button type="button" class="actions-menu-item" id="produtosTodasEtiquetasBtn">
+                  <i class="fa-solid fa-print"></i> Todas as Etiquetas
+                </button>
+                <button type="button" class="actions-menu-item" id="produtosHojeEtiquetasBtn">
+                  <i class="fa-solid fa-calendar-day"></i> Etiquetas de Hoje
+                </button>
+                <div class="actions-menu-divider"></div>
+                <button type="button" class="actions-menu-item" id="produtosExportBtn">
+                  <i class="fa-solid fa-file-csv"></i> Exportar CSV
+                </button>
+              </div>
+            </div>
             <button type="button" class="btn btn-light" id="produtosLoteBtn" style="display:none">
               <i class="fa-solid fa-tags"></i>
               Etiquetas <span id="produtosLoteBadge" class="badge badge--primary" style="margin-left:4px;font-size:.75rem">0</span>
             </button>
-            <button type="button" class="btn btn-light" id="produtosTodasEtiquetasBtn" title="Gera etiquetas de todos os produtos carregados em folhas A4">
-              <i class="fa-solid fa-print"></i> Todas as Etiquetas
-            </button>
-            <button type="button" class="btn btn-light" id="produtosHojeEtiquetasBtn" title="Gera etiquetas dos produtos registrados hoje (cadastros, compras ou movimentações)">
-              <i class="fa-solid fa-calendar-day"></i> Etiquetas de Hoje
-            </button>
-            <button type="button" class="btn btn-light" id="produtosExportBtn"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
             <div class="col-picker-wrapper" id="colPickerWrapper">
               <button type="button" class="btn btn-light" id="produtosColsBtn" title="Configurar colunas visíveis">
                 <i class="fa-solid fa-table-columns"></i>
@@ -437,7 +457,6 @@ const ProdutosModule = {
                 <label class="col-picker-item"><input type="checkbox" data-col="11" /> Status</label>
               </div>
             </div>
-            <button type="button" class="btn btn-light" id="produtosRefreshBtn"><i class="fa-solid fa-rotate"></i> Atualizar</button>
             <button type="button" class="btn btn-primary" id="produtosNewBtn"><i class="fa-solid fa-plus"></i> Novo produto</button>
           </div>
         </div>

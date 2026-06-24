@@ -85,11 +85,7 @@ function renderLista() {
       <div id="cbFeedback" class="module-feedback hidden"></div>
 
       <div class="module-card__header">
-        <div>
-          <h3>Conciliação Bancária</h3>
-          <p>Importe extratos OFX ou CSV e reconcilie com seus lançamentos</p>
-        </div>
-        <div class="module-card__actions">
+        <div class="module-card__actions" style="margin-left:auto">
           <button class="btn btn-light" id="cbBtnAtualizar" type="button">
             <i class="fa-solid fa-rotate"></i> Atualizar
           </button>

@@ -82,8 +82,7 @@ const ComissoesModule = {
     c.innerHTML = `
       <section class="module-card">
         <div class="module-card__header">
-          <div><h3>Comissões</h3><p>Comissões de vendedores por venda realizada</p></div>
-          <div class="module-card__actions">
+          <div class="module-card__actions" style="margin-left:auto">
             <button class="btn btn-light" id="comExportarBtn">
               <i class="fa-solid fa-file-csv"></i> Exportar CSV
             </button>

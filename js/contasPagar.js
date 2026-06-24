@@ -180,12 +180,7 @@ function render() {
       <div id="contasPagarFeedback" class="module-feedback"></div>
 
       <div class="module-card__header">
-        <div>
-          <h3>Contas a Pagar</h3>
-          <p>Controle de despesas pendentes, atrasadas e pagas</p>
-        </div>
-
-        <div class="module-card__actions">
+        <div class="module-card__actions" style="margin-left:auto">
           <button class="btn btn-light" id="btnAtualizarContasPagar" type="button">
             <i class="fa-solid fa-rotate"></i>
             Atualizar
