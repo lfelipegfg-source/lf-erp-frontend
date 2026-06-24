@@ -297,10 +297,21 @@ const VendasModule = {
 
       if (button.dataset.action === 'estornar-parcela-venda') {
         event.preventDefault();
-
         const id = Number(button.dataset.id);
         await this.estornarParcelaVenda(id);
+        return;
+      }
 
+      if (button.dataset.action === 'baixar-parcela-venda') {
+        event.preventDefault();
+        const id = Number(button.dataset.id);
+        await this.baixarParcelaVenda(id);
+        return;
+      }
+
+      if (button.dataset.action === 'editar-observacao-venda') {
+        event.preventDefault();
+        await this.editarObservacaoVenda();
         return;
       }
 

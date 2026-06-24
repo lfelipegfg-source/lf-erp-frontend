@@ -557,14 +557,20 @@ function _aplicarDadosNotificacoes(dados) {
   }
 }
 
-function conectarSSE() {
+async function conectarSSE() {
   desconectarSSE();
 
   const token   = api.getAuthToken();
   const baseUrl = api.getApiBaseUrl().replace(/\/+$/, '');
   if (!token || !baseUrl) return;
 
-  const url = `${baseUrl}/sse-notificacoes?token=${encodeURIComponent(token)}`;
+  let url;
+  try {
+    const { nonce } = await api.getSseNonce();
+    url = `${baseUrl}/sse-notificacoes?nonce=${encodeURIComponent(nonce)}`;
+  } catch {
+    url = `${baseUrl}/sse-notificacoes?token=${encodeURIComponent(token)}`;
+  }
   const es = new EventSource(url);
   _sseEventSource = es;
   _sseReconnectDelay = 3000;

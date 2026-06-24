@@ -237,6 +237,10 @@ async function validateSession() {
   });
 }
 
+async function getSseNonce() {
+  return request('/auth/sse-token', { method: 'GET' });
+}
+
 async function refreshToken() {
   return request('/auth/refresh', { method: 'POST' });
 }
@@ -1460,6 +1464,7 @@ const api = {
   dispararAlertas,
   getAlertasHistorico,
 
+  getSseNonce,
   getAuthToken,
   getEmpresaId,
   getEmpresaNome,
