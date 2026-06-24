@@ -915,8 +915,17 @@ img {
 .card-header,
 .module-card__header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 18px;
+}
+
+.module-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .card-header h3,
@@ -2850,6 +2859,14 @@ select {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
+}
+
+.module-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .module-card__header h3 {
