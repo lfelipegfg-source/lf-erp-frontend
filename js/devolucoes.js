@@ -32,8 +32,12 @@ const DevolucoesModule = {
     if (!c) return;
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div><h3>Devoluções</h3><p>Registre devoluções de vendas — o estoque é restaurado automaticamente</p></div>
+        <div class="module-feedback" id="devFeedback"></div>
+        <div class="module-toolbar">
+          <div class="table-actions">
+            <button class="btn-inline btn-inline--active" data-dev-aba="nova">Nova Devolução</button>
+            <button class="btn-inline" data-dev-aba="historico">Histórico</button>
+          </div>
           <div class="module-card__actions">
             <button class="btn btn-light" id="devExportarBtn">
               <i class="fa-solid fa-file-csv"></i> Exportar CSV
@@ -41,13 +45,6 @@ const DevolucoesModule = {
             <button class="btn btn-light" id="devAtualizarBtn">
               <i class="fa-solid fa-rotate"></i> Atualizar
             </button>
-          </div>
-        </div>
-        <div class="module-feedback" id="devFeedback"></div>
-        <div class="module-toolbar">
-          <div class="table-actions">
-            <button class="btn-inline btn-inline--active" data-dev-aba="nova">Nova Devolução</button>
-            <button class="btn-inline" data-dev-aba="historico">Histórico</button>
           </div>
         </div>
         <div id="devConteudo"></div>

@@ -448,26 +448,6 @@ const VendasModule = {
       <section class="module-card vendas-module-card">
         <div id="vendasFeedback" class="module-feedback"></div>
 
-        <div class="module-card__header">
-          <div>
-            <h3>Vendas</h3>
-            <p>Consulta, filtros e detalhamento das vendas realizadas</p>
-          </div>
-
-          <div class="module-card__actions">
-            <button type="button" class="btn btn-light" id="vendasMetasBtn">
-              <i class="fa-solid fa-bullseye"></i> Metas
-            </button>
-            <button type="button" class="btn btn-light" id="vendasExportarBtn">
-              <i class="fa-solid fa-file-csv"></i> Exportar CSV
-            </button>
-            <button type="button" class="btn btn-light" id="vendasAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i>
-              Atualizar
-            </button>
-          </div>
-        </div>
-
         <div class="module-toolbar vendas-toolbar">
           <div class="module-toolbar__search">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -494,6 +474,17 @@ const VendasModule = {
               <span>Itens vendidos</span>
               <strong id="vendasStatsItens">0</strong>
             </div>
+          </div>
+          <div class="module-card__actions">
+            <button type="button" class="btn btn-light" id="vendasMetasBtn">
+              <i class="fa-solid fa-bullseye"></i> Metas
+            </button>
+            <button type="button" class="btn btn-light" id="vendasExportarBtn">
+              <i class="fa-solid fa-file-csv"></i> Exportar CSV
+            </button>
+            <button type="button" class="btn btn-light" id="vendasAtualizarBtn">
+              <i class="fa-solid fa-rotate"></i> Atualizar
+            </button>
           </div>
         </div>
 

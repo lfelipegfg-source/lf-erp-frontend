@@ -41,13 +41,6 @@ const AlertasModule = {
     if (!c) return;
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div class="module-card__actions" style="margin-left:auto">
-            <button class="btn btn-light" id="alertasAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i> Atualizar
-            </button>
-          </div>
-        </div>
         <div class="module-feedback" id="alertasFeedback"></div>
         <div class="module-toolbar">
           <div class="table-actions">
@@ -55,6 +48,9 @@ const AlertasModule = {
             <button class="btn-inline" data-al-aba="config">Configuração</button>
             <button class="btn-inline" data-al-aba="historico">Histórico</button>
           </div>
+          <button class="btn btn-light" id="alertasAtualizarBtn">
+            <i class="fa-solid fa-rotate"></i> Atualizar
+          </button>
         </div>
         <div id="alertasConteudo"></div>
       </section>

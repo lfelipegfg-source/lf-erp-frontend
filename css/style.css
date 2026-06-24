@@ -2390,6 +2390,10 @@ img {
   color: var(--text-muted);
 }
 
+.view-section:not([data-view="dashboard"]) > .section-header {
+  display: none;
+}
+
 .sidebar-overlay {
   position: fixed;
   inset: 0;

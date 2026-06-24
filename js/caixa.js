@@ -53,19 +53,15 @@ const CaixaModule = {
     if (!c) return;
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div class="module-card__actions" style="margin-left:auto">
-            <button class="btn btn-light" id="caixaAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i> Atualizar
-            </button>
-          </div>
-        </div>
         <div class="module-feedback" id="caixaFeedback"></div>
         <div class="module-toolbar">
           <div class="table-actions">
             <button class="btn-inline btn-inline--active" data-caixa-aba="caixa">Caixa</button>
             <button class="btn-inline" data-caixa-aba="historico">Histórico</button>
           </div>
+          <button class="btn btn-light" id="caixaAtualizarBtn">
+            <i class="fa-solid fa-rotate"></i> Atualizar
+          </button>
         </div>
         <div id="caixaConteudo"></div>
       </section>

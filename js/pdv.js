@@ -423,25 +423,17 @@ const PDVModule = {
 
     container.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div>
-            <h3>PDV</h3>
-            <p>Ponto de venda rápido e profissional</p>
-          </div>
-
+        <div class="module-card__header" style="margin-bottom:12px">
           <span id="pdvOfflineIndicator" class="pdv-offline-badge hidden">
             <i class="fa-solid fa-wifi-slash"></i> Offline
           </span>
 
           <div class="module-card__actions">
             <button type="button" class="btn btn-light" id="pdvAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i>
-              Atualizar
+              <i class="fa-solid fa-rotate"></i> Atualizar
             </button>
-
             <button type="button" class="btn btn-light" id="pdvLimparBtn">
-              <i class="fa-solid fa-broom"></i>
-              Limpar venda
+              <i class="fa-solid fa-broom"></i> Limpar venda
             </button>
           </div>
         </div>

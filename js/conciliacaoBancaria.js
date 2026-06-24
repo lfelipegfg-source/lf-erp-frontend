@@ -84,15 +84,13 @@ function renderLista() {
     <div class="module-card">
       <div id="cbFeedback" class="module-feedback hidden"></div>
 
-      <div class="module-card__header">
-        <div class="module-card__actions" style="margin-left:auto">
-          <button class="btn btn-light" id="cbBtnAtualizar" type="button">
-            <i class="fa-solid fa-rotate"></i> Atualizar
-          </button>
-          <button class="btn btn-primary" id="cbBtnNova" type="button">
-            <i class="fa-solid fa-upload"></i> Importar Extrato
-          </button>
-        </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px">
+        <button class="btn btn-light" id="cbBtnAtualizar" type="button">
+          <i class="fa-solid fa-rotate"></i> Atualizar
+        </button>
+        <button class="btn btn-primary" id="cbBtnNova" type="button">
+          <i class="fa-solid fa-upload"></i> Importar Extrato
+        </button>
       </div>
 
       <div class="cb-info-card">

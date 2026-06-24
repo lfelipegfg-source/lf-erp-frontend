@@ -145,26 +145,16 @@ const EstoqueModule = {
       <section class="module-card">
         <div id="estoqueFeedback" class="module-feedback"></div>
 
-        <div class="module-card__header">
-          <div>
-            <h3>Estoque</h3>
-            <p>Posição atual, alerta de mínimo e visão geral dos produtos</p>
-          </div>
-
-          <div class="module-card__actions">
-            <button class="btn btn-light" id="estoqueDepositosBtn" type="button">
-              <i class="fa-solid fa-warehouse"></i>
-              Depósitos
-            </button>
-            <button class="btn btn-light" id="estoqueSugestaoBtn" type="button">
-              <i class="fa-solid fa-cart-shopping"></i>
-              Sugestão de compra
-            </button>
-            <button class="btn btn-light" id="estoqueAtualizarBtn" type="button">
-              <i class="fa-solid fa-rotate"></i>
-              Atualizar
-            </button>
-          </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px">
+          <button class="btn btn-light" id="estoqueDepositosBtn" type="button">
+            <i class="fa-solid fa-warehouse"></i> Depósitos
+          </button>
+          <button class="btn btn-light" id="estoqueSugestaoBtn" type="button">
+            <i class="fa-solid fa-cart-shopping"></i> Sugestão de compra
+          </button>
+          <button class="btn btn-light" id="estoqueAtualizarBtn" type="button">
+            <i class="fa-solid fa-rotate"></i> Atualizar
+          </button>
         </div>
 
         <div class="estoque-toolbar-grid">

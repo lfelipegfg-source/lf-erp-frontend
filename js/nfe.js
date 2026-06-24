@@ -61,18 +61,6 @@ const NfeModule = {
 
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div>
-            <h3>NF-e</h3>
-            <p>Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas</p>
-          </div>
-          <div class="module-card__actions">
-            <button class="btn btn-light" id="nfeAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i> Atualizar
-            </button>
-          </div>
-        </div>
-
         <div class="module-feedback" id="nfeFeedback"></div>
 
         <div class="module-toolbar">
@@ -83,6 +71,9 @@ const NfeModule = {
             <button class="btn-inline" data-nfe-aba="nfse">NFS-e</button>
             <button class="btn-inline" data-nfe-aba="config">Configuração</button>
           </div>
+          <button class="btn btn-light" id="nfeAtualizarBtn">
+            <i class="fa-solid fa-rotate"></i> Atualizar
+          </button>
         </div>
 
         <div id="nfeConteudo"></div>

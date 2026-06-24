@@ -126,20 +126,6 @@ const UsuariosModule = {
       <section class="module-card">
         <div id="usuariosFeedback" class="module-feedback"></div>
 
-        <div class="module-card__header">
-          <div>
-            <h3>Usuários</h3>
-            <p>Gestão de acessos, perfis e permissões do sistema</p>
-          </div>
-
-          <div class="module-card__actions">
-            <button class="btn btn-primary" id="novoUsuarioBtn">
-              <i class="fa-solid fa-plus"></i>
-              Novo Usuário
-            </button>
-          </div>
-        </div>
-
         <div class="module-toolbar">
           <div class="module-toolbar__search">
             <i class="fa-solid fa-search"></i>
@@ -155,6 +141,11 @@ const UsuariosModule = {
               <span>Total</span>
               <strong>${this.state.filteredItems.length}</strong>
             </div>
+          </div>
+          <div class="module-card__actions">
+            <button class="btn btn-primary" id="novoUsuarioBtn">
+              <i class="fa-solid fa-plus"></i> Novo Usuário
+            </button>
           </div>
         </div>
 

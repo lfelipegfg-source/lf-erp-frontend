@@ -412,8 +412,27 @@ const ProdutosModule = {
     if (!container) return;
     container.innerHTML = `
       <section class="module-card" id="produtosSection">
-        <div class="module-card__header">
-          <div class="module-card__actions" style="margin-left:auto">
+        <div class="module-toolbar">
+          <div class="module-toolbar__search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="produtosSearchInput" placeholder="Buscar por nome, categoria ou código" />
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="produtosFiltroCategoria" class="input" style="height:38px;min-width:150px;font-size:13px">
+              <option value="">Todas as categorias</option>
+            </select>
+            <select id="produtosFiltroAlerta" class="input" style="height:38px;min-width:140px;font-size:13px">
+              <option value="">Todos os status</option>
+              <option value="alerta">Em alerta</option>
+              <option value="ok">Estoque ok</option>
+            </select>
+          </div>
+          <div class="module-toolbar__stats">
+            <div class="mini-stat"><span>Total</span><strong id="produtosStatsTotal">0</strong></div>
+            <div class="mini-stat"><span>Estoque</span><strong id="produtosStatsStock">0</strong></div>
+            <div class="mini-stat"><span>Em alerta</span><strong id="produtosStatsAlert">0</strong></div>
+          </div>
+          <div class="module-card__actions">
             <div class="actions-menu-wrapper" id="produtosActionsWrapper">
               <button type="button" class="btn btn-light" id="produtosActionsBtn">
                 <i class="fa-solid fa-ellipsis"></i> Mais ações <i class="fa-solid fa-chevron-down" style="font-size:10px;margin-left:2px"></i>
@@ -458,27 +477,6 @@ const ProdutosModule = {
               </div>
             </div>
             <button type="button" class="btn btn-primary" id="produtosNewBtn"><i class="fa-solid fa-plus"></i> Novo produto</button>
-          </div>
-        </div>
-        <div class="module-toolbar">
-          <div class="module-toolbar__search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="produtosSearchInput" placeholder="Buscar por nome, categoria ou código" />
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <select id="produtosFiltroCategoria" class="input" style="height:38px;min-width:150px;font-size:13px">
-              <option value="">Todas as categorias</option>
-            </select>
-            <select id="produtosFiltroAlerta" class="input" style="height:38px;min-width:140px;font-size:13px">
-              <option value="">Todos os status</option>
-              <option value="alerta">Em alerta</option>
-              <option value="ok">Estoque ok</option>
-            </select>
-          </div>
-          <div class="module-toolbar__stats">
-            <div class="mini-stat"><span>Total</span><strong id="produtosStatsTotal">0</strong></div>
-            <div class="mini-stat"><span>Estoque</span><strong id="produtosStatsStock">0</strong></div>
-            <div class="mini-stat"><span>Em alerta</span><strong id="produtosStatsAlert">0</strong></div>
           </div>
         </div>
         <div class="module-feedback" id="produtosFeedback"></div>

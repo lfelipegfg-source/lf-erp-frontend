@@ -118,25 +118,6 @@ function render() {
     <div class="module-card">
       <div id="relatoriosFeedback" class="module-feedback"></div>
 
-      <div class="module-card__header">
-        <div>
-          <h3>Relatórios Financeiros</h3>
-          <p>Resumo gerencial e detalhamento financeiro do período</p>
-        </div>
-
-        <div class="module-card__actions">
-          <button class="btn btn-light" id="btnImprimirRelatorios">
-            <i class="fa-solid fa-print"></i> Imprimir PDF
-          </button>
-          <button class="btn btn-light" id="btnExportarRelatorios">
-            <i class="fa-solid fa-file-csv"></i> Exportar CSV
-          </button>
-          <button class="btn btn-light" id="btnAtualizarRelatoriosFinanceiros">
-            Atualizar
-          </button>
-        </div>
-      </div>
-
       <div class="rel-periodo-rapido" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 0 4px">
         <span style="font-size:12px;color:var(--text-muted);font-weight:700;white-space:nowrap">Período rápido:</span>
         <button type="button" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:30px" data-rel-preset="hoje">Hoje</button>
@@ -196,6 +177,17 @@ function render() {
           </button>
           <button class="btn-inline ${state.aba === 'inadimplencia' ? 'btn-inline--active' : ''}" data-aba="inadimplencia">
             Inadimplência
+          </button>
+        </div>
+        <div class="module-card__actions">
+          <button class="btn btn-light" id="btnImprimirRelatorios">
+            <i class="fa-solid fa-print"></i> Imprimir PDF
+          </button>
+          <button class="btn btn-light" id="btnExportarRelatorios">
+            <i class="fa-solid fa-file-csv"></i> Exportar CSV
+          </button>
+          <button class="btn btn-light" id="btnAtualizarRelatoriosFinanceiros">
+            <i class="fa-solid fa-rotate"></i> Atualizar
           </button>
         </div>
       </div>

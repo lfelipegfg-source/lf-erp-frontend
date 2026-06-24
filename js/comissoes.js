@@ -81,17 +81,6 @@ const ComissoesModule = {
     if (!c) return;
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div class="module-card__actions" style="margin-left:auto">
-            <button class="btn btn-light" id="comExportarBtn">
-              <i class="fa-solid fa-file-csv"></i> Exportar CSV
-            </button>
-            <button class="btn btn-light" id="comAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i> Atualizar
-            </button>
-          </div>
-        </div>
-
         <div class="module-feedback" id="comFeedback"></div>
 
         <div class="module-toolbar">
@@ -109,6 +98,14 @@ const ComissoesModule = {
               ['todos',       'Todos']
             ].map(([v, l]) => `<option value="${v}"${this.state.filtroPeriodo === v ? ' selected' : ''}>${l}</option>`).join('')}
           </select>
+          <div class="module-card__actions">
+            <button class="btn btn-light" id="comExportarBtn">
+              <i class="fa-solid fa-file-csv"></i> Exportar CSV
+            </button>
+            <button class="btn btn-light" id="comAtualizarBtn">
+              <i class="fa-solid fa-rotate"></i> Atualizar
+            </button>
+          </div>
         </div>
 
         <div id="comConteudo"></div>

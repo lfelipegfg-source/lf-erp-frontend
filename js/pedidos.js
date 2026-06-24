@@ -58,18 +58,6 @@ const PedidosModule = {
 
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div>
-            <h3>Pedidos</h3>
-            <p>Gerencie pedidos em andamento — confirme, separe e converta em venda</p>
-          </div>
-          <div class="module-card__actions">
-            <button class="btn btn-light" id="pedAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i> Atualizar
-            </button>
-          </div>
-        </div>
-
         <div class="module-feedback" id="pedFeedback"></div>
 
         <div class="module-toolbar">
@@ -80,6 +68,9 @@ const PedidosModule = {
               </button>
             `).join('')}
           </div>
+          <button class="btn btn-light" id="pedAtualizarBtn">
+            <i class="fa-solid fa-rotate"></i> Atualizar
+          </button>
         </div>
 
         <div id="pedLista"></div>

@@ -56,18 +56,6 @@ const OrcamentosModule = {
 
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div>
-            <h3>Orçamentos</h3>
-            <p>Cotações emitidas — gerencie aprovações e converta em pedidos</p>
-          </div>
-          <div class="module-card__actions">
-            <button class="btn btn-light" id="orcAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i> Atualizar
-            </button>
-          </div>
-        </div>
-
         <div class="module-feedback" id="orcFeedback"></div>
 
         <div class="module-toolbar">
@@ -78,6 +66,9 @@ const OrcamentosModule = {
               </button>
             `).join('')}
           </div>
+          <button class="btn btn-light" id="orcAtualizarBtn">
+            <i class="fa-solid fa-rotate"></i> Atualizar
+          </button>
         </div>
 
         <div id="orcLista"></div>

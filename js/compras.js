@@ -191,20 +191,7 @@ const ComprasModule = {
       <section class="module-card">
         <div id="comprasFeedback" class="module-feedback"></div>
 
-        <div class="module-card__header">
-          <div class="module-card__actions" style="margin-left:auto">
-            <button class="btn btn-light" id="importarXmlBtn" type="button" title="Importar NF do fornecedor (XML)">
-              <i class="fa-solid fa-file-import"></i>
-              Importar XML
-            </button>
-            <button class="btn btn-primary" id="novaCompraBtn" type="button">
-              <i class="fa-solid fa-plus"></i>
-              Nova Compra
-            </button>
-          </div>
-          <input type="file" id="xmlNFInput" accept=".xml" style="display:none"/>
-        </div>
-
+        <input type="file" id="xmlNFInput" accept=".xml" style="display:none"/>
         <div class="module-toolbar">
           <div class="module-toolbar__search">
             <i class="fa-solid fa-search"></i>
@@ -242,6 +229,14 @@ const ComprasModule = {
               <span>Fornecedores</span>
               <strong>${this.getTotalFornecedores()}</strong>
             </div>
+          </div>
+          <div class="module-card__actions">
+            <button class="btn btn-light" id="importarXmlBtn" type="button" title="Importar NF do fornecedor (XML)">
+              <i class="fa-solid fa-file-import"></i> Importar XML
+            </button>
+            <button class="btn btn-primary" id="novaCompraBtn" type="button">
+              <i class="fa-solid fa-plus"></i> Nova Compra
+            </button>
           </div>
         </div>
 

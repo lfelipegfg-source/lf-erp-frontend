@@ -145,12 +145,6 @@ function renderSkeleton() {
 
   container.innerHTML = `
     <section class="module-card">
-      <div class="module-card__header">
-        <div>
-          <span class="skeleton skeleton-h3" style="width:200px"></span>
-          <span class="skeleton skeleton-text" style="width:260px;margin-top:8px"></span>
-        </div>
-      </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
         ${Array.from({length:3},()=>`
           <div class="mini-stat" style="display:flex;flex-direction:column;gap:8px">
@@ -178,15 +172,6 @@ function render() {
   container.innerHTML = `
     <section class="module-card cp-module-card">
       <div id="contasPagarFeedback" class="module-feedback"></div>
-
-      <div class="module-card__header">
-        <div class="module-card__actions" style="margin-left:auto">
-          <button class="btn btn-light" id="btnAtualizarContasPagar" type="button">
-            <i class="fa-solid fa-rotate"></i>
-            Atualizar
-          </button>
-        </div>
-      </div>
 
       <div class="cp-explain-card">
         <div>
@@ -239,6 +224,11 @@ function render() {
           <button class="btn btn-light" id="btnLimparFiltrosContasPagar" type="button">
             <i class="fa-solid fa-eraser"></i>
             Limpar
+          </button>
+
+          <button class="btn btn-light" id="btnAtualizarContasPagar" type="button">
+            <i class="fa-solid fa-rotate"></i>
+            Atualizar
           </button>
         </div>
       </div>

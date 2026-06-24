@@ -148,12 +148,6 @@ function renderSkeleton() {
 
   c.innerHTML = `
     <div class="module-card">
-      <div class="module-card__header">
-        <div>
-          <span class="skeleton skeleton-h3" style="width:220px"></span>
-          <span class="skeleton skeleton-text" style="width:180px;margin-top:8px"></span>
-        </div>
-      </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
         ${Array.from({length:3},()=>`
           <div class="mini-stat" style="display:flex;flex-direction:column;gap:8px">
@@ -183,21 +177,6 @@ function render() {
     <div class="module-card">
 
       <div id="lfFeedback" class="module-feedback hidden"></div>
-
-      <div class="module-card__header">
-        <div>
-          <h3>Lançamentos Financeiros</h3>
-          <p>Receitas e despesas manuais da operação</p>
-        </div>
-        <div class="module-card__actions">
-          <button class="btn btn-light" id="lfBtnAtualizar" type="button">
-            <i class="fa-solid fa-rotate"></i> Atualizar
-          </button>
-          <button class="btn btn-primary" id="lfBtnNovo" type="button">
-            <i class="fa-solid fa-plus"></i> Novo Lançamento
-          </button>
-        </div>
-      </div>
 
       <!-- Resumo -->
       ${r.parcial ? `
@@ -247,6 +226,12 @@ function render() {
           </button>
           <button class="btn btn-light" id="lfBtnLimpar" type="button">
             <i class="fa-solid fa-eraser"></i>
+          </button>
+          <button class="btn btn-light" id="lfBtnAtualizar" type="button">
+            <i class="fa-solid fa-rotate"></i> Atualizar
+          </button>
+          <button class="btn btn-primary" id="lfBtnNovo" type="button">
+            <i class="fa-solid fa-plus"></i> Novo Lançamento
           </button>
         </div>
       </div>

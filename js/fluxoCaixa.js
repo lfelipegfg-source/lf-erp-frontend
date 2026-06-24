@@ -181,20 +181,6 @@ function render() {
     <section class="module-card fluxo-module-card">
       <div id="fluxoCaixaFeedback" class="module-feedback"></div>
 
-      <div class="module-card__header">
-        <div>
-          <h3>Fluxo de Caixa</h3>
-          <p>Entradas, saídas e saldo real com base em pagamentos e recebimentos baixados</p>
-        </div>
-
-        <div class="module-card__actions">
-          <button class="btn btn-light" id="btnAtualizarFluxoCaixa" type="button">
-            <i class="fa-solid fa-rotate"></i>
-            Atualizar
-          </button>
-        </div>
-      </div>
-
       <div class="fluxo-explain-card">
         <div>
           <strong>Caixa real</strong>
@@ -278,6 +264,11 @@ function render() {
           <button class="btn btn-light" id="btnLimparFluxoCaixa" type="button">
             <i class="fa-solid fa-eraser"></i>
             Limpar
+          </button>
+
+          <button class="btn btn-light" id="btnAtualizarFluxoCaixa" type="button">
+            <i class="fa-solid fa-rotate"></i>
+            Atualizar
           </button>
         </div>
       </div>

@@ -146,12 +146,6 @@ function renderSkeleton() {
 
   container.innerHTML = `
     <section class="module-card">
-      <div class="module-card__header">
-        <div>
-          <span class="skeleton skeleton-h3" style="width:200px"></span>
-          <span class="skeleton skeleton-text" style="width:260px;margin-top:8px"></span>
-        </div>
-      </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
         ${Array.from({length:3},()=>`
           <div class="mini-stat" style="display:flex;flex-direction:column;gap:8px">
@@ -172,21 +166,6 @@ function render() {
   container.innerHTML = `
     <section class="module-card cr-module-card">
       <div id="contasReceberFeedback" class="module-feedback"></div>
-
-      <div class="module-card__header">
-        <div class="module-card__actions" style="margin-left:auto">
-
-          <button class="btn btn-primary" id="btnNovaContaManual" type="button">
-            <i class="fa-solid fa-plus"></i>
-            Conta manual
-          </button>
-
-          <button class="btn btn-light" id="btnAtualizarContasReceber" type="button">
-            <i class="fa-solid fa-rotate"></i>
-            Atualizar
-          </button>
-        </div>
-      </div>
 
       <div class="cr-explain-card">
         <div>
@@ -231,6 +210,11 @@ function render() {
         </div>
 
         <div class="cr-action-box">
+          <button class="btn btn-primary" id="btnNovaContaManual" type="button">
+            <i class="fa-solid fa-plus"></i>
+            Conta manual
+          </button>
+
           <button class="btn btn-primary" id="btnFiltrarContasReceber" type="button">
             <i class="fa-solid fa-filter"></i>
             Filtrar
@@ -239,6 +223,11 @@ function render() {
           <button class="btn btn-light" id="btnLimparFiltrosContasReceber" type="button">
             <i class="fa-solid fa-eraser"></i>
             Limpar
+          </button>
+
+          <button class="btn btn-light" id="btnAtualizarContasReceber" type="button">
+            <i class="fa-solid fa-rotate"></i>
+            Atualizar
           </button>
         </div>
       </div>

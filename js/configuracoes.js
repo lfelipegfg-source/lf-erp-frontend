@@ -267,13 +267,6 @@ const ConfigModule = {
 
     c.innerHTML = `
       <section class="module-card">
-        <div class="module-card__header">
-          <div>
-            <h3>Configurações</h3>
-            <p>Dados da empresa e preferências do sistema</p>
-          </div>
-        </div>
-
         <div class="form-grid" style="max-width: 600px;">
           <div class="form-field">
             <label>Nome da empresa</label>

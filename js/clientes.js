@@ -182,21 +182,6 @@ const ClientesModule = {
       <section class="module-card">
         <div id="clientesFeedback" class="module-feedback"></div>
 
-        <div class="module-card__header">
-          <div class="module-card__actions" style="margin-left:auto">
-            <button class="btn btn-light" id="abcClientesBtn" title="Segmentação A/B/C por receita">
-              <i class="fa-solid fa-chart-bar"></i> Curva ABC
-            </button>
-            <button class="btn btn-light" id="exportarClientesBtn">
-              <i class="fa-solid fa-file-csv"></i> Exportar CSV
-            </button>
-            <button class="btn btn-primary" id="novoClienteBtn">
-              <i class="fa-solid fa-plus"></i>
-              Novo Cliente
-            </button>
-          </div>
-        </div>
-
         <div class="module-toolbar">
           <div class="module-toolbar__search">
             <i class="fa-solid fa-search"></i>
@@ -212,6 +197,17 @@ const ClientesModule = {
               <span>Total</span>
               <strong>${this.state.filteredItems.length}</strong>
             </div>
+          </div>
+          <div class="module-card__actions">
+            <button class="btn btn-light" id="abcClientesBtn" title="Segmentação A/B/C por receita">
+              <i class="fa-solid fa-chart-bar"></i> Curva ABC
+            </button>
+            <button class="btn btn-light" id="exportarClientesBtn">
+              <i class="fa-solid fa-file-csv"></i> Exportar CSV
+            </button>
+            <button class="btn btn-primary" id="novoClienteBtn">
+              <i class="fa-solid fa-plus"></i> Novo Cliente
+            </button>
           </div>
         </div>
 
