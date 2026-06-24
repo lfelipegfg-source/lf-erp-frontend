@@ -562,7 +562,9 @@ const ComprasModule = {
       const compra = await api.getCompraDetalhe(id);
 
       this.state.editingId = Number(id);
-      this.state.itensCompra = (compra.itens || []).map(i => ({
+
+      // Salva os itens antes de openModal() resetar state.itensCompra
+      const itensCarregados = (compra.itens || []).map(i => ({
         produto_id: i.produto_id,
         produto_nome: i.produto_nome,
         quantidade: Number(i.quantidade),
@@ -570,18 +572,21 @@ const ComprasModule = {
         subtotal: Number(i.subtotal || 0)
       }));
 
-      this.openModal();
+      this.openModal(); // openModal() faz state.itensCompra = [] — restauramos logo abaixo
+
+      this.state.itensCompra = itensCarregados;
 
       setTimeout(() => {
-        if (this.el.fornecedor) this.el.fornecedor.value = compra.compra?.fornecedor_id || '';
-        if (this.el.data) this.el.data.value = (compra.compra?.data || '').slice(0, 10);
-        if (this.el.formaPagamento) this.el.formaPagamento.value = compra.compra?.pagamento || '';
-        if (this.el.parcelas) this.el.parcelas.value = compra.compra?.total_parcelas || 1;
-        if (this.el.observacao) this.el.observacao.value = compra.compra?.observacao || '';
+        // Backend retorna campos planificados no topo: compra.fornecedor_id, não compra.compra.fornecedor_id
+        if (this.el.fornecedor) this.el.fornecedor.value = compra.fornecedor_id || '';
+        if (this.el.data) this.el.data.value = (compra.data || '').slice(0, 10);
+        if (this.el.formaPagamento) this.el.formaPagamento.value = compra.pagamento || '';
+        if (this.el.parcelas) this.el.parcelas.value = compra.parcelas || 1;
+        if (this.el.observacao) this.el.observacao.value = compra.observacao || '';
         this.toggleVencimentoField();
         this.renderItensCompra();
 
-        const titulo = document.querySelector('#compraModal h2, #compraModal .modal-title');
+        const titulo = document.querySelector('#compraModal h3');
         if (titulo) titulo.textContent = `Editar Compra #${id}`;
       }, 50);
     } catch (error) {
