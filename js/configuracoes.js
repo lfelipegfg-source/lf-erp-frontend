@@ -163,6 +163,8 @@ const ConfigModule = {
       });
       showToast('Configuração PIX salva com sucesso!', 'success');
       document.getElementById('cfgPixClientSecret').value = '';
+      const certEl = document.getElementById('cfgPixCertificado');
+      if (certEl) { certEl.value = ''; certEl.placeholder = '✓ Certificado configurado (deixe vazio para manter)'; }
     } catch (err) {
       showToast(err.message || 'Erro ao salvar configuração PIX', 'error');
     } finally {
