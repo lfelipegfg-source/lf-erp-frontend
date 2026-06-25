@@ -881,7 +881,11 @@ img {
 .topbar__right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+}
+
+.topbar__right {
+  flex-shrink: 0;
 }
 
 .page-title h1 {
@@ -2553,8 +2557,10 @@ img {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 10px 14px;
-  min-width: 190px;
+  padding: 8px 14px;
+  min-width: 0;
+  max-width: 200px;
+  overflow: hidden;
 }
 
 .topbar-company__label {
@@ -2568,6 +2574,9 @@ img {
   display: block;
   color: var(--text);
   font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* SELECT COM SETA PADRÃO */
