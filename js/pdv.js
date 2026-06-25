@@ -457,7 +457,6 @@ const PDVModule = {
           <div class="pdv-panel pdv-panel--active" data-pdv-panel="produtos">
             <div class="pdv-panel__header">
               <h4>Cliente e produtos</h4>
-              <p>Selecione o cliente, busque produtos e monte o carrinho.</p>
             </div>
 
             <div class="pdv-section">
@@ -493,7 +492,6 @@ const PDVModule = {
             <div class="pdv-products">
               <div class="pdv-products__header">
                 <h5>Produtos disponíveis</h5>
-                <span class="pdv-helper">Clique em adicionar para incluir no carrinho.</span>
               </div>
               <div class="pdv-products__list" id="pdvListaProdutos"></div>
             </div>
@@ -502,7 +500,6 @@ const PDVModule = {
           <div class="pdv-panel" data-pdv-panel="carrinho">
             <div class="pdv-panel__header">
               <h4>Carrinho e fechamento</h4>
-              <p>Revise os itens, informe o pagamento e finalize a venda.</p>
             </div>
 
             <div class="table-wrapper">
@@ -1173,23 +1170,18 @@ const PDVModule = {
           <div class="pdv-product-card">
             <div class="pdv-product-card__info">
               <strong>${this.escapeHtml(produto.nome || 'Produto')}</strong>
-              <div class="pdv-product-card__meta">
-                <span class="pdv-chip">Categoria: ${this.escapeHtml(produto.categoria || '-')}</span>
-                <span class="pdv-chip">Preço: ${this.toCurrency(produto.preco)}</span>
-                <span class="pdv-chip">Estoque: ${estoque}</span>
-              </div>
+              <span class="pdv-product-card__sub">${this.escapeHtml(produto.categoria || '-')} &nbsp;·&nbsp; ${estoque} un.</span>
             </div>
-
-            <button
-              type="button"
-              class="btn ${semEstoque ? 'btn-light' : 'btn-primary'}"
-              data-action="pdv-add-produto"
-              data-id="${produto.id}"
-              ${semEstoque ? 'disabled' : ''}
-            >
-              <i class="fa-solid fa-plus"></i>
-              ${semEstoque ? 'Sem estoque' : 'Adicionar'}
-            </button>
+            <div class="pdv-product-card__right">
+              <span class="pdv-product-card__price">${this.toCurrency(produto.preco)}</span>
+              <button
+                type="button"
+                class="btn btn-sm ${semEstoque ? 'btn-light' : 'btn-primary'}"
+                data-action="pdv-add-produto"
+                data-id="${produto.id}"
+                ${semEstoque ? 'disabled' : ''}
+              ><i class="fa-solid fa-plus"></i> ${semEstoque ? 'Sem estoque' : 'Adicionar'}</button>
+            </div>
           </div>
         `;
       })
