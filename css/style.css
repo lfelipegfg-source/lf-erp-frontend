@@ -886,6 +886,7 @@ img {
 
 .topbar__right {
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .page-title h1 {
