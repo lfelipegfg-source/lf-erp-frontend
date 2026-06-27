@@ -569,7 +569,7 @@ async function conectarSSE() {
     const { nonce } = await api.getSseNonce();
     url = `${baseUrl}/sse-notificacoes?nonce=${encodeURIComponent(nonce)}`;
   } catch {
-    url = `${baseUrl}/sse-notificacoes?token=${encodeURIComponent(token)}`;
+    return; // nonce falhou — abortar SSE; nunca expor JWT em query string
   }
   const es = new EventSource(url);
   _sseEventSource = es;

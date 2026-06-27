@@ -25,6 +25,8 @@ const PDVModule = {
 
   init() {
     this._eventsBound = false;
+    this._keyboardBound = false;
+    this._offlineBound = false;
     this.resolveEmpresa();
     this.render();
     this.cache();
