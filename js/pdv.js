@@ -25,8 +25,21 @@ const PDVModule = {
 
   init() {
     this._eventsBound = false;
-    this._keyboardBound = false;
-    this._offlineBound = false;
+    // _keyboardBound e _offlineBound NÃO são resetados: listeners no document são registrados uma única vez
+    this.state.carrinho = [];
+    this.state.clientes = [];
+    this.state.produtos = [];
+    this.state.produtosFiltrados = [];
+    this.state.pagamentos = [{ forma: 'Dinheiro', valor: 0, parcelas: 1, vencimento: '' }];
+    this.state.salvando = false;
+    this.state.activeTab = 'produtos';
+    this.state.gradeModalProduto = null;
+    this.state.gradesDisponiveis = [];
+    this.state.clienteId = '';
+    this.state.clienteNome = '';
+    this.state.desconto = 0;
+    this.state.acrescimo = 0;
+    this.state.observacao = '';
     this.resolveEmpresa();
     this.render();
     this.cache();

@@ -409,7 +409,7 @@ function renderLinhas() {
         data-action="cobrar-pix-cr"
         data-id="${conta.id}"
         data-valor="${conta.valor}"
-        data-cliente="${conta.cliente_nome || ''}">
+        data-cliente="${escapeHtml(conta.cliente_nome || '')}">
         <i class="fa-brands fa-pix"></i>
         PIX
       </button>
