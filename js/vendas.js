@@ -429,6 +429,8 @@ const VendasModule = {
       showToast('Erro ao carregar mais vendas', 'error');
     } finally {
       this.state.carregandoMais = false;
+      const btn = document.getElementById('vendasCarregarMaisBtn');
+      if (btn) btn.disabled = false;
     }
   },
 

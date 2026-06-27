@@ -392,6 +392,8 @@ const ClientesModule = {
       showToast('Erro ao carregar mais clientes', 'error');
     } finally {
       this.state.carregandoMais = false;
+      const btn = document.getElementById('clientesCarregarMaisBtn');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-plus"></i> Carregar mais'; }
     }
   },
 
@@ -934,6 +936,10 @@ const ClientesModule = {
       </body></html>`;
 
     const win = window.open('', '_blank', 'width=800,height=600');
+    if (!win) {
+      showToast('Popup bloqueado. Permita popups para imprimir o extrato.', 'warning');
+      return;
+    }
     win.document.write(html);
     win.document.close();
     win.focus();

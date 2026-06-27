@@ -884,7 +884,7 @@ function abrirModalBaixaConta(conta) {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirmando...';
     try {
       await api.baixarContaReceber(conta.id, {
-        valor_pago: valorPago,
+        valor_pago: Number(valorPago),
         data_pagamento: dataPagamento
       });
 

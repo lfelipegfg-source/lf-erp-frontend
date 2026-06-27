@@ -1266,6 +1266,7 @@ function handleLogout(showMessage = true) {
 
   desconectarSSE();
   authLogout();
+  api.config._isRedirecting401 = false;
   showLoginScreen();
   clearLoginInputs();
   closeMobileSidebar();
@@ -1278,7 +1279,11 @@ function handleLogout(showMessage = true) {
 }
 
 // Intercepta 401 global disparado por api.js — evita múltiplos redirecionamentos
+let _lastSessionExpiredAt = 0;
 window.addEventListener('lferp:session-expired', () => {
+  const now = Date.now();
+  if (now - _lastSessionExpiredAt < 1000) return;
+  _lastSessionExpiredAt = now;
   if (AppState.isAuthenticated) {
     handleLogout(false);
     showToast('Sua sessão expirou. Faça login novamente.', 'warning');

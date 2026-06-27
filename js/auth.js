@@ -3,6 +3,7 @@ import api from './api.js';
 const AUTH_STORAGE_KEY = 'lf_erp_auth';
 
 let _refreshTimerId = null;
+let _refreshInProgress = false;
 
 export function saveAuth(data, remember = false) {
   const empresaId =
@@ -89,6 +90,7 @@ export async function validateSession() {
 
 export function logout() {
   clearRefreshTimer();
+  api.request('/auth/logout', { method: 'POST' }).catch(() => {});
   clearAuth();
 }
 
@@ -127,6 +129,8 @@ export function scheduleTokenRefresh() {
 }
 
 async function _doRefresh() {
+  if (_refreshInProgress) return;
+  _refreshInProgress = true;
   _refreshTimerId = null;
   try {
     const data = await api.refreshToken();
@@ -145,5 +149,7 @@ async function _doRefresh() {
     scheduleTokenRefresh();
   } catch {
     // Refresh falhou silenciosamente; próxima requisição retornará 401
+  } finally {
+    _refreshInProgress = false;
   }
 }
