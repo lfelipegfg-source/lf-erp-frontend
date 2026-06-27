@@ -1942,8 +1942,8 @@ function renderModuleError(containerId, title, message) {
 
   container.innerHTML = `
     <div class="module-placeholder__content">
-      <h3>${title}</h3>
-      <p>${message}</p>
+      <h3>${escapeHtml(title)}</h3>
+      <p>${escapeHtml(message)}</p>
       <div class="module-placeholder__note">
         Verifique a integração com o backend e tente novamente.
       </div>

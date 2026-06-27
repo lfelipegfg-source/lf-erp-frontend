@@ -223,9 +223,9 @@ function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = 
           <span>${
             diasTrial === null || diasTrial === undefined
               ? 'Sem trial definido'
-              : diasTrial < 0
+              : Number(diasTrial) < 0
                 ? 'Expirado'
-                : `${diasTrial} dia(s) restante(s)`
+                : `${Number(diasTrial)} dia(s) restante(s)`
           }</span>
         </div>
 

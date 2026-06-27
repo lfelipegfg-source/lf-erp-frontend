@@ -1,4 +1,4 @@
-import api from './api.js';
+﻿import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast } from './feedback.js';
 import * as PdvOffline from './pdvOffline.js';
@@ -92,7 +92,7 @@ const PDVModule = {
       this.handleClienteChange(event.target.value);
     });
 
-    // ── Split de pagamento — delegação de eventos ───────────────────────────
+    // â”€â”€ Split de pagamento â€” delegaÃ§Ã£o de eventos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('pdvAddPagamentoBtn')?.addEventListener('click', () => {
       this.addPagamento();
     });
@@ -129,7 +129,7 @@ const PDVModule = {
       this.removePagamento(idx);
     });
 
-    // ── Eventos do modal de grade ──────────────────────────────────────────
+    // â”€â”€ Eventos do modal de grade â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('pdvGradeModalClose')?.addEventListener('click', () => {
       this.closeGradeSelector();
     });
@@ -146,11 +146,11 @@ const PDVModule = {
       const preco    = Number(btn.dataset.preco) || null;
       const atrib1   = btn.dataset.atrib1;
       const atrib2   = btn.dataset.atrib2 || '';
-      if (estoque <= 0) { showToast('Variação sem estoque.', 'error'); return; }
+      if (estoque <= 0) { showToast('VariaÃ§Ã£o sem estoque.', 'error'); return; }
       this.selectGrade(gradeId, atrib1, atrib2, estoque, preco);
     });
 
-    // ── Abas mobile ────────────────────────────────────────────────────────────
+    // â”€â”€ Abas mobile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('pdvTabs')?.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-tab]');
       if (!btn) return;
@@ -243,14 +243,14 @@ const PDVModule = {
     this._keyboardBound = true;
 
     document.addEventListener('keydown', (e) => {
-      // Só ativa quando o PDV está visível
+      // SÃ³ ativa quando o PDV estÃ¡ visÃ­vel
       if (!document.getElementById('pdvBuscaProduto')) return;
 
       const tag      = document.activeElement?.tagName?.toLowerCase();
       const inInput  = ['input', 'textarea', 'select'].includes(tag);
       const inBusca  = document.activeElement === this.el.buscaProduto;
 
-      // F2 — focar campo de busca de produto
+      // F2 â€” focar campo de busca de produto
       if (e.key === 'F2') {
         e.preventDefault();
         this.el.buscaProduto?.focus();
@@ -258,7 +258,7 @@ const PDVModule = {
         return;
       }
 
-      // / — focar busca se não estiver em nenhum input
+      // / â€” focar busca se nÃ£o estiver em nenhum input
       if (e.key === '/' && !inInput) {
         e.preventDefault();
         this.el.buscaProduto?.focus();
@@ -266,7 +266,7 @@ const PDVModule = {
         return;
       }
 
-      // F9 — finalizar venda
+      // F9 â€” finalizar venda
       if (e.key === 'F9') {
         e.preventDefault();
         if (!this.state.salvando && this.state.carrinho.length > 0) {
@@ -275,14 +275,14 @@ const PDVModule = {
         return;
       }
 
-      // F8 — limpar venda
+      // F8 â€” limpar venda
       if (e.key === 'F8') {
         e.preventDefault();
         if (this.state.carrinho.length > 0) this.resetVenda();
         return;
       }
 
-      // Escape — fecha modal de grade, ou limpa o campo de busca
+      // Escape â€” fecha modal de grade, ou limpa o campo de busca
       if (e.key === 'Escape') {
         const gradeModal = document.getElementById('pdvGradeModal');
         if (gradeModal && !gradeModal.classList.contains('hidden')) {
@@ -296,7 +296,7 @@ const PDVModule = {
         return;
       }
 
-      // Enter na busca — adiciona o primeiro produto visível e limpa a busca
+      // Enter na busca â€” adiciona o primeiro produto visÃ­vel e limpa a busca
       if (e.key === 'Enter' && inBusca) {
         e.preventDefault();
         const primeiroBtn = this.el.listaProdutos
@@ -310,7 +310,7 @@ const PDVModule = {
         return;
       }
 
-      // + / = — aumentar quantidade do último item do carrinho
+      // + / = â€” aumentar quantidade do Ãºltimo item do carrinho
       if (!inInput && (e.key === '+' || e.key === '=')) {
         e.preventDefault();
         if (this.state.carrinho.length > 0) {
@@ -319,7 +319,7 @@ const PDVModule = {
         return;
       }
 
-      // - — diminuir quantidade do último item do carrinho
+      // - â€” diminuir quantidade do Ãºltimo item do carrinho
       if (!inInput && e.key === '-') {
         e.preventDefault();
         if (this.state.carrinho.length > 0) {
@@ -328,7 +328,7 @@ const PDVModule = {
         return;
       }
 
-      // Delete — remover último item do carrinho
+      // Delete â€” remover Ãºltimo item do carrinho
       if (!inInput && e.key === 'Delete') {
         e.preventDefault();
         if (this.state.carrinho.length > 0) {
@@ -344,7 +344,7 @@ const PDVModule = {
     this.cache();
 
     if (!this.state.empresa) {
-      this.setFeedback('Empresa não identificada para carregar o PDV.', 'error');
+      this.setFeedback('Empresa nÃ£o identificada para carregar o PDV.', 'error');
       return;
     }
 
@@ -380,11 +380,11 @@ const PDVModule = {
       if (!isOnline) {
         const pendentes = await PdvOffline.contarVendasPendentes();
         if (!this.state.produtos.length) {
-          this.setFeedback('Sem conexão e sem dados em cache. Aguarde a conexão.', 'error');
+          this.setFeedback('Sem conexÃ£o e sem dados em cache. Aguarde a conexÃ£o.', 'error');
         } else {
           const msg = pendentes > 0
-            ? `Offline — ${this.state.produtos.length} produto(s) em cache. ${pendentes} venda(s) aguardando sincronização.`
-            : `Offline — ${this.state.produtos.length} produto(s) em cache.`;
+            ? `Offline â€” ${this.state.produtos.length} produto(s) em cache. ${pendentes} venda(s) aguardando sincronizaÃ§Ã£o.`
+            : `Offline â€” ${this.state.produtos.length} produto(s) em cache.`;
           this.setFeedback(msg, 'warning');
         }
       } else {
@@ -402,7 +402,7 @@ const PDVModule = {
           this.renderProdutos();
           this.renderCarrinho();
           this.renderResumo();
-          this.setFeedback(`Sem conexão — usando ${this.state.produtos.length} produto(s) do cache.`, 'warning');
+          this.setFeedback(`Sem conexÃ£o â€” usando ${this.state.produtos.length} produto(s) do cache.`, 'warning');
           return;
         } catch { /* sem cache */ }
       }
@@ -445,7 +445,7 @@ const PDVModule = {
 
         <div class="module-feedback" id="pdvFormFeedback"></div>
 
-        <!-- Abas visíveis apenas no mobile -->
+        <!-- Abas visÃ­veis apenas no mobile -->
         <div class="pdv-tabs" id="pdvTabs">
           <button type="button" class="pdv-tab pdv-tab--active" data-tab="produtos" id="pdvTabProdutos">
             <i class="fa-solid fa-box"></i>
@@ -481,7 +481,7 @@ const PDVModule = {
                     id="pdvBuscaProduto"
                     inputmode="search"
                     autocomplete="off"
-                    placeholder="Nome, categoria ou código de barras"
+                    placeholder="Nome, categoria ou cÃ³digo de barras"
                   />
                   <div class="pdv-shortcuts-hint">
                     <span><kbd>F2</kbd> Focar busca</span>
@@ -496,7 +496,7 @@ const PDVModule = {
 
             <div class="pdv-products">
               <div class="pdv-products__header">
-                <h5>Produtos disponíveis</h5>
+                <h5>Produtos disponÃ­veis</h5>
               </div>
               <div class="pdv-products__list" id="pdvListaProdutos"></div>
             </div>
@@ -513,10 +513,10 @@ const PDVModule = {
                   <tr>
                     <th>Produto</th>
                     <th>Qtd</th>
-                    <th>Preço</th>
+                    <th>PreÃ§o</th>
                     <th>Desc%</th>
                     <th>Total</th>
-                    <th class="text-right">Ações</th>
+                    <th class="text-right">AÃ§Ãµes</th>
                   </tr>
                 </thead>
                 <tbody id="pdvCarrinhoBody"></tbody>
@@ -546,15 +546,15 @@ const PDVModule = {
                 </div>
 
                 <div class="form-field">
-                  <label for="pdvAcrescimo">Acréscimo</label>
+                  <label for="pdvAcrescimo">AcrÃ©scimo</label>
                   <input type="number" min="0" step="0.01" id="pdvAcrescimo" value="0" inputmode="decimal" />
                 </div>
 
                 <div class="form-field form-field--span-2">
-                  <label for="pdvObservacao">Observação</label>
+                  <label for="pdvObservacao">ObservaÃ§Ã£o</label>
                   <textarea
                     id="pdvObservacao"
-                    placeholder="Informações adicionais da venda"
+                    placeholder="InformaÃ§Ãµes adicionais da venda"
                   ></textarea>
                 </div>
               </div>
@@ -579,7 +579,7 @@ const PDVModule = {
               <div class="pdv-actions">
                 <button type="button" class="btn btn-light" id="pdvSalvarOrcamentoBtn">
                   <i class="fa-solid fa-file-lines"></i>
-                  Salvar orçamento
+                  Salvar orÃ§amento
                 </button>
                 <button type="button" class="btn btn-primary" id="pdvFinalizarBtn">
                   <i class="fa-solid fa-check"></i>
@@ -605,7 +605,7 @@ const PDVModule = {
 
     this.injectStyles();
 
-    // Modal de seleção de grade (injetado uma vez)
+    // Modal de seleÃ§Ã£o de grade (injetado uma vez)
     if (!document.getElementById('pdvGradeModal')) {
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay hidden';
@@ -614,8 +614,8 @@ const PDVModule = {
         <div class="modal-card" style="max-width:520px">
           <div class="modal-card__header">
             <div>
-              <h3 id="pdvGradeModalTitle">Selecionar variação</h3>
-              <p id="pdvGradeModalSub">Escolha o tamanho/cor disponível.</p>
+              <h3 id="pdvGradeModalTitle">Selecionar variaÃ§Ã£o</h3>
+              <p id="pdvGradeModalSub">Escolha o tamanho/cor disponÃ­vel.</p>
             </div>
             <button type="button" class="icon-button" id="pdvGradeModalClose">
               <i class="fa-solid fa-xmark"></i>
@@ -623,7 +623,7 @@ const PDVModule = {
           </div>
           <div style="padding:20px 24px 24px">
             <div class="grade-grid" id="pdvGradeGrid"></div>
-            <div class="section-empty hidden" id="pdvGradeEmpty">Nenhuma variação disponível.</div>
+            <div class="section-empty hidden" id="pdvGradeEmpty">Nenhuma variaÃ§Ã£o disponÃ­vel.</div>
           </div>
         </div>`;
       document.body.appendChild(overlay);
@@ -632,494 +632,6 @@ const PDVModule = {
 
   injectStyles() {
     // estilos migrados para style.css
-    if (true) return;
-
-    const style = document.createElement('style');
-    style.id = 'pdv-inline-styles';
-    style.textContent = `
-      .pdv-grid {
-        display: grid;
-        grid-template-columns: 1.15fr 1fr;
-        gap: 20px;
-      }
-
-      .pdv-panel {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 18px;
-      }
-
-      .pdv-panel__header {
-        margin-bottom: 16px;
-      }
-
-      .pdv-panel__header h4 {
-        font-size: 1.12rem;
-        font-weight: 800;
-        color: var(--text);
-        margin-bottom: 6px;
-      }
-
-      .pdv-panel__header p,
-      .pdv-helper {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-      }
-
-      .pdv-section {
-        margin-bottom: 18px;
-      }
-
-      .pdv-products {
-        border-top: 1px solid var(--border);
-        padding-top: 18px;
-      }
-
-      .pdv-products__header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 12px;
-        flex-wrap: wrap;
-      }
-
-      .pdv-products__header h5 {
-        font-size: 1rem;
-        font-weight: 800;
-        color: var(--text);
-      }
-
-      .pdv-products__list {
-        display: grid;
-        gap: 12px;
-        max-height: 520px;
-        overflow-y: auto;
-        padding-right: 4px;
-      }
-
-      .pdv-product-card {
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 14px;
-        background: var(--surface-2);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-      }
-
-      .pdv-product-card__info {
-        min-width: 0;
-      }
-
-      .pdv-product-card__info strong {
-        display: block;
-        color: var(--text);
-        font-weight: 800;
-        margin-bottom: 4px;
-      }
-
-      .pdv-product-card__meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .pdv-chip {
-        display: inline-flex;
-        align-items: center;
-        min-height: 28px;
-        padding: 0 10px;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        background: var(--surface);
-        color: var(--text-soft);
-        font-size: 0.8rem;
-        font-weight: 700;
-      }
-
-      .pdv-table {
-        min-width: 640px;
-      }
-
-      .pdv-qty {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .pdv-qty__value {
-        min-width: 24px;
-        text-align: center;
-        font-weight: 800;
-        color: var(--text);
-      }
-
-      .pdv-mini-btn {
-        width: 30px;
-        height: 30px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: var(--surface);
-        color: var(--text-soft);
-        display: inline-grid;
-        place-items: center;
-      }
-
-      .pdv-mini-btn:hover {
-        background: var(--surface-3);
-        color: var(--text);
-      }
-
-      .pdv-checkout {
-        margin-top: 18px;
-        border-top: 1px solid var(--border);
-        padding-top: 18px;
-      }
-
-      .pdv-summary {
-        margin-top: 12px;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        background: var(--surface-2);
-        padding: 16px;
-        display: grid;
-        gap: 10px;
-      }
-
-      .pdv-summary__row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        color: var(--text-soft);
-      }
-
-      .pdv-summary__row strong {
-        color: var(--text);
-        font-weight: 800;
-      }
-
-      .pdv-summary__row--total {
-        padding-top: 10px;
-        border-top: 1px solid var(--border);
-      }
-
-      .pdv-summary__row--total span,
-      .pdv-summary__row--total strong {
-        font-size: 1.05rem;
-      }
-
-      .pdv-actions {
-        margin-top: 16px;
-        display: flex;
-        justify-content: flex-end;
-      }
-
-      @media (max-width: 1100px) {
-        .pdv-grid { grid-template-columns: 1fr; }
-      }
-
-      /* ── Mobile responsivo (< 768px) ─────────────────────── */
-      .pdv-tabs {
-        display: none;
-        gap: 0;
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        overflow: hidden;
-        margin-bottom: 16px;
-      }
-
-      .pdv-tab {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 12px 8px;
-        border: none;
-        background: var(--surface-2);
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        font-weight: 700;
-        cursor: pointer;
-        position: relative;
-      }
-
-      .pdv-tab--active {
-        background: var(--primary, #2563eb);
-        color: #fff;
-      }
-
-      .pdv-tab-badge {
-        position: absolute;
-        top: 6px;
-        right: 10px;
-        background: #ef4444;
-        color: #fff;
-        font-size: 0.7rem;
-        font-weight: 800;
-        border-radius: 999px;
-        padding: 1px 6px;
-        min-width: 18px;
-        text-align: center;
-      }
-
-      .pdv-mobile-sticky {
-        display: none;
-      }
-
-      @media (max-width: 767px) {
-        .pdv-tabs { display: flex; }
-
-        /* Mostra só o painel ativo no mobile */
-        [data-pdv-panel]:not(.pdv-panel--active) { display: none; }
-
-        /* Produtos: lista mais alta, sem altura fixa */
-        .pdv-products__list {
-          max-height: calc(100dvh - 340px);
-          min-height: 200px;
-        }
-
-        /* Touch targets maiores */
-        .pdv-mini-btn {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          font-size: 1rem;
-        }
-
-        .pdv-qty__value {
-          min-width: 32px;
-          font-size: 1.1rem;
-        }
-
-        /* Tabela do carrinho → cards */
-        .pdv-table { min-width: unset; width: 100%; }
-        .pdv-table thead { display: none; }
-        .pdv-table tbody tr {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 6px 12px;
-          padding: 12px 4px;
-          border-bottom: 1px solid var(--border);
-        }
-        .pdv-table tbody tr td { border: none; padding: 0; }
-        .pdv-table tbody tr td[data-label="Produto"] {
-          flex: 1 1 100%;
-          font-size: 1rem;
-        }
-        .pdv-table tbody tr td[data-label="Qtd"] { flex: 0 0 auto; }
-        .pdv-table tbody tr td[data-label="Preço"] {
-          flex: 1 1 auto;
-          color: var(--text-muted);
-          font-size: 0.88rem;
-        }
-        .pdv-table tbody tr td[data-label="Total"] {
-          flex: 0 0 auto;
-          font-weight: 800;
-          font-size: 1rem;
-        }
-        .pdv-table tbody tr td:last-child {
-          flex: 0 0 auto;
-          margin-left: auto;
-        }
-        .pdv-remove-label { display: none; }
-
-        /* Esconde header do painel no mobile (aba já contextualiza) */
-        .pdv-panel__header { display: none; }
-
-        /* Checkout mais compacto */
-        .pdv-checkout { margin-top: 12px; padding-top: 12px; }
-
-        /* Esconde summary e botões normais no mobile — sticky faz o trabalho */
-        .pdv-summary { display: none; }
-        .pdv-actions { display: none; }
-
-        /* Sticky footer */
-        .pdv-mobile-sticky {
-          display: flex;
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 200;
-          background: var(--surface);
-          border-top: 1px solid var(--border);
-          padding: 12px 16px;
-          padding-bottom: max(12px, env(safe-area-inset-bottom));
-          gap: 12px;
-          align-items: center;
-          box-shadow: 0 -4px 20px rgba(0,0,0,.12);
-        }
-
-        .pdv-mobile-sticky__total {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .pdv-mobile-sticky__total span {
-          font-size: 0.78rem;
-          color: var(--text-muted);
-        }
-
-        .pdv-mobile-sticky__total strong {
-          font-size: 1.2rem;
-          font-weight: 800;
-          color: var(--text);
-        }
-
-        .pdv-mobile-sticky__btn {
-          flex-shrink: 0;
-          padding: 14px 24px;
-          font-size: 1rem;
-          border-radius: 14px;
-        }
-
-        /* Padding para não ficar atrás do sticky */
-        [data-pdv-panel="carrinho"] { padding-bottom: 90px; }
-
-        /* Botão adicionar produto — maior para touch */
-        .pdv-product-card .btn {
-          min-height: 44px;
-          padding: 10px 16px;
-        }
-
-        /* Form fields do checkout mais espaçados */
-        .form-grid { gap: 10px; }
-        .form-control, select, input[type="text"],
-        input[type="number"], input[type="date"] {
-          min-height: 44px;
-          font-size: 1rem;
-        }
-
-        /* Split payment mais compacto */
-        .pdv-split-row .pdv-split-forma,
-        .pdv-split-row .pdv-split-valor { min-height: 44px; }
-      }
-
-      /* ── Split de pagamento ───────────────────────────────── */
-      .pdv-split-lista {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .pdv-split-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      .pdv-split-row .pdv-split-forma {
-        flex: 1 1 140px;
-        min-width: 130px;
-      }
-
-      .pdv-split-row .pdv-split-valor {
-        flex: 1 1 100px;
-        min-width: 90px;
-      }
-
-      .pdv-split-promissoria {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        width: 100%;
-      }
-
-      .pdv-split-promissoria .pdv-split-parcelas { flex: 0 0 72px; }
-      .pdv-split-promissoria .pdv-split-vencimento { flex: 1 1 140px; }
-
-      .pdv-split-remove {
-        width: 34px;
-        height: 34px;
-        flex-shrink: 0;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: var(--surface);
-        color: var(--danger, #e53e3e);
-        display: grid;
-        place-items: center;
-        cursor: pointer;
-        font-size: 0.85rem;
-      }
-
-      .pdv-split-remove:hover { background: var(--surface-3); }
-
-      .pdv-split-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 8px;
-        gap: 10px;
-      }
-
-      .pdv-split-restante {
-        font-size: 0.88rem;
-        font-weight: 700;
-      }
-
-      .pdv-split-restante--ok { color: var(--success, #38a169); }
-      .pdv-split-restante--pendente { color: var(--warning, #d69e2e); }
-      .pdv-split-restante--excesso { color: var(--danger, #e53e3e); }
-
-      .btn-sm {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-      }
-
-      /* ── Grade selector ───────────────────────────────── */
-      .grade-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 10px;
-      }
-
-      .grade-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        padding: 12px 8px;
-        border: 2px solid var(--border);
-        border-radius: 14px;
-        background: var(--surface-2);
-        cursor: pointer;
-        transition: border-color 0.15s, background 0.15s;
-        width: 100%;
-      }
-
-      .grade-btn:not(:disabled):hover {
-        border-color: var(--primary);
-        background: var(--surface-3, var(--surface));
-      }
-
-      .grade-btn--esgotado,
-      .grade-btn:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-      }
-
-      .grade-btn__label {
-        font-weight: 800;
-        color: var(--text);
-        font-size: 0.95rem;
-      }
-
-      .grade-btn__estoque {
-        font-size: 0.77rem;
-        color: var(--text-muted);
-      }
-    `;
-    document.head.appendChild(style);
   },
 
   async fetchClientes() {
@@ -1175,7 +687,7 @@ const PDVModule = {
           <div class="pdv-product-card">
             <div class="pdv-product-card__info">
               <strong>${this.escapeHtml(produto.nome || 'Produto')}</strong>
-              <span class="pdv-product-card__sub">${this.escapeHtml(produto.categoria || '-')} &nbsp;·&nbsp; ${estoque} un.</span>
+              <span class="pdv-product-card__sub">${this.escapeHtml(produto.categoria || '-')} &nbsp;Â·&nbsp; ${estoque} un.</span>
             </div>
             <div class="pdv-product-card__right">
               <span class="pdv-product-card__price">${this.toCurrency(produto.preco)}</span>
@@ -1233,7 +745,7 @@ const PDVModule = {
               </div>
             </td>
 
-            <td data-label="Preço">
+            <td data-label="PreÃ§o">
               ${descPct > 0
                 ? `<span style="text-decoration:line-through;color:var(--text-muted);font-size:.82em;display:block">${this.toCurrency(item.preco_unitario)}</span><span style="color:var(--success,#16a34a);font-weight:700">${this.toCurrency(precoComDesconto)}</span>`
                 : this.toCurrency(item.preco_unitario)
@@ -1305,14 +817,14 @@ const PDVModule = {
       }
     }
 
-    // Ajusta o valor da única forma de pagamento quando total muda e só há uma
+    // Ajusta o valor da Ãºnica forma de pagamento quando total muda e sÃ³ hÃ¡ uma
     if (this.state.pagamentos.length === 1) {
       this.state.pagamentos[0].valor = total;
     }
     this.renderPagamentos();
   },
 
-  // ── Abas mobile ─────────────────────────────────────────────────────────────
+  // â”€â”€ Abas mobile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   switchTab(tab) {
     this.state.activeTab = tab;
@@ -1334,9 +846,9 @@ const PDVModule = {
     });
   },
 
-  // ── Split de pagamento ──────────────────────────────────────────────────────
+  // â”€â”€ Split de pagamento â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  FORMAS_PAGAMENTO: ['Dinheiro', 'Pix', 'Cartão de Débito', 'Cartão de Crédito', 'Promissória'],
+  FORMAS_PAGAMENTO: ['Dinheiro', 'Pix', 'CartÃ£o de DÃ©bito', 'CartÃ£o de CrÃ©dito', 'PromissÃ³ria'],
 
   getSomaPagamentos() {
     return this.state.pagamentos.reduce((acc, p) => acc + Number(p.valor || 0), 0);
@@ -1376,7 +888,7 @@ const PDVModule = {
     if (!lista) return;
 
     lista.innerHTML = this.state.pagamentos.map((p, i) => {
-      const ehPromissoria = p.forma === 'Promissória';
+      const ehPromissoria = p.forma === 'PromissÃ³ria';
       const opcoesForma = this.FORMAS_PAGAMENTO.map((f) =>
         `<option value="${f}" ${p.forma === f ? 'selected' : ''}>${f}</option>`
       ).join('');
@@ -1392,7 +904,7 @@ const PDVModule = {
                 ${[1,2,3,4,5,6,8,10,12].map((n) => `<option value="${n}" ${p.parcelas === n ? 'selected' : ''}>${n}x</option>`).join('')}
               </select>
               <input type="date" class="pdv-split-vencimento form-control" data-idx="${i}"
-                value="${p.vencimento || ''}" placeholder="1º vencimento" />
+                value="${p.vencimento || ''}" placeholder="1Âº vencimento" />
             </div>` : ''}
           ${this.state.pagamentos.length > 1
             ? `<button type="button" class="pdv-split-remove" data-idx="${i}" title="Remover">
@@ -1430,7 +942,7 @@ const PDVModule = {
 
     this.updateClienteInfo();
 
-    // Recalcula preços do carrinho pela tabela de preços do cliente
+    // Recalcula preÃ§os do carrinho pela tabela de preÃ§os do cliente
     if (this.state.carrinho.length) {
       this.recalcularPrecosCarrinho();
     }
@@ -1452,7 +964,7 @@ const PDVModule = {
     const field = document.getElementById('pdvPrimeiroVencimentoField');
     if (!field) return;
 
-    const exibir = this.state.pagamento === 'Promissória';
+    const exibir = this.state.pagamento === 'PromissÃ³ria';
     field.style.display = exibir ? 'block' : 'none';
 
     if (!exibir) {
@@ -1482,17 +994,17 @@ const PDVModule = {
   async addProduto(produtoId) {
     const produto = this.state.produtos.find((item) => Number(item.id) === Number(produtoId));
     if (!produto) {
-      this.showMessage('Produto não encontrado.', 'error');
+      this.showMessage('Produto nÃ£o encontrado.', 'error');
       return;
     }
 
     const estoqueDisponivel = Number(produto.estoque || 0);
     if (estoqueDisponivel <= 0) {
-      this.showMessage(`O produto "${produto.nome}" está sem estoque.`, 'error');
+      this.showMessage(`O produto "${produto.nome}" estÃ¡ sem estoque.`, 'error');
       return;
     }
 
-    // Produto com grade → abre modal de seleção de variação
+    // Produto com grade â†’ abre modal de seleÃ§Ã£o de variaÃ§Ã£o
     if (produto.tem_grade) {
       await this.openGradeSelector(produto);
       return;
@@ -1542,7 +1054,7 @@ const PDVModule = {
     }
   },
 
-  // ── SELETOR DE GRADE ────────────────────────────────────────────────────────
+  // â”€â”€ SELETOR DE GRADE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async openGradeSelector(produto) {
     this.state.gradeModalProduto = produto;
@@ -1554,7 +1066,7 @@ const PDVModule = {
     modal.classList.remove('hidden');
 
     const grid = document.getElementById('pdvGradeGrid');
-    if (grid) grid.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">Carregando variações...</div>';
+    if (grid) grid.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">Carregando variaÃ§Ãµes...</div>';
 
     try {
       const result = await api.getGradesProduto(produto.id);
@@ -1590,7 +1102,7 @@ const PDVModule = {
     if (existenteIndex >= 0) {
       const itemAtual = this.state.carrinho[existenteIndex];
       if (Number(itemAtual.quantidade) + 1 > estoque) {
-        this.showMessage(`Estoque insuficiente para "${produto.nome} — ${gradeLabel}".`, 'error');
+        this.showMessage(`Estoque insuficiente para "${produto.nome} â€” ${gradeLabel}".`, 'error');
         return;
       }
       this.state.carrinho[existenteIndex].quantidade += 1;
@@ -1627,8 +1139,8 @@ const PDVModule = {
     if (!grid) return;
 
     const produto = this.state.gradeModalProduto;
-    if (title) title.textContent = this.escapeHtml(produto?.nome || 'Selecionar variação');
-    if (sub)   sub.textContent   = 'Escolha o tamanho/cor disponível.';
+    if (title) title.textContent = this.escapeHtml(produto?.nome || 'Selecionar variaÃ§Ã£o');
+    if (sub)   sub.textContent   = 'Escolha o tamanho/cor disponÃ­vel.';
 
     const grades = this.state.gradesDisponiveis;
 
@@ -1662,7 +1174,7 @@ const PDVModule = {
     }).join('');
   },
 
-  // ── TABELA DE PREÇOS ─────────────────────────────────────────────────────────
+  // â”€â”€ TABELA DE PREÃ‡OS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async resolverPrecoItem(produtoId, gradeId, clienteId, quantidade) {
     if (!clienteId) return null;
@@ -1695,7 +1207,7 @@ const PDVModule = {
           );
         }
 
-        // Sem tabela ou sem cliente → preço padrão armazenado no item
+        // Sem tabela ou sem cliente â†’ preÃ§o padrÃ£o armazenado no item
         if (preco === null) {
           preco = item.preco_padrao ?? item.preco_unitario;
         }
@@ -1766,7 +1278,7 @@ const PDVModule = {
       return;
     }
 
-    // Validação do split
+    // ValidaÃ§Ã£o do split
     const restante = this.getPagamentoRestante();
     if (restante > 0.01) {
       this.showMessage(`Faltam ${this.toCurrency(restante)} para cobrir o total.`, 'error');
@@ -1791,10 +1303,10 @@ const PDVModule = {
       });
     }
 
-    // Valida vencimento para Promissória
-    const promissoriaEntry = this.state.pagamentos.find((p) => p.forma === 'Promissória');
+    // Valida vencimento para PromissÃ³ria
+    const promissoriaEntry = this.state.pagamentos.find((p) => p.forma === 'PromissÃ³ria');
     if (promissoriaEntry && !promissoriaEntry.vencimento) {
-      this.showMessage('Informe o primeiro vencimento para a promissória.', 'error');
+      this.showMessage('Informe o primeiro vencimento para a promissÃ³ria.', 'error');
       return;
     }
 
@@ -1835,7 +1347,7 @@ const PDVModule = {
       conta_receber: null
     };
 
-    // Offline — salvar na fila local
+    // Offline â€” salvar na fila local
     if (!navigator.onLine) {
       this.state.salvando = true;
       this.setLoading(true);
@@ -1845,15 +1357,15 @@ const PDVModule = {
       try {
         const pendingId = await PdvOffline.salvarVendaPendente(payload);
         const msg = pendingId
-          ? `Venda salva offline (fila #${pendingId}). Será enviada quando a conexão retornar.`
-          : 'Venda salva offline. Será enviada quando a conexão retornar.';
+          ? `Venda salva offline (fila #${pendingId}). SerÃ¡ enviada quando a conexÃ£o retornar.`
+          : 'Venda salva offline. SerÃ¡ enviada quando a conexÃ£o retornar.';
         this.setFeedback(msg, 'warning');
         showToast(msg, 'warning');
         this.resetVenda();
         await this.load();
       } catch {
         this.setFeedback('Erro ao salvar a venda offline.', 'error');
-        showToast('Não foi possível salvar a venda offline.', 'error');
+        showToast('NÃ£o foi possÃ­vel salvar a venda offline.', 'error');
       } finally {
         this.state.salvando = false;
         this.setLoading(false);
@@ -1961,7 +1473,7 @@ const PDVModule = {
           </button>
           <div id="_pixConteudo">
             <div style="font-size:36px;color:#32b768;margin-bottom:8px"><i class="fa-brands fa-pix"></i></div>
-            <h3 style="margin:0 0 4px;font-size:18px;font-weight:800">PIX — ${fmtValor(valor)}</h3>
+            <h3 style="margin:0 0 4px;font-size:18px;font-weight:800">PIX â€” ${fmtValor(valor)}</h3>
             ${clienteNome ? `<p style="margin:0 0 16px;font-size:13px;color:var(--text-muted)">${this.escapeHtml(clienteNome)}</p>` : '<div style="margin-bottom:16px"></div>'}
             <div id="_pixStatus" style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
               <i class="fa-solid fa-spinner fa-spin"></i> Gerando QR Code...
@@ -1972,7 +1484,7 @@ const PDVModule = {
                 <label style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:4px">PIX Copia e Cola</label>
                 <div style="display:flex;gap:6px">
                   <input id="_pixCopiaCola" readonly style="flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-family:monospace;background:var(--surface-2);color:var(--text);min-width:0" />
-                  <button id="_pixCopiar" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px" title="Copiar código">
+                  <button id="_pixCopiar" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px" title="Copiar cÃ³digo">
                     <i class="fa-solid fa-copy"></i>
                   </button>
                 </div>
@@ -2022,7 +1534,7 @@ const PDVModule = {
           try {
             const st = await api.request(`/pagamentos/pix/status/${txid}`);
             if (st?.status === 'CONCLUIDA') mostrarSucesso();
-          } catch { /* silencioso — continua tentando */ }
+          } catch { /* silencioso â€” continua tentando */ }
         }, 4000);
       };
 
@@ -2061,7 +1573,7 @@ const PDVModule = {
           if (dados?.qr_image) {
             qrImg.innerHTML = `<img src="data:image/png;base64,${dados.qr_image}" style="width:100%;height:100%;object-fit:contain" alt="QR Code PIX" />`;
           } else {
-            qrImg.innerHTML = `<div style="padding:16px;font-size:11px;color:var(--text-muted);line-height:1.5"><i class="fa-solid fa-qrcode" style="font-size:32px;display:block;margin-bottom:8px"></i>QR Code disponível<br>em produção</div>`;
+            qrImg.innerHTML = `<div style="padding:16px;font-size:11px;color:var(--text-muted);line-height:1.5"><i class="fa-solid fa-qrcode" style="font-size:32px;display:block;margin-bottom:8px"></i>QR Code disponÃ­vel<br>em produÃ§Ã£o</div>`;
           }
 
           if (ccInput && dados?.pix_copia_e_cola) ccInput.value = dados.pix_copia_e_cola;
@@ -2086,7 +1598,7 @@ const PDVModule = {
           if (st) st.style.display = 'none';
           if (errArea) {
             errArea.style.display = 'block';
-            errArea.textContent = `Erro ao gerar PIX: ${e.message || 'verifique as configurações de PIX nas Configurações do sistema.'}`;
+            errArea.textContent = `Erro ao gerar PIX: ${e.message || 'verifique as configuraÃ§Ãµes de PIX nas ConfiguraÃ§Ãµes do sistema.'}`;
           }
         }
       })();
@@ -2119,14 +1631,14 @@ const PDVModule = {
       });
 
       const numero = result?.orcamento?.numero ?? result?.numero ?? '?';
-      const msg = `Orçamento #${numero} salvo com sucesso.`;
+      const msg = `OrÃ§amento #${numero} salvo com sucesso.`;
       this.showMessage(msg, 'success');
       showToast(msg, 'success');
       this.resetVenda();
     } catch (err) {
-      this.showMessage(err.message || 'Erro ao salvar orçamento.', 'error');
+      this.showMessage(err.message || 'Erro ao salvar orÃ§amento.', 'error');
     } finally {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-lines"></i> Salvar orçamento'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-lines"></i> Salvar orÃ§amento'; }
     }
   },
 
@@ -2167,12 +1679,12 @@ const PDVModule = {
       return api.formatPlanError(error);
     }
 
-    if (error.status === 400) return error.message || 'Dados inválidos para a venda.';
-    if (error.status === 403) return error.message || 'Sem permissão para realizar esta venda.';
-    if (error.status === 404) return error.message || 'Recurso não encontrado.';
+    if (error.status === 400) return error.message || 'Dados invÃ¡lidos para a venda.';
+    if (error.status === 403) return error.message || 'Sem permissÃ£o para realizar esta venda.';
+    if (error.status === 404) return error.message || 'Recurso nÃ£o encontrado.';
     if (error.status === 500) return 'Erro interno no backend ao finalizar a venda.';
     if (String(error.message || '').includes('Failed to fetch')) {
-      return 'Não foi possível conectar ao backend.';
+      return 'NÃ£o foi possÃ­vel conectar ao backend.';
     }
 
     return error.message || 'Falha ao concluir a venda.';
@@ -2207,7 +1719,7 @@ const PDVModule = {
       showToast(`${sincronizadas} venda(s) offline sincronizada(s) com sucesso!`, 'success');
     }
     if (erros > 0) {
-      showToast(`${erros} venda(s) falharam na sincronização. Verifique e tente novamente.`, 'error');
+      showToast(`${erros} venda(s) falharam na sincronizaÃ§Ã£o. Verifique e tente novamente.`, 'error');
     }
 
     return sincronizadas;
@@ -2218,14 +1730,14 @@ const PDVModule = {
     this._offlineBound = true;
     window.addEventListener('online', async () => {
       this.updateOfflineIndicator(true);
-      showToast('Conexão restaurada. Sincronizando vendas pendentes...', 'success');
+      showToast('ConexÃ£o restaurada. Sincronizando vendas pendentes...', 'success');
       await this.syncPendentesIfOnline().catch(() => {});
       await this.load();
     });
 
     window.addEventListener('offline', () => {
       this.updateOfflineIndicator(false);
-      showToast('Sem conexão. Modo offline ativado — vendas serão salvas localmente.', 'warning');
+      showToast('Sem conexÃ£o. Modo offline ativado â€” vendas serÃ£o salvas localmente.', 'warning');
     });
   },
 
@@ -2261,3 +1773,4 @@ export async function initPDVModule() {
 }
 
 export default PDVModule;
+

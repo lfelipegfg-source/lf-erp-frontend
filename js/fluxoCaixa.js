@@ -430,7 +430,7 @@ function formatFormaPagamento(value) {
     promissoria: 'Promissória'
   };
 
-  return map[v] || value;
+  return map[v] || escapeHtml(String(value || ''));
 }
 
 function renderResumoOrigens() {
