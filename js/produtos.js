@@ -1511,7 +1511,7 @@ const ProdutosModule = {
     overlay.innerHTML = `
       <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
         <h3 style="margin:0 0 6px;font-size:16px;font-weight:700"><i class="fa-solid fa-tag"></i> Imprimir Etiqueta</h3>
-        <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">${String(item.nome).substring(0, 50)}</p>
+        <p style="font-size:13px;color:var(--text-muted);margin:0 0 16px">${escapeHtml(String(item.nome).substring(0, 50))}</p>
         <div style="display:grid;gap:12px;margin-bottom:16px">
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase">Quantidade de etiquetas</label>
