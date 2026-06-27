@@ -480,8 +480,8 @@ async function carregarNotificacoes() {
     }
 
     listaEl.innerHTML = lista.map((n) => {
-      const cor = _escNotif(n.cor || 'var(--primary)');
-      const icone = _escNotif(n.icone || 'fa-bell');
+      const cor = /^(#[0-9a-fA-F]{3,8}|var\(--[\w-]+\))$/.test(n.cor) ? n.cor : 'var(--primary)';
+      const icone = /^fa-[a-z0-9-]+$/.test(n.icone) ? n.icone : 'fa-bell';
       return `
       <div style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:12px;align-items:flex-start"
         class="notif-item" data-view="${_escNotif(n.link || '')}">
@@ -533,8 +533,8 @@ function _aplicarDadosNotificacoes(dados) {
       return;
     }
     listaEl.innerHTML = lista.map((n) => {
-      const cor = _escNotif(n.cor || 'var(--primary)');
-      const icone = _escNotif(n.icone || 'fa-bell');
+      const cor = /^(#[0-9a-fA-F]{3,8}|var\(--[\w-]+\))$/.test(n.cor) ? n.cor : 'var(--primary)';
+      const icone = /^fa-[a-z0-9-]+$/.test(n.icone) ? n.icone : 'fa-bell';
       return `
       <div style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;gap:12px;align-items:flex-start"
         class="notif-item" data-view="${_escNotif(n.link || '')}">

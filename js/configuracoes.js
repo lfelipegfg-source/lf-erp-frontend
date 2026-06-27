@@ -14,6 +14,7 @@ const ConfigModule = {
   },
 
   init() {
+    this.state.eventsBound = false;
     const auth = getAuth();
     this.state.empresa = auth?.empresa?.nome || auth?.user?.empresa || 'LF ERP';
     this.state.user = auth?.user || {};
@@ -236,7 +237,7 @@ const ConfigModule = {
           login_falha: '<span class="badge badge--danger">falha</span>',
           troca_senha: '<span class="badge badge--warning">senha</span>'
         };
-        return map[a] || `<span class="badge">${a}</span>`;
+        return map[a] || `<span class="badge">${esc(a)}</span>`;
       };
       container.innerHTML = `
         <table class="historico-table">
@@ -252,7 +253,7 @@ const ConfigModule = {
               <tr>
                 <td>${new Date(l.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</td>
                 <td>${acaoBadge(l.acao)}</td>
-                <td class="text-muted">${l.ip || '—'}</td>
+                <td class="text-muted">${esc(l.ip || '—')}</td>
               </tr>`).join('')}
           </tbody>
         </table>`;
