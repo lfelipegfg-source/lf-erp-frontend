@@ -89,6 +89,7 @@ export async function validateSession() {
 }
 
 export function logout() {
+  _refreshInProgress = false;
   clearRefreshTimer();
   api.request('/auth/logout', { method: 'POST' }).catch(() => {});
   clearAuth();

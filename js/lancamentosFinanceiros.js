@@ -450,7 +450,8 @@ function bindEventos() {
   };
 
   // Ações da tabela (pagar, editar, excluir)
-  document.querySelectorAll('[data-action]').forEach((btn) => {
+  const lfContainer = document.getElementById('lancamentosContainer');
+  (lfContainer || document).querySelectorAll('[data-action]').forEach((btn) => {
     btn.onclick = () => {
       const id = Number(btn.dataset.id);
       if (btn.dataset.action === 'pagar')   pagar(id);

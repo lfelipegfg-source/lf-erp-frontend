@@ -872,7 +872,7 @@ const ClientesModule = {
                    <td class="text-right">${cur(p.valor)}</td>
                    <td class="text-right">${p.valor_atualizado !== p.valor ? `<strong>${cur(p.valor_atualizado)}</strong>` : cur(p.valor)}</td>
                    <td>${dt(p.data_pagamento)}</td>
-                   <td><span class="badge ${statusClass[p.status] || ''}">${statusLabel[p.status] || p.status}</span></td>
+                   <td><span class="badge ${statusClass[p.status] || ''}">${statusLabel[p.status] || escapeHtml(String(p.status || ''))}</span></td>
                  </tr>`).join('')}
              </tbody>
            </table>
@@ -929,7 +929,7 @@ const ClientesModule = {
               <td class="text-right">${cur(p.valor)}</td>
               <td class="text-right">${cur(p.valor_atualizado)}</td>
               <td>${dt(p.data_pagamento)}</td>
-              <td>${statusLabel[p.status] || p.status}</td>
+              <td>${statusLabel[p.status] || escapeHtml(String(p.status || ''))}</td>
             </tr>`).join('')}
         </tbody>
       </table>

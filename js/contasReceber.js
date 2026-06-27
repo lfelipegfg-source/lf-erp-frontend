@@ -2248,7 +2248,7 @@ async function salvarContaManual(modal) {
         empresa_id: api.getEmpresaId(),
         cliente_id: clienteId || null,
         cliente_nome: nomeManual,
-        valor,
+        valor: Number(valor),
         data_vencimento: vencimento,
         descricao,
         observacao,

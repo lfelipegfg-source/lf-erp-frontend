@@ -174,6 +174,9 @@ const ConfigModule = {
   },
 
   async save() {
+    const btn = document.getElementById('salvarConfigBtn');
+    if (btn && btn.disabled) return;
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
     try {
       const nome = document.getElementById('cfgNomeEmpresa').value;
 
@@ -186,6 +189,8 @@ const ConfigModule = {
     } catch (err) {
       console.error('Erro ao salvar:', err);
       showToast('Erro ao salvar configurações', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
     }
   },
 
