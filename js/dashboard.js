@@ -682,6 +682,8 @@ function renderChartVendas(vendasPorDia = []) {
   const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(203,213,225,0.35)';
   const tickColor  = isDark ? '#64748b' : '#64748b';
 
+  if (_chartVendas) { _chartVendas.destroy(); _chartVendas = null; }
+
   const gradient = ctx.createLinearGradient(0, 0, 0, 260);
   gradient.addColorStop(0, isDark ? 'rgba(59,130,246,0.28)' : 'rgba(37,99,235,0.22)');
   gradient.addColorStop(1, 'rgba(37,99,235,0)');
@@ -748,6 +750,7 @@ function renderChartFormaPagamento(formasPagamento = []) {
   const totais  = formasPagamento.map((r) => r.total);
   const cores   = formasPagamento.map((_, i) => CHART_COLORS.palette[i % CHART_COLORS.palette.length]);
 
+  if (_chartForma) { _chartForma.destroy(); _chartForma = null; }
   _chartForma = new Chart(canvas.getContext('2d'), {
     type: 'doughnut',
     data: {

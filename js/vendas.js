@@ -1266,10 +1266,10 @@ const VendasModule = {
         'Esta venda possui parcela paga. Estorne o recebimento antes de editar.',
         'error'
       );
-      return;
+      return false;
     }
 
-    if (!venda || !Array.isArray(venda.itens)) return;
+    if (!venda || !Array.isArray(venda.itens)) return false;
 
     const subtotal = venda.itens.reduce((acc, item) => {
       const quantidade = Number(item.quantidade || 0);
@@ -1489,7 +1489,7 @@ const VendasModule = {
     try {
       showToast('Reprocessando venda...', 'info');
 
-      this.recalcularVendaEmEdicao();
+      if (this.recalcularVendaEmEdicao() === false) return;
 
       const vendaEditada = this.state.vendaDetalheAtual;
 
@@ -2313,10 +2313,16 @@ const VendasModule = {
           </div>`;
       }).join('');
 
-      corpo.addEventListener('click', (ev) => {
-        const btn = ev.target.closest('.js-excluir-meta');
-        if (btn) VendasModule.excluirMeta(Number(btn.dataset.metaId), periodo);
-      }, { once: true });
+      if (!corpo.dataset.metaClickBound) {
+        corpo.dataset.metaClickBound = '1';
+        corpo.addEventListener('click', (ev) => {
+          const btn = ev.target.closest('.js-excluir-meta');
+          if (btn) {
+            const p = document.getElementById('metasPeriodoInput')?.value || '';
+            VendasModule.excluirMeta(Number(btn.dataset.metaId), p);
+          }
+        });
+      }
 
     } catch (err) {
       corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message) || 'Erro ao carregar metas'}</div>`;

@@ -1953,7 +1953,6 @@ function renderModuleError(containerId, title, message) {
 
 async function simulateRefresh() {
   if (!AppState.isAuthenticated) {
-    await wait(500);
     renderInitialDashboardState();
     showToast('Dados atualizados.', 'success');
     return;

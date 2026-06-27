@@ -24,6 +24,7 @@ const PDVModule = {
   },
 
   init() {
+    this._eventsBound = false;
     this.resolveEmpresa();
     this.render();
     this.cache();
@@ -62,6 +63,8 @@ const PDVModule = {
   },
 
   bindLocalEvents() {
+    if (this._eventsBound) return;
+    this._eventsBound = true;
     this.cache();
 
     this.el.buscaProduto?.addEventListener('input', (event) => {
@@ -1990,7 +1993,9 @@ const PDVModule = {
 
       document.body.appendChild(overlay);
 
+      let _pixFechado = false;
       const fechar = () => {
+        _pixFechado = true;
         clearInterval(pollInterval);
         clearInterval(timerInterval);
         if (overlay.parentNode) document.body.removeChild(overlay);
@@ -2060,8 +2065,8 @@ const PDVModule = {
           if (ccInput && dados?.pix_copia_e_cola) ccInput.value = dados.pix_copia_e_cola;
 
           qrArea.style.display = 'block';
-          iniciarTimer(dados?.expiracao);
-          iniciarPoll();
+          if (!_pixFechado) iniciarTimer(dados?.expiracao);
+          if (!_pixFechado) iniciarPoll();
 
           const btnCopiar = overlay.querySelector('#_pixCopiar');
           if (btnCopiar) {

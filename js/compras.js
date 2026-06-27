@@ -566,7 +566,7 @@ const ComprasModule = {
 
       this.state.itensCompra = itensCarregados;
 
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         // Backend retorna campos planificados no topo: compra.fornecedor_id, não compra.compra.fornecedor_id
         if (this.el.fornecedor) this.el.fornecedor.value = compra.fornecedor_id || '';
         if (this.el.data) this.el.data.value = (compra.data || '').slice(0, 10);
@@ -578,7 +578,7 @@ const ComprasModule = {
 
         const titulo = document.querySelector('#compraModal h3');
         if (titulo) titulo.textContent = `Editar Compra #${id}`;
-      }, 50);
+      });
     } catch (error) {
       this.showMessage('Erro ao carregar compra para edição.', 'error');
     }

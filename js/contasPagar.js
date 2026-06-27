@@ -864,7 +864,7 @@ function getStatusBadgeClass(status) {
   if (normalized === 'atrasado') return 'badge badge--danger';
   if (normalized === 'pendente') return 'badge badge--warning';
   if (normalized === 'parcial') return 'badge badge--info';
-  if (normalized === 'parcial_atrasado') return 'badge badge--warning';
+  if (normalized === 'parcial_atrasado') return 'badge badge--danger';
 
   return 'badge badge--info';
 }
