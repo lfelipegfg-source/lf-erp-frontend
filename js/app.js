@@ -2157,7 +2157,10 @@ function initCommandPalette() {
   _cpRender();
 }
 
+let _cpShortcutBound = false;
 function bindCommandPaletteShortcut() {
+  if (_cpShortcutBound) return;
+  _cpShortcutBound = true;
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();

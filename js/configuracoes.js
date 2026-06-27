@@ -41,6 +41,8 @@ const ConfigModule = {
   },
 
   async load() {
+    if (this.state.loadingConfig) return;
+    this.state.loadingConfig = true;
     try {
       const [data, meData] = await Promise.all([
         api.fetchAPI(`/configuracoes/${this.state.empresa}`),
@@ -77,6 +79,8 @@ const ConfigModule = {
       await this.carregarAsaas();
     } catch (err) {
       console.error('Erro ao carregar configurações:', err);
+    } finally {
+      this.state.loadingConfig = false;
     }
   },
 

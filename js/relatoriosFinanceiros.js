@@ -1065,6 +1065,8 @@ async function recarregarModulo(mensagem = '') {
   }
 }
 
+let _feedbackTimer = null;
+
 function renderFeedback(message, type = 'success') {
   const feedback = document.getElementById('relatoriosFeedback');
   if (!feedback) return;
@@ -1072,12 +1074,14 @@ function renderFeedback(message, type = 'success') {
   feedback.className = `module-feedback module-feedback--${type}`;
   feedback.textContent = message;
 
-  setTimeout(() => {
+  if (_feedbackTimer) clearTimeout(_feedbackTimer);
+  _feedbackTimer = setTimeout(() => {
     const current = document.getElementById('relatoriosFeedback');
     if (current) {
       current.className = 'module-feedback';
       current.textContent = '';
     }
+    _feedbackTimer = null;
   }, 3500);
 }
 

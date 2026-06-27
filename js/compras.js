@@ -767,6 +767,8 @@ const ComprasModule = {
     }
 
     this.state.saving = true;
+    const btn = this.el.form?.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
     const payload = {
       fornecedor_id: fornecedorId,
       data,
@@ -799,6 +801,7 @@ const ComprasModule = {
       this.setFeedback(message, 'error');
     } finally {
       this.state.saving = false;
+      if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
     }
   },
 
@@ -1068,7 +1071,7 @@ const ComprasModule = {
     const existing = document.getElementById('_xmlNFModal');
     if (existing) existing.remove();
 
-    const esc = (v) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const esc = escapeHtml;
     const cur = (v) => Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
     const fornecedorOptions = this.state.fornecedores.map(f =>

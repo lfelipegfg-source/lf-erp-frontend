@@ -503,7 +503,12 @@ function bindEventos() {
 
   document.querySelectorAll("[data-action='estornar-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
-      await estornarConta(button.dataset.id);
+      button.disabled = true;
+      try {
+        await estornarConta(button.dataset.id);
+      } finally {
+        button.disabled = false;
+      }
     });
   });
 
@@ -577,10 +582,12 @@ async function recarregar() {
 }
 
 async function estornarConta(id) {
+  if (state._estornando) return;
   const confirmar = await confirmarAcao('Estornar a baixa desta conta? Ela voltará para pendente ou atrasada conforme o vencimento.', 'Estornar', 'warning');
 
   if (!confirmar) return;
 
+  state._estornando = true;
   try {
     await api.estornarContaReceber(id);
 
@@ -591,6 +598,8 @@ async function estornarConta(id) {
     console.error('Erro ao estornar conta a receber:', error);
     const message = buildFriendlyError(error);
     showMessage(message, 'error');
+  } finally {
+    state._estornando = false;
   }
 }
 

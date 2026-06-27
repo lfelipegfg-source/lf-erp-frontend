@@ -1385,6 +1385,8 @@ const VendasModule = {
       return;
     }
 
+    if (this.state._baixandoParcela) return;
+    this.state._baixandoParcela = true;
     try {
       showToast('Registrando baixa da parcela...', 'info');
 
@@ -1405,6 +1407,8 @@ const VendasModule = {
     } catch (error) {
       console.error('Erro ao baixar parcela:', error);
       this.showMessage(this.buildFriendlyError(error), 'error');
+    } finally {
+      this.state._baixandoParcela = false;
     }
   },
 
@@ -1435,6 +1439,8 @@ const VendasModule = {
 
     if (novaObservacao === null) return;
 
+    if (this.state._editandoObs) return;
+    this.state._editandoObs = true;
     try {
       showToast('Atualizando observação...', 'info');
 
@@ -1449,6 +1455,8 @@ const VendasModule = {
     } catch (error) {
       console.error('Erro ao editar observação:', error);
       this.showMessage(this.buildFriendlyError(error), 'error');
+    } finally {
+      this.state._editandoObs = false;
     }
   },
 
@@ -1486,10 +1494,12 @@ const VendasModule = {
 
     if (novoObservacao === null) return;
 
+    if (this.state._editandoVenda) return;
+    this.state._editandoVenda = true;
     try {
       showToast('Reprocessando venda...', 'info');
 
-      if (this.recalcularVendaEmEdicao() === false) return;
+      if (this.recalcularVendaEmEdicao() === false) { this.state._editandoVenda = false; return; }
 
       const vendaEditada = this.state.vendaDetalheAtual;
 
@@ -1525,6 +1535,8 @@ const VendasModule = {
     } catch (error) {
       console.error('Erro ao editar venda:', error);
       this.showMessage(this.buildFriendlyError(error), 'error');
+    } finally {
+      this.state._editandoVenda = false;
     }
   },
 
@@ -2374,7 +2386,7 @@ const VendasModule = {
   _abrirJanelaRecibo(venda) {
     const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const dt  = (v) => v ? new Date(`${v}T12:00:00`).toLocaleDateString('pt-BR') : '-';
-    const esc = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const esc = escapeHtml;
 
     const empresa = window.LfErpApi?.getEmpresaNome?.() || '';
 

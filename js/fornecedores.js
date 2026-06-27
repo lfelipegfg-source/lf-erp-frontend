@@ -393,6 +393,8 @@ const FornecedoresModule = {
     }
 
     this.state.loading = true;
+    const btn = this.el.form?.querySelector('button[type="submit"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
     try {
       const message = this.state.editingId ? 'Atualizando fornecedor...' : 'Salvando fornecedor...';
 
@@ -415,6 +417,7 @@ const FornecedoresModule = {
       this.setFeedback(message, 'error');
     } finally {
       this.state.loading = false;
+      if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
     }
   },
 
