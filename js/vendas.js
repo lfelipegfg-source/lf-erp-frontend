@@ -37,6 +37,12 @@ const VendasModule = {
       this.cache();
       this.bindEvents();
     } else {
+      this.state.filtros.dataInicial = '';
+      this.state.filtros.dataFinal   = '';
+      const iniEl = document.getElementById('vendasDataInicial');
+      const fimEl = document.getElementById('vendasDataFinal');
+      if (iniEl) iniEl.value = '';
+      if (fimEl) fimEl.value = '';
       this.cache();
     }
   },
@@ -773,13 +779,17 @@ const VendasModule = {
   },
 
   salvarFiltros() {
-    try { sessionStorage.setItem('lf_filtros_vendas', JSON.stringify(this.state.filtros)); } catch {}
+    const { busca, pagamento, status } = this.state.filtros;
+    try { sessionStorage.setItem('lf_filtros_vendas', JSON.stringify({ busca, pagamento, status })); } catch {}
   },
 
   carregarFiltros() {
     try {
       const s = JSON.parse(sessionStorage.getItem('lf_filtros_vendas') || 'null');
-      if (s) Object.assign(this.state.filtros, s);
+      if (s) {
+        const { busca, pagamento, status } = s;
+        Object.assign(this.state.filtros, { busca: busca || '', pagamento: pagamento || '', status: status || '' });
+      }
     } catch {}
   },
 
