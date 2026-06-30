@@ -414,6 +414,7 @@ function bindEventos() {
 
   // Atualizar
   document.getElementById('lfBtnAtualizar').onclick = async () => {
+    if (state.loading) return;
     setLoading(true);
     try {
       await carregarLancamentos();
@@ -462,7 +463,7 @@ function bindEventos() {
         const page = btn.dataset.page;
         if (page === 'prev' && state.pagina > 1) state.pagina--;
         else if (page === 'next' && state.pagina < state.totalPaginas) state.pagina++;
-        carregarLancamentos().then(() => render());
+        carregarLancamentos().then(() => render()).catch(err => showMsg(buildFriendlyError(err), 'error'));
       }
     };
   });
@@ -504,7 +505,7 @@ async function salvar() {
     tipo:            document.getElementById('lfTipoInput').value,
     descricao:       document.getElementById('lfDescricao').value.trim(),
     categoria:       document.getElementById('lfCategoria').value.trim(),
-    valor:           document.getElementById('lfValor').value,
+    valor:           Number(document.getElementById('lfValor').value) || 0,
     vencimento:      document.getElementById('lfVencimento').value || null,
     forma_pagamento: document.getElementById('lfFormaPagamento').value,
     observacao:      document.getElementById('lfObservacao').value.trim()

@@ -422,9 +422,11 @@ const FornecedoresModule = {
   },
 
   async delete(id) {
+    if (this.state.loading) return;
     const ok = await confirmarAcao('Excluir este fornecedor? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
     if (!ok) return;
 
+    this.state.loading = true;
     try {
       this.setFeedback('Excluindo fornecedor...', 'info');
 
@@ -438,6 +440,8 @@ const FornecedoresModule = {
       console.error('Erro ao excluir fornecedor:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 

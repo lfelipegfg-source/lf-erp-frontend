@@ -514,13 +514,25 @@ function bindEventos() {
 
   document.querySelectorAll("[data-action='baixar-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
-      await baixarConta(button.dataset.id);
+      if (button.disabled) return;
+      button.disabled = true;
+      try {
+        await baixarConta(button.dataset.id);
+      } finally {
+        button.disabled = false;
+      }
     });
   });
 
   document.querySelectorAll("[data-action='excluir-cr']").forEach((button) => {
     button.addEventListener('click', async () => {
-      await excluirConta(button.dataset.id);
+      if (button.disabled) return;
+      button.disabled = true;
+      try {
+        await excluirConta(button.dataset.id);
+      } finally {
+        button.disabled = false;
+      }
     });
   });
 
@@ -906,7 +918,7 @@ function abrirModalBaixaConta(conta) {
       console.error('Erro ao baixar conta a receber:', error);
       showMessage(buildFriendlyError(error), 'error');
       btn.disabled = false;
-      btn.innerHTML = 'Confirmar';
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Confirmar recebimento';
     }
   });
 
@@ -918,7 +930,7 @@ function abrirModalBaixaConta(conta) {
 async function abrirDetalheConta(id) {
   try {
     const conta = await api.getContaReceberDetalhe(id);
-    renderDetalheConta(conta);
+    await renderDetalheConta(conta);
   } catch (error) {
     console.error('Erro ao abrir detalhe da conta:', error);
     const message = buildFriendlyError(error);

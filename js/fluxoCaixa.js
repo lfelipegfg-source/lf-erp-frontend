@@ -613,6 +613,7 @@ function bindEventos() {
     state.pagina = 1;
 
     render();
+    renderCashflowFuturo();
   });
 
   btnLimpar?.addEventListener('click', () => {
@@ -625,6 +626,7 @@ function bindEventos() {
     state.pagina = 1;
 
     render();
+    renderCashflowFuturo();
   });
 
   busca?.addEventListener('keydown', (event) => {
@@ -635,6 +637,7 @@ function bindEventos() {
       state.pagina = 1;
 
       render();
+      renderCashflowFuturo();
     }
   });
 
@@ -646,6 +649,7 @@ function bindEventos() {
       if (page === 'prev' && state.pagina > 1) state.pagina--;
       else if (page === 'next' && state.pagina < total) state.pagina++;
       render();
+      renderCashflowFuturo();
     });
   });
 }

@@ -28,6 +28,10 @@ const ComprasModule = {
       this.bind();
     } else {
       this.cache();
+      if (!this.el.modal || this.el.modal.classList.contains('hidden')) {
+        this.state.editingId = null;
+        this.state.itensCompra = [];
+      }
     }
   },
 
@@ -155,10 +159,10 @@ const ComprasModule = {
         api.getProdutos()
       ]);
 
-      this.state.items = Array.isArray(compras) ? compras : [];
+      this.state.items = Array.isArray(compras) ? compras : (compras?.dados ?? []);
       this.state.filteredItems = [...this.state.items];
-      this.state.fornecedores = Array.isArray(fornecedores) ? fornecedores : [];
-      this.state.produtos = Array.isArray(produtos) ? produtos : [];
+      this.state.fornecedores = Array.isArray(fornecedores) ? fornecedores : (fornecedores?.dados ?? []);
+      this.state.produtos = Array.isArray(produtos) ? produtos : (produtos?.dados ?? []);
 
       this.render();
       this.cache();
@@ -801,7 +805,7 @@ const ComprasModule = {
       this.setFeedback(message, 'error');
     } finally {
       this.state.saving = false;
-      if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check"></i> Salvar compra'; }
     }
   },
 

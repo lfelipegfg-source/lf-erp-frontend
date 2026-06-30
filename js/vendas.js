@@ -1379,7 +1379,10 @@ const VendasModule = {
         </div>`;
       document.body.appendChild(overlay);
       overlay.querySelector('#_bpCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      let _bpClicado = false;
       overlay.querySelector('#_bpConfirmar').onclick = () => {
+        if (_bpClicado) return;
+        _bpClicado = true;
         const val = Number(overlay.querySelector('#_bpValor').value);
         const data = overlay.querySelector('#_bpData').value;
         document.body.removeChild(overlay);
@@ -1444,7 +1447,14 @@ const VendasModule = {
         </div>`;
       document.body.appendChild(overlay);
       overlay.querySelector('#_obsCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
-      overlay.querySelector('#_obsSalvar').onclick = () => { const v = overlay.querySelector('#_obsInput').value; document.body.removeChild(overlay); resolve(v); };
+      let _obsClicado = false;
+      overlay.querySelector('#_obsSalvar').onclick = () => {
+        if (_obsClicado) return;
+        _obsClicado = true;
+        const v = overlay.querySelector('#_obsInput').value;
+        document.body.removeChild(overlay);
+        resolve(v);
+      };
     });
 
     if (novaObservacao === null) return;
@@ -1499,7 +1509,14 @@ const VendasModule = {
         </div>`;
       document.body.appendChild(overlay);
       overlay.querySelector('#_seCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
-      overlay.querySelector('#_seConfirmar').onclick = () => { const v = overlay.querySelector('#_seObs').value; document.body.removeChild(overlay); resolve(v); };
+      let _seClicado = false;
+      overlay.querySelector('#_seConfirmar').onclick = () => {
+        if (_seClicado) return;
+        _seClicado = true;
+        const v = overlay.querySelector('#_seObs').value;
+        document.body.removeChild(overlay);
+        resolve(v);
+      };
     });
 
     if (novoObservacao === null) return;
