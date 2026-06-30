@@ -405,13 +405,13 @@ const VendasModule = {
   },
 
   async fetchVendas({ offset = 0 } = {}) {
-    const filtrosGlobais = this.getGlobalFilters();
-    const params = { ...filtrosGlobais, limit: this.state.limite, offset };
+    const params = { limit: this.state.limite, offset };
 
-    if (this.state.filtros.dataInicial) params.data_inicial = this.state.filtros.dataInicial;
-    if (this.state.filtros.dataFinal)   params.data_final   = this.state.filtros.dataFinal;
-    if (this.state.filtros.pagamento)   params.pagamento     = this.state.filtros.pagamento;
-    if (this.state.filtros.status)      params.status_pagamento = this.state.filtros.status;
+    if (this.state.filtros.busca)        params.busca            = this.state.filtros.busca;
+    if (this.state.filtros.dataInicial)  params.data_inicial     = this.state.filtros.dataInicial;
+    if (this.state.filtros.dataFinal)    params.data_final       = this.state.filtros.dataFinal;
+    if (this.state.filtros.pagamento)    params.pagamento        = this.state.filtros.pagamento;
+    if (this.state.filtros.status)       params.status_pagamento = this.state.filtros.status;
 
     return api.getVendas(params);
   },
