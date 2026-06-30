@@ -160,6 +160,10 @@ async function parseResponse(response) {
     }
 
     if (payload.sucesso === true) {
+      // Respostas paginadas: preservar total/limite/offset para paginação
+      if (payload.dados !== undefined && payload.total !== undefined) {
+        return payload;
+      }
       return payload.dados !== undefined ? payload.dados : payload;
     }
   }
