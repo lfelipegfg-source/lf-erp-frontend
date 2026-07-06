@@ -473,8 +473,8 @@ const UsuariosModule = {
 
     if (payload.senha) {
       const s = payload.senha;
-      if (s.length < 8 || !/[A-Z]/.test(s) || !/[0-9]/.test(s)) {
-        this.setFeedback('Senha fraca: use 8+ caracteres, 1 maiúscula e 1 número.', 'error');
+      if (s.length < 8 || s.length > 128 || !/[A-Z]/.test(s) || !/[0-9]/.test(s)) {
+        this.setFeedback('Senha fraca: use entre 8 e 128 caracteres, 1 maiúscula e 1 número.', 'error');
         return;
       }
     }

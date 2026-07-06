@@ -821,7 +821,7 @@ const ProdutosModule = {
   async loadImagens(produtoId) {
     try {
       const res = await api.getImagensProduto(produtoId);
-      this.state.imagens = res.imagens || [];
+      this.state.imagens = Array.isArray(res) ? res : (res?.imagens || []);
     } catch { this.state.imagens = []; }
     this.renderImagens();
   },
@@ -911,7 +911,7 @@ const ProdutosModule = {
       disabledMsg?.classList.add('hidden');
       try {
         const res = await api.getGradesProduto(item.id);
-        this.state.grades = res.grades || [];
+        this.state.grades = Array.isArray(res) ? res : (res?.grades || []);
       } catch { this.state.grades = []; }
       this.renderGrades();
     } else {
@@ -1098,10 +1098,8 @@ const ProdutosModule = {
     const sel = document.getElementById('kitProdutoSelect');
     if (!sel) return;
     try {
-      if (!this.state.allProdutos.length) {
-        const items = await api.getProdutos();
-        this.state.allProdutos = Array.isArray(items) ? items : [];
-      }
+      const items = await api.getProdutos();
+      this.state.allProdutos = Array.isArray(items) ? items : [];
       const disponíveis = this.state.allProdutos.filter((p) => Number(p.id) !== Number(kitId) && !p.e_kit);
       sel.innerHTML = '<option value="">Selecione o produto...</option>' +
         disponíveis.map((p) => `<option value="${p.id}">${escapeHtml(p.nome)} (Est: ${p.estoque})</option>`).join('');
@@ -1478,7 +1476,7 @@ const ProdutosModule = {
     try {
       showToast('Buscando produtos de hoje…', 'info');
       const resp = await api.request(`/produtos/etiquetas-hoje/${this.state.empresa}`);
-      const itens = (resp && resp.dados) ? resp.dados : [];
+      const itens = Array.isArray(resp) ? resp : (resp?.dados || []);
 
       if (!itens.length) {
         showToast('Nenhum produto registrado hoje', 'warning');

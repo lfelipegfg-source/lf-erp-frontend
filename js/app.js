@@ -621,6 +621,7 @@ function bindTopbarEvents() {
 
   sinoBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (!dropdown) return;
     const aberto = !dropdown.classList.contains('hidden');
     dropdown.classList.toggle('hidden');
     if (!aberto && !_notifCarregadas) {
@@ -988,7 +989,8 @@ function updateGlobalFilterContextNote() {
 
 
 function applyDefaultPeriodDates() {
-  const today = new Date();
+  const nowBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Fortaleza' }));
+  const today = nowBR;
   let start = new Date(today);
   let end = new Date(today);
 
@@ -1035,7 +1037,9 @@ async function applyGlobalFilters() {
     return;
   }
 
-  await loadCurrentView(AppState.currentView);
+  if (VIEWS_WITH_GLOBAL_FILTER.has(AppState.currentView)) {
+    await loadCurrentView(AppState.currentView);
+  }
 }
 
 function clearGlobalFilters() {

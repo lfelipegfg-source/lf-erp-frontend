@@ -257,7 +257,8 @@ const PDVModule = {
 
     document.addEventListener('keydown', (e) => {
       // SÃ³ ativa quando o PDV estÃ¡ visÃ­vel
-      if (!document.getElementById('pdvBuscaProduto')) return;
+      const buscaEl = document.getElementById('pdvBuscaProduto');
+      if (!buscaEl || !buscaEl.offsetParent) return;
 
       const tag      = document.activeElement?.tagName?.toLowerCase();
       const inInput  = ['input', 'textarea', 'select'].includes(tag);
@@ -1308,8 +1309,10 @@ const PDVModule = {
       let trocoRestante = troco;
       this.state.pagamentos = this.state.pagamentos.map((p) => {
         if (p.forma === 'Dinheiro' && trocoRestante > 0) {
-          const novoValor = Number((Number(p.valor || 0) - trocoRestante).toFixed(2));
-          trocoRestante = 0;
+          const valorAtual = Number(p.valor || 0);
+          const desconto = Math.min(trocoRestante, valorAtual);
+          trocoRestante -= desconto;
+          const novoValor = Number((valorAtual - desconto).toFixed(2));
           return { ...p, valor: novoValor };
         }
         return p;
@@ -1329,6 +1332,7 @@ const PDVModule = {
 
     const payload = {
       empresa: this.state.empresa,
+      empresa_id: api.getEmpresaId() || null,
       cliente_id: this.state.clienteId ? Number(this.state.clienteId) : null,
       cliente_nome: this.state.clienteNome || '',
       itens: this.state.carrinho.map((item) => {

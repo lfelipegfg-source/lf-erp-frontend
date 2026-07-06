@@ -108,9 +108,7 @@ const EstoqueModule = {
 
     this.setLoading(true);
     try {
-      const data = await api.getProdutos({
-        busca: document.getElementById('filtroBuscaGlobal')?.value?.trim() || ''
-      });
+      const data = await api.getProdutos();
 
       this.state.items = Array.isArray(data) ? data : [];
       this.state.filteredItems = [...this.state.items];

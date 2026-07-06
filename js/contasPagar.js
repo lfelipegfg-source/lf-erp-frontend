@@ -442,6 +442,7 @@ function bindEventos() {
 
   document.querySelectorAll("[data-action='pagar-cp']").forEach((button) => {
     button.addEventListener('click', async () => {
+      if (state.loading) return;
       await pagarConta(button.dataset.id);
     });
   });
@@ -511,16 +512,22 @@ async function pagarConta(id) {
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirmando...';
       const data = overlay.querySelector('#_pagarDataInput').value;
+      if (!data) {
+        btn.disabled = false;
+        btn.innerHTML = 'Confirmar pagamento';
+        showMessage('Informe a data do pagamento.', 'error');
+        return;
+      }
       const valorStr = overlay.querySelector('#_pagarValorInput').value;
       const valor_pago = valorStr ? Number(valorStr) : undefined;
-      if (valor_pago !== undefined && valor_pago <= 0) {
+      if (valor_pago !== undefined && (!Number.isFinite(valor_pago) || valor_pago <= 0)) {
         btn.disabled = false;
         btn.innerHTML = 'Confirmar pagamento';
         showMessage('Valor pago deve ser maior que zero.', 'error');
         return;
       }
       try {
-        await api.pagarContaPagar(id, { data_pagamento: data || undefined, valor_pago });
+        await api.pagarContaPagar(id, { data_pagamento: data, valor_pago });
         document.body.removeChild(overlay);
         showMessage('Pagamento registrado com sucesso.', 'success');
         await recarregar();

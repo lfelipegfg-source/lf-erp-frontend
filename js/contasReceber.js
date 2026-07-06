@@ -595,16 +595,15 @@ async function recarregar() {
 
 async function estornarConta(id) {
   if (state._estornando) return;
-  const confirmar = await confirmarAcao('Estornar a baixa desta conta? Ela voltará para pendente ou atrasada conforme o vencimento.', 'Estornar', 'warning');
-
-  if (!confirmar) return;
-
   state._estornando = true;
+  const confirmar = await confirmarAcao('Estornar a baixa desta conta? Ela voltará para pendente ou atrasada conforme o vencimento.', 'Estornar', 'warning');
+  if (!confirmar) {
+    state._estornando = false;
+    return;
+  }
   try {
     await api.estornarContaReceber(id);
-
     showMessage('Baixa estornada com sucesso.', 'success');
-
     await recarregar();
   } catch (error) {
     console.error('Erro ao estornar conta a receber:', error);
@@ -2259,6 +2258,16 @@ async function salvarContaManual(modal) {
 
     if (!valor || Number(valor) <= 0) {
       showMessage('Informe um valor válido.', 'error');
+      return;
+    }
+
+    if (!vencimento) {
+      showMessage('Informe a data de vencimento.', 'error');
+      return;
+    }
+
+    if (!clienteId && !nomeManual) {
+      showMessage('Selecione um cliente ou informe o nome manual.', 'error');
       return;
     }
 
