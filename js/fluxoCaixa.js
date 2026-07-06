@@ -492,11 +492,11 @@ function renderResumoOrigens() {
 
 async function carregarCashflowFuturo(dias = 30) {
   try {
-    const empresa = document.getElementById('filtroEmpresa')?.value
-      || window.LfErpApi?.getEmpresaNome?.() || '';
+    const empresa   = api.getEmpresaNome() || '';
+    const empresaId = api.getEmpresaId()   || '';
     const data = await api.request('/financeiro/cashflow-futuro', {
       method: 'GET',
-      query: { dias, empresa }
+      query: { dias, empresa, empresa_id: empresaId }
     });
     state.cashflowFuturo = data;
   } catch (err) {
@@ -606,6 +606,7 @@ function bindEventos() {
   });
 
   btnFiltrar?.addEventListener('click', () => {
+    if (state.loading) return;
     showMessage('Filtros aplicados.', 'info');
     state.filtros.busca = busca?.value?.trim() || '';
     state.filtros.tipo = tipo?.value || '';
@@ -617,6 +618,7 @@ function bindEventos() {
   });
 
   btnLimpar?.addEventListener('click', () => {
+    if (state.loading) return;
     showMessage('Filtros limpos.', 'info');
     state.filtros = {
       busca: '',
@@ -728,14 +730,13 @@ function formatCurrency(value) {
 
 function formatDate(value) {
   if (!value) return '-';
-
-  const date = new Date(`${value}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) {
+    const [ano, mes, dia] = String(value).split('-');
+    return `${dia}/${mes}/${ano}`;
   }
-
-  return date.toLocaleDateString('pt-BR');
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
 }
 
 function injectFluxoCaixaStyles() {

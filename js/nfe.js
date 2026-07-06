@@ -694,7 +694,7 @@ const NfeModule = {
   async renderNfse(container) {
     const cur = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const dt  = (v) => v ? new Date(v).toLocaleDateString('pt-BR') : '-';
-    const esc = (v) => this.escapeHtml(v);
+    const esc = (v) => this.esc(v);
 
     container.innerHTML = `
       <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
@@ -747,22 +747,22 @@ const NfeModule = {
             ${emissoes.map((e) => `
               <tr>
                 <td>${dt(e.criado_em)}</td>
-                <td>${this.escapeHtml(e.tomador_nome || '-')}</td>
-                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this.escapeHtml(e.discriminacao || '-')}</td>
+                <td>${this.esc(e.tomador_nome || '-')}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this.esc(e.discriminacao || '-')}</td>
                 <td class="text-right">${cur(e.valor_servico)}</td>
-                <td>${this.escapeHtml(e.numero_nfse || e.rps_numero || '-')}</td>
+                <td>${this.esc(e.numero_nfse || e.rps_numero || '-')}</td>
                 <td><span class="badge ${statusColor[e.status] || ''}">${e.status || 'pendente'}</span></td>
                 <td class="text-right">
                   <div class="table-actions">
-                    <button class="btn-inline" data-nfse-consultar="${this.escapeHtml(e.ref)}">
+                    <button class="btn-inline" data-nfse-consultar="${this.esc(e.ref)}">
                       <i class="fa-solid fa-sync"></i>
                     </button>
                     ${e.link_pdf ? `
-                      <a href="${this.escapeHtml(e.link_pdf)}" target="_blank" class="btn-inline">
+                      <a href="${this.esc(e.link_pdf)}" target="_blank" class="btn-inline">
                         <i class="fa-solid fa-file-pdf"></i> PDF
                       </a>` : ''}
                     ${e.status === 'autorizada' ? `
-                      <button class="btn-inline btn-inline--danger" data-nfse-cancelar="${this.escapeHtml(e.ref)}">
+                      <button class="btn-inline btn-inline--danger" data-nfse-cancelar="${this.esc(e.ref)}">
                         Cancelar
                       </button>` : ''}
                   </div>
@@ -793,7 +793,7 @@ const NfeModule = {
         });
       });
     } catch (err) {
-      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${this.escapeHtml(err.message)}</div>`;
+      corpo.innerHTML = `<div class="module-feedback module-feedback--error">${this.esc(err.message)}</div>`;
     }
   },
 
@@ -939,7 +939,6 @@ const NfeModule = {
 
 export async function initNfeModule() {
   NfeModule.init();
-  await NfeModule.load();
 }
 
 export default NfeModule;

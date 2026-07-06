@@ -181,7 +181,7 @@
       renderEmpresas(empresas);
     } catch (e) {
       document.getElementById('empresasBody').innerHTML =
-        `<tr class="loading-row"><td colspan="7">Erro ao carregar: ${e.message}</td></tr>`;
+        `<tr class="loading-row"><td colspan="7">Erro ao carregar: ${esc(e.message)}</td></tr>`;
     }
   }
 
@@ -401,7 +401,7 @@
       renderPlanos(planosCache);
     } catch (e) {
       document.getElementById('planosBody').innerHTML =
-        `<tr class="loading-row"><td colspan="8">Erro: ${e.message}</td></tr>`;
+        `<tr class="loading-row"><td colspan="8">Erro: ${esc(e.message)}</td></tr>`;
     }
   }
 
@@ -517,7 +517,7 @@
       renderLogs(logs);
     } catch (e) {
       document.getElementById('logsBody').innerHTML =
-        `<tr class="loading-row"><td colspan="6">Erro: ${e.message}</td></tr>`;
+        `<tr class="loading-row"><td colspan="6">Erro: ${esc(e.message)}</td></tr>`;
     }
   };
 
@@ -621,16 +621,18 @@
                 return `
                   <tr style="border-bottom:1px solid var(--border)" id="billingRow_${e.id}">
                     <td style="padding:8px 10px">
-                      <strong>${e.nome}</strong>
-                      ${e.email ? `<br><small style="color:var(--text-muted)">${e.email}</small>` : ''}
+                      <strong>${esc(e.nome)}</strong>
+                      ${e.email ? `<br><small style="color:var(--text-muted)">${esc(e.email)}</small>` : ''}
                     </td>
                     <td style="padding:8px 10px">${badgeEmpresa(e)}</td>
-                    <td style="padding:8px 10px">${e.plano_nome || '—'}</td>
+                    <td style="padding:8px 10px">${esc(e.plano_nome || '—')}</td>
                     <td style="padding:8px 10px;text-align:right">${preco > 0 ? `R$ ${preco.toFixed(2)}` : '—'}</td>
                     <td style="padding:8px 10px;font-size:12px">${e.trial_fim ? formatDate(e.trial_fim) : '—'}</td>
                     <td style="padding:8px 10px;text-align:center">
                       <button class="btn btn-secondary btn-sm"
-                        onclick="gerarCobrancaEmpresa(${e.id}, '${e.nome.replace(/'/g,"\\'")}', ${preco})">
+                        data-cobrar-id="${e.id}"
+                        data-cobrar-nome="${esc(e.nome)}"
+                        data-cobrar-preco="${preco}">
                         <i class="fa fa-barcode"></i> Cobrar
                       </button>
                     </td>
@@ -639,6 +641,17 @@
             </tbody>
           </table>
         </div>`;
+
+      // Event delegation para botões Cobrar (evita XSS via onclick inline)
+      corpo.querySelectorAll('[data-cobrar-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          gerarCobrancaEmpresa(
+            Number(btn.dataset.cobrarId),
+            btn.dataset.cobrarNome,
+            Number(btn.dataset.cobrarPreco)
+          );
+        });
+      });
     } catch (e) {
       if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${esc(e.message)}</div>`;
     }

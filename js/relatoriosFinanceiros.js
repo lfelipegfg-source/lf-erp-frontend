@@ -993,6 +993,8 @@ function bindEventos() {
     ?.addEventListener('click', () => { window.print(); });
 
   document.querySelectorAll('[data-rel-preset]').forEach((btn) => {
+    if (btn.dataset.rfHandlerBound) return;
+    btn.dataset.rfHandlerBound = '1';
     btn.addEventListener('click', async () => {
       const today = todayFortaleza();
       const [y, m] = today.split('-').map(Number);
@@ -1002,7 +1004,9 @@ function bindEventos() {
         ini = today;
       } else if (preset === 'semana') {
         const d = new Date(`${today}T12:00:00`);
-        d.setDate(d.getDate() - d.getDay());
+        const dow = d.getDay(); // 0=dom, 1=seg ... 6=sab
+        const diasAteSeg = dow === 0 ? 6 : dow - 1; // recua até segunda-feira
+        d.setDate(d.getDate() - diasAteSeg);
         ini = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       } else if (preset === 'mes') {
         ini = `${y}-${String(m).padStart(2,'0')}-01`;

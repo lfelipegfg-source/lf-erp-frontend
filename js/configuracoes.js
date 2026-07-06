@@ -68,7 +68,10 @@ const ConfigModule = {
       try {
         const pixCfg = await api.getPixConfig();
         if (document.getElementById('cfgPixClientId')) {
-          document.getElementById('cfgPixClientId').value   = pixCfg.pix_client_id  || '';
+          // Não preenchemos campos de credenciais com valores reais — apenas sinalizamos que está configurado
+          if (pixCfg.pix_client_id) {
+            document.getElementById('cfgPixClientId').placeholder = '*** (configurado — preencha para alterar)';
+          }
           document.getElementById('cfgPixChave').value      = pixCfg.pix_chave       || '';
           document.getElementById('cfgPixSandbox').checked  = pixCfg.pix_sandbox !== false;
           if (pixCfg.pix_certificado === 'configurado')

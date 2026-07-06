@@ -986,9 +986,11 @@ async function createLancamentoFinanceiro(payload) {
 }
 
 async function updateLancamentoFinanceiro(id, payload) {
+  const empresa   = getEmpresaNome();
+  const empresaId = getEmpresaId();
   return request(`/financeiro/lancamentos/${id}`, {
     method: 'PUT',
-    body: payload
+    body: { ...payload, empresa, empresa_id: empresaId }
   });
 }
 
