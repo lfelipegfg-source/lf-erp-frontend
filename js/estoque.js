@@ -450,7 +450,7 @@ const EstoqueModule = {
 
     try {
       const empresa = this.state.empresa || '';
-      const data = await api.request('/depositos', { method: 'GET', query: { empresa } });
+      const data = await api.request('/depositos', { method: 'GET', query: { empresa, empresa_id: api.getEmpresaId() } });
       const lista = data.depositos || [];
 
       if (!lista.length) {
@@ -547,7 +547,7 @@ const EstoqueModule = {
       const empresa = this.state.empresa || '';
       await api.request('/depositos', {
         method: 'POST',
-        body: { nome: dados.nome, descricao: dados.descricao, empresa }
+        body: { nome: dados.nome, descricao: dados.descricao, empresa, empresa_id: api.getEmpresaId() }
       });
       showToast('Depósito criado!', 'success');
       await this._renderDepositos();
@@ -557,14 +557,18 @@ const EstoqueModule = {
   },
 
   async excluirDeposito(id) {
+    if (this._excluindoDeposito) return;
     const ok = await confirmarAcao('Excluir este depósito? Só é possível se não houver estoque.', 'Excluir');
     if (!ok) return;
+    this._excluindoDeposito = true;
     try {
       await api.request(`/depositos/${id}`, { method: 'DELETE' });
       showToast('Depósito excluído!', 'success');
       await this._renderDepositos();
     } catch (err) {
       showToast(err.message || 'Erro ao excluir', 'error');
+    } finally {
+      this._excluindoDeposito = false;
     }
   },
 
@@ -653,7 +657,7 @@ const EstoqueModule = {
 
     try {
       const empresa = this.state.empresa || '';
-      const data = await api.request('/estoque/sugestao-compra', { method: 'GET', query: { empresa } });
+      const data = await api.request('/estoque/sugestao-compra', { method: 'GET', query: { empresa, empresa_id: api.getEmpresaId() } });
       const { itens = [], total_itens = 0, total_estimado = 0 } = data;
 
       if (sub) sub.textContent = total_itens === 0

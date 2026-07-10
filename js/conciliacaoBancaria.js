@@ -309,7 +309,7 @@ function lerArquivo(file) {
     const reader = new FileReader();
     reader.onload  = (e) => resolve(e.target.result);
     reader.onerror = () => reject(new Error('Erro ao ler o arquivo.'));
-    reader.readAsText(file, 'latin1');
+    reader.readAsText(file, 'utf-8');
   });
 }
 
@@ -559,6 +559,8 @@ function fecharModalLanc() {
 
 async function salvarLancamento(e) {
   e.preventDefault();
+  if (salvarLancamento._salvando) return;
+  salvarLancamento._salvando = true;
   const btn = document.getElementById('cbBtnSalvarLanc');
   const itemId   = Number(document.getElementById('cbLancItemId').value);
   const categoria = document.getElementById('cbLancCategoria').value.trim();
@@ -579,6 +581,8 @@ async function salvarLancamento(e) {
     showMsg(buildFriendlyError(error), 'error');
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Criar lançamento';
+  } finally {
+    salvarLancamento._salvando = false;
   }
 }
 

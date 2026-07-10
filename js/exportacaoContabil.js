@@ -1,6 +1,7 @@
 import { getAuth } from './auth.js';
 import { showToast } from './feedback.js';
 import api from './api.js';
+import { escapeHtml } from './utils.js';
 
 const API_BASE = window.LF_ERP_API_URL || localStorage.getItem('lf_erp_api_url') || 'https://lf-erp-backend.onrender.com';
 
@@ -376,7 +377,7 @@ const ExportacaoModule = {
           <div class="form-group">
             <label class="form-label">URL do Webhook</label>
             <input id="expWHUrl" type="url" class="form-input" placeholder="https://seu-sistema.com/webhook"
-              value="${cfg.webhook_url || ''}">
+              value="${escapeHtml(cfg.webhook_url || '')}">
           </div>
           <div class="form-group">
             <label class="form-label">Secret (opcional) <span style="font-size:.78rem;color:var(--text-muted)">— enviado no header X-LF-Secret</span></label>

@@ -373,6 +373,7 @@ const FornecedoresModule = {
 
     const payload = {
       empresa: this.state.empresa,
+      empresa_id: api.getEmpresaId(),
       nome: this.el.nome?.value?.trim() || '',
       telefone: this.el.telefone?.value?.trim() || '',
       cnpj: this.el.cnpj?.value?.trim() || '',

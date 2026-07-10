@@ -143,25 +143,29 @@ const PDVModule = {
     });
 
     // â”€â”€ Eventos do modal de grade â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    document.getElementById('pdvGradeModalClose')?.addEventListener('click', () => {
-      this.closeGradeSelector();
-    });
+    if (!this._gradeModalBound) {
+      this._gradeModalBound = true;
 
-    document.getElementById('pdvGradeModal')?.addEventListener('click', (e) => {
-      if (e.target === document.getElementById('pdvGradeModal')) this.closeGradeSelector();
-    });
+      document.getElementById('pdvGradeModalClose')?.addEventListener('click', () => {
+        this.closeGradeSelector();
+      });
 
-    document.getElementById('pdvGradeGrid')?.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-pdv-grade-id]');
-      if (!btn) return;
-      const gradeId  = Number(btn.dataset.pdvGradeId);
-      const estoque  = Number(btn.dataset.estoque);
-      const preco    = Number(btn.dataset.preco) || null;
-      const atrib1   = btn.dataset.atrib1;
-      const atrib2   = btn.dataset.atrib2 || '';
-      if (estoque <= 0) { showToast('VariaÃ§Ã£o sem estoque.', 'error'); return; }
-      this.selectGrade(gradeId, atrib1, atrib2, estoque, preco);
-    });
+      document.getElementById('pdvGradeModal')?.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('pdvGradeModal')) this.closeGradeSelector();
+      });
+
+      document.getElementById('pdvGradeGrid')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-pdv-grade-id]');
+        if (!btn) return;
+        const gradeId  = Number(btn.dataset.pdvGradeId);
+        const estoque  = Number(btn.dataset.estoque);
+        const preco    = Number(btn.dataset.preco) || null;
+        const atrib1   = btn.dataset.atrib1;
+        const atrib2   = btn.dataset.atrib2 || '';
+        if (estoque <= 0) { showToast('VariaÃ§Ã£o sem estoque.', 'error'); return; }
+        this.selectGrade(gradeId, atrib1, atrib2, estoque, preco);
+      });
+    }
 
     // â”€â”€ Abas mobile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('pdvTabs')?.addEventListener('click', (e) => {
@@ -1549,7 +1553,7 @@ const PDVModule = {
         if (!txid) return;
         pollInterval = setInterval(async () => {
           try {
-            const st = await api.request(`/pagamentos/pix/status/${txid}`);
+            const st = await api.verificarStatusPIX(txid);
             if (st?.status === 'CONCLUIDA') mostrarSucesso();
           } catch { /* silencioso â€” continua tentando */ }
         }, 4000);
@@ -1573,10 +1577,7 @@ const PDVModule = {
       // Gera o QR Code
       (async () => {
         try {
-          const dados = await api.request('/pagamentos/pix/gerar', {
-            method: 'POST',
-            body: { empresa, valor: Number(valor), cliente_nome: clienteNome || '' }
-          });
+          const dados = await api.gerarPIX({ valor: Number(valor), cliente_nome: clienteNome || '' });
 
           txid = dados?.txid || null;
 

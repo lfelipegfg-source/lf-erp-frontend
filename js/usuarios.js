@@ -414,7 +414,7 @@ const UsuariosModule = {
     const ACOES = ['ver', 'criar', 'editar', 'deletar'];
 
     const rows = Object.entries(permissoes).map(([modulo, p]) => {
-      const label = LABELS[modulo] || modulo;
+      const label = LABELS[modulo] || escapeHtml(modulo);
       const checks = ACOES.map((acao) => {
         const val = p[`pode_${acao}`] ? 'checked' : '';
         return `<td style="text-align:center">

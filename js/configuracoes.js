@@ -162,13 +162,15 @@ const ConfigModule = {
     const btn = document.getElementById('cfgSalvarPixBtn');
     try {
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
-      await api.savePixConfig({
-        pix_client_id:     document.getElementById('cfgPixClientId')?.value?.trim()    || '',
-        pix_client_secret: document.getElementById('cfgPixClientSecret')?.value?.trim() || '',
-        pix_certificado:   document.getElementById('cfgPixCertificado')?.value?.trim()  || '',
-        pix_chave:         document.getElementById('cfgPixChave')?.value?.trim()         || '',
-        pix_sandbox:       document.getElementById('cfgPixSandbox')?.checked ?? true
-      });
+      const clientId     = document.getElementById('cfgPixClientId')?.value?.trim()    || '';
+      const clientSecret = document.getElementById('cfgPixClientSecret')?.value?.trim() || '';
+      const certificado  = document.getElementById('cfgPixCertificado')?.value?.trim()  || '';
+      const chave        = document.getElementById('cfgPixChave')?.value?.trim()         || '';
+      const pixConfig = { pix_chave: chave, pix_sandbox: document.getElementById('cfgPixSandbox')?.checked ?? true };
+      if (clientId)     pixConfig.pix_client_id     = clientId;
+      if (clientSecret) pixConfig.pix_client_secret = clientSecret;
+      if (certificado)  pixConfig.pix_certificado   = certificado;
+      await api.savePixConfig(pixConfig);
       showToast('Configuração PIX salva com sucesso!', 'success');
       document.getElementById('cfgPixClientSecret').value = '';
       const certEl = document.getElementById('cfgPixCertificado');
@@ -215,8 +217,8 @@ const ConfigModule = {
       return showToast('A nova senha e a confirmação não conferem', 'error');
     }
 
-    if (nova.length < 6) {
-      return showToast('A nova senha deve ter pelo menos 6 caracteres', 'error');
+    if (nova.length < 8) {
+      return showToast('A nova senha deve ter pelo menos 8 caracteres', 'error');
     }
 
     try {

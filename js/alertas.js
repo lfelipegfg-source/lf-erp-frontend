@@ -17,6 +17,7 @@ const AlertasModule = {
   },
 
   async load() {
+    if (this.state.carregando) return;
     this.state.carregando = true;
     this.setFeedback('Carregando...', 'info');
     try {
@@ -61,9 +62,10 @@ const AlertasModule = {
     const c = document.getElementById('alertasContainer');
     if (!c) return;
 
-    document.getElementById('alertasAtualizarBtn')?.addEventListener('click', () => this.load());
+    const atuBtn = document.getElementById('alertasAtualizarBtn');
+    if (atuBtn) atuBtn.onclick = () => this.load();
 
-    c.addEventListener('click', (e) => {
+    c.onclick = (e) => {
       const abaBtn = e.target.closest('[data-al-aba]');
       if (abaBtn) {
         this.state.aba = abaBtn.dataset.alAba;
@@ -71,7 +73,7 @@ const AlertasModule = {
         abaBtn.classList.add('btn-inline--active');
         this.renderConteudo();
       }
-    });
+    };
   },
 
   renderConteudo() {
@@ -347,8 +349,9 @@ const AlertasModule = {
       try {
         await api.salvarAlertasConfig(payload);
         showToast('Configuração de alertas salva.', 'success');
-        if (fb) { fb.className = 'module-feedback module-feedback--success'; fb.textContent = 'Configuração salva com sucesso.'; }
         await this.load();
+        const fbAfter = document.getElementById('alConfigFeedback');
+        if (fbAfter) { fbAfter.className = 'module-feedback module-feedback--success'; fbAfter.textContent = 'Configuração salva com sucesso.'; }
       } catch (err) {
         if (fb) { fb.className = 'module-feedback module-feedback--error'; fb.textContent = err.message || 'Erro ao salvar.'; }
         showToast('Erro ao salvar configuração.', 'error');
@@ -442,7 +445,7 @@ const AlertasModule = {
 
 export async function initAlertasModule() {
   AlertasModule.init();
-  await AlertasModule.load();
+  // init() já chama load() internamente; não chamar novamente para evitar double-fetch
 }
 
 export default AlertasModule;

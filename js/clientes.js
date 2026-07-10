@@ -472,6 +472,7 @@ const ClientesModule = {
 
     const payload = {
       empresa: this.state.empresa,
+      empresa_id: api.getEmpresaId(),
       nome: this.el.nome?.value?.trim() || '',
       telefone: this.el.telefone?.value?.trim() || '',
       cpf: this.el.cpf?.value?.trim() || '',
@@ -520,9 +521,11 @@ const ClientesModule = {
   },
 
   async delete(id) {
+    if (this.state.loading) return;
     const ok = await confirmarAcao('Excluir este cliente? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
     if (!ok) return;
 
+    this.state.loading = true;
     try {
       this.setFeedback('Excluindo cliente...', 'info');
 
@@ -536,6 +539,8 @@ const ClientesModule = {
       console.error('Erro ao excluir cliente:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 

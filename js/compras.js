@@ -774,6 +774,8 @@ const ComprasModule = {
     const btn = this.el.form?.querySelector('button[type="submit"]');
     if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
     const payload = {
+      empresa: this.state.empresa,
+      empresa_id: api.getEmpresaId(),
       fornecedor_id: fornecedorId,
       data,
       pagamento,
@@ -810,10 +812,12 @@ const ComprasModule = {
   },
 
   async remove(id) {
+    if (this.state.loading) return;
     const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serão ajustados.', 'Excluir', 'danger');
 
     if (!confirmar) return;
 
+    this.state.loading = true;
     try {
       await api.deleteCompra(id);
       this.showMessage('Compra excluída com sucesso.', 'success');
@@ -822,6 +826,8 @@ const ComprasModule = {
       console.error('Erro ao excluir compra:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 
@@ -1202,6 +1208,8 @@ const ComprasModule = {
 
       try {
         await api.createCompra({
+          empresa: this.state.empresa,
+          empresa_id: api.getEmpresaId(),
           fornecedor_id: fornecedorId,
           data: dataVal,
           pagamento: formaVal,

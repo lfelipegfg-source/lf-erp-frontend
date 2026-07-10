@@ -209,17 +209,21 @@ function getFiltros() {
     inicio = document.getElementById('biInicio')?.value;
     fim    = document.getElementById('biFim')?.value;
   } else if (periodo === '30d') {
-    fim    = hoje.toISOString().slice(0,10);
+    const fmtFtz = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(d);
+    fim    = fmtFtz(hoje);
     const d = new Date(hoje); d.setDate(d.getDate()-30);
-    inicio = d.toISOString().slice(0,10);
+    inicio = fmtFtz(d);
   } else if (periodo === '90d') {
-    fim    = hoje.toISOString().slice(0,10);
+    const fmtFtz = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(d);
+    fim    = fmtFtz(hoje);
     const d = new Date(hoje); d.setDate(d.getDate()-90);
-    inicio = d.toISOString().slice(0,10);
+    inicio = fmtFtz(d);
   } else {
     // mes_atual
-    inicio = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-01`;
-    fim    = hoje.toISOString().slice(0,10);
+    const fmtFtz = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(d);
+    const hojeStr = fmtFtz(hoje);
+    inicio = `${hojeStr.slice(0,7)}-01`;
+    fim    = hojeStr;
   }
 
   return { inicio, fim, meses };
@@ -233,7 +237,7 @@ async function carregarBI() {
 
   try {
     const [comp, tendencia, topProd, topCli, mixPag, margemCat, funil] = await Promise.allSettled([
-      api.get('/bi/comparativo'),
+      api.get(`/bi/comparativo${q}`),
       api.get(`/bi/tendencia-vendas?meses=${meses}`),
       api.get(`/bi/top-produtos${q}&limit=10`),
       api.get(`/bi/top-clientes${q}&limit=10`),
@@ -443,7 +447,7 @@ async function carregarInsightsIA() {
     body.innerHTML = `<div class="bi-ai-empty" style="color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i> ${esc(err.message)}</div>`;
     showToast('Erro ao gerar análise IA: ' + err.message, 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Atualizar'; }
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Análise IA'; }
   }
 }
 

@@ -892,12 +892,14 @@ async function getNfcePdf(ref) {
 
 async function getPixConfig() {
   const empresa = getEmpresaNome();
-  return request('/pagamentos/pix/config', { method: 'GET', query: { empresa } });
+  const empresaId = getEmpresaId();
+  return request('/pagamentos/pix/config', { method: 'GET', query: { empresa, empresa_id: empresaId } });
 }
 
 async function savePixConfig(payload) {
   const empresa = getEmpresaNome();
-  return request('/pagamentos/pix/config', { method: 'PUT', body: { ...payload, empresa } });
+  const empresaId = getEmpresaId();
+  return request('/pagamentos/pix/config', { method: 'PUT', body: { ...payload, empresa, empresa_id: empresaId } });
 }
 
 async function gerarPIX(payload) {

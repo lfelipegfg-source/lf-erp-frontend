@@ -799,16 +799,21 @@ function _setChartSkeletons(visible) {
   });
 }
 
+let _graficosReqId = 0;
+
 async function renderGraficos(params = {}) {
+  const reqId = ++_graficosReqId;
   destroyCharts();
   _setChartSkeletons(true);
   try {
     const data = await api.getDashboardGrafico(params);
+    if (reqId !== _graficosReqId) return;
     _setChartSkeletons(false);
     renderChartVendas(data?.vendas_por_dia || []);
     renderChartFormaPagamento(data?.forma_pagamento || []);
     renderSparklineKpi(data?.vendas_por_dia || []);
   } catch (_) {
+    if (reqId !== _graficosReqId) return;
     _setChartSkeletons(false);
     ['chartVendasDia','chartFormaPagamento'].forEach((id) => {
       _showChartPlaceholder(id, 'Gráfico indisponível');
@@ -1025,7 +1030,7 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
     const [rawDashboard, rawResumoFinanceiro, rawEmpresaStatus, rawAlertas, rawTabelaPrecos] = await Promise.all([
       api.getDashboard(params),
       api.getRelatorioFinanceiroResumo(params),
-      api.getEmpresaStatus(),
+      api.getEmpresaStatus().catch(() => null),
       api.getAlertas().catch(() => ({ alertas: [] })),
       api.getTabelaPrecosDashboard().catch(() => null)
     ]);
@@ -1065,7 +1070,7 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
     const tsEl = document.getElementById('dashUltimaAtualizacao');
     if (tsEl) {
       const agora = new Date();
-      tsEl.textContent = `Atualizado às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      tsEl.textContent = `Atualizado às ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Fortaleza' })}`;
     }
 
     return {

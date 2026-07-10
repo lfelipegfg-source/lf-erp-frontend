@@ -1320,10 +1320,13 @@ const VendasModule = {
       return;
     }
 
+    if (this.state._estornandoParcela) return;
+
     const confirmar = await confirmarAcao('Estornar a baixa desta parcela? Ela voltará para pendente ou atrasada conforme o vencimento.', 'Estornar', 'warning');
 
     if (!confirmar) return;
 
+    this.state._estornandoParcela = true;
     try {
       showToast('Estornando baixa da parcela...', 'info');
 
@@ -1342,6 +1345,8 @@ const VendasModule = {
     } catch (error) {
       console.error('Erro ao estornar parcela:', error);
       this.showMessage(this.buildFriendlyError(error), 'error');
+    } finally {
+      this.state._estornandoParcela = false;
     }
   },
 
@@ -1532,6 +1537,7 @@ const VendasModule = {
 
       await api.updateVenda(venda.id, {
         empresa: this.state.empresa,
+        empresa_id: api.getEmpresaId(),
 
         cliente_id: vendaEditada.cliente_id || null,
         cliente_nome: vendaEditada.cliente_nome || '',

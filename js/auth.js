@@ -112,7 +112,8 @@ export function scheduleTokenRefresh() {
     const parts = auth.authToken.split('.');
     if (parts.length !== 3) return;
 
-    const payload = JSON.parse(atob(parts[1]));
+    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(b64));
     if (!payload.exp) return;
 
     const msUntilExpiry = payload.exp * 1000 - Date.now();

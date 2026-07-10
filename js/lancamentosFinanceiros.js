@@ -428,20 +428,22 @@ function bindEventos() {
 
   // Filtrar
   document.getElementById('lfBtnFiltrar').onclick = async () => {
+    if (state.loading) return;
     state.filtros.tipo   = document.getElementById('lfTipo').value;
     state.filtros.status = document.getElementById('lfStatus').value;
     state.filtros.busca  = document.getElementById('lfBusca').value.trim();
     state.pagina = 1;
-    await carregarLancamentos();
-    render();
+    setLoading(true);
+    try { await carregarLancamentos(); render(); } finally { setLoading(false); }
   };
 
   // Limpar filtros
   document.getElementById('lfBtnLimpar').onclick = async () => {
+    if (state.loading) return;
     state.filtros = { tipo: '', status: '', busca: '' };
     state.pagina = 1;
-    await carregarLancamentos();
-    render();
+    setLoading(true);
+    try { await carregarLancamentos(); render(); } finally { setLoading(false); }
   };
 
   // Submit do form (criar / editar)
@@ -463,7 +465,8 @@ function bindEventos() {
         const page = btn.dataset.page;
         if (page === 'prev' && state.pagina > 1) state.pagina--;
         else if (page === 'next' && state.pagina < state.totalPaginas) state.pagina++;
-        carregarLancamentos().then(() => render()).catch(err => showMsg(buildFriendlyError(err), 'error'));
+        setLoading(true);
+        carregarLancamentos().then(() => render()).catch(err => showMsg(buildFriendlyError(err), 'error')).finally(() => setLoading(false));
       }
     };
   });

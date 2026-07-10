@@ -761,6 +761,7 @@ const ProdutosModule = {
     this.cacheElements();
     const payload = {
       empresa: this.state.empresa,
+      empresa_id: api.getEmpresaId(),
       nome: this.el.nome?.value?.trim() || '',
       categoria: this.el.categoria?.value?.trim() || '',
       codigo_barras: this.el.codigoBarras?.value?.trim() || '',
@@ -854,6 +855,7 @@ const ProdutosModule = {
 
   async handleImagemUpload(file) {
     if (!file || !this.state.editingId) return;
+    if (this.state._uploadingImagem) return;
     const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedMimes.includes(file.type)) {
       showToast('Apenas imagens JPG, PNG ou WebP são permitidas.', 'error');
@@ -863,6 +865,7 @@ const ProdutosModule = {
       showToast('A imagem deve ter no máximo 5 MB.', 'error');
       return;
     }
+    this.state._uploadingImagem = true;
     const btn = document.getElementById('imagemUploadBtn');
     if (btn) btn.textContent = 'Enviando...';
     try {
@@ -872,6 +875,7 @@ const ProdutosModule = {
     } catch (err) {
       showToast(buildFriendlyError(err), 'error');
     } finally {
+      this.state._uploadingImagem = false;
       if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" style="font-size:22px;margin-bottom:6px;display:block"></i>Clique para enviar uma imagem (JPG, PNG, WebP — máx. 5MB)';
     }
   },

@@ -302,7 +302,7 @@ const CrmModule = {
                 <tr style="cursor:pointer;" data-op-detalhe="${op.id}">
                   <td><strong>${esc(op.titulo)}</strong></td>
                   <td>${esc(op.cliente_nome || '—')}</td>
-                  <td><span class="crm-badge" style="background:${e?.cor}20;color:${e?.cor}">${e?.label || op.estagio}</span></td>
+                  <td><span class="crm-badge" style="background:${e?.cor}20;color:${e?.cor}">${e?.label || esc(op.estagio)}</span></td>
                   <td class="text-right">${op.valor_estimado > 0 ? moeda(op.valor_estimado) : '—'}</td>
                   <td>${dataFmt(op.data_prev_fechamento)}</td>
                   <td style="text-align:center;">${op.total_atividades || 0}</td>
@@ -453,7 +453,7 @@ const CrmModule = {
   },
 
   async excluir(id) {
-    const ok = await confirmarAcao('Excluir esta oportunidade?');
+    const ok = await confirmarAcao('Excluir esta oportunidade? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
     if (!ok) return;
     try {
       await api.fetchAPI(`/crm/oportunidades/${id}`, 'DELETE');
@@ -501,7 +501,7 @@ const CrmModule = {
       <!-- Info -->
       <div class="crm-detalhe-info">
         <div class="crm-detalhe-row">
-          <span class="crm-badge" style="background:${e?.cor}20;color:${e?.cor}">${e?.label || op.estagio}</span>
+          <span class="crm-badge" style="background:${e?.cor}20;color:${e?.cor}">${e?.label || esc(op.estagio)}</span>
           ${op.probabilidade != null ? `<span style="font-size:12px;color:var(--text-muted);">${op.probabilidade}% probabilidade</span>` : ''}
         </div>
         ${op.cliente_nome ? `<div class="crm-detalhe-row"><i class="fa fa-user" style="width:16px;"></i> ${esc(op.cliente_nome)}</div>` : ''}
@@ -574,7 +574,7 @@ const CrmModule = {
   },
 
   async converter(id) {
-    const ok = await confirmarAcao('Criar um orçamento a partir desta oportunidade?');
+    const ok = await confirmarAcao('Criar um orçamento a partir desta oportunidade?', 'Confirmar', 'primary');
     if (!ok) return;
     try {
       const data = await api.fetchAPI(`/crm/oportunidades/${id}/converter`, 'POST');
@@ -592,15 +592,22 @@ const CrmModule = {
     const data     = document.getElementById('crmAtivData').value;
     if (!descricao) return;
 
+    const submitBtn = document.querySelector('#crmAtivForm button[type="submit"]');
+    if (submitBtn?.disabled) return;
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Registrando...'; }
+
     try {
       await api.fetchAPI(`/crm/oportunidades/${opId}/atividades`, 'POST', { tipo, descricao, data });
       await this.abrirDetalhe(opId);
     } catch (err) {
       showToast(err.message || 'Erro ao registrar atividade', 'error');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Registrar'; }
     }
   },
 
   async removerAtividade(opId, atId) {
+    const ok = await confirmarAcao('Remover esta atividade? Esta ação não pode ser desfeita.', 'Remover', 'danger');
+    if (!ok) return;
     try {
       await api.fetchAPI(`/crm/oportunidades/${opId}/atividades/${atId}`, 'DELETE');
       await this.abrirDetalhe(opId);
