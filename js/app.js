@@ -331,6 +331,16 @@ function bindSidebarEvents() {
       _saveNavGroupState();
     });
   });
+
+  const advancedToggle = document.getElementById('navAdvancedToggle');
+  if (advancedToggle) {
+    advancedToggle.addEventListener('click', () => {
+      const section = document.getElementById('navAdvancedSection');
+      const isOpen = advancedToggle.classList.toggle('open');
+      section?.classList.toggle('open', isOpen);
+      try { localStorage.setItem('lf_nav_advanced', isOpen ? '1' : '0'); } catch {}
+    });
+  }
 }
 
 function _saveNavGroupState() {
@@ -346,6 +356,11 @@ function restoreNavGroupState() {
     open.forEach((key) => {
       document.querySelector(`.nav-group[data-group="${key}"]`)?.classList.add('open');
     });
+    const advOpen = localStorage.getItem('lf_nav_advanced') === '1';
+    if (advOpen) {
+      document.getElementById('navAdvancedToggle')?.classList.add('open');
+      document.getElementById('navAdvancedSection')?.classList.add('open');
+    }
   } catch {}
 }
 
@@ -919,8 +934,13 @@ function updateNavigationState(view) {
     }
 
     const toggle = parentGroup.querySelector('.nav-group__toggle');
-    if (toggle) {
-      toggle.classList.add('active');
+    if (toggle) toggle.classList.add('active');
+
+    const advSection = activeItem.closest('#navAdvancedSection');
+    if (advSection && !advSection.classList.contains('open')) {
+      advSection.classList.add('open');
+      document.getElementById('navAdvancedToggle')?.classList.add('open');
+      try { localStorage.setItem('lf_nav_advanced', '1'); } catch {}
     }
   }
 }

@@ -819,12 +819,12 @@ img {
 
 .nav-item,
 .nav-group__toggle {
-  min-height: 48px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 0 14px;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .nav-item:hover,
@@ -838,6 +838,8 @@ img {
 .nav-subitem.active {
   background: var(--sidebar-active);
   color: var(--white);
+  border-left: 3px solid rgba(147, 197, 253, 0.75);
+  padding-left: 11px;
 }
 
 .nav-item__icon {
@@ -2641,6 +2643,61 @@ select {
   margin: 8px 6px 10px;
 }
 
+/* ─── Seção Avançado ─────────────────────────────────────────────── */
+.nav-advanced-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--sidebar-text-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 8px;
+  transition: color 0.2s;
+  margin: 6px 0 4px;
+}
+.nav-advanced-toggle:hover {
+  color: rgba(255,255,255,0.75);
+}
+.nav-advanced-toggle__line {
+  flex: 1;
+  height: 1px;
+  background: var(--sidebar-border);
+}
+.nav-advanced-toggle__label {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-advanced-toggle__arrow {
+  font-size: 0.6rem;
+  flex-shrink: 0;
+  transition: transform 0.22s ease;
+}
+.nav-advanced-toggle.open .nav-advanced-toggle__arrow {
+  transform: rotate(180deg);
+}
+.nav-advanced-section {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.nav-advanced-section.open {
+  max-height: 500px;
+}
+.sidebar.collapsed .nav-advanced-toggle {
+  display: none;
+}
+.sidebar.collapsed .nav-advanced-section {
+  max-height: none;
+  overflow: visible;
+}
+
 /* PDV — atalhos de teclado */
 .pdv-shortcuts-hint {
   display: flex;
@@ -2735,15 +2792,15 @@ select {
 }
 
 .nav-subitem {
-  min-height: 42px;
+  min-height: 34px;
   padding: 0 14px;
   display: flex;
   align-items: center;
   gap: 11px;
   text-align: left;
-  font-size: 0.91rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--sidebar-text-soft);
 }
 
@@ -2760,7 +2817,9 @@ select {
 .nav-subitem.active {
   background: var(--sidebar-active);
   color: #fff;
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  border-left: 3px solid rgba(147, 197, 253, 0.75);
+  padding-left: 11px;
 }
 
 /* NÃO DEIXAR SUBMENU ESPREMIDO */
