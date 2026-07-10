@@ -913,6 +913,11 @@ function updateNavigationState(view) {
   if (parentGroup) {
     parentGroup.classList.add('active');
 
+    if (!parentGroup.classList.contains('open')) {
+      parentGroup.classList.add('open');
+      _saveNavGroupState();
+    }
+
     const toggle = parentGroup.querySelector('.nav-group__toggle');
     if (toggle) {
       toggle.classList.add('active');
