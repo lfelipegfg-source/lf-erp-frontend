@@ -781,15 +781,11 @@ const ProdutosModule = {
         await api.updateProduto(this.state.editingId, payload);
         showToast('Produto atualizado com sucesso.', 'success');
       } else {
-        const result = await api.createProduto(payload);
-        showToast('Produto cadastrado. Agora você pode adicionar imagens, grades e componentes.', 'success');
-        // Abre automaticamente o modo de edição para continuar configurando
+        await api.createProduto(payload);
+        showToast('Produto cadastrado com sucesso!', 'success');
         await this.load();
-        const novoId = result?.produto?.id || result?.id;
-        if (novoId) {
-          await this.openEditModal(novoId);
-          return;
-        }
+        this.openCreateModal();
+        return;
       }
       this.closeModal();
       await this.load();
