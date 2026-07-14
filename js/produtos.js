@@ -552,7 +552,7 @@ const ProdutosModule = {
               </div>
               <div class="form-field">
                 <label for="produtoCodigoBarras">Código de barras</label>
-                <input type="text" id="produtoCodigoBarras" />
+                <input type="text" id="produtoCodigoBarras" placeholder="Gerado automaticamente" />
               </div>
               <div class="form-field">
                 <label for="produtoPreco">Preço de venda *</label>
