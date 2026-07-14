@@ -555,16 +555,16 @@ const ProdutosModule = {
                 <input type="text" id="produtoCodigoBarras" placeholder="Gerado automaticamente" />
               </div>
               <div class="form-field">
+                <label for="produtoCusto">Custo *</label>
+                <input type="number" id="produtoCusto" min="0" step="0.01" required />
+              </div>
+              <div class="form-field">
                 <label for="produtoPreco">Preço de venda *</label>
                 <input type="number" id="produtoPreco" min="0" step="0.01" required />
               </div>
               <div class="form-field">
                 <label for="produtoPrecoPromocional">Preço promocional</label>
                 <input type="number" id="produtoPrecoPromocional" min="0" step="0.01" />
-              </div>
-              <div class="form-field">
-                <label for="produtoCusto">Custo *</label>
-                <input type="number" id="produtoCusto" min="0" step="0.01" required />
               </div>
               <div class="form-field form-field--checkbox">
                 <label class="checkbox-wrapper">
