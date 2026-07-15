@@ -715,7 +715,20 @@ async function handleLoginSubmit(event) {
   showGlobalLoader('Validando acesso...');
 
   try {
-    const loginResult = await authLogin(usuario, senha, AppState.rememberSession);
+    let loginResult;
+    try {
+      loginResult = await authLogin(usuario, senha, AppState.rememberSession);
+    } catch (firstError) {
+      // Se foi timeout, o servidor pode estar em cold start — tentamos mais uma vez
+      // com uma mensagem clara e timeout mais generoso (60s).
+      if (firstError?.message?.includes('demorou demais')) {
+        setLoginMessage('Servidor iniciando (normal na 1ª vez do dia). Tentando novamente...', 'info');
+        loginResult = await authLogin(usuario, senha, AppState.rememberSession);
+      } else {
+        throw firstError;
+      }
+    }
+
     applyAuthData(loginResult);
     renderAuthenticatedUser();
     showMainScreen();
@@ -1282,6 +1295,11 @@ function showLoginScreen() {
 
   if (loginScreen) loginScreen.classList.remove('hidden');
   if (mainScreen) mainScreen.classList.add('hidden');
+
+  // Acorda o servidor Render em background assim que a tela de login aparece.
+  // Quando o usuário terminar de digitar as credenciais (~10-20s), o servidor
+  // estará quente e o login responderá sem timeout.
+  api.warmupServer();
 }
 
 function handleLogout(showMessage = true) {
@@ -2043,7 +2061,7 @@ function buildFriendlyAuthError(error) {
   if (message.includes('Failed to fetch') || message.includes('NetworkError'))
     return 'Não foi possível conectar ao servidor. Verifique sua conexão.';
   if (message.includes('demorou demais'))
-    return 'O servidor demorou demais para responder. Tente novamente.';
+    return 'O servidor está demorando para iniciar. Aguarde alguns instantes e tente novamente.';
 
   return message;
 }

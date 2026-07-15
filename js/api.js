@@ -172,6 +172,16 @@ async function parseResponse(response) {
   return payload;
 }
 
+// Acorda o servidor (Render spin-down). Chamado quando a tela de login aparece.
+// Silencioso — nunca rejeita, nunca exibe erro ao usuário.
+async function warmupServer() {
+  try {
+    await withTimeout(fetch(`${API_CONFIG.BASE_URL}/health`), 90000);
+  } catch {
+    // intencional — cold start pode levar até 60s, apenas acordamos o processo
+  }
+}
+
 async function request(path, options = {}) {
   const { method = 'GET', body, headers = {}, query = {}, timeout = API_CONFIG.TIMEOUT } = options;
 
@@ -1501,7 +1511,8 @@ const api = {
   setApiBaseUrl,
   clearApiBaseUrl,
 
-  formatPlanError
+  formatPlanError,
+  warmupServer
 };
 
 window.LfErpApi = api;
