@@ -10,7 +10,8 @@ const EstoqueModule = {
     initialized: false,
     eventsBound: false,
     loading: false,
-    empresa: ''
+    empresa: '',
+    viewMode: 'em_estoque' // 'em_estoque' | 'em_falta'
   },
 
   init() {
@@ -35,7 +36,10 @@ const EstoqueModule = {
       totalProdutos: document.getElementById('estoqueTotalProdutos'),
       totalBaixo: document.getElementById('estoqueTotalBaixo'),
       totalZerado: document.getElementById('estoqueTotalZerado'),
-      feedback: document.getElementById('estoqueFeedback')
+      feedback: document.getElementById('estoqueFeedback'),
+      faltaBtn: document.getElementById('estoqueFaltaBtn'),
+      faltaCount: document.getElementById('estoqueFaltaCount'),
+      viewTitle: document.getElementById('estoqueViewTitle')
     };
   },
 
@@ -61,6 +65,12 @@ const EstoqueModule = {
 
       if (btn.id === 'estoqueAtualizarBtn') {
         await this.load();
+      }
+
+      if (btn.id === 'estoqueFaltaBtn') {
+        this.state.viewMode = this.state.viewMode === 'em_falta' ? 'em_estoque' : 'em_falta';
+        this.applyFilters();
+        this.updateFaltaBtn();
       }
 
       if (btn.id === 'estoqueSugestaoBtn') {
@@ -104,8 +114,6 @@ const EstoqueModule = {
   async load() {
     this.state.loading = true;
     this.setFeedback('Carregando estoque...', 'info');
-
-
     this.setLoading(true);
     try {
       const data = await api.getProdutos();
@@ -143,16 +151,25 @@ const EstoqueModule = {
       <section class="module-card">
         <div id="estoqueFeedback" class="module-feedback"></div>
 
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px">
-          <button class="btn btn-light" id="estoqueDepositosBtn" type="button">
-            <i class="fa-solid fa-warehouse"></i> Depósitos
-          </button>
-          <button class="btn btn-light" id="estoqueSugestaoBtn" type="button">
-            <i class="fa-solid fa-cart-shopping"></i> Sugestão de compra
-          </button>
-          <button class="btn btn-light" id="estoqueAtualizarBtn" type="button">
-            <i class="fa-solid fa-rotate"></i> Atualizar
-          </button>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px">
+          <h2 id="estoqueViewTitle" style="font-size:1rem;font-weight:600;margin:0;color:var(--text-primary)">
+            Produtos em estoque
+          </h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+            <button class="btn btn-light" id="estoqueFaltaBtn" type="button">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              Produtos em falta <span id="estoqueFaltaCount" class="badge badge--danger" style="margin-left:4px;display:none">0</span>
+            </button>
+            <button class="btn btn-light" id="estoqueDepositosBtn" type="button">
+              <i class="fa-solid fa-warehouse"></i> Depósitos
+            </button>
+            <button class="btn btn-light" id="estoqueSugestaoBtn" type="button">
+              <i class="fa-solid fa-cart-shopping"></i> Sugestão de compra
+            </button>
+            <button class="btn btn-light" id="estoqueAtualizarBtn" type="button">
+              <i class="fa-solid fa-rotate"></i> Atualizar
+            </button>
+          </div>
         </div>
 
         <div class="estoque-toolbar-grid">
@@ -167,10 +184,9 @@ const EstoqueModule = {
 
           <div class="estoque-filter-box">
             <select id="estoqueStatusFiltro" class="input">
-              <option value="">Todos os produtos</option>
+              <option value="">Todos</option>
               <option value="normal" ${this.getCurrentStatusValue() === 'normal' ? 'selected' : ''}>Estoque normal</option>
               <option value="baixo" ${this.getCurrentStatusValue() === 'baixo' ? 'selected' : ''}>Baixo estoque</option>
-              <option value="zerado" ${this.getCurrentStatusValue() === 'zerado' ? 'selected' : ''}>Sem estoque</option>
             </select>
           </div>
         </div>
@@ -264,36 +280,31 @@ const EstoqueModule = {
   },
 
   applyFilters() {
-    const termo = String(this.el.search?.value || '')
-      .trim()
-      .toLowerCase();
+    const termo = String(this.el.search?.value || '').trim().toLowerCase();
     const status = String(this.el.status?.value || '').trim();
+    const emFalta = this.state.viewMode === 'em_falta';
 
     this.state.filteredItems = this.state.items.filter((produto) => {
-      const nome = String(produto.nome || '').toLowerCase();
-      const categoria = String(produto.categoria || '').toLowerCase();
-      const codigo = String(produto.codigo_barras || '').toLowerCase();
-
-      const matchTexto =
-        !termo || nome.includes(termo) || categoria.includes(termo) || codigo.includes(termo);
-
-      if (!matchTexto) return false;
-
-      if (!status) return true;
-
       const estoque = Number(produto.estoque || 0);
       const estoqueMinimo = Number(produto.estoque_minimo || 0);
 
-      if (status === 'zerado') {
-        return estoque === 0;
+      // Separação principal: zerados ficam na view "em falta"
+      if (emFalta) {
+        if (estoque !== 0) return false;
+      } else {
+        if (estoque === 0) return false;
       }
 
-      if (status === 'baixo') {
-        return estoque > 0 && estoqueMinimo > 0 && estoque <= estoqueMinimo;
-      }
+      const nome = String(produto.nome || '').toLowerCase();
+      const categoria = String(produto.categoria || '').toLowerCase();
+      const codigo = String(produto.codigo_barras || '').toLowerCase();
+      const matchTexto = !termo || nome.includes(termo) || categoria.includes(termo) || codigo.includes(termo);
+      if (!matchTexto) return false;
 
-      if (status === 'normal') {
-        return estoque > 0 && (estoqueMinimo <= 0 || estoque > estoqueMinimo);
+      // Filtro de status só se aplica na view principal
+      if (!emFalta && status) {
+        if (status === 'baixo') return estoqueMinimo > 0 && estoque <= estoqueMinimo;
+        if (status === 'normal') return estoqueMinimo <= 0 || estoque > estoqueMinimo;
       }
 
       return true;
@@ -303,7 +314,10 @@ const EstoqueModule = {
     this.renderTable();
 
     if (!this.state.filteredItems.length) {
-      this.setFeedback('Nenhum produto encontrado com os filtros aplicados.', 'info');
+      this.setFeedback(
+        emFalta ? 'Nenhum produto com estoque zerado.' : 'Nenhum produto encontrado com os filtros aplicados.',
+        'info'
+      );
     } else {
       this.setFeedback('', 'info');
     }
@@ -317,13 +331,33 @@ const EstoqueModule = {
       return estoque > 0 && estoqueMinimo > 0 && estoque <= estoqueMinimo;
     }).length;
 
-    const totalZerado = this.state.filteredItems.filter((produto) => {
-      return Number(produto.estoque || 0) === 0;
-    }).length;
+    // Total zerado calculado sobre TODOS os itens (não só filtrados)
+    const totalZerado = this.state.items.filter((p) => Number(p.estoque || 0) === 0).length;
 
     if (this.el.totalProdutos) this.el.totalProdutos.textContent = String(totalProdutos);
     if (this.el.totalBaixo) this.el.totalBaixo.textContent = String(totalBaixo);
     if (this.el.totalZerado) this.el.totalZerado.textContent = String(totalZerado);
+
+    this.updateFaltaBtn(totalZerado);
+  },
+
+  updateFaltaBtn(totalZerado) {
+    const count = totalZerado !== undefined
+      ? totalZerado
+      : this.state.items.filter((p) => Number(p.estoque || 0) === 0).length;
+
+    const emFalta = this.state.viewMode === 'em_falta';
+
+    if (this.el.faltaBtn) {
+      this.el.faltaBtn.innerHTML = emFalta
+        ? '<i class="fa-solid fa-arrow-left"></i> Voltar ao estoque'
+        : `<i class="fa-solid fa-circle-exclamation"></i> Produtos em falta${count > 0 ? ` <span class="badge badge--danger" style="margin-left:4px">${count}</span>` : ''}`;
+      this.el.faltaBtn.className = emFalta ? 'btn btn-warning' : 'btn btn-light';
+    }
+
+    if (this.el.viewTitle) {
+      this.el.viewTitle.textContent = emFalta ? 'Produtos em falta (sem estoque)' : 'Produtos em estoque';
+    }
   },
 
   getStatusProduto(produto) {
