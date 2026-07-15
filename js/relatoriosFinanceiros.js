@@ -25,7 +25,7 @@ function statusBadge(status) {
     pendente:         ['badge--warning', 'Pendente'],
     atrasado:         ['badge--danger',  'Atrasado'],
     parcial:          ['badge--info',    'Parcial'],
-    parcial_atrasado: ['badge--warning', 'Parcial em atraso']
+    parcial_atrasado: ['badge--danger', 'Parcial em atraso']
   };
   const [cls, label] = map[s] || ['badge--info', status || '-'];
   return `<span class="badge ${cls}">${label}</span>`;
@@ -38,7 +38,7 @@ export async function initRelatoriosFinanceirosModule() {
     render();
   } catch (error) {
     console.error('Erro ao iniciar relatórios financeiros:', error);
-    renderErro('Não foi possível carregar os relatórios financeiros.');
+    renderErro(error?.message || 'Não foi possível carregar os relatórios financeiros.');
   }
 }
 
@@ -1109,7 +1109,7 @@ function formatOrigem(origem) {
     lancamento_financeiro: 'Lançamento Financeiro',
     investimento: 'Investimento'
   };
-  return mapa[origem] || origem || '-';
+  return mapa[origem] || 'Outros';
 }
 
 function formatReferencia(item) {
@@ -1136,6 +1136,6 @@ function formatDate(value) {
 
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value);
-  return d.toLocaleDateString('pt-BR');
+  return d.toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
 }
 

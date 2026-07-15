@@ -113,7 +113,8 @@ export function scheduleTokenRefresh() {
     if (parts.length !== 3) return;
 
     const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(atob(b64));
+    const padded = b64 + '=='.slice(0, (4 - b64.length % 4) % 4);
+    const payload = JSON.parse(atob(padded));
     if (!payload.exp) return;
 
     const msUntilExpiry = payload.exp * 1000 - Date.now();

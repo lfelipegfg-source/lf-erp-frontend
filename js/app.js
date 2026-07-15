@@ -1249,9 +1249,10 @@ function renderTrialBanner() {
     } else if (dias <= 7) {
       const cor = dias <= 2 ? 'var(--danger)' : 'var(--warning)';
       banner.style.cssText = `display:block;padding:10px 20px;font-size:13px;font-weight:600;text-align:center;background:${cor};color:#fff`;
-      banner.innerHTML = dias === 0
+      const diasNum = Number(dias) || 0;
+      banner.innerHTML = diasNum === 0
         ? 'Seu trial expira hoje. Contate o suporte para ativar.'
-        : `Seu trial expira em <strong>${dias} dia(s)</strong>. Fale com o suporte para continuar usando.`;
+        : `Seu trial expira em <strong>${diasNum} dia(s)</strong>. Fale com o suporte para continuar usando.`;
     } else {
       banner.style.display = 'none';
     }

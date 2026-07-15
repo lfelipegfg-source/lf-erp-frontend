@@ -494,6 +494,7 @@ function bindEventos() {
 
   document.querySelectorAll("[data-action='cr-pagina']").forEach((btn) => {
     btn.addEventListener('click', async () => {
+      if (state.loading) return;
       const page = btn.dataset.page;
       if (page === 'prev' && state.pagina > 1) state.pagina--;
       else if (page === 'next' && state.pagina < state.totalPaginas) state.pagina++;
@@ -885,7 +886,8 @@ function abrirModalBaixaConta(conta) {
     const valorPago = document.getElementById('crBaixaValor')?.value || '';
     const dataPagamento = document.getElementById('crBaixaData')?.value || '';
 
-    if (!valorPago || Number(valorPago) <= 0) {
+    const _numVP = Number(valorPago);
+    if (!valorPago || !Number.isFinite(_numVP) || _numVP <= 0) {
       showMessage('Informe um valor recebido válido.', 'error');
       return;
     }
@@ -2256,7 +2258,8 @@ async function salvarContaManual(modal) {
 
     const observacao = document.getElementById('crManualObservacao')?.value?.trim() || '';
 
-    if (!valor || Number(valor) <= 0) {
+    const _numValor = Number(valor);
+    if (!valor || !Number.isFinite(_numValor) || _numValor <= 0) {
       showMessage('Informe um valor válido.', 'error');
       return;
     }

@@ -433,6 +433,7 @@ function bindEventos() {
 
   document.querySelectorAll("[data-action='cp-pagina']").forEach((btn) => {
     btn.addEventListener('click', async () => {
+      if (state.loading) return;
       const page = btn.dataset.page;
       if (page === 'prev' && state.pagina > 1) state.pagina--;
       else if (page === 'next' && state.pagina < state.totalPaginas) state.pagina++;

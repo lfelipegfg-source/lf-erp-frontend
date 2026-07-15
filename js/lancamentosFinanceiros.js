@@ -7,6 +7,8 @@ const state = {
   editId:  null,
   loading: false,
   saving:  false,
+  paying:  false,
+  deleting: false,
   filtros: { tipo: '', status: '', busca: '' },
   pagina: 1,
   totalPaginas: 1,
@@ -542,10 +544,11 @@ function editar(id) {
 }
 
 async function pagar(id) {
-  const ok = await confirmarAcao('Confirmar pagamento deste lançamento?', 'Confirmar pagamento', 'primary');
-  if (!ok) return;
-
+  if (state.paying) return;
+  state.paying = true;
   try {
+    const ok = await confirmarAcao('Confirmar pagamento deste lançamento?', 'Confirmar pagamento', 'primary');
+    if (!ok) return;
     await api.pagarLancamentoFinanceiro(id);
     showMsg('Lançamento marcado como pago.', 'success');
     await carregarLancamentos();
@@ -553,14 +556,17 @@ async function pagar(id) {
   } catch (error) {
     console.error('Erro ao pagar lançamento:', error);
     showMsg(buildFriendlyError(error), 'error');
+  } finally {
+    state.paying = false;
   }
 }
 
 async function excluir(id) {
-  const ok = await confirmarAcao('Excluir este lançamento? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
-  if (!ok) return;
-
+  if (state.deleting) return;
+  state.deleting = true;
   try {
+    const ok = await confirmarAcao('Excluir este lançamento? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
+    if (!ok) return;
     await api.deleteLancamentoFinanceiro(id);
     showMsg('Lançamento excluído.', 'success');
     await carregarLancamentos();
@@ -568,5 +574,7 @@ async function excluir(id) {
   } catch (error) {
     console.error('Erro ao excluir lançamento:', error);
     showMsg(buildFriendlyError(error), 'error');
+  } finally {
+    state.deleting = false;
   }
 }
