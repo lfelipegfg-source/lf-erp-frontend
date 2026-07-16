@@ -64,6 +64,9 @@ const ConfigModule = {
       const campoNome = document.getElementById('cfgNomeEmpresa');
       if (campoNome) campoNome.value = data.nome_empresa || '';
 
+      this._aplicarLogoPreview(data.logo_url || null);
+      this._aplicarLogoSidebar(data.logo_url || null);
+
       // Carregar config PIX
       try {
         const pixCfg = await api.getPixConfig();
@@ -203,6 +206,65 @@ const ConfigModule = {
     }
   },
 
+  _aplicarLogoSidebar(url) {
+    const empresaKey = this.state.dados?.empresa_id || this.state.dados?.empresa || this.state.empresa || '';
+    try {
+      if (url) localStorage.setItem(`lf_logo_${empresaKey}`, url);
+      else localStorage.removeItem(`lf_logo_${empresaKey}`);
+    } catch (_) {}
+    if (typeof window.aplicarLogoSidebar === 'function') window.aplicarLogoSidebar(url);
+  },
+
+  _aplicarLogoPreview(url) {
+    const preview = document.getElementById('cfgLogoPreview');
+    if (!preview) return;
+    preview.innerHTML = url
+      ? `<img src="${url}" style="width:100%;height:100%;object-fit:contain;border-radius:12px">`
+      : '<i class="fa-solid fa-layer-group" style="font-size:28px;color:var(--text-muted)"></i>';
+  },
+
+  async salvarLogo(logoUrl) {
+    try {
+      await api.fetchAPI('/configuracoes', 'PUT', {
+        empresa: this.state.empresa,
+        logo_url: logoUrl
+      });
+      if (this.state.dados) this.state.dados.logo_url = logoUrl;
+      this._aplicarLogoPreview(logoUrl);
+      this._aplicarLogoSidebar(logoUrl);
+      showToast(logoUrl ? 'Logo salvo com sucesso!' : 'Logo removido.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Erro ao salvar logo', 'error');
+    }
+  },
+
+  _processarImagemLogo(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) return reject(new Error('Nenhum arquivo'));
+      if (file.size > 5 * 1024 * 1024) return reject(new Error('Imagem muito grande (máx. 5 MB)'));
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 200;
+          const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = () => reject(new Error('Imagem inválida'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+      reader.readAsDataURL(file);
+    });
+  },
+
   async trocarSenha() {
     const atual = document.getElementById('cfgSenhaAtual')?.value;
     const nova = document.getElementById('cfgSenhaNova')?.value;
@@ -280,15 +342,44 @@ const ConfigModule = {
     const c = document.getElementById('configuracoesContainer');
     if (!c) return;
 
+    const logoAtual = this.state.dados?.logo_url || '';
+
     c.innerHTML = `
       <section class="module-card">
-        <div class="form-grid" style="max-width: 600px;">
-          <div class="form-field">
-            <label>Nome da empresa</label>
-            <input id="cfgNomeEmpresa" />
-          </div>
+        <div class="module-card__header" style="margin-bottom:16px">
           <div>
-            <button id="salvarConfigBtn" class="btn btn-primary">Salvar</button>
+            <h3>Empresa</h3>
+            <p>Dados e identidade visual da sua empresa</p>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;max-width:700px;margin-bottom:20px">
+          <!-- Logo -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+            <div id="cfgLogoPreview" style="width:88px;height:88px;border-radius:14px;border:2px dashed var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" title="Clique para trocar o logo">
+              ${logoAtual
+                ? `<img src="${esc(logoAtual)}" style="width:100%;height:100%;object-fit:contain;border-radius:12px">`
+                : '<i class="fa-solid fa-layer-group" style="font-size:28px;color:var(--text-muted)"></i>'}
+            </div>
+            <input type="file" id="cfgLogoInput" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="display:none">
+            <div style="display:flex;gap:6px">
+              <button type="button" class="btn btn-light" id="cfgLogoEscolherBtn" style="font-size:12px;padding:4px 10px;height:28px">
+                <i class="fa-solid fa-image"></i> Escolher
+              </button>
+              ${logoAtual ? `<button type="button" class="btn btn-light" id="cfgLogoRemoverBtn" style="font-size:12px;padding:4px 10px;height:28px;color:var(--danger)">
+                <i class="fa-solid fa-trash"></i>
+              </button>` : ''}
+            </div>
+            <span style="font-size:11px;color:var(--text-muted);text-align:center;max-width:90px">PNG · JPG · SVG<br>Recomendado 200×200</span>
+          </div>
+
+          <!-- Nome -->
+          <div style="flex:1;min-width:200px">
+            <div class="form-field" style="margin-bottom:14px">
+              <label>Nome da empresa</label>
+              <input id="cfgNomeEmpresa" value="${esc(this.state.dados?.nome_empresa || '')}" />
+            </div>
+            <button id="salvarConfigBtn" class="btn btn-primary">Salvar empresa</button>
           </div>
         </div>
 
@@ -495,6 +586,42 @@ const ConfigModule = {
         document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
         document.getElementById('cfgSalvarAsaasBtn')?.addEventListener('click', () => this.salvarAsaas());
         document.getElementById('exportarDadosBtn')?.addEventListener('click', () => this.exportarDados());
+
+        // Logo da empresa
+        const logoInput = document.getElementById('cfgLogoInput');
+        document.getElementById('cfgLogoEscolherBtn')?.addEventListener('click', () => logoInput?.click());
+        document.getElementById('cfgLogoPreview')?.addEventListener('click', () => logoInput?.click());
+        document.getElementById('cfgLogoRemoverBtn')?.addEventListener('click', async () => {
+          await this.salvarLogo(null);
+          // re-renderiza o preview sem o botão remover
+          document.getElementById('cfgLogoRemoverBtn')?.remove();
+        });
+        logoInput?.addEventListener('change', async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          try {
+            const dataUrl = await this._processarImagemLogo(file);
+            await this.salvarLogo(dataUrl);
+            // mostra botão remover se ainda não existe
+            if (!document.getElementById('cfgLogoRemoverBtn')) {
+              const escolherBtn = document.getElementById('cfgLogoEscolherBtn');
+              if (escolherBtn) {
+                const remBtn = document.createElement('button');
+                remBtn.type = 'button';
+                remBtn.id = 'cfgLogoRemoverBtn';
+                remBtn.className = 'btn btn-light';
+                remBtn.style.cssText = 'font-size:12px;padding:4px 10px;height:28px;color:var(--danger)';
+                remBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                remBtn.addEventListener('click', async () => { await this.salvarLogo(null); remBtn.remove(); });
+                escolherBtn.parentElement.appendChild(remBtn);
+              }
+            }
+          } catch (err) {
+            showToast(err.message || 'Erro ao processar imagem', 'error');
+          } finally {
+            e.target.value = '';
+          }
+        });
       }, 0);
     }
   }

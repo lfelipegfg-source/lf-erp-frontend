@@ -1230,6 +1230,11 @@ function renderAuthenticatedUser() {
   if (sidebarUserRole) sidebarUserRole.textContent = userRole;
   if (sidebarUserAvatar) sidebarUserAvatar.textContent = getInitials(userName);
 
+  try {
+    const cachedLogo = localStorage.getItem(`lf_logo_${AppState.empresaId || AppState.empresa?.nome || ''}`);
+    aplicarLogoSidebar(cachedLogo || null);
+  } catch (_) {}
+
   const adminLink = document.getElementById('adminNavLink');
   if (adminLink && AppState.user?.is_saas_owner) {
     adminLink.style.display = 'block';
@@ -1243,6 +1248,18 @@ function renderAuthenticatedUser() {
     }
   }
 }
+
+function aplicarLogoSidebar(url) {
+  const el = document.getElementById('sidebarBrandIcon');
+  if (!el) return;
+  if (url) {
+    el.innerHTML = `<img src="${url}" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">`;
+  } else {
+    el.innerHTML = '<i class="fa-solid fa-layer-group"></i>';
+  }
+}
+
+window.aplicarLogoSidebar = aplicarLogoSidebar;
 
 function renderTrialBanner() {
   const banner = document.getElementById('trialBanner');
