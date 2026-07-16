@@ -5112,8 +5112,7 @@ body.pdv-active #pdvContainer.module-placeholder {
 
 /* Body */
 .pdv-v2__body {
-  display: grid;
-  grid-template-columns: 420px 1fr;
+  display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
@@ -5123,6 +5122,8 @@ body.pdv-active #pdvContainer.module-placeholder {
 .pdv-v2__left {
   display: flex;
   flex-direction: column;
+  width: 420px;
+  flex-shrink: 0;
   border-right: 1px solid var(--border);
   background: var(--surface);
   overflow: hidden;
@@ -5284,6 +5285,7 @@ body.pdv-active #pdvContainer.module-placeholder {
 .pdv-v2__right {
   display: flex;
   flex-direction: column;
+  flex: 1;
   overflow: hidden;
   position: relative;
   background: var(--background);
@@ -5364,9 +5366,9 @@ body.pdv-active #pdvContainer.module-placeholder {
   body.pdv-active { height: 100dvh; overflow: hidden; }
   body.pdv-active .main-screen { height: 100dvh; }
   body.pdv-active .main-content { height: 100dvh; }
-  .pdv-v2__body { grid-template-columns: 1fr; }
-  .pdv-v2__left { border-right: none; border-bottom: 1px solid var(--border); }
-  .pdv-v2__right { min-height: 200px; flex: 1; }
+  .pdv-v2__body { flex-direction: column; }
+  .pdv-v2__left { width: 100%; flex-shrink: unset; border-right: none; border-bottom: 1px solid var(--border); }
+  .pdv-v2__right { min-height: 200px; }
   .pdv-v2__panel { max-height: 300px; }
   .pdv-v2__total strong { font-size: 1.2rem; }
 }
