@@ -502,7 +502,7 @@ const PDVModule = {
               <i class="fa-solid fa-file-lines"></i> Orçamento
             </button>
             <button type="button" class="btn btn-primary" id="pdvNovaVendaBtn">
-              <i class="fa-solid fa-plus"></i> Nova venda <kbd class="pdv-v2__kbd">Alt+N</kbd>
+              <i class="fa-solid fa-plus"></i> Nova venda
             </button>
             <button type="button" class="btn btn-light btn-icon" id="pdvAtualizarBtn" title="Atualizar dados">
               <i class="fa-solid fa-rotate"></i>
@@ -518,15 +518,9 @@ const PDVModule = {
 
             <!-- Tabs -->
             <div class="pdv-v2__tabs" id="pdvTabs">
-              <button type="button" class="pdv-v2__tab pdv-v2__tab--active" data-tab="produtos">
-                Produto <span class="pdv-v2__tab-kbd">Alt+Z</span>
-              </button>
-              <button type="button" class="pdv-v2__tab" data-tab="cliente">
-                Cliente <span class="pdv-v2__tab-kbd">Alt+C</span>
-              </button>
-              <button type="button" class="pdv-v2__tab" data-tab="pagamento">
-                Pagamento <span class="pdv-v2__tab-kbd">Alt+B</span>
-              </button>
+              <button type="button" class="pdv-v2__tab pdv-v2__tab--active" data-tab="produtos">Produto</button>
+              <button type="button" class="pdv-v2__tab" data-tab="cliente">Cliente</button>
+              <button type="button" class="pdv-v2__tab" data-tab="pagamento">Pagamento</button>
             </div>
 
             <!-- Painel: Produto -->
@@ -636,12 +630,10 @@ const PDVModule = {
         <!-- ── Rodapé fixo ────────────────────────────────────────────────── -->
         <footer class="pdv-v2__footer">
           <button type="button" class="btn pdv-v2__btn-excluir" id="pdvLimparBtn">
-            <i class="fa-solid fa-trash"></i>
-            Excluir venda <span class="pdv-v2__kbd">Alt+Q</span>
+            <i class="fa-solid fa-trash"></i> Excluir venda
           </button>
           <button type="button" class="btn btn-primary pdv-v2__btn-finalizar" id="pdvFinalizarBtn">
-            <i class="fa-solid fa-check"></i>
-            Finalizar venda <span class="pdv-v2__kbd">Alt+S</span>
+            <i class="fa-solid fa-check"></i> Finalizar venda
           </button>
           <div class="pdv-v2__total">
             <span>Total</span>
