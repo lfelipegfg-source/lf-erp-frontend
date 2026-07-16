@@ -742,6 +742,35 @@ img {
   margin-bottom: 12px;
 }
 
+.sidebar__collapse-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--sidebar-text);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: background var(--transition), opacity var(--transition);
+  opacity: 0.6;
+}
+
+.sidebar__collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.sidebar__collapse-btn i {
+  transition: transform var(--transition);
+}
+
+.sidebar.collapsed .sidebar__collapse-btn i {
+  transform: rotate(180deg);
+}
+
 .brand {
   display: flex;
   align-items: center;
