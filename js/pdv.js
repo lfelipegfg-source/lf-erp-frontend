@@ -430,9 +430,8 @@ const PDVModule = {
         this.state.clientes = clientes;
       }
 
-      this.state.produtosFiltrados = [...this.state.produtos];
       this.renderClientes();
-      this.renderProdutos();
+      this.filterProdutos('');
       this.renderCarrinho();
       this.renderResumo();
       this.togglePrimeiroVencimentoField();
@@ -712,14 +711,20 @@ const PDVModule = {
 
     if (!this.state.produtosFiltrados.length) {
       this.el.listaProdutos.innerHTML = `
-        <div class="empty-state">
-          Nenhum produto encontrado.
+        <div class="pdv-v2__prod-hint">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>${this.state._buscaAtiva ? 'Nenhum produto encontrado.' : 'Pesquise para ver produtos.'}</span>
         </div>
       `;
       return;
     }
 
-    this.el.listaProdutos.innerHTML = this.state.produtosFiltrados
+    const isTop3 = !this.state._buscaAtiva;
+    const hint = isTop3
+      ? `<div class="pdv-v2__prod-label">Mais vendidos — pesquise para ver todos</div>`
+      : '';
+
+    this.el.listaProdutos.innerHTML = hint + this.state.produtosFiltrados
       .map((produto) => {
         const estoque = Number(produto.estoque || 0);
         const semEstoque = estoque <= 0;
@@ -1014,14 +1019,37 @@ const PDVModule = {
     }
   },
 
+  // ── Contador de frequência de uso (localStorage) ─────────────────────────
+  _topKey() {
+    return `pdv_top_${this.state.empresaId || this.state.empresa || 'default'}`;
+  },
+
+  _getFreqMap() {
+    try { return JSON.parse(localStorage.getItem(this._topKey()) || '{}'); } catch { return {}; }
+  },
+
+  _recordProdutoAdded(produtoId) {
+    const map = this._getFreqMap();
+    map[produtoId] = (map[produtoId] || 0) + 1;
+    try { localStorage.setItem(this._topKey(), JSON.stringify(map)); } catch { /* quota */ }
+  },
+
+  _getTopProdutos(n) {
+    const map = this._getFreqMap();
+    return [...this.state.produtos]
+      .filter((p) => Number(p.estoque || 0) > 0)
+      .sort((a, b) => (map[b.id] || 0) - (map[a.id] || 0))
+      .slice(0, n);
+  },
+
   filterProdutos(term) {
-    const normalized = String(term || '')
-      .trim()
-      .toLowerCase();
+    const normalized = String(term || '').trim().toLowerCase();
 
     if (!normalized) {
-      this.state.produtosFiltrados = [...this.state.produtos];
+      this.state.produtosFiltrados = this._getTopProdutos(3);
+      this.state._buscaAtiva = false;
     } else {
+      this.state._buscaAtiva = true;
       this.state.produtosFiltrados = this.state.produtos.filter((produto) => {
         return [produto.nome, produto.categoria, produto.codigo_barras]
           .filter(Boolean)
@@ -1085,6 +1113,7 @@ const PDVModule = {
       });
     }
 
+    this._recordProdutoAdded(produto.id);
     this.renderCarrinho();
     this.renderResumo();
     this.setFeedback('', 'info');
@@ -1163,6 +1192,7 @@ const PDVModule = {
       });
     }
 
+    this._recordProdutoAdded(this.state.gradeModalProduto?.id);
     this.renderCarrinho();
     this.renderResumo();
     this.setFeedback('', 'info');
@@ -1485,11 +1515,9 @@ const PDVModule = {
     if (this.el.observacao) this.el.observacao.value = '';
     if (this.el.buscaProduto) this.el.buscaProduto.value = '';
 
-    this.state.produtosFiltrados = [...this.state.produtos];
-
     this.switchTab('produtos');
     this.updateClienteInfo();
-    this.renderProdutos();
+    this.filterProdutos('');
     this.renderCarrinho();
     this.renderResumo();
     this.setFeedback('', 'info');

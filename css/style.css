@@ -5072,6 +5072,15 @@ body.pdv-active #pdvContainer {
   overflow: hidden;
 }
 
+/* Remove padding do module-placeholder no modo PDV */
+body.pdv-active #pdvContainer.module-placeholder {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 /* Header */
 .pdv-v2__header {
   display: flex;
@@ -5080,6 +5089,7 @@ body.pdv-active #pdvContainer {
   gap: 12px;
   padding: 12px 18px;
   background: var(--surface);
+  flex-shrink: 0;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -5189,6 +5199,28 @@ body.pdv-active #pdvContainer {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 99,102,241),.15);
 }
+/* Label "Mais vendidos" + estado vazio da lista de produtos */
+.pdv-v2__prod-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-muted);
+  padding: 0 4px 8px;
+  flex-shrink: 0;
+}
+.pdv-v2__prod-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  opacity: .6;
+}
+.pdv-v2__prod-hint i { font-size: 1.5rem; }
+
 /* Ícone de teclado com tooltip de atalhos (aparece após 3s de hover) */
 .pdv-v2__shortcuts-hint {
   position: absolute;
@@ -5286,6 +5318,7 @@ body.pdv-active #pdvContainer {
   padding: 12px 18px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
   background: var(--surface);
+  flex-shrink: 0;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
