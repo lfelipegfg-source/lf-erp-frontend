@@ -828,7 +828,7 @@ async function setActiveView(view) {
   updateNavigationState(view);
 
   const globalFiltersBar = document.getElementById('globalFiltersBar');
-  if (globalFiltersBar) globalFiltersBar.classList.toggle('hidden', view === 'pdv');
+  if (globalFiltersBar) globalFiltersBar.classList.add('hidden');
 
   document.body.classList.toggle('pdv-active', view === 'pdv');
 
