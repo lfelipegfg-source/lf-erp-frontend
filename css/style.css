@@ -5045,6 +5045,15 @@ body.pdv-active .main-content {
   display: flex;
   flex-direction: column;
 }
+body.pdv-active .view-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  padding: 0;
+  gap: 0;
+}
 body.pdv-active .view-section[data-view="pdv"].active {
   flex: 1;
   display: flex;
