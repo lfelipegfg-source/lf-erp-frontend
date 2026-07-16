@@ -113,28 +113,25 @@ const EstoqueModule = {
 
   async load() {
     this.state.loading = true;
+    this.state.viewMode = 'em_estoque';
     this.setFeedback('Carregando estoque...', 'info');
     this.setLoading(true);
     try {
       const data = await api.getProdutos();
 
       this.state.items = Array.isArray(data) ? data : [];
-      this.state.filteredItems = [...this.state.items];
 
       this.render();
       this.cache();
-      this.updateStats();
-      this.renderTable();
+      this.applyFilters();
       this.setFeedback('', 'info');
     } catch (error) {
       console.error('Erro ao carregar estoque:', error);
       this.state.items = [];
-      this.state.filteredItems = [];
 
       this.render();
       this.cache();
-      this.updateStats();
-      this.renderTable();
+      this.applyFilters();
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
     } finally {
