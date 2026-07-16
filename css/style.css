@@ -1011,6 +1011,31 @@ img {
   font-weight: 800;
 }
 
+/* PAGINAÇÃO */
+.lf-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 0 4px;
+}
+.lf-pagination__btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.lf-pagination__btn:hover:not(:disabled) { background: var(--surface-2); }
+.lf-pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.lf-pagination__info { font-size: 0.88rem; font-weight: 700; color: var(--text-muted); }
+.lf-pagination__info small { font-weight: 600; font-size: 0.8rem; }
+
 /* TABELA */
 .table-wrapper {
   overflow-x: auto;

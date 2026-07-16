@@ -14,6 +14,8 @@ function toCurrency(v) {
 // ─── Module ───────────────────────────────────────────────────────────────────
 
 const ProdutosModule = {
+  ITENS_POR_PAGINA: 20,
+
   state: {
     items: [],
     filteredItems: [],
@@ -27,6 +29,10 @@ const ProdutosModule = {
     searchTerm: '',
     filtroCategoria: '',
     filtroAlerta: '',
+    filtroOrdem: '',
+    filtroPromocao: '',
+    filtroTipo: '',
+    pagina: 1,
     // grade
     grades: [],
     // kit
@@ -109,13 +115,22 @@ const ProdutosModule = {
     }
 
     document.addEventListener('input', (e) => {
-      if (e.target?.id === 'produtosSearchInput') this.applySearch(e.target.value);
+      if (e.target?.id === 'produtosSearchInput') {
+        this.state.pagina = 1;
+        this.applySearch(e.target.value);
+      }
     });
 
     document.addEventListener('change', (e) => {
-      if (e.target.id === 'produtosFiltroCategoria' || e.target.id === 'produtosFiltroAlerta') {
+      const filtroIds = ['produtosFiltroCategoria', 'produtosFiltroAlerta',
+                         'produtosFiltroOrdem', 'produtosFiltroPromocao', 'produtosFiltroTipo'];
+      if (filtroIds.includes(e.target.id)) {
         this.state.filtroCategoria = document.getElementById('produtosFiltroCategoria')?.value || '';
         this.state.filtroAlerta    = document.getElementById('produtosFiltroAlerta')?.value || '';
+        this.state.filtroOrdem     = document.getElementById('produtosFiltroOrdem')?.value || '';
+        this.state.filtroPromocao  = document.getElementById('produtosFiltroPromocao')?.value || '';
+        this.state.filtroTipo      = document.getElementById('produtosFiltroTipo')?.value || '';
+        this.state.pagina = 1;
         this.applySearch(document.getElementById('produtosSearchInput')?.value || '');
       }
     });
@@ -184,6 +199,18 @@ const ProdutosModule = {
       if (t.dataset.action === 'etiqueta') { this.abrirEtiqueta(Number(t.dataset.id)); return; }
       if (t.dataset.action === 'edit')    { this.openEditModal(Number(t.dataset.id)).catch((err) => { console.error('Erro ao abrir modal de edição:', err); showToast('Erro ao abrir produto para edição.', 'error'); }); return; }
       if (t.dataset.action === 'delete')  { await this.handleDelete(Number(t.dataset.id)); return; }
+
+      // ── paginação
+      if (t.dataset.action === 'prod-pagina') {
+        if (this.state.loading) return;
+        const totalPaginas = Math.ceil(this.state.filteredItems.length / this.ITENS_POR_PAGINA);
+        const page = t.dataset.page;
+        if (page === 'prev' && this.state.pagina > 1) this.state.pagina--;
+        else if (page === 'next' && this.state.pagina < totalPaginas) this.state.pagina++;
+        this.renderTable();
+        this.renderPagination();
+        return;
+      }
 
       // ── tabs
       if (t.dataset.tab) { this.switchTab(t.dataset.tab); return; }
@@ -301,6 +328,12 @@ const ProdutosModule = {
       if (selCategoria) selCategoria.value = this.state.filtroCategoria || '';
       const selAlerta = document.getElementById('produtosFiltroAlerta');
       if (selAlerta) selAlerta.value = this.state.filtroAlerta || '';
+      const selOrdem = document.getElementById('produtosFiltroOrdem');
+      if (selOrdem) selOrdem.value = this.state.filtroOrdem || '';
+      const selPromo = document.getElementById('produtosFiltroPromocao');
+      if (selPromo) selPromo.value = this.state.filtroPromocao || '';
+      const selTipo = document.getElementById('produtosFiltroTipo');
+      if (selTipo) selTipo.value = this.state.filtroTipo || '';
       this.applySearch(this.state.searchTerm || '');
       this.toggleEmptyState();
       this.showModuleMessage('', 'info');
@@ -321,10 +354,42 @@ const ProdutosModule = {
     if (this.el.statsAlert) this.el.statsAlert.textContent = alert;
   },
 
+  _getPagedItems() {
+    const start = (this.state.pagina - 1) * this.ITENS_POR_PAGINA;
+    return this.state.filteredItems.slice(start, start + this.ITENS_POR_PAGINA);
+  },
+
+  renderPagination() {
+    const el = document.getElementById('produtosPagination');
+    if (!el) return;
+    const total = this.state.filteredItems.length;
+    const totalPaginas = Math.max(1, Math.ceil(total / this.ITENS_POR_PAGINA));
+    if (this.state.pagina > totalPaginas) this.state.pagina = totalPaginas;
+    if (totalPaginas <= 1) { el.innerHTML = ''; return; }
+    const p = this.state.pagina;
+    const inicio = (p - 1) * this.ITENS_POR_PAGINA + 1;
+    const fim = Math.min(p * this.ITENS_POR_PAGINA, total);
+    el.innerHTML = `
+      <div class="lf-pagination">
+        <button class="lf-pagination__btn" type="button" data-action="prod-pagina" data-page="prev"
+          ${p <= 1 ? 'disabled' : ''} aria-label="Página anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <span class="lf-pagination__info">Página ${p} de ${totalPaginas}
+          <small>(${inicio}–${fim} de ${total} produtos)</small>
+        </span>
+        <button class="lf-pagination__btn" type="button" data-action="prod-pagina" data-page="next"
+          ${p >= totalPaginas ? 'disabled' : ''} aria-label="Próxima página">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>`;
+  },
+
   renderTable() {
     if (!this.el.tableBody) return;
     if (!this.state.filteredItems.length) { this.el.tableBody.innerHTML = ''; return; }
-    this.el.tableBody.innerHTML = this.state.filteredItems.map((item) => {
+    const pageItems = this._getPagedItems();
+    this.el.tableBody.innerHTML = pageItems.map((item) => {
       const alerta = Boolean(item.alerta_estoque);
       const statusClass = alerta ? 'badge badge--danger' : 'badge badge--success';
 
@@ -381,18 +446,44 @@ const ProdutosModule = {
 
   applySearch(term) {
     this.state.searchTerm = term || '';
-    const q    = String(term||'').trim().toLowerCase();
-    const cat  = this.state.filtroCategoria || '';
-    const alrt = this.state.filtroAlerta    || '';
+    const q      = String(term||'').trim().toLowerCase();
+    const cat    = this.state.filtroCategoria || '';
+    const alrt   = this.state.filtroAlerta    || '';
+    const promo  = this.state.filtroPromocao  || '';
+    const tipo   = this.state.filtroTipo      || '';
 
-    this.state.filteredItems = this.state.items.filter((i) => {
+    let result = this.state.items.filter((i) => {
       if (q && ![i.nome, i.categoria, i.codigo_barras].filter(Boolean).some((f) => String(f).toLowerCase().includes(q))) return false;
       if (cat && (i.categoria || '') !== cat) return false;
-      if (alrt === 'alerta' && !Boolean(i.alerta_estoque)) return false;
+      if (alrt === 'alerta' && !i.alerta_estoque)  return false;
       if (alrt === 'ok'     && Boolean(i.alerta_estoque))  return false;
+      if (promo === 'sim'   && !(i.promocao_ativa && Number(i.preco_promocional) > 0)) return false;
+      if (promo === 'nao'   && (i.promocao_ativa && Number(i.preco_promocional) > 0))  return false;
+      if (tipo === 'grade'  && !i.tem_grade)  return false;
+      if (tipo === 'kit'    && !i.e_kit)      return false;
+      if (tipo === 'normal' && (i.tem_grade || i.e_kit)) return false;
       return true;
     });
+
+    // ordenação
+    const ordem = this.state.filtroOrdem || '';
+    if (ordem) {
+      result = [...result].sort((a, b) => {
+        if (ordem === 'nome_az')   return (a.nome||'').localeCompare(b.nome||'');
+        if (ordem === 'nome_za')   return (b.nome||'').localeCompare(a.nome||'');
+        if (ordem === 'preco_a')   return Number(a.preco||0) - Number(b.preco||0);
+        if (ordem === 'preco_d')   return Number(b.preco||0) - Number(a.preco||0);
+        if (ordem === 'estoque_a') return Number(a.estoque||0) - Number(b.estoque||0);
+        if (ordem === 'estoque_d') return Number(b.estoque||0) - Number(a.estoque||0);
+        if (ordem === 'margem_a')  return Number(a.margem_lucro||0) - Number(b.margem_lucro||0);
+        if (ordem === 'margem_d')  return Number(b.margem_lucro||0) - Number(a.margem_lucro||0);
+        return 0;
+      });
+    }
+
+    this.state.filteredItems = result;
     this.renderTable();
+    this.renderPagination();
     this.toggleEmptyState();
   },
 
@@ -425,6 +516,28 @@ const ProdutosModule = {
               <option value="">Todos os status</option>
               <option value="alerta">Em alerta</option>
               <option value="ok">Estoque ok</option>
+            </select>
+            <select id="produtosFiltroPromocao" class="input" style="height:38px;min-width:140px;width:auto;font-size:13px">
+              <option value="">Promoção: Todas</option>
+              <option value="sim">Em promoção</option>
+              <option value="nao">Sem promoção</option>
+            </select>
+            <select id="produtosFiltroTipo" class="input" style="height:38px;min-width:130px;width:auto;font-size:13px">
+              <option value="">Tipo: Todos</option>
+              <option value="normal">Normal</option>
+              <option value="grade">Com grade</option>
+              <option value="kit">Kit</option>
+            </select>
+            <select id="produtosFiltroOrdem" class="input" style="height:38px;min-width:155px;width:auto;font-size:13px">
+              <option value="">Ordenar: Padrão</option>
+              <option value="nome_az">Nome A→Z</option>
+              <option value="nome_za">Nome Z→A</option>
+              <option value="preco_a">Preço ↑</option>
+              <option value="preco_d">Preço ↓</option>
+              <option value="estoque_a">Estoque ↑</option>
+              <option value="estoque_d">Estoque ↓</option>
+              <option value="margem_a">Margem ↑</option>
+              <option value="margem_d">Margem ↓</option>
             </select>
           </div>
           <div class="module-toolbar__stats">
@@ -497,6 +610,7 @@ const ProdutosModule = {
             <tbody id="produtosTableBody"></tbody>
           </table>
         </div>
+        <div id="produtosPagination"></div>
         <div class="empty-state hidden" id="produtosEmptyState">
           <i class="fa-solid fa-box-open"></i>
           <strong>Nenhum produto encontrado</strong>
