@@ -5070,6 +5070,18 @@ body.pdv-active #pdvContainer {
   min-height: 0;
 }
 
+/* ── Filtro de período local (reutilizável por módulo) ─────────────────── */
+.periodo-local { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; padding:10px 14px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; }
+.periodo-local__label { font-size:12px; font-weight:700; color:var(--text-muted); white-space:nowrap; }
+.periodo-local__presets { display:flex; gap:4px; flex-wrap:wrap; }
+.periodo-local__btn { height:28px; padding:0 10px; font-size:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:6px; cursor:pointer; transition:.15s; white-space:nowrap; }
+.periodo-local__btn:hover { border-color:var(--primary); color:var(--primary); }
+.periodo-local__btn--active { background:var(--primary); color:#fff; border-color:var(--primary); font-weight:600; }
+.periodo-local__custom { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.periodo-local__custom .input { height:28px; padding:0 8px; font-size:12px; width:132px; }
+.periodo-local__custom span { font-size:12px; color:var(--text-muted); }
+.periodo-local__custom .btn { height:28px; padding:0 12px; font-size:12px; }
+
 /* ── PDV v2 ─────────────────────────────────────────────────────────────── */
 .pdv-v2 {
   display: flex;

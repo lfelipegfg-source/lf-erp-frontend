@@ -3,6 +3,24 @@ import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { escapeHtml } from './utils.js';
 
+function calcPeriodoLocal(preset) {
+  const nowBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Fortaleza' }));
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(nowBR);
+  let ini = today, fim = today;
+  if (preset === '7dias') { const s = new Date(nowBR); s.setDate(s.getDate()-6); ini = fmt(s); }
+  else if (preset === '30dias') { const s = new Date(nowBR); s.setDate(s.getDate()-29); ini = fmt(s); }
+  else if (preset === 'mesAtual') { ini = `${nowBR.getFullYear()}-${pad(nowBR.getMonth()+1)}-01`; }
+  else if (preset === 'mesAnterior') {
+    const m = nowBR.getMonth(), y = nowBR.getFullYear();
+    const pm = m === 0 ? 11 : m-1, py = m === 0 ? y-1 : y;
+    ini = `${py}-${pad(pm+1)}-01`;
+    fim = fmt(new Date(y, m, 0));
+  }
+  return { dataInicial: ini, dataFinal: fim };
+}
+
 const ComprasModule = {
   state: {
     items: [],
@@ -15,7 +33,8 @@ const ComprasModule = {
     itensCompra: [],
     loading: false,
     filtroStatus: '',
-    filtroFornecedor: ''
+    filtroFornecedor: '',
+    periodo: { preset: '30dias', dataInicial: '', dataFinal: '' }
   },
 
   init() {
@@ -89,11 +108,30 @@ const ComprasModule = {
         this.state.filtroFornecedor = document.getElementById('comprasFiltroFornecedor')?.value || '';
         this.search(this.el.search?.value || '');
       }
+      if (e.target.id === 'compDataIni' || e.target.id === 'compDataFim') {
+        this.state.periodo.dataInicial = document.getElementById('compDataIni')?.value || '';
+        this.state.periodo.dataFinal = document.getElementById('compDataFim')?.value || '';
+        this.search(this.el.search?.value || '');
+      }
     });
 
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('button');
       if (!btn) return;
+
+      if (btn.dataset.compPeriod !== undefined) {
+        const preset = btn.dataset.compPeriod;
+        this.state.periodo.preset = preset;
+        if (preset !== 'personalizado') {
+          const { dataInicial, dataFinal } = calcPeriodoLocal(preset);
+          this.state.periodo.dataInicial = dataInicial;
+          this.state.periodo.dataFinal = dataFinal;
+        }
+        this.render();
+        this.cache();
+        this.search(this.el.search?.value || '');
+        return;
+      }
 
       if (btn.id === 'importarXmlBtn') {
         document.getElementById('xmlNFInput')?.click();
@@ -147,9 +185,13 @@ const ComprasModule = {
     this.resolveEmpresa();
     this.state.loading = true;
 
+    if (!this.state.periodo.dataInicial) {
+      const datas = calcPeriodoLocal(this.state.periodo.preset);
+      this.state.periodo.dataInicial = datas.dataInicial;
+      this.state.periodo.dataFinal = datas.dataFinal;
+    }
+
     this.setFeedback('Carregando compras...', 'info');
-
-
     this.setLoading(true);
 
     try {
@@ -160,13 +202,12 @@ const ComprasModule = {
       ]);
 
       this.state.items = Array.isArray(compras) ? compras : (compras?.dados ?? []);
-      this.state.filteredItems = [...this.state.items];
       this.state.fornecedores = Array.isArray(fornecedores) ? fornecedores : (fornecedores?.dados ?? []);
       this.state.produtos = Array.isArray(produtos) ? produtos : (produtos?.dados ?? []);
 
       this.render();
       this.cache();
-      this.renderTable();
+      this.search('');
       this.setFeedback('', '');
     } catch (error) {
       console.error('Erro ao carregar compras:', error);
@@ -178,7 +219,7 @@ const ComprasModule = {
 
       this.render();
       this.cache();
-      this.renderTable();
+      this.search('');
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
     } finally {
@@ -196,6 +237,23 @@ const ComprasModule = {
         <div id="comprasFeedback" class="module-feedback"></div>
 
         <input type="file" id="xmlNFInput" accept=".xml" style="display:none"/>
+
+        <div class="periodo-local">
+          <span class="periodo-local__label">Período:</span>
+          <div class="periodo-local__presets">
+            ${['hoje','7dias','30dias','mesAtual','mesAnterior'].map(p => {
+              const labels = { hoje:'Hoje', '7dias':'7 dias', '30dias':'30 dias', mesAtual:'Este mês', mesAnterior:'Mês ant.' };
+              return `<button type="button" class="periodo-local__btn${this.state.periodo.preset===p?' periodo-local__btn--active':''}" data-comp-period="${p}">${labels[p]}</button>`;
+            }).join('')}
+            <button type="button" class="periodo-local__btn${this.state.periodo.preset==='personalizado'?' periodo-local__btn--active':''}" data-comp-period="personalizado">Personalizado</button>
+          </div>
+          <div id="compPeriodoCustom" class="periodo-local__custom${this.state.periodo.preset==='personalizado'?'':' hidden'}">
+            <input type="date" id="compDataIni" class="input" value="${this.state.periodo.dataInicial}">
+            <span>até</span>
+            <input type="date" id="compDataFim" class="input" value="${this.state.periodo.dataFinal}">
+          </div>
+        </div>
+
         <div class="module-toolbar">
           <div class="module-toolbar__search">
             <i class="fa-solid fa-search"></i>
@@ -487,16 +545,13 @@ const ComprasModule = {
     const termo = String(value || '').trim().toLowerCase();
     const filtroStatus = this.state.filtroStatus;
     const filtroFornecedor = String(this.state.filtroFornecedor || '');
-
-    if (!termo && !filtroStatus && !filtroFornecedor) {
-      this.state.filteredItems = [...this.state.items];
-      this.renderTable();
-      return;
-    }
+    const { dataInicial, dataFinal } = this.state.periodo;
 
     this.state.filteredItems = this.state.items.filter((item) => {
       if (filtroStatus && (item.status || 'finalizada') !== filtroStatus) return false;
       if (filtroFornecedor && String(item.fornecedor_id) !== filtroFornecedor) return false;
+      if (dataInicial && item.data && String(item.data).slice(0, 10) < dataInicial) return false;
+      if (dataFinal && item.data && String(item.data).slice(0, 10) > dataFinal) return false;
       if (!termo) return true;
 
       const texto = [

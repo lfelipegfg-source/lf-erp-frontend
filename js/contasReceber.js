@@ -20,11 +20,30 @@ const state = {
     cliente_id: '',
     busca: ''
   },
+  periodo: { preset: '30dias', dataInicial: '', dataFinal: '' },
   pagina: 1,
   totalPaginas: 1,
   totalRegistros: 0,
   loading: false
 };
+
+function calcPeriodoLocal(preset) {
+  const nowBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Fortaleza' }));
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(nowBR);
+  let ini = today, fim = today;
+  if (preset === '7dias') { const s = new Date(nowBR); s.setDate(s.getDate()-6); ini = fmt(s); }
+  else if (preset === '30dias') { const s = new Date(nowBR); s.setDate(s.getDate()-29); ini = fmt(s); }
+  else if (preset === 'mesAtual') { ini = `${nowBR.getFullYear()}-${pad(nowBR.getMonth()+1)}-01`; }
+  else if (preset === 'mesAnterior') {
+    const m = nowBR.getMonth(), y = nowBR.getFullYear();
+    const pm = m === 0 ? 11 : m-1, py = m === 0 ? y-1 : y;
+    ini = `${py}-${pad(pm+1)}-01`;
+    fim = fmt(new Date(y, m, 0));
+  }
+  return { dataInicial: ini, dataFinal: fim };
+}
 
 function salvarFiltrosCR() {
   try { sessionStorage.setItem('lf_filtros_cr', JSON.stringify(state.filtros)); } catch {}
@@ -79,6 +98,11 @@ export async function initContasReceberModule() {
   try {
     state.loading = true;
     carregarFiltrosCR();
+    if (!state.periodo.dataInicial) {
+      const datas = calcPeriodoLocal(state.periodo.preset);
+      state.periodo.dataInicial = datas.dataInicial;
+      state.periodo.dataFinal = datas.dataFinal;
+    }
     renderSkeleton();
 
     await Promise.all([carregarClientes(), carregarContas()]);
@@ -129,9 +153,9 @@ async function carregarContas() {
 
 function getFiltrosGlobais() {
   return {
-    data_inicial: document.getElementById('filtroDataInicial')?.value || '',
-    data_final: document.getElementById('filtroDataFinal')?.value || '',
-    busca: state.filtros.busca || document.getElementById('filtroBuscaGlobal')?.value?.trim() || ''
+    data_inicial: state.periodo.dataInicial,
+    data_final: state.periodo.dataFinal,
+    busca: state.filtros.busca || ''
   };
 }
 
@@ -171,6 +195,23 @@ function render() {
         <div>
           <strong>Importante</strong>
           <span>Esta tela mostra títulos. Valores recebidos só entram no Fluxo de Caixa após baixa/pagamento.</span>
+        </div>
+      </div>
+
+      <div class="periodo-local">
+        <span class="periodo-local__label">Período:</span>
+        <div class="periodo-local__presets">
+          ${['hoje','7dias','30dias','mesAtual','mesAnterior'].map(p => {
+            const labels = { hoje:'Hoje', '7dias':'7 dias', '30dias':'30 dias', mesAtual:'Este mês', mesAnterior:'Mês ant.' };
+            return `<button type="button" class="periodo-local__btn${state.periodo.preset===p?' periodo-local__btn--active':''}" data-cr-period="${p}">${labels[p]}</button>`;
+          }).join('')}
+          <button type="button" class="periodo-local__btn${state.periodo.preset==='personalizado'?' periodo-local__btn--active':''}" data-cr-period="personalizado">Personalizado</button>
+        </div>
+        <div id="crPeriodoCustom" class="periodo-local__custom${state.periodo.preset==='personalizado'?'':' hidden'}">
+          <input type="date" id="crDataIni" class="input" value="${state.periodo.dataInicial}">
+          <span>até</span>
+          <input type="date" id="crDataFim" class="input" value="${state.periodo.dataFinal}">
+          <button type="button" class="btn btn-primary" id="crAplicarPeriodo">Aplicar</button>
         </div>
       </div>
 
@@ -490,6 +531,27 @@ function bindEventos() {
 
       await recarregar();
     }
+  });
+
+  document.querySelectorAll('[data-cr-period]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const preset = btn.dataset.crPeriod;
+      state.periodo.preset = preset;
+      if (preset !== 'personalizado') {
+        const { dataInicial, dataFinal } = calcPeriodoLocal(preset);
+        state.periodo.dataInicial = dataInicial;
+        state.periodo.dataFinal = dataFinal;
+      }
+      state.pagina = 1;
+      await recarregar();
+    });
+  });
+
+  document.getElementById('crAplicarPeriodo')?.addEventListener('click', async () => {
+    state.periodo.dataInicial = document.getElementById('crDataIni')?.value || '';
+    state.periodo.dataFinal = document.getElementById('crDataFim')?.value || '';
+    state.pagina = 1;
+    await recarregar();
   });
 
   document.querySelectorAll("[data-action='cr-pagina']").forEach((btn) => {

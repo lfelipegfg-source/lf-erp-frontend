@@ -15,12 +15,31 @@ const state = {
     tipo: '',
     origem: ''
   },
+  periodo: { preset: '30dias', dataInicial: '', dataFinal: '' },
   loading: false,
   cashflowFuturo: null,
   diasProjecao: 30,
   pagina: 1,
   itensPorPagina: 50
 };
+
+function calcPeriodoLocal(preset) {
+  const nowBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Fortaleza' }));
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(nowBR);
+  let ini = today, fim = today;
+  if (preset === '7dias') { const s = new Date(nowBR); s.setDate(s.getDate()-6); ini = fmt(s); }
+  else if (preset === '30dias') { const s = new Date(nowBR); s.setDate(s.getDate()-29); ini = fmt(s); }
+  else if (preset === 'mesAtual') { ini = `${nowBR.getFullYear()}-${pad(nowBR.getMonth()+1)}-01`; }
+  else if (preset === 'mesAnterior') {
+    const m = nowBR.getMonth(), y = nowBR.getFullYear();
+    const pm = m === 0 ? 11 : m-1, py = m === 0 ? y-1 : y;
+    ini = `${py}-${pad(pm+1)}-01`;
+    fim = fmt(new Date(y, m, 0));
+  }
+  return { dataInicial: ini, dataFinal: fim };
+}
 
 function showMessage(message, type = 'info') {
   const feedback = document.getElementById('fluxoCaixaFeedback');
@@ -64,6 +83,11 @@ function setLoading(value) {
 export async function initFluxoCaixaModule() {
   try {
     state.loading = true;
+    if (!state.periodo.dataInicial) {
+      const datas = calcPeriodoLocal(state.periodo.preset);
+      state.periodo.dataInicial = datas.dataInicial;
+      state.periodo.dataFinal = datas.dataFinal;
+    }
     renderSkeleton();
 
     await Promise.all([
@@ -104,9 +128,9 @@ async function carregarFluxoCaixa() {
 
 function getFiltrosGlobais() {
   return {
-    data_inicial: document.getElementById('filtroDataInicial')?.value || '',
-    data_final: document.getElementById('filtroDataFinal')?.value || '',
-    busca: document.getElementById('filtroBuscaGlobal')?.value?.trim() || ''
+    data_inicial: state.periodo.dataInicial,
+    data_final: state.periodo.dataFinal,
+    busca: ''
   };
 }
 
@@ -224,6 +248,23 @@ function render() {
             <small>${getSaldoDescricao(state.resumo.saldo)}</small>
           </div>
         </article>
+      </div>
+
+      <div class="periodo-local">
+        <span class="periodo-local__label">Período:</span>
+        <div class="periodo-local__presets">
+          ${['hoje','7dias','30dias','mesAtual','mesAnterior'].map(p => {
+            const labels = { hoje:'Hoje', '7dias':'7 dias', '30dias':'30 dias', mesAtual:'Este mês', mesAnterior:'Mês ant.' };
+            return `<button type="button" class="periodo-local__btn${state.periodo.preset===p?' periodo-local__btn--active':''}" data-fc-period="${p}">${labels[p]}</button>`;
+          }).join('')}
+          <button type="button" class="periodo-local__btn${state.periodo.preset==='personalizado'?' periodo-local__btn--active':''}" data-fc-period="personalizado">Personalizado</button>
+        </div>
+        <div id="fcPeriodoCustom" class="periodo-local__custom${state.periodo.preset==='personalizado'?'':' hidden'}">
+          <input type="date" id="fcDataIni" class="input" value="${state.periodo.dataInicial}">
+          <span>até</span>
+          <input type="date" id="fcDataFim" class="input" value="${state.periodo.dataFinal}">
+          <button type="button" class="btn btn-primary" id="fcAplicarPeriodo">Aplicar</button>
+        </div>
       </div>
 
       <div class="fluxo-toolbar-grid">
@@ -641,6 +682,27 @@ function bindEventos() {
       render();
       renderCashflowFuturo();
     }
+  });
+
+  document.querySelectorAll('[data-fc-period]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const preset = btn.dataset.fcPeriod;
+      state.periodo.preset = preset;
+      if (preset !== 'personalizado') {
+        const { dataInicial, dataFinal } = calcPeriodoLocal(preset);
+        state.periodo.dataInicial = dataInicial;
+        state.periodo.dataFinal = dataFinal;
+      }
+      state.pagina = 1;
+      await recarregar();
+    });
+  });
+
+  document.getElementById('fcAplicarPeriodo')?.addEventListener('click', async () => {
+    state.periodo.dataInicial = document.getElementById('fcDataIni')?.value || '';
+    state.periodo.dataFinal = document.getElementById('fcDataFim')?.value || '';
+    state.pagina = 1;
+    await recarregar();
   });
 
   document.querySelectorAll("[data-action='fluxo-pagina']").forEach((btn) => {

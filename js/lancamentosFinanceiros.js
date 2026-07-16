@@ -10,11 +10,30 @@ const state = {
   paying:  false,
   deleting: false,
   filtros: { tipo: '', status: '', busca: '' },
+  periodo: { preset: '30dias', dataInicial: '', dataFinal: '' },
   pagina: 1,
   totalPaginas: 1,
   totalRegistros: 0,
   resumoGlobal: null
 };
+
+function calcPeriodoLocal(preset) {
+  const nowBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Fortaleza' }));
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(nowBR);
+  let ini = today, fim = today;
+  if (preset === '7dias') { const s = new Date(nowBR); s.setDate(s.getDate()-6); ini = fmt(s); }
+  else if (preset === '30dias') { const s = new Date(nowBR); s.setDate(s.getDate()-29); ini = fmt(s); }
+  else if (preset === 'mesAtual') { ini = `${nowBR.getFullYear()}-${pad(nowBR.getMonth()+1)}-01`; }
+  else if (preset === 'mesAnterior') {
+    const m = nowBR.getMonth(), y = nowBR.getFullYear();
+    const pm = m === 0 ? 11 : m-1, py = m === 0 ? y-1 : y;
+    ini = `${py}-${pad(pm+1)}-01`;
+    fim = fmt(new Date(y, m, 0));
+  }
+  return { dataInicial: ini, dataFinal: fim };
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,8 +58,8 @@ function toInputDate(d) {
 
 function getFiltrosGlobais() {
   return {
-    data_inicial: document.getElementById('filtroDataInicial')?.value || '',
-    data_final:   document.getElementById('filtroDataFinal')?.value  || ''
+    data_inicial: state.periodo.dataInicial,
+    data_final:   state.periodo.dataFinal
   };
 }
 
@@ -106,6 +125,11 @@ function badgeStatus(status) {
 
 export async function initLancamentosModule() {
   try {
+    if (!state.periodo.dataInicial) {
+      const datas = calcPeriodoLocal(state.periodo.preset);
+      state.periodo.dataInicial = datas.dataInicial;
+      state.periodo.dataFinal = datas.dataFinal;
+    }
     renderSkeleton();
     await carregarLancamentos();
     render();
@@ -204,6 +228,23 @@ function render() {
           <strong>${toCurrency(r.saldo)}</strong>
           <small>${r.saldo >= 0 ? 'Superávit' : 'Déficit'}</small>
         </article>
+      </div>
+
+      <div class="periodo-local">
+        <span class="periodo-local__label">Período:</span>
+        <div class="periodo-local__presets">
+          ${['hoje','7dias','30dias','mesAtual','mesAnterior'].map(p => {
+            const labels = { hoje:'Hoje', '7dias':'7 dias', '30dias':'30 dias', mesAtual:'Este mês', mesAnterior:'Mês ant.' };
+            return `<button type="button" class="periodo-local__btn${state.periodo.preset===p?' periodo-local__btn--active':''}" data-lf-period="${p}">${labels[p]}</button>`;
+          }).join('')}
+          <button type="button" class="periodo-local__btn${state.periodo.preset==='personalizado'?' periodo-local__btn--active':''}" data-lf-period="personalizado">Personalizado</button>
+        </div>
+        <div id="lfPeriodoCustom" class="periodo-local__custom${state.periodo.preset==='personalizado'?'':' hidden'}">
+          <input type="date" id="lfDataIni" class="input" value="${state.periodo.dataInicial}">
+          <span>até</span>
+          <input type="date" id="lfDataFim" class="input" value="${state.periodo.dataFinal}">
+          <button type="button" class="btn btn-primary" id="lfAplicarPeriodo">Aplicar</button>
+        </div>
       </div>
 
       <!-- Toolbar -->
@@ -453,6 +494,31 @@ function bindEventos() {
     e.preventDefault();
     await salvar();
   };
+
+  // Período local
+  document.querySelectorAll('[data-lf-period]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const preset = btn.dataset.lfPeriod;
+      state.periodo.preset = preset;
+      if (preset !== 'personalizado') {
+        const { dataInicial, dataFinal } = calcPeriodoLocal(preset);
+        state.periodo.dataInicial = dataInicial;
+        state.periodo.dataFinal = dataFinal;
+      }
+      state.pagina = 1;
+      if (state.loading) return;
+      setLoading(true);
+      try { await carregarLancamentos(); render(); } finally { setLoading(false); }
+    });
+  });
+  document.getElementById('lfAplicarPeriodo')?.addEventListener('click', async () => {
+    state.periodo.dataInicial = document.getElementById('lfDataIni')?.value || '';
+    state.periodo.dataFinal = document.getElementById('lfDataFim')?.value || '';
+    state.pagina = 1;
+    if (state.loading) return;
+    setLoading(true);
+    try { await carregarLancamentos(); render(); } finally { setLoading(false); }
+  });
 
   // Ações da tabela (pagar, editar, excluir)
   const lfContainer = document.getElementById('lancamentosContainer');
