@@ -830,6 +830,8 @@ async function setActiveView(view) {
   const globalFiltersBar = document.getElementById('globalFiltersBar');
   if (globalFiltersBar) globalFiltersBar.classList.toggle('hidden', view === 'pdv');
 
+  document.body.classList.toggle('pdv-active', view === 'pdv');
+
   const config = VIEW_CONFIG[view] || {
     title: 'LF ERP',
     subtitle: 'Sistema de gestão empresarial'
