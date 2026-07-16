@@ -174,10 +174,9 @@ const PDVModule = {
       this.switchTab(btn.dataset.tab);
     });
 
-    // Sticky Finalizar mobile
-    document.getElementById('pdvMobileFinalizarBtn')?.addEventListener('click', async (e) => {
+    document.getElementById('pdvNovaVendaBtn')?.addEventListener('click', (e) => {
       e.preventDefault();
-      await this.finalizarVenda();
+      this.resetVenda();
     });
 
     this.el.atualizarBtn?.addEventListener('click', async (event) => {
@@ -269,8 +268,51 @@ const PDVModule = {
       const inBusca  = document.activeElement === this.el.buscaProduto;
 
       // F2 â€” focar campo de busca de produto
+      // Alt+Z — aba Produto / Alt+C — aba Cliente / Alt+B — aba Pagamento
+      if (e.altKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        this.switchTab('produtos');
+        this.el.buscaProduto?.focus();
+        return;
+      }
+      if (e.altKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        this.switchTab('cliente');
+        return;
+      }
+      if (e.altKey && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        this.switchTab('pagamento');
+        return;
+      }
+
+      // Alt+N — nova venda
+      if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        this.resetVenda();
+        return;
+      }
+
+      // Alt+S — finalizar venda
+      if (e.altKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        if (!this.state.salvando && this.state.carrinho.length > 0) {
+          this.finalizarVenda();
+        }
+        return;
+      }
+
+      // Alt+Q — excluir/limpar venda
+      if (e.altKey && e.key.toLowerCase() === 'q') {
+        e.preventDefault();
+        if (this.state.carrinho.length > 0) this.resetVenda();
+        return;
+      }
+
+      // F2 — focar campo de busca de produto
       if (e.key === 'F2') {
         e.preventDefault();
+        this.switchTab('produtos');
         this.el.buscaProduto?.focus();
         this.el.buscaProduto?.select();
         return;
@@ -445,180 +487,161 @@ const PDVModule = {
     if (!container) return;
 
     container.innerHTML = `
-      <section class="module-card">
-        <div class="module-card__header" style="margin-bottom:12px">
-          <span id="pdvOfflineIndicator" class="pdv-offline-badge hidden">
-            <i class="fa-solid fa-wifi-slash"></i> Offline
-          </span>
+      <div class="pdv-v2">
 
-          <div class="module-card__actions">
-            <button type="button" class="btn btn-light" id="pdvAtualizarBtn">
-              <i class="fa-solid fa-rotate"></i> Atualizar
+        <!-- ── Cabeçalho ─────────────────────────────────────────────────── -->
+        <header class="pdv-v2__header">
+          <div class="pdv-v2__header-left">
+            <span id="pdvOfflineIndicator" class="pdv-offline-badge hidden">
+              <i class="fa-solid fa-wifi-slash"></i> Offline
+            </span>
+            <div class="module-feedback pdv-v2__feedback" id="pdvFormFeedback"></div>
+          </div>
+          <div class="pdv-v2__header-right">
+            <button type="button" class="btn btn-light btn-sm" id="pdvSalvarOrcamentoBtn">
+              <i class="fa-solid fa-file-lines"></i> Orçamento
             </button>
-            <button type="button" class="btn btn-light" id="pdvLimparBtn">
-              <i class="fa-solid fa-broom"></i> Limpar venda
+            <button type="button" class="btn btn-primary" id="pdvNovaVendaBtn">
+              <i class="fa-solid fa-plus"></i> Nova venda <kbd class="pdv-v2__kbd">Alt+N</kbd>
+            </button>
+            <button type="button" class="btn btn-light btn-icon" id="pdvAtualizarBtn" title="Atualizar dados">
+              <i class="fa-solid fa-rotate"></i>
             </button>
           </div>
-        </div>
+        </header>
 
-        <div class="module-feedback" id="pdvFormFeedback"></div>
+        <!-- ── Corpo principal ───────────────────────────────────────────── -->
+        <div class="pdv-v2__body">
 
-        <!-- Abas visíveis apenas no mobile -->
-        <div class="pdv-tabs" id="pdvTabs">
-          <button type="button" class="pdv-tab pdv-tab--active" data-tab="produtos" id="pdvTabProdutos">
-            <i class="fa-solid fa-box"></i>
-            <span>Produtos</span>
-          </button>
-          <button type="button" class="pdv-tab" data-tab="carrinho" id="pdvTabCarrinho">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>Carrinho</span>
-            <span class="pdv-tab-badge hidden" id="pdvTabCarrinhoBadge">0</span>
-          </button>
-        </div>
+          <!-- Painel esquerdo: Tabs + conteúdo -->
+          <div class="pdv-v2__left">
 
-        <div class="pdv-grid">
-          <div class="pdv-panel pdv-panel--active" data-pdv-panel="produtos">
-            <div class="pdv-panel__header">
-              <h4>Cliente e produtos</h4>
+            <!-- Tabs -->
+            <div class="pdv-v2__tabs" id="pdvTabs">
+              <button type="button" class="pdv-v2__tab pdv-v2__tab--active" data-tab="produtos">
+                Produto <span class="pdv-v2__tab-kbd">Alt+Z</span>
+              </button>
+              <button type="button" class="pdv-v2__tab" data-tab="cliente">
+                Cliente <span class="pdv-v2__tab-kbd">Alt+C</span>
+              </button>
+              <button type="button" class="pdv-v2__tab" data-tab="pagamento">
+                Pagamento <span class="pdv-v2__tab-kbd">Alt+B</span>
+              </button>
             </div>
 
-            <div class="pdv-section">
-              <div class="form-grid">
-                <div class="form-field form-field--span-2">
-                  <label for="pdvCliente">Cliente</label>
-                  <select id="pdvCliente">
-                    <option value="">Consumidor sem cadastro</option>
-                  </select>
-                  <small class="pdv-helper" id="pdvClienteNomeInfo">Nenhum cliente selecionado.</small>
-                </div>
-
-                <div class="form-field form-field--span-2">
-                  <label for="pdvBuscaProduto">Buscar produto</label>
-                  <input
-                    type="text"
-                    id="pdvBuscaProduto"
-                    inputmode="search"
-                    autocomplete="off"
-                    placeholder="Nome, categoria ou código de barras"
-                  />
-                  <div class="pdv-shortcuts-hint">
-                    <span><kbd>F2</kbd> Focar busca</span>
-                    <span><kbd>Enter</kbd> Adicionar</span>
-                    <span><kbd>F9</kbd> Finalizar</span>
-                    <span><kbd>F8</kbd> Limpar</span>
-                    <span><kbd>Esc</kbd> Limpar busca</span>
-                  </div>
-                </div>
+            <!-- Painel: Produto -->
+            <div class="pdv-v2__panel pdv-v2__panel--active" data-pdv-panel="produtos">
+              <div class="pdv-v2__search-wrap">
+                <i class="fa-solid fa-magnifying-glass pdv-v2__search-icon"></i>
+                <input type="text" id="pdvBuscaProduto" class="pdv-v2__search-input"
+                  inputmode="search" autocomplete="off"
+                  placeholder="Pesquise por código, descrição ou código de barras" />
               </div>
-            </div>
-
-            <div class="pdv-products">
-              <div class="pdv-products__header">
-                <h5>Produtos disponíveis</h5>
+              <div class="pdv-v2__shortcuts">
+                <span><kbd>Enter</kbd> Adicionar</span>
+                <span><kbd>Alt+S</kbd> Finalizar</span>
+                <span><kbd>Alt+Q</kbd> Excluir</span>
+                <span><kbd>Esc</kbd> Limpar busca</span>
               </div>
               <div class="pdv-products__list" id="pdvListaProdutos"></div>
             </div>
-          </div>
 
-          <div class="pdv-panel" data-pdv-panel="carrinho">
-            <div class="pdv-panel__header">
-              <h4>Carrinho e fechamento</h4>
-            </div>
-
-            <div class="table-wrapper">
-              <table class="data-table pdv-table">
-                <thead>
-                  <tr>
-                    <th>Produto</th>
-                    <th>Qtd</th>
-                    <th>Preço</th>
-                    <th>Desc%</th>
-                    <th>Total</th>
-                    <th class="text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="pdvCarrinhoBody"></tbody>
-              </table>
-            </div>
-
-            <div class="empty-state hidden" id="pdvCarrinhoEmpty">
-              Nenhum item no carrinho.
-            </div>
-
-            <div class="pdv-checkout">
-              <div class="form-grid">
-                <div class="form-field form-field--span-2">
-                  <label>Formas de pagamento</label>
-                  <div id="pdvPagamentosLista" class="pdv-split-lista"></div>
-                  <div class="pdv-split-footer">
-                    <span id="pdvSplitRestante" class="pdv-split-restante"></span>
-                    <button type="button" class="btn btn-light btn-sm" id="pdvAddPagamentoBtn">
-                      <i class="fa-solid fa-plus"></i> Adicionar forma
-                    </button>
-                  </div>
-                </div>
-
+            <!-- Painel: Cliente -->
+            <div class="pdv-v2__panel" data-pdv-panel="cliente">
+              <div class="form-field" style="margin-bottom:14px">
+                <label for="pdvCliente">Cliente</label>
+                <select id="pdvCliente">
+                  <option value="">Consumidor sem cadastro</option>
+                </select>
+                <small class="pdv-helper" id="pdvClienteNomeInfo">Nenhum cliente selecionado.</small>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
                 <div class="form-field">
-                  <label for="pdvDesconto">Desconto</label>
+                  <label for="pdvDesconto">Desconto (R$)</label>
                   <input type="number" min="0" step="0.01" id="pdvDesconto" value="0" inputmode="decimal" />
                 </div>
-
                 <div class="form-field">
-                  <label for="pdvAcrescimo">Acréscimo</label>
+                  <label for="pdvAcrescimo">Acréscimo (R$)</label>
                   <input type="number" min="0" step="0.01" id="pdvAcrescimo" value="0" inputmode="decimal" />
                 </div>
+              </div>
+              <div class="form-field">
+                <label for="pdvObservacao">Observação</label>
+                <textarea id="pdvObservacao" rows="3"
+                  placeholder="Informações adicionais da venda"></textarea>
+              </div>
+            </div>
 
-                <div class="form-field form-field--span-2">
-                  <label for="pdvObservacao">Observação</label>
-                  <textarea
-                    id="pdvObservacao"
-                    placeholder="Informações adicionais da venda"
-                  ></textarea>
+            <!-- Painel: Pagamento -->
+            <div class="pdv-v2__panel" data-pdv-panel="pagamento">
+              <div class="form-field">
+                <label>Formas de pagamento</label>
+                <div id="pdvPagamentosLista" class="pdv-split-lista"></div>
+                <div class="pdv-split-footer" style="margin-top:10px">
+                  <span id="pdvSplitRestante" class="pdv-split-restante"></span>
+                  <button type="button" class="btn btn-light btn-sm" id="pdvAddPagamentoBtn">
+                    <i class="fa-solid fa-plus"></i> Adicionar forma
+                  </button>
                 </div>
               </div>
-
-              <div class="pdv-summary">
+              <div class="pdv-v2__pay-summary">
                 <div class="pdv-summary__row">
-                  <span>Itens</span>
-                  <strong id="pdvTotalItens">0</strong>
+                  <span>Subtotal</span><strong id="pdvSubtotal">R$ 0,00</strong>
                 </div>
-
                 <div class="pdv-summary__row">
-                  <span>Subtotal</span>
-                  <strong id="pdvSubtotal">R$ 0,00</strong>
-                </div>
-
-                <div class="pdv-summary__row pdv-summary__row--total">
-                  <span>Total final</span>
-                  <strong id="pdvTotal">R$ 0,00</strong>
+                  <span>Itens</span><strong id="pdvTotalItens">0</strong>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class="pdv-actions">
-                <button type="button" class="btn btn-light" id="pdvSalvarOrcamentoBtn">
-                  <i class="fa-solid fa-file-lines"></i>
-                  Salvar orçamento
-                </button>
-                <button type="button" class="btn btn-primary" id="pdvFinalizarBtn">
-                  <i class="fa-solid fa-check"></i>
-                  Finalizar venda
-                </button>
-              </div>
+          <!-- Painel direito: Carrinho -->
+          <div class="pdv-v2__right">
+            <!-- Estado vazio -->
+            <div class="pdv-v2__cart-empty" id="pdvCarrinhoEmpty">
+              <i class="fa-solid fa-store"></i>
+              <p>Carrinho vazio</p>
+              <small>Busque produtos na aba <strong>Produto</strong></small>
+            </div>
 
-              <!-- Footer fixo no mobile -->
-              <div class="pdv-mobile-sticky" id="pdvMobileSticky">
-                <div class="pdv-mobile-sticky__total">
-                  <span>Total</span>
-                  <strong id="pdvMobileStickyTotal">R$ 0,00</strong>
-                </div>
-                <button type="button" class="btn btn-primary pdv-mobile-sticky__btn" id="pdvMobileFinalizarBtn">
-                  <i class="fa-solid fa-check"></i> Finalizar
-                </button>
+            <!-- Tabela de itens -->
+            <div class="pdv-v2__cart-wrap">
+              <div class="table-wrapper" style="border-radius:14px">
+                <table class="data-table pdv-table">
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th style="width:110px">Qtd</th>
+                      <th style="width:100px">Preço</th>
+                      <th style="width:72px">Desc%</th>
+                      <th style="width:100px">Total</th>
+                      <th style="width:44px"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="pdvCarrinhoBody"></tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
-      </section>
+
+        <!-- ── Rodapé fixo ────────────────────────────────────────────────── -->
+        <footer class="pdv-v2__footer">
+          <button type="button" class="btn pdv-v2__btn-excluir" id="pdvLimparBtn">
+            <i class="fa-solid fa-trash"></i>
+            Excluir venda <span class="pdv-v2__kbd">Alt+Q</span>
+          </button>
+          <button type="button" class="btn btn-primary pdv-v2__btn-finalizar" id="pdvFinalizarBtn">
+            <i class="fa-solid fa-check"></i>
+            Finalizar venda <span class="pdv-v2__kbd">Alt+S</span>
+          </button>
+          <div class="pdv-v2__total">
+            <span>Total</span>
+            <strong id="pdvTotal">R$ 0,00</strong>
+          </div>
+        </footer>
+
+      </div>
     `;
 
     this.injectStyles();
@@ -728,13 +751,17 @@ const PDVModule = {
 
     if (!this.el.carrinhoBody || !this.el.emptyCarrinho) return;
 
+    const cartWrap = document.querySelector('.pdv-v2__cart-wrap');
+
     if (!this.state.carrinho.length) {
       this.el.carrinhoBody.innerHTML = '';
       this.el.emptyCarrinho.classList.remove('hidden');
+      cartWrap?.classList.remove('pdv-v2__cart-wrap--visible');
       return;
     }
 
     this.el.emptyCarrinho.classList.add('hidden');
+    cartWrap?.classList.add('pdv-v2__cart-wrap--visible');
 
     this.el.carrinhoBody.innerHTML = this.state.carrinho
       .map((item, index) => {
@@ -848,19 +875,15 @@ const PDVModule = {
     this.state.activeTab = tab;
 
     document.querySelectorAll('[data-pdv-panel]').forEach((panel) => {
-      if (panel.dataset.pdvPanel === tab) {
-        panel.classList.add('pdv-panel--active');
-      } else {
-        panel.classList.remove('pdv-panel--active');
-      }
+      const active = panel.dataset.pdvPanel === tab;
+      panel.classList.toggle('pdv-v2__panel--active', active);
+      panel.classList.toggle('pdv-panel--active', active);
     });
 
     document.querySelectorAll('[data-tab]').forEach((btn) => {
-      if (btn.dataset.tab === tab) {
-        btn.classList.add('pdv-tab--active');
-      } else {
-        btn.classList.remove('pdv-tab--active');
-      }
+      const active = btn.dataset.tab === tab;
+      btn.classList.toggle('pdv-v2__tab--active', active);
+      btn.classList.toggle('pdv-tab--active', active);
     });
   },
 
