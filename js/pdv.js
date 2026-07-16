@@ -536,12 +536,20 @@ const PDVModule = {
                 <input type="text" id="pdvBuscaProduto" class="pdv-v2__search-input"
                   inputmode="search" autocomplete="off"
                   placeholder="Pesquise por código, descrição ou código de barras" />
-              </div>
-              <div class="pdv-v2__shortcuts">
-                <span><kbd>Enter</kbd> Adicionar</span>
-                <span><kbd>Alt+S</kbd> Finalizar</span>
-                <span><kbd>Alt+Q</kbd> Excluir</span>
-                <span><kbd>Esc</kbd> Limpar busca</span>
+                <div class="pdv-v2__shortcuts-hint">
+                  <i class="fa-solid fa-keyboard"></i>
+                  <div class="pdv-v2__shortcuts-tooltip">
+                    <span><kbd>Enter</kbd> Adicionar produto</span>
+                    <span><kbd>Alt+Z</kbd> Aba Produto</span>
+                    <span><kbd>Alt+C</kbd> Aba Cliente</span>
+                    <span><kbd>Alt+B</kbd> Aba Pagamento</span>
+                    <span><kbd>Alt+N</kbd> Nova venda</span>
+                    <span><kbd>Alt+S</kbd> Finalizar venda</span>
+                    <span><kbd>Alt+Q</kbd> Excluir venda</span>
+                    <span><kbd>F2</kbd> Focar busca</span>
+                    <span><kbd>Esc</kbd> Limpar busca</span>
+                  </div>
+                </div>
               </div>
               <div class="pdv-products__list" id="pdvListaProdutos"></div>
             </div>
