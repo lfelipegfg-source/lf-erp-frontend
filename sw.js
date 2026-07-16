@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lf-erp-v1';
+const CACHE_NAME = 'lf-erp-v2';
 
 const SHELL = [
   '/index.html',
