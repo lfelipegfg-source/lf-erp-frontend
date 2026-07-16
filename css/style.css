@@ -879,6 +879,7 @@ img {
 .main-content {
   display: flex;
   flex-direction: column;
+  min-width: 0; /* impede que o item de grid cresça além da coluna 1fr */
 }
 
 /* TOPBAR */
