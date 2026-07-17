@@ -1,40 +1,6 @@
 import api from './api.js';
 import dashboard from './dashboard.js';
 import { showToast } from './feedback.js';
-import { initProdutosModule } from './produtos.js';
-import { initClientesModule } from './clientes.js';
-import { initPDVModule } from './pdv.js';
-import { initVendasModule } from './vendas.js';
-import { initContasReceberModule } from './contasReceber.js';
-import { initContasPagarModule } from './contasPagar.js';
-import { initFluxoCaixaModule } from './fluxoCaixa.js';
-import { initLancamentosModule } from './lancamentosFinanceiros.js';
-import { initAuditoriaFinanceiraModule } from './auditoriaFinanceira.js';
-import { initLixeiraModule } from './lixeira.js';
-import { initRelatoriosFinanceirosModule } from './relatoriosFinanceiros.js';
-import { initFornecedoresModule } from './fornecedores.js';
-import { initComprasModule } from './compras.js';
-import { initUsuariosModule } from './usuarios.js';
-import { initEstoqueModule } from './estoque.js';
-import { initConfigModule } from './configuracoes.js';
-import { initNfeModule } from './nfe.js';
-import { initOrcamentosModule } from './orcamentos.js';
-import { initPedidosModule } from './pedidos.js';
-import { initComissoesModule } from './comissoes.js';
-import { initCaixaModule } from './caixa.js';
-import { initDevolucoesModule } from './devolucoes.js';
-import { initAlertasModule } from './alertas.js';
-import { initConciliacaoModule } from './conciliacaoBancaria.js';
-import { initMarketplaceModule } from './marketplace.js';
-import { initCrmModule } from './crm.js';
-import { initExportacaoContabilModule } from './exportacaoContabil.js';
-import { initApiPublicaModule } from './apiPublica.js';
-import { initRastreabilidadeModule } from './rastreabilidade.js';
-import { initWhatsappModule } from './whatsapp.js';
-import { initFidelidadeModule } from './fidelidade.js';
-import { initCheckoutLinksModule } from './checkoutLinks.js';
-import { initFiliaisModule } from './filiais.js';
-import { initBiModule } from './bi.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession, scheduleTokenRefresh, saveAuth } from './auth.js';
 import { escapeHtml } from './utils.js';
 
@@ -850,77 +816,48 @@ async function setActiveView(view) {
   await loadCurrentView(view);
 }
 
+const VIEW_LOADERS = {
+  'dashboard':           loadDashboardReal,
+  'produtos':            loadProdutosReal,
+  'clientes':            loadClientesReal,
+  'pdv':                 loadPDVReal,
+  'vendas':              loadVendasReal,
+  'compras':             loadComprasReal,
+  'estoque':             loadEstoqueReal,
+  'contas-receber':      loadContasReceberReal,
+  'contas-pagar':        loadContasPagarReal,
+  'fluxo-caixa':         loadFluxoCaixaReal,
+  'lancamentos':         loadLancamentosReal,
+  'conciliacao':         loadConciliacaoReal,
+  'auditoria-financeira':loadAuditoriaFinanceiraReal,
+  'lixeira':             loadLixeiraReal,
+  'relatorios':          loadRelatoriosFinanceirosReal,
+  'fornecedores':        loadFornecedoresReal,
+  'usuarios':            loadUsuariosReal,
+  'alertas':             loadAlertasReal,
+  'devolucoes':          loadDevolucoesReal,
+  'caixa':               loadCaixaReal,
+  'comissoes':           loadComissoesReal,
+  'orcamentos':          loadOrcamentosReal,
+  'pedidos':             loadPedidosReal,
+  'nfe':                 loadNfeReal,
+  'filiais':             loadFiliaisReal,
+  'bi':                  loadBiReal,
+  'checkout-links':      loadCheckoutLinksReal,
+  'fidelidade':          loadFidelidadeReal,
+  'whatsapp':            loadWhatsappReal,
+  'rastreabilidade':     loadRastreabilidadeReal,
+  'api-publica':         loadApiPublicaReal,
+  'exportacao-contabil': loadExportacaoContabilReal,
+  'crm':                 loadCrmReal,
+  'marketplace':         loadMarketplaceReal,
+  'configuracoes':       loadConfigReal,
+};
+
 async function loadCurrentView(view) {
-  if (view === 'dashboard') {
-    await loadDashboardReal();
-  } else if (view === 'produtos') {
-    await loadProdutosReal();
-  } else if (view === 'clientes') {
-    await loadClientesReal();
-  } else if (view === 'pdv') {
-    await loadPDVReal();
-  } else if (view === 'vendas') {
-    await loadVendasReal();
-  } else if (view === 'compras') {
-    await loadComprasReal();
-  } else if (view === 'estoque') {
-    await loadEstoqueReal();
-  } else if (view === 'contas-receber') {
-    await loadContasReceberReal();
-  } else if (view === 'contas-pagar') {
-    await loadContasPagarReal();
-  } else if (view === 'fluxo-caixa') {
-    await loadFluxoCaixaReal();
-  } else if (view === 'lancamentos') {
-    await loadLancamentosReal();
-  } else if (view === 'conciliacao') {
-    await loadConciliacaoReal();
-  } else if (view === 'auditoria-financeira') {
-    await loadAuditoriaFinanceiraReal();
-  } else if (view === 'lixeira') {
-    await loadLixeiraReal();
-  } else if (view === 'relatorios') {
-    await loadRelatoriosFinanceirosReal();
-  } else if (view === 'fornecedores') {
-    await loadFornecedoresReal();
-  } else if (view === 'usuarios') {
-    await loadUsuariosReal();
-  } else if (view === 'alertas') {
-    await loadAlertasReal();
-  } else if (view === 'devolucoes') {
-    await loadDevolucoesReal();
-  } else if (view === 'caixa') {
-    await loadCaixaReal();
-  } else if (view === 'comissoes') {
-    await loadComissoesReal();
-  } else if (view === 'orcamentos') {
-    await loadOrcamentosReal();
-  } else if (view === 'pedidos') {
-    await loadPedidosReal();
-  } else if (view === 'nfe') {
-    await loadNfeReal();
-  } else if (view === 'filiais') {
-    await loadFiliaisReal();
-  } else if (view === 'bi') {
-    await loadBiReal();
-  } else if (view === 'checkout-links') {
-    await loadCheckoutLinksReal();
-  } else if (view === 'fidelidade') {
-    await loadFidelidadeReal();
-  } else if (view === 'whatsapp') {
-    await loadWhatsappReal();
-  } else if (view === 'rastreabilidade') {
-    await loadRastreabilidadeReal();
-  } else if (view === 'api-publica') {
-    await loadApiPublicaReal();
-  } else if (view === 'exportacao-contabil') {
-    await loadExportacaoContabilReal();
-  } else if (view === 'crm') {
-    await loadCrmReal();
-  } else if (view === 'marketplace') {
-    await loadMarketplaceReal();
-  } else if (view === 'configuracoes') {
-    await loadConfigReal();
+  const loader = VIEW_LOADERS[view];
+  if (loader) {
+    await loader();
   } else {
     renderViewFeedback(view);
   }
@@ -1486,6 +1423,7 @@ async function loadProdutosReal() {
   showGlobalLoader('Carregando produtos...');
 
   try {
+    const { initProdutosModule } = await import('./produtos.js');
     await initProdutosModule();
     showToast('Produtos carregados com sucesso.', 'success');
   } catch (error) {
@@ -1505,6 +1443,7 @@ async function loadClientesReal() {
   showGlobalLoader('Carregando clientes...');
 
   try {
+    const { initClientesModule } = await import('./clientes.js');
     await initClientesModule();
     showToast('Clientes carregados com sucesso.', 'success');
   } catch (error) {
@@ -1524,6 +1463,7 @@ async function loadPDVReal() {
   showGlobalLoader('Carregando PDV...');
 
   try {
+    const { initPDVModule } = await import('./pdv.js');
     await initPDVModule();
     showToast('PDV carregado com sucesso.', 'success');
   } catch (error) {
@@ -1539,6 +1479,7 @@ async function loadVendasReal() {
   showGlobalLoader('Carregando vendas...');
 
   try {
+    const { initVendasModule } = await import('./vendas.js');
     await initVendasModule();
     showToast('Vendas carregadas com sucesso.', 'success');
   } catch (error) {
@@ -1554,6 +1495,7 @@ async function loadComprasReal() {
   showGlobalLoader('Carregando compras...');
 
   try {
+    const { initComprasModule } = await import('./compras.js');
     await initComprasModule();
     showToast('Compras carregadas com sucesso.', 'success');
   } catch (error) {
@@ -1573,6 +1515,7 @@ async function loadContasReceberReal() {
   showGlobalLoader('Carregando contas a receber...');
 
   try {
+    const { initContasReceberModule } = await import('./contasReceber.js');
     await initContasReceberModule();
     showToast('Contas a receber carregadas.', 'success');
   } catch (error) {
@@ -1592,6 +1535,7 @@ async function loadContasPagarReal() {
   showGlobalLoader('Carregando contas a pagar...');
 
   try {
+    const { initContasPagarModule } = await import('./contasPagar.js');
     await initContasPagarModule();
     showToast('Contas a pagar carregadas com sucesso.', 'success');
   } catch (error) {
@@ -1611,6 +1555,7 @@ async function loadFluxoCaixaReal() {
   showGlobalLoader('Carregando fluxo de caixa...');
 
   try {
+    const { initFluxoCaixaModule } = await import('./fluxoCaixa.js');
     await initFluxoCaixaModule();
     showToast('Fluxo de caixa carregado com sucesso.', 'success');
   } catch (error) {
@@ -1630,6 +1575,7 @@ async function loadLancamentosReal() {
   showGlobalLoader('Carregando lançamentos...');
 
   try {
+    const { initLancamentosModule } = await import('./lancamentosFinanceiros.js');
     await initLancamentosModule();
     showToast('Lançamentos carregados', 'success');
   } catch (error) {
@@ -1648,6 +1594,7 @@ async function loadLancamentosReal() {
 async function loadConciliacaoReal() {
   showGlobalLoader('Carregando conciliação bancária...');
   try {
+    const { initConciliacaoModule } = await import('./conciliacaoBancaria.js');
     await initConciliacaoModule();
   } catch (error) {
     console.error('Erro ao carregar conciliação:', error);
@@ -1665,6 +1612,7 @@ async function loadConciliacaoReal() {
 async function loadLixeiraReal() {
   showGlobalLoader('Carregando lixeira...');
   try {
+    const { initLixeiraModule } = await import('./lixeira.js');
     await initLixeiraModule();
   } catch (error) {
     console.error('Erro ao carregar lixeira:', error);
@@ -1678,6 +1626,7 @@ async function loadLixeiraReal() {
 async function loadAuditoriaFinanceiraReal() {
   showGlobalLoader('Carregando auditoria financeira...');
   try {
+    const { initAuditoriaFinanceiraModule } = await import('./auditoriaFinanceira.js');
     await initAuditoriaFinanceiraModule();
   } catch (error) {
     console.error('Erro ao carregar auditoria financeira:', error);
@@ -1696,6 +1645,7 @@ async function loadRelatoriosFinanceirosReal() {
   showGlobalLoader('Carregando relatórios financeiros...');
 
   try {
+    const { initRelatoriosFinanceirosModule } = await import('./relatoriosFinanceiros.js');
     await initRelatoriosFinanceirosModule();
     showToast('Relatórios financeiros carregados com sucesso.', 'success');
   } catch (error) {
@@ -1715,6 +1665,7 @@ async function loadFornecedoresReal() {
   showGlobalLoader('Carregando fornecedores...');
 
   try {
+    const { initFornecedoresModule } = await import('./fornecedores.js');
     await initFornecedoresModule();
     showToast('Fornecedores carregados com sucesso.', 'success');
   } catch (error) {
@@ -1734,6 +1685,7 @@ async function loadEstoqueReal() {
   showGlobalLoader('Carregando estoque...');
 
   try {
+    const { initEstoqueModule } = await import('./estoque.js');
     await initEstoqueModule();
     showToast('Estoque carregado com sucesso.', 'success');
   } catch (error) {
@@ -1749,6 +1701,7 @@ async function loadUsuariosReal() {
   showGlobalLoader('Carregando usuários...');
 
   try {
+    const { initUsuariosModule } = await import('./usuarios.js');
     await initUsuariosModule();
     showToast('Usuários carregados com sucesso.', 'success');
   } catch (error) {
@@ -1763,6 +1716,7 @@ async function loadUsuariosReal() {
 async function loadAlertasReal() {
   showGlobalLoader('Carregando alertas...');
   try {
+    const { initAlertasModule } = await import('./alertas.js');
     await initAlertasModule();
     showToast('Alertas carregados.', 'success');
   } catch (error) {
@@ -1777,6 +1731,7 @@ async function loadAlertasReal() {
 async function loadDevolucoesReal() {
   showGlobalLoader('Carregando devoluções...');
   try {
+    const { initDevolucoesModule } = await import('./devolucoes.js');
     await initDevolucoesModule();
     showToast('Devoluções carregadas.', 'success');
   } catch (error) {
@@ -1791,6 +1746,7 @@ async function loadDevolucoesReal() {
 async function loadCaixaReal() {
   showGlobalLoader('Carregando caixa...');
   try {
+    const { initCaixaModule } = await import('./caixa.js');
     await initCaixaModule();
     showToast('Caixa carregado.', 'success');
   } catch (error) {
@@ -1805,6 +1761,7 @@ async function loadCaixaReal() {
 async function loadComissoesReal() {
   showGlobalLoader('Carregando comissões...');
   try {
+    const { initComissoesModule } = await import('./comissoes.js');
     await initComissoesModule();
     showToast('Comissões carregadas.', 'success');
   } catch (error) {
@@ -1819,6 +1776,7 @@ async function loadComissoesReal() {
 async function loadOrcamentosReal() {
   showGlobalLoader('Carregando orçamentos...');
   try {
+    const { initOrcamentosModule } = await import('./orcamentos.js');
     await initOrcamentosModule();
     showToast('Orçamentos carregados.', 'success');
   } catch (error) {
@@ -1833,6 +1791,7 @@ async function loadOrcamentosReal() {
 async function loadPedidosReal() {
   showGlobalLoader('Carregando pedidos...');
   try {
+    const { initPedidosModule } = await import('./pedidos.js');
     await initPedidosModule();
     showToast('Pedidos carregados.', 'success');
   } catch (error) {
@@ -1848,6 +1807,7 @@ async function loadNfeReal() {
   showGlobalLoader('Carregando NF-e...');
 
   try {
+    const { initNfeModule } = await import('./nfe.js');
     await initNfeModule();
     showToast('Módulo NF-e carregado.', 'success');
   } catch (error) {
@@ -1862,6 +1822,7 @@ async function loadNfeReal() {
 async function loadFiliaisReal() {
   showGlobalLoader('Carregando filiais...');
   try {
+    const { initFiliaisModule } = await import('./filiais.js');
     await initFiliaisModule();
   } catch (error) {
     console.error('Erro ao carregar filiais:', error);
@@ -1874,6 +1835,7 @@ async function loadFiliaisReal() {
 async function loadCheckoutLinksReal() {
   showGlobalLoader('Carregando links de pagamento...');
   try {
+    const { initCheckoutLinksModule } = await import('./checkoutLinks.js');
     await initCheckoutLinksModule();
   } catch (error) {
     console.error('Erro ao carregar checkout links:', error);
@@ -1886,6 +1848,7 @@ async function loadCheckoutLinksReal() {
 async function loadFidelidadeReal() {
   showGlobalLoader('Carregando fidelidade...');
   try {
+    const { initFidelidadeModule } = await import('./fidelidade.js');
     await initFidelidadeModule();
   } catch (error) {
     console.error('Erro ao carregar fidelidade:', error);
@@ -1898,6 +1861,7 @@ async function loadFidelidadeReal() {
 async function loadWhatsappReal() {
   showGlobalLoader('Carregando WhatsApp...');
   try {
+    const { initWhatsappModule } = await import('./whatsapp.js');
     await initWhatsappModule();
   } catch (error) {
     console.error('Erro ao carregar WhatsApp:', error);
@@ -1910,6 +1874,7 @@ async function loadWhatsappReal() {
 async function loadRastreabilidadeReal() {
   showGlobalLoader('Carregando rastreabilidade...');
   try {
+    const { initRastreabilidadeModule } = await import('./rastreabilidade.js');
     await initRastreabilidadeModule();
   } catch (error) {
     console.error('Erro ao carregar rastreabilidade:', error);
@@ -1922,6 +1887,7 @@ async function loadRastreabilidadeReal() {
 async function loadApiPublicaReal() {
   showGlobalLoader('Carregando API & Webhooks...');
   try {
+    const { initApiPublicaModule } = await import('./apiPublica.js');
     await initApiPublicaModule();
   } catch (error) {
     console.error('Erro ao carregar API Publica:', error);
@@ -1934,6 +1900,7 @@ async function loadApiPublicaReal() {
 async function loadExportacaoContabilReal() {
   showGlobalLoader('Carregando exportação contábil...');
   try {
+    const { initExportacaoContabilModule } = await import('./exportacaoContabil.js');
     await initExportacaoContabilModule();
   } catch (error) {
     console.error('Erro ao carregar exportação contábil:', error);
@@ -1946,6 +1913,7 @@ async function loadExportacaoContabilReal() {
 async function loadCrmReal() {
   showGlobalLoader('Carregando CRM...');
   try {
+    const { initCrmModule } = await import('./crm.js');
     await initCrmModule();
   } catch (error) {
     console.error('Erro ao carregar CRM:', error);
@@ -1958,6 +1926,7 @@ async function loadCrmReal() {
 async function loadBiReal() {
   showGlobalLoader('Carregando BI...');
   try {
+    const { initBiModule } = await import('./bi.js');
     await initBiModule();
   } catch (error) {
     console.error('Erro ao carregar BI:', error);
@@ -1970,6 +1939,7 @@ async function loadBiReal() {
 async function loadMarketplaceReal() {
   showGlobalLoader('Carregando marketplace...');
   try {
+    const { initMarketplaceModule } = await import('./marketplace.js');
     await initMarketplaceModule();
   } catch (error) {
     console.error('Erro ao carregar marketplace:', error);
@@ -1983,6 +1953,7 @@ async function loadConfigReal() {
   showGlobalLoader('Carregando configurações...');
 
   try {
+    const { initConfigModule } = await import('./configuracoes.js');
     await initConfigModule();
     showToast('Configurações carregadas', 'success');
   } catch (error) {

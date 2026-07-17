@@ -46,6 +46,24 @@ export function buildFriendlyError(error) {
   return message || 'Não foi possível concluir a operação.';
 }
 
+export function calcPeriodoLocal(preset) {
+  const nowBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Fortaleza' }));
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(nowBR);
+  let ini = today, fim = today;
+  if (preset === '7dias') { const s = new Date(nowBR); s.setDate(s.getDate()-6); ini = fmt(s); }
+  else if (preset === '30dias') { const s = new Date(nowBR); s.setDate(s.getDate()-29); ini = fmt(s); }
+  else if (preset === 'mesAtual') { ini = `${nowBR.getFullYear()}-${pad(nowBR.getMonth()+1)}-01`; }
+  else if (preset === 'mesAnterior') {
+    const m = nowBR.getMonth(), y = nowBR.getFullYear();
+    const pm = m === 0 ? 11 : m-1, py = m === 0 ? y-1 : y;
+    ini = `${py}-${pad(pm+1)}-01`;
+    fim = fmt(new Date(y, m, 0));
+  }
+  return { dataInicial: ini, dataFinal: fim };
+}
+
 export function maskPhone(value) {
   return String(value || '')
     .replace(/\D/g, '')
