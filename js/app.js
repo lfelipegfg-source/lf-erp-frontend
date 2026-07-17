@@ -1235,6 +1235,11 @@ function renderAuthenticatedUser() {
     aplicarLogoSidebar(cachedLogo || null);
   } catch (_) {}
 
+  try {
+    const cachedCor = localStorage.getItem(`lf_cor_${AppState.empresaId || AppState.empresa?.nome || ''}`);
+    if (cachedCor) aplicarCorPrimaria(cachedCor);
+  } catch (_) {}
+
   const adminLink = document.getElementById('adminNavLink');
   if (adminLink && AppState.user?.is_saas_owner) {
     adminLink.style.display = 'block';
@@ -1260,6 +1265,43 @@ function aplicarLogoSidebar(url) {
 }
 
 window.aplicarLogoSidebar = aplicarLogoSidebar;
+
+function hexToHsl(hex) {
+  const r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h=0, s=0, l=(max+min)/2;
+  if (max !== min) {
+    const d=max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    if (max===r) h=((g-b)/d+(g<b?6:0))/6;
+    else if (max===g) h=((b-r)/d+2)/6;
+    else h=((r-g)/d+4)/6;
+  }
+  return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
+}
+
+function hslToHex(h, s, l) {
+  s/=100; l/=100;
+  const a=s*Math.min(l,1-l);
+  const f=n=>{const k=(n+h/30)%12;const c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c).toString(16).padStart(2,'0');};
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function aplicarCorPrimaria(hex) {
+  const root = document.documentElement;
+  if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) {
+    root.style.removeProperty('--primary');
+    root.style.removeProperty('--primary-hover');
+    root.style.removeProperty('--primary-soft');
+    return;
+  }
+  const [h, s, l] = hexToHsl(hex);
+  const ri = parseInt(hex.slice(1,3),16), gi = parseInt(hex.slice(3,5),16), bi = parseInt(hex.slice(5,7),16);
+  root.style.setProperty('--primary', hex);
+  root.style.setProperty('--primary-hover', hslToHex(h, s, Math.max(l-10, 5)));
+  root.style.setProperty('--primary-soft', `rgba(${ri},${gi},${bi},0.15)`);
+}
+window.aplicarCorPrimaria = aplicarCorPrimaria;
 
 function renderTrialBanner() {
   const banner = document.getElementById('trialBanner');

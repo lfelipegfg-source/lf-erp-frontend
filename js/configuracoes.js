@@ -67,6 +67,14 @@ const ConfigModule = {
       this._aplicarLogoPreview(data.logo_url || null);
       this._aplicarLogoSidebar(data.logo_url || null);
 
+      if (data.cor_primaria) {
+        const chave = `lf_cor_${data.empresa_id || data.empresa || this.state.empresa || ''}`;
+        try { localStorage.setItem(chave, data.cor_primaria); } catch(_) {}
+        if (typeof window.aplicarCorPrimaria === 'function') window.aplicarCorPrimaria(data.cor_primaria);
+      }
+      const colorInput = document.getElementById('cfgCorPrimaria');
+      if (colorInput) colorInput.value = data.cor_primaria || '#2563eb';
+
       // Carregar config PIX
       try {
         const pixCfg = await api.getPixConfig();
@@ -221,6 +229,19 @@ const ConfigModule = {
     preview.innerHTML = url
       ? `<img src="${url}" style="width:100%;height:100%;object-fit:contain;border-radius:12px">`
       : '<i class="fa-solid fa-layer-group" style="font-size:28px;color:var(--text-muted)"></i>';
+  },
+
+  async salvarCor(cor) {
+    try {
+      await api.fetchAPI('/configuracoes', 'PUT', { empresa: this.state.empresa, cor_primaria: cor || null });
+      if (this.state.dados) this.state.dados.cor_primaria = cor || null;
+      const chave = `lf_cor_${this.state.dados?.empresa_id || this.state.dados?.empresa || this.state.empresa || ''}`;
+      try { cor ? localStorage.setItem(chave, cor) : localStorage.removeItem(chave); } catch(_) {}
+      if (typeof window.aplicarCorPrimaria === 'function') window.aplicarCorPrimaria(cor || null);
+      showToast(cor ? 'Cor salva!' : 'Cor restaurada para o padrão.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Erro ao salvar cor', 'error');
+    }
   },
 
   async salvarLogo(logoUrl) {
@@ -380,6 +401,30 @@ const ConfigModule = {
               <input id="cfgNomeEmpresa" value="${esc(this.state.dados?.nome_empresa || '')}" />
             </div>
             <button id="salvarConfigBtn" class="btn btn-primary">Salvar empresa</button>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);max-width:700px">
+          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)">
+            <i class="fa-solid fa-palette" style="margin-right:6px;color:var(--primary)"></i>Cor principal do sistema
+          </label>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <input type="color" id="cfgCorPrimaria" value="${this.state.dados?.cor_primaria || '#2563eb'}"
+              style="width:44px;height:36px;border-radius:8px;border:1px solid var(--border);cursor:pointer;padding:2px;background:none">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${['#2563eb','#7c3aed','#059669','#dc2626','#d97706','#0891b2','#db2777','#1e293b'].map(c => {
+                const ativo = c === (this.state.dados?.cor_primaria || '#2563eb');
+                return `<button type="button" class="cfg-cor-preset" data-cor="${c}"
+                  style="width:26px;height:26px;border-radius:6px;border:2px solid ${ativo ? '#fff' : 'transparent'};outline:${ativo ? '2px solid var(--text-muted)' : 'none'};outline-offset:1px;background:${c};cursor:pointer;padding:0"
+                  title="${c}"></button>`;
+              }).join('')}
+            </div>
+            <button type="button" id="cfgCorPadraoBtn" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:32px">
+              <i class="fa-solid fa-rotate-left"></i> Padrão
+            </button>
+            <button type="button" id="cfgSalvarCorBtn" class="btn btn-primary" style="font-size:12px;padding:4px 14px;height:32px">
+              <i class="fa-solid fa-floppy-disk"></i> Salvar cor
+            </button>
           </div>
         </div>
 
@@ -586,6 +631,33 @@ const ConfigModule = {
         document.getElementById('cfgSalvarPixBtn')?.addEventListener('click', () => this.salvarPix());
         document.getElementById('cfgSalvarAsaasBtn')?.addEventListener('click', () => this.salvarAsaas());
         document.getElementById('exportarDadosBtn')?.addEventListener('click', () => this.exportarDados());
+
+        // Cor primária
+        const colorInput = document.getElementById('cfgCorPrimaria');
+        colorInput?.addEventListener('input', () => {
+          if (typeof window.aplicarCorPrimaria === 'function') window.aplicarCorPrimaria(colorInput.value);
+        });
+        document.getElementById('cfgSalvarCorBtn')?.addEventListener('click', () => {
+          if (colorInput?.value) this.salvarCor(colorInput.value);
+        });
+        document.getElementById('cfgCorPadraoBtn')?.addEventListener('click', () => {
+          if (colorInput) colorInput.value = '#2563eb';
+          if (typeof window.aplicarCorPrimaria === 'function') window.aplicarCorPrimaria(null);
+          this.salvarCor(null);
+        });
+        document.querySelectorAll('.cfg-cor-preset').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const cor = btn.dataset.cor;
+            if (colorInput) colorInput.value = cor;
+            if (typeof window.aplicarCorPrimaria === 'function') window.aplicarCorPrimaria(cor);
+            document.querySelectorAll('.cfg-cor-preset').forEach(b => {
+              b.style.borderColor = 'transparent';
+              b.style.outline = 'none';
+            });
+            btn.style.borderColor = '#fff';
+            btn.style.outline = '2px solid var(--text-muted)';
+          });
+        });
 
         // Logo da empresa
         const logoInput = document.getElementById('cfgLogoInput');
