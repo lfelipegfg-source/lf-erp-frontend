@@ -198,19 +198,25 @@ const ConfigModule = {
     if (btn && btn.disabled) return;
     if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
     try {
-      const nome = document.getElementById('cfgNomeEmpresa').value;
+      const nome = document.getElementById('cfgNomeEmpresa')?.value?.trim() || '';
+      const cor = document.getElementById('cfgCorPrimaria')?.value || null;
 
       await api.fetchAPI(`/configuracoes`, 'PUT', {
         empresa: this.state.empresa,
-        nome_empresa: nome
+        nome_empresa: nome,
+        cor_primaria: cor
       });
+
+      if (this.state.dados) { this.state.dados.nome_empresa = nome; this.state.dados.cor_primaria = cor; }
+      const chave = `lf_cor_${this.state.dados?.empresa_id || this.state.dados?.empresa || this.state.empresa || ''}`;
+      try { cor ? localStorage.setItem(chave, cor) : localStorage.removeItem(chave); } catch(_) {}
+      if (typeof window.aplicarCorPrimaria === 'function') window.aplicarCorPrimaria(cor);
 
       showToast('Configurações salvas com sucesso', 'success');
     } catch (err) {
-      console.error('Erro ao salvar:', err);
       showToast('Erro ao salvar configurações', 'error');
     } finally {
-      if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar empresa'; }
     }
   },
 
@@ -365,16 +371,19 @@ const ConfigModule = {
 
     const logoAtual = this.state.dados?.logo_url || '';
 
+    const corAtual = this.state.dados?.cor_primaria || '#2563eb';
+
     c.innerHTML = `
-      <section class="module-card">
-        <div class="module-card__header" style="margin-bottom:16px">
+      <!-- CARD 1: Identidade da Empresa -->
+      <section class="module-card" style="margin-bottom:16px">
+        <div class="module-card__header" style="margin-bottom:20px">
           <div>
-            <h3>Empresa</h3>
-            <p>Dados e identidade visual da sua empresa</p>
+            <h3>Identidade da Empresa</h3>
+            <p>Logo, nome e cor principal exibidos em todo o sistema</p>
           </div>
         </div>
 
-        <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;max-width:700px;margin-bottom:20px">
+        <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;max-width:600px">
           <!-- Logo -->
           <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
             <div id="cfgLogoPreview" style="width:88px;height:88px;border-radius:14px;border:2px dashed var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" title="Clique para trocar o logo">
@@ -394,49 +403,52 @@ const ConfigModule = {
             <span style="font-size:11px;color:var(--text-muted);text-align:center;max-width:90px">PNG · JPG · SVG<br>Recomendado 200×200</span>
           </div>
 
-          <!-- Nome -->
-          <div style="flex:1;min-width:200px">
-            <div class="form-field" style="margin-bottom:14px">
+          <!-- Nome e Cor -->
+          <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:16px">
+            <div class="form-field">
               <label>Nome da empresa</label>
               <input id="cfgNomeEmpresa" value="${esc(this.state.dados?.nome_empresa || '')}" />
             </div>
-            <button id="salvarConfigBtn" class="btn btn-primary">Salvar empresa</button>
-          </div>
-        </div>
 
-        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);max-width:700px">
-          <label style="display:block;font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)">
-            <i class="fa-solid fa-palette" style="margin-right:6px;color:var(--primary)"></i>Cor principal do sistema
-          </label>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <input type="color" id="cfgCorPrimaria" value="${this.state.dados?.cor_primaria || '#2563eb'}"
-              style="width:44px;height:36px;border-radius:8px;border:1px solid var(--border);cursor:pointer;padding:2px;background:none">
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
-              ${['#2563eb','#7c3aed','#059669','#dc2626','#d97706','#0891b2','#db2777','#1e293b'].map(c => {
-                const ativo = c === (this.state.dados?.cor_primaria || '#2563eb');
-                return `<button type="button" class="cfg-cor-preset" data-cor="${c}"
-                  style="width:26px;height:26px;border-radius:6px;border:2px solid ${ativo ? '#fff' : 'transparent'};outline:${ativo ? '2px solid var(--text-muted)' : 'none'};outline-offset:1px;background:${c};cursor:pointer;padding:0"
-                  title="${c}"></button>`;
-              }).join('')}
+            <div class="form-field">
+              <label style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+                <i class="fa-solid fa-palette" style="color:var(--primary)"></i> Cor principal
+              </label>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <input type="color" id="cfgCorPrimaria" value="${esc(corAtual)}"
+                  style="width:40px;height:34px;border-radius:8px;border:1px solid var(--border);cursor:pointer;padding:2px;background:none">
+                <div style="display:flex;gap:5px;flex-wrap:wrap">
+                  ${['#2563eb','#7c3aed','#059669','#dc2626','#d97706','#0891b2','#db2777','#1e293b'].map(hex => {
+                    const ativo = hex === corAtual;
+                    return `<button type="button" class="cfg-cor-preset" data-cor="${hex}"
+                      style="width:24px;height:24px;border-radius:6px;border:2px solid ${ativo ? '#fff' : 'transparent'};outline:${ativo ? '2px solid var(--text-muted)' : 'none'};outline-offset:1px;background:${hex};cursor:pointer;padding:0"
+                      title="${hex}"></button>`;
+                  }).join('')}
+                </div>
+                <button type="button" id="cfgCorPadraoBtn" class="btn btn-light" style="font-size:11px;padding:3px 8px;height:28px">
+                  <i class="fa-solid fa-rotate-left"></i> Padrão
+                </button>
+              </div>
             </div>
-            <button type="button" id="cfgCorPadraoBtn" class="btn btn-light" style="font-size:12px;padding:4px 10px;height:32px">
-              <i class="fa-solid fa-rotate-left"></i> Padrão
-            </button>
-            <button type="button" id="cfgSalvarCorBtn" class="btn btn-primary" style="font-size:12px;padding:4px 14px;height:32px">
-              <i class="fa-solid fa-floppy-disk"></i> Salvar cor
-            </button>
+
+            <div>
+              <button id="salvarConfigBtn" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i> Salvar empresa
+              </button>
+            </div>
           </div>
         </div>
+      </section>
 
-        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
-
+      <!-- CARD 2: Meu Perfil -->
+      <section class="module-card" style="margin-bottom:16px">
         <div class="module-card__header" style="margin-bottom:16px">
           <div>
             <h3>Meu Perfil</h3>
             <p>Atualize suas informações pessoais</p>
           </div>
         </div>
-        <div class="form-grid" style="max-width: 420px;">
+        <div class="form-grid" style="max-width:600px">
           <div class="form-field">
             <label>Nome completo</label>
             <input id="cfgNomeCompleto" value="${esc(this.state.user?.nome_completo || '')}" placeholder="Seu nome" />
@@ -455,16 +467,17 @@ const ConfigModule = {
             <button id="cfgSalvarPerfilBtn" class="btn btn-primary">Salvar perfil</button>
           </div>
         </div>
+      </section>
 
-        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
-
+      <!-- CARD 3: Segurança -->
+      <section class="module-card" style="margin-bottom:16px">
         <div class="module-card__header" style="margin-bottom:16px">
           <div>
             <h3>Segurança — Alterar senha</h3>
             <p>Informe sua senha atual para definir uma nova</p>
           </div>
         </div>
-        <div class="form-grid" style="max-width: 420px;">
+        <div class="form-grid" style="max-width:600px">
           <div class="form-field">
             <label>Senha atual</label>
             <input id="cfgSenhaAtual" type="password" placeholder="••••••••" />
@@ -481,9 +494,10 @@ const ConfigModule = {
             <button id="cfgTrocarSenhaBtn" class="btn btn-primary">Alterar senha</button>
           </div>
         </div>
+      </section>
 
-        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
-
+      <!-- CARD 4: Histórico de acesso -->
+      <section class="module-card" style="margin-bottom:16px">
         <div class="module-card__header" style="margin-bottom:12px">
           <div>
             <h3>Histórico de acesso</h3>
@@ -494,23 +508,22 @@ const ConfigModule = {
           </button>
         </div>
         <div id="cfgHistoricoAcesso" style="min-height:48px"></div>
+      </section>
 
-        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
-
-        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
-
+      <!-- CARD 5: PIX -->
+      <section class="module-card" style="margin-bottom:16px">
         <div class="module-card__header" style="margin-bottom:16px">
           <div>
             <h3><i class="fa-brands fa-pix" style="color:#32bcad;margin-right:6px"></i>PIX — Configuração EFÍ</h3>
             <p>Configure as credenciais da EFÍ (Gerencianet) para gerar cobranças PIX automaticamente</p>
           </div>
         </div>
-
-        <div class="pix-config-info">
-          <i class="fa-solid fa-circle-info"></i>
-          <div>
-            <strong>Como obter as credenciais</strong>
-            <ol style="margin:6px 0 0;padding-left:18px;font-size:.85rem;color:var(--text-soft)">
+        <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <summary style="padding:10px 16px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:6px;user-select:none">
+            <i class="fa-solid fa-circle-info"></i> Como obter as credenciais
+          </summary>
+          <div style="padding:12px 16px;border-top:1px solid var(--border)">
+            <ol style="margin:0;padding-left:18px;font-size:.85rem;color:var(--text-soft)">
               <li>Acesse <strong>efipay.com.br</strong> e abra uma conta gratuita</li>
               <li>Vá em <strong>API → Criar aplicação</strong> → copie Client ID e Client Secret</li>
               <li>Baixe o certificado <strong>.p12</strong> e carregue abaixo (como Base64)</li>
@@ -518,8 +531,7 @@ const ConfigModule = {
               <li>Desative o sandbox quando tudo estiver pronto</li>
             </ol>
           </div>
-        </div>
-
+        </details>
         <div class="form-grid" style="max-width:600px" id="cfgPixForm">
           <div class="form-field">
             <label>Client ID</label>
@@ -553,34 +565,29 @@ const ConfigModule = {
             </button>
           </div>
         </div>
+      </section>
 
-        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
-
-        <!-- Asaas — Boleto Bancário -->
-        <div style="margin-bottom:8px">
-          <h4 style="font-size:1rem;font-weight:800;margin-bottom:4px">
-            <i class="fa-solid fa-barcode" style="color:var(--primary);margin-right:6px"></i>
-            Boleto Bancário — Asaas
-          </h4>
-          <p style="font-size:.88rem;color:var(--text-muted)">
-            Emita boletos bancários diretamente do sistema. Crie uma conta gratuita em
-            <strong>asaas.com</strong> e cole a API Key abaixo.
-          </p>
-        </div>
-
-        <div class="pix-config-info" style="margin-bottom:16px">
-          <i class="fa-solid fa-circle-info"></i>
+      <!-- CARD 6: Asaas -->
+      <section class="module-card" style="margin-bottom:16px">
+        <div class="module-card__header" style="margin-bottom:16px">
           <div>
-            <strong>Como configurar</strong>
-            <ol style="margin:6px 0 0;padding-left:18px;font-size:.85rem;color:var(--text-soft)">
+            <h3><i class="fa-solid fa-barcode" style="color:var(--primary);margin-right:6px"></i>Boleto Bancário — Asaas</h3>
+            <p>Emita boletos diretamente do sistema via integração com a Asaas</p>
+          </div>
+        </div>
+        <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <summary style="padding:10px 16px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:6px;user-select:none">
+            <i class="fa-solid fa-circle-info"></i> Como configurar
+          </summary>
+          <div style="padding:12px 16px;border-top:1px solid var(--border)">
+            <ol style="margin:0;padding-left:18px;font-size:.85rem;color:var(--text-soft)">
               <li>Acesse <strong>asaas.com</strong> e crie uma conta (gratuita)</li>
               <li>Vá em <strong>Configurações → Integrações → API Key</strong> e copie a chave</li>
               <li>Cole a chave abaixo e salve em modo Sandbox para testar</li>
               <li>Desative o Sandbox quando estiver pronto para produção real</li>
             </ol>
           </div>
-        </div>
-
+        </details>
         <div class="form-grid" style="max-width:600px">
           <div class="form-field form-field--span-2">
             <label>API Key Asaas</label>
@@ -599,25 +606,22 @@ const ConfigModule = {
             </button>
           </div>
         </div>
+      </section>
 
-        <hr style="margin: 28px 0; border: none; border-top: 1px solid var(--border);" />
-
-        <!-- LGPD — Exportação de dados -->
-        <div class="module-card" style="margin-bottom:16px">
-          <div class="module-card__header">
-            <div>
-              <h3><i class="fa-solid fa-file-arrow-down" style="color:var(--primary);margin-right:6px"></i>Exportar meus dados (LGPD)</h3>
-              <p>Conforme a Lei 13.709/2018 (LGPD), você pode baixar todos os dados da sua empresa a qualquer momento.</p>
-            </div>
+      <!-- CARD 7: LGPD -->
+      <section class="module-card">
+        <div class="module-card__header" style="margin-bottom:12px">
+          <div>
+            <h3><i class="fa-solid fa-file-arrow-down" style="color:var(--primary);margin-right:6px"></i>Exportar meus dados (LGPD)</h3>
+            <p>Conforme a Lei 13.709/2018, você pode baixar todos os dados da sua empresa a qualquer momento.</p>
           </div>
-          <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:12px">
-            O arquivo JSON incluirá: clientes, produtos, vendas, compras, contas a receber/pagar, movimentações de estoque e lançamentos financeiros.
-          </p>
-          <button id="exportarDadosBtn" class="btn btn-light">
-            <i class="fa-solid fa-download"></i> Baixar meus dados
-          </button>
         </div>
-
+        <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:16px">
+          O arquivo JSON incluirá: clientes, produtos, vendas, compras, contas a receber/pagar, movimentações de estoque e lançamentos financeiros.
+        </p>
+        <button id="exportarDadosBtn" class="btn btn-light">
+          <i class="fa-solid fa-download"></i> Baixar meus dados
+        </button>
       </section>
     `;
 
@@ -636,9 +640,6 @@ const ConfigModule = {
         const colorInput = document.getElementById('cfgCorPrimaria');
         colorInput?.addEventListener('input', () => {
           if (typeof window.aplicarCorPrimaria === 'function') window.aplicarCorPrimaria(colorInput.value);
-        });
-        document.getElementById('cfgSalvarCorBtn')?.addEventListener('click', () => {
-          if (colorInput?.value) this.salvarCor(colorInput.value);
         });
         document.getElementById('cfgCorPadraoBtn')?.addEventListener('click', () => {
           if (colorInput) colorInput.value = '#2563eb';
