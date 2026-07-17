@@ -1487,6 +1487,15 @@ const PDVModule = {
       console.error('Erro ao finalizar venda:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
+      // Recarrega lista de produtos em background para mostrar estoque real após erro
+      if (error.status === 400 || error.status === 409) {
+        this.fetchProdutos().then(produtos => {
+          if (Array.isArray(produtos)) {
+            this.state.produtos = produtos;
+            this.filterProdutos(this.el.buscaProduto?.value || '');
+          }
+        }).catch(() => {});
+      }
     } finally {
       this.state.salvando = false;
       this.setLoading(false);
