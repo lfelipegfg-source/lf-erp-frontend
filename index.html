@@ -44,17 +44,15 @@
       crossorigin="anonymous"
     ></script>
 
-    <!-- Sentry Browser SDK — preencher dsn após criar projeto em sentry.io/projects/ -->
-    <!-- Descomente e substitua SEU_DSN pelo valor real:
+    <!-- Sentry Browser SDK — monitoramento de erros frontend -->
     <script src="https://browser.sentry-cdn.com/10.0.0/bundle.tracing.min.js" crossorigin="anonymous"></script>
     <script>
       Sentry.init({
-        dsn: 'SEU_DSN_BROWSER_AQUI',
+        dsn: 'https://875e8a03477a7b31a76c8b77d606b778@o4511749774442496.ingest.us.sentry.io/4511749830606848',
         environment: 'production',
         tracesSampleRate: 0.05
       });
     </script>
-    -->
     <script>
       (function () {
         var t = localStorage.getItem('lf_erp_theme');
