@@ -40,7 +40,9 @@ const ProdutosModule = {
     kitEstoque: 0,
     allProdutos: [],
     // imagens
-    imagens: []
+    imagens: [],
+    // preço sugerido
+    precoEditado: false
   },
 
   init() {
@@ -118,6 +120,33 @@ const ProdutosModule = {
       if (e.target?.id === 'produtosSearchInput') {
         this.state.pagina = 1;
         this.applySearch(e.target.value);
+      }
+
+      // Preço sugerido: atualiza quando custo muda e o usuário não digitou preço
+      if (e.target?.id === 'produtoCusto') {
+        if (!this.state.precoEditado) {
+          const custo = parseFloat(e.target.value) || 0;
+          const preco = this.el.preco;
+          const hint  = document.getElementById('produtoPrecoHint');
+          if (custo > 0 && preco) {
+            const sugerido = parseFloat((custo * 1.3).toFixed(2));
+            preco.value = sugerido;
+            preco.classList.add('input--sugerido');
+            if (hint) hint.textContent = '— sugerido (+30%)';
+          } else if (preco) {
+            preco.value = '';
+            preco.classList.remove('input--sugerido');
+            if (hint) hint.textContent = '';
+          }
+        }
+      }
+
+      // Quando o usuário digita no campo de preço, marca como editado manualmente
+      if (e.target?.id === 'produtoPreco') {
+        this.state.precoEditado = true;
+        e.target.classList.remove('input--sugerido');
+        const hint = document.getElementById('produtoPrecoHint');
+        if (hint) hint.textContent = '';
       }
     });
 
@@ -673,7 +702,7 @@ const ProdutosModule = {
                 <input type="number" id="produtoCusto" min="0" step="0.01" required />
               </div>
               <div class="form-field">
-                <label for="produtoPreco">Preço de venda *</label>
+                <label for="produtoPreco">Preço de venda * <small id="produtoPrecoHint" style="font-weight:400;color:var(--text-muted);font-size:11px"></small></label>
                 <input type="number" id="produtoPreco" min="0" step="0.01" required />
               </div>
               <div class="form-field">
@@ -805,10 +834,14 @@ const ProdutosModule = {
   openCreateModal() {
     this.state.editingId = null;
     this.state.activeTab = 'dados';
+    this.state.precoEditado = false;
     this.cacheElements();
     if (this.el.modalTitle) this.el.modalTitle.textContent = 'Novo produto';
     if (this.el.form) this.el.form.reset();
     if (this.el.id) this.el.id.value = '';
+    if (this.el.preco) this.el.preco.classList.remove('input--sugerido');
+    const hint = document.getElementById('produtoPrecoHint');
+    if (hint) hint.textContent = '';
     if (this.el.tabs) this.el.tabs.classList.add('hidden');
     this.switchTab('dados');
     this.setFormFeedback('', 'info');
@@ -820,6 +853,7 @@ const ProdutosModule = {
     if (!item) { this.showModuleMessage('Produto não encontrado.', 'error'); return; }
 
     this.state.editingId = id;
+    this.state.precoEditado = true;
     this.cacheElements();
 
     if (this.el.modalTitle) this.el.modalTitle.textContent = 'Editar produto';
@@ -827,7 +861,7 @@ const ProdutosModule = {
     if (this.el.nome) this.el.nome.value = item.nome || '';
     if (this.el.categoria) this.el.categoria.value = item.categoria || '';
     if (this.el.codigoBarras) this.el.codigoBarras.value = item.codigo_barras || '';
-    if (this.el.preco) this.el.preco.value = Number(item.preco || 0);
+    if (this.el.preco) { this.el.preco.value = Number(item.preco || 0); this.el.preco.classList.remove('input--sugerido'); }
     if (this.el.custo) this.el.custo.value = Number(item.custo || 0);
     if (this.el.precoPromocional) this.el.precoPromocional.value = Number(item.preco_promocional || 0);
     if (this.el.promocaoAtiva) this.el.promocaoAtiva.checked = Boolean(item.promocao_ativa);

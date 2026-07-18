@@ -1381,6 +1381,12 @@ img {
 .module-feedback--error   { color: var(--danger);  background: var(--danger-soft,  rgba(239,68,68,.1));  padding: 10px 14px; border-radius: 12px; font-weight: 600; }
 .module-feedback--warning { color: var(--warning); background: var(--warning-soft, rgba(234,179,8,.1));  padding: 10px 14px; border-radius: 12px; font-weight: 600; }
 
+/* Preço sugerido — campo com valor calculado automaticamente (marca d'água) */
+.input--sugerido {
+  color: var(--text-muted) !important;
+  font-style: italic;
+}
+
 /* =========================
    TOAST
 ========================= */
