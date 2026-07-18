@@ -14,7 +14,6 @@ const ConfigModule = {
   },
 
   init() {
-    this.state.eventsBound = false;
     const auth = getAuth();
     this.state.empresa = auth?.empresa?.nome || auth?.user?.empresa || 'LF ERP';
     this.state.user = auth?.user || {};

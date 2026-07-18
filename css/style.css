@@ -1375,6 +1375,12 @@ img {
   color: var(--danger);
 }
 
+/* Seletores BEM — usados pelos módulos JS */
+.module-feedback--info    { color: var(--info);    background: var(--info-soft,    rgba(59,130,246,.1)); padding: 10px 14px; border-radius: 12px; font-weight: 600; }
+.module-feedback--success { color: var(--success); background: var(--success-soft, rgba(34,197,94,.1));  padding: 10px 14px; border-radius: 12px; font-weight: 600; }
+.module-feedback--error   { color: var(--danger);  background: var(--danger-soft,  rgba(239,68,68,.1));  padding: 10px 14px; border-radius: 12px; font-weight: 600; }
+.module-feedback--warning { color: var(--warning); background: var(--warning-soft, rgba(234,179,8,.1));  padding: 10px 14px; border-radius: 12px; font-weight: 600; }
+
 /* =========================
    TOAST
 ========================= */

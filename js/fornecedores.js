@@ -1,7 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
-import { escapeHtml, maskPhone } from './utils.js';
+import { escapeHtml, maskPhone, debounce } from './utils.js';
 
 const FornecedoresModule = {
   state: {
@@ -54,9 +54,11 @@ const FornecedoresModule = {
     if (this.state.eventsBound) return;
     this.state.eventsBound = true;
 
+    const debouncedSearch = debounce((v) => this.search(v), 350);
+
     document.addEventListener('input', (e) => {
       if (e.target.id === 'fornecedoresSearch') {
-        this.search(e.target.value);
+        debouncedSearch(e.target.value);
       }
 
       if (e.target.id === 'fornecedorTelefone') {

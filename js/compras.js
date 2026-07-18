@@ -1,7 +1,7 @@
 ﻿import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
-import { escapeHtml, calcPeriodoLocal } from './utils.js';
+import { escapeHtml, calcPeriodoLocal, debounce } from './utils.js';
 
 const ComprasModule = {
   state: {
@@ -70,9 +70,11 @@ const ComprasModule = {
     if (this.state.eventsBound) return;
     this.state.eventsBound = true;
 
+    const debouncedSearch = debounce((v) => this.search(v), 350);
+
     document.addEventListener('input', (e) => {
       if (e.target.id === 'comprasSearch') {
-        this.search(e.target.value);
+        debouncedSearch(e.target.value);
       }
     });
 
@@ -976,7 +978,7 @@ const ComprasModule = {
             <div class="compra-detail-section__header">
               <div>
                 <h4>Contas a pagar</h4>
-                <p>Parcelas financeiras vinculadas Ã  compra</p>
+                <p>Parcelas financeiras vinculadas à compra</p>
               </div>
               <span>${contas.length} parcela(s)</span>
             </div>
@@ -1133,7 +1135,7 @@ const ComprasModule = {
         <td style="text-align:right"><strong>${cur(item.total)}</strong></td>
         <td>
           <select class="input xml-produto-select" style="font-size:.8rem;padding:4px 8px" data-idx="${idx}">
-            <option value="">â€” Vincular produto â€”</option>
+            <option value="">— Vincular produto —</option>
             ${this.state.produtos.map(p =>
               `<option value="${p.id}">${esc(p.nome)}</option>`
             ).join('')}
@@ -1150,7 +1152,7 @@ const ComprasModule = {
         <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)">
           <div>
             <h3 style="margin:0;font-size:1rem;font-weight:700">Importar NF do Fornecedor</h3>
-            <p style="margin:4px 0 0;font-size:.83rem;color:var(--text-muted)">NF-e nÂº ${esc(data.numero_nf || 'â€”')} Â· ${esc(data.data_emissao || 'â€”')} Â· Total: ${cur(data.total)}</p>
+            <p style="margin:4px 0 0;font-size:.83rem;color:var(--text-muted)">NF-e nº ${esc(data.numero_nf || '—')} · ${esc(data.data_emissao || '—')} · Total: ${cur(data.total)}</p>
           </div>
           <button id="_xmlFechar" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
         </div>
@@ -1274,7 +1276,7 @@ function formatCurrency(value) {
 function formatDate(value) {
   if (!value) return '-';
 
-  const date = new Date(`${value}T00:00:00`);
+  const date = new Date(`${value}T12:00:00`);
 
   if (Number.isNaN(date.getTime())) {
     return String(value);

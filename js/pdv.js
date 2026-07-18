@@ -105,7 +105,7 @@ const PDVModule = {
       this.handleClienteChange(event.target.value);
     });
 
-    // â”€â”€ Split de pagamento â€” delegação de eventos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // â”€â”€ Split de pagamento — delegação de eventos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('pdvAddPagamentoBtn')?.addEventListener('click', () => {
       this.addPagamento();
     });
@@ -267,7 +267,7 @@ const PDVModule = {
       const inInput  = ['input', 'textarea', 'select'].includes(tag);
       const inBusca  = document.activeElement === this.el.buscaProduto;
 
-      // F2 â€” focar campo de busca de produto
+      // F2 — focar campo de busca de produto
       // Alt+Z — aba Produto / Alt+C — aba Cliente / Alt+B — aba Pagamento
       if (e.altKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
@@ -318,7 +318,7 @@ const PDVModule = {
         return;
       }
 
-      // / â€” focar busca se não estiver em nenhum input
+      // / — focar busca se não estiver em nenhum input
       if (e.key === '/' && !inInput) {
         e.preventDefault();
         this.el.buscaProduto?.focus();
@@ -326,7 +326,7 @@ const PDVModule = {
         return;
       }
 
-      // F9 â€” finalizar venda
+      // F9 — finalizar venda
       if (e.key === 'F9') {
         e.preventDefault();
         if (!this.state.salvando && this.state.carrinho.length > 0) {
@@ -335,14 +335,14 @@ const PDVModule = {
         return;
       }
 
-      // F8 â€” limpar venda
+      // F8 — limpar venda
       if (e.key === 'F8') {
         e.preventDefault();
         if (this.state.carrinho.length > 0) this.resetVenda();
         return;
       }
 
-      // Escape â€” fecha modal de grade, ou limpa o campo de busca
+      // Escape — fecha modal de grade, ou limpa o campo de busca
       if (e.key === 'Escape') {
         const gradeModal = document.getElementById('pdvGradeModal');
         if (gradeModal && !gradeModal.classList.contains('hidden')) {
@@ -356,7 +356,7 @@ const PDVModule = {
         return;
       }
 
-      // Enter na busca â€” adiciona o primeiro produto visível e limpa a busca
+      // Enter na busca — adiciona o primeiro produto visível e limpa a busca
       if (e.key === 'Enter' && inBusca) {
         e.preventDefault();
         const primeiroBtn = this.el.listaProdutos
@@ -370,7 +370,7 @@ const PDVModule = {
         return;
       }
 
-      // + / = â€” aumentar quantidade do Ãºltimo item do carrinho
+      // + / = — aumentar quantidade do Ãºltimo item do carrinho
       if (!inInput && (e.key === '+' || e.key === '=')) {
         e.preventDefault();
         if (this.state.carrinho.length > 0) {
@@ -379,7 +379,7 @@ const PDVModule = {
         return;
       }
 
-      // - â€” diminuir quantidade do Ãºltimo item do carrinho
+      // - — diminuir quantidade do Ãºltimo item do carrinho
       if (!inInput && e.key === '-') {
         e.preventDefault();
         if (this.state.carrinho.length > 0) {
@@ -388,7 +388,7 @@ const PDVModule = {
         return;
       }
 
-      // Delete â€” remover Ãºltimo item do carrinho
+      // Delete — remover Ãºltimo item do carrinho
       if (!inInput && e.key === 'Delete') {
         e.preventDefault();
         if (this.state.carrinho.length > 0) {
@@ -442,8 +442,8 @@ const PDVModule = {
           this.setFeedback('Sem conexão e sem dados em cache. Aguarde a conexão.', 'error');
         } else {
           const msg = pendentes > 0
-            ? `Offline â€” ${this.state.produtos.length} produto(s) em cache. ${pendentes} venda(s) aguardando sincronização.`
-            : `Offline â€” ${this.state.produtos.length} produto(s) em cache.`;
+            ? `Offline — ${this.state.produtos.length} produto(s) em cache. ${pendentes} venda(s) aguardando sincronização.`
+            : `Offline — ${this.state.produtos.length} produto(s) em cache.`;
           this.setFeedback(msg, 'warning');
         }
       } else {
@@ -461,7 +461,7 @@ const PDVModule = {
           this.renderProdutos();
           this.renderCarrinho();
           this.renderResumo();
-          this.setFeedback(`Sem conexão â€” usando ${this.state.produtos.length} produto(s) do cache.`, 'warning');
+          this.setFeedback(`Sem conexão — usando ${this.state.produtos.length} produto(s) do cache.`, 'warning');
           return;
         } catch { /* sem cache */ }
       }
@@ -1172,7 +1172,7 @@ const PDVModule = {
     if (existenteIndex >= 0) {
       const itemAtual = this.state.carrinho[existenteIndex];
       if (Number(itemAtual.quantidade) + 1 > estoque) {
-        this.showMessage(`Estoque insuficiente para "${produto.nome} â€” ${gradeLabel}".`, 'error');
+        this.showMessage(`Estoque insuficiente para "${produto.nome} — ${gradeLabel}".`, 'error');
         return;
       }
       this.state.carrinho[existenteIndex].quantidade += 1;
@@ -1421,7 +1421,7 @@ const PDVModule = {
       conta_receber: null
     };
 
-    // Offline â€” salvar na fila local
+    // Offline — salvar na fila local
     if (!navigator.onLine) {
       this.state.salvando = true;
       this.setLoading(true);
@@ -1554,7 +1554,7 @@ const PDVModule = {
           </button>
           <div id="_pixConteudo">
             <div style="font-size:36px;color:#32b768;margin-bottom:8px"><i class="fa-brands fa-pix"></i></div>
-            <h3 style="margin:0 0 4px;font-size:18px;font-weight:800">PIX â€” ${fmtValor(valor)}</h3>
+            <h3 style="margin:0 0 4px;font-size:18px;font-weight:800">PIX — ${fmtValor(valor)}</h3>
             ${clienteNome ? `<p style="margin:0 0 16px;font-size:13px;color:var(--text-muted)">${this.escapeHtml(clienteNome)}</p>` : '<div style="margin-bottom:16px"></div>'}
             <div id="_pixStatus" style="font-size:13px;color:var(--text-muted);margin-bottom:16px">
               <i class="fa-solid fa-spinner fa-spin"></i> Gerando QR Code...
@@ -1615,7 +1615,7 @@ const PDVModule = {
           try {
             const st = await api.verificarStatusPIX(txid);
             if (st?.status === 'CONCLUIDA') mostrarSucesso();
-          } catch { /* silencioso â€” continua tentando */ }
+          } catch { /* silencioso — continua tentando */ }
         }, 4000);
       };
 
@@ -1815,7 +1815,7 @@ const PDVModule = {
 
     window.addEventListener('offline', () => {
       this.updateOfflineIndicator(false);
-      showToast('Sem conexão. Modo offline ativado â€” vendas serão salvas localmente.', 'warning');
+      showToast('Sem conexão. Modo offline ativado — vendas serão salvas localmente.', 'warning');
     });
   },
 

@@ -1,7 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { confirmarAcao } from './feedback.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, debounce } from './utils.js';
 
 const UsuariosModule = {
   state: {
@@ -52,9 +52,11 @@ const UsuariosModule = {
     if (this.state.eventsBound) return;
     this.state.eventsBound = true;
 
+    const debouncedSearch = debounce((v) => this.search(v), 350);
+
     document.addEventListener('input', (e) => {
       if (e.target.id === 'usuariosSearch') {
-        this.search(e.target.value);
+        debouncedSearch(e.target.value);
       }
       if (e.target.id === 'usuarioSenha') {
         this.atualizarMedidorSenha(e.target.value);
@@ -96,7 +98,7 @@ const UsuariosModule = {
     this.setFeedback('Carregando usuários...', 'info');
 
     try {
-      const data = await api.getUsuarios({ empresa: this.state.empresa });
+      const data = await api.getUsuarios({ empresa: this.state.empresa, empresa_id: api.getEmpresaId() });
       this.state.items = Array.isArray(data) ? data : [];
       this.state.filteredItems = [...this.state.items];
 
@@ -449,8 +451,12 @@ const UsuariosModule = {
   async save() {
     this.cache();
 
+    if (this.state.loading) return;
+    this.state.loading = true;
+
     const payload = {
       empresa: this.state.empresa,
+      empresa_id: api.getEmpresaId(),
       nome: this.el.nome?.value?.trim() || '',
       usuario: this.el.usuario?.value?.trim() || '',
       tipo: this.el.tipo?.value || 'funcionario'
@@ -463,11 +469,13 @@ const UsuariosModule = {
 
     if (!payload.nome || !payload.usuario || !payload.tipo) {
       this.setFeedback('Preencha os campos obrigatórios.', 'error');
+      this.state.loading = false;
       return;
     }
 
     if (!this.state.editingId && !payload.senha) {
       this.setFeedback('Informe a senha para o novo usuário.', 'error');
+      this.state.loading = false;
       return;
     }
 
@@ -475,6 +483,7 @@ const UsuariosModule = {
       const s = payload.senha;
       if (s.length < 8 || s.length > 128 || !/[A-Z]/.test(s) || !/[0-9]/.test(s)) {
         this.setFeedback('Senha fraca: use entre 8 e 128 caracteres, 1 maiúscula e 1 número.', 'error');
+        this.state.loading = false;
         return;
       }
     }
@@ -498,6 +507,8 @@ const UsuariosModule = {
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
       this.setFeedback(error.message || 'Erro ao salvar usuário.', 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 

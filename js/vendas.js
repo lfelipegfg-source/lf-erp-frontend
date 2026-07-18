@@ -1,8 +1,8 @@
-import api from './api.js';
+﻿import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV, numCSV } from './exportUtils.js';
-import { todayFortaleza, escapeHtml } from './utils.js';
+import { todayFortaleza, escapeHtml, calcPeriodoLocal } from './utils.js';
 
 const VendasModule = {
   state: {
@@ -2502,7 +2502,7 @@ function formatDate(value) {
   if (!value) return '-';
 
   const normalized = String(value).slice(0, 10);
-  const date = new Date(`${normalized}T00:00:00`);
+  const date = new Date(`${normalized}T12:00:00`);
 
   if (Number.isNaN(date.getTime())) {
     return String(value);

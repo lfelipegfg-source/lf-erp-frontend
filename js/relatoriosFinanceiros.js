@@ -1,7 +1,7 @@
 import api from './api.js';
 import { exportCSV, numCSV } from './exportUtils.js';
 import { showToast } from './feedback.js';
-import { escapeHtml, todayFortaleza } from './utils.js';
+import { escapeHtml, todayFortaleza, calcPeriodoLocal } from './utils.js';
 
 const state = {
   resumo: null,

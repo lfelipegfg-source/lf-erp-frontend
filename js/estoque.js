@@ -1,7 +1,7 @@
 import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, debounce } from './utils.js';
 
 const EstoqueModule = {
   state: {
@@ -47,9 +47,11 @@ const EstoqueModule = {
     if (this.state.eventsBound) return;
     this.state.eventsBound = true;
 
+    const debouncedFilters = debounce(() => this.applyFilters(), 350);
+
     document.addEventListener('input', (e) => {
       if (e.target.id === 'estoqueSearch') {
-        this.applyFilters();
+        debouncedFilters();
       }
     });
 

@@ -1,8 +1,8 @@
-import api from './api.js';
+﻿import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV } from './exportUtils.js';
-import { escapeHtml, maskPhone } from './utils.js';
+import { escapeHtml, maskPhone, debounce } from './utils.js';
 
 const ClientesModule = {
   state: {
@@ -58,9 +58,11 @@ const ClientesModule = {
     if (this.state.eventsBound) return;
     this.state.eventsBound = true;
 
+    const debouncedSearch = debounce((v) => this.search(v), 350);
+
     document.addEventListener('input', (e) => {
       if (e.target.id === 'clientesSearch') {
-        this.search(e.target.value);
+        debouncedSearch(e.target.value);
       }
 
       if (e.target.id === 'clienteCpf') {
@@ -980,7 +982,7 @@ function validarCPF(cpf) {
 function formatDate(value) {
   if (!value) return '-';
 
-  const date = new Date(`${value}T00:00:00`);
+  const date = new Date(`${value}T12:00:00`);
   if (Number.isNaN(date.getTime())) return '-';
 
   return date.toLocaleDateString('pt-BR');

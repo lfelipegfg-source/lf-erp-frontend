@@ -71,3 +71,11 @@ export function maskPhone(value) {
     .replace(/(\d{5})(\d)/, '$1-$2')
     .slice(0, 15);
 }
+
+export function debounce(fn, delay = 300) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}

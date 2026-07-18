@@ -1,4 +1,4 @@
-import api from './api.js';
+﻿import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { gerarPIX } from './pix.js';
 import { escapeHtml, buildFriendlyError, todayFortaleza, calcPeriodoLocal } from './utils.js';
@@ -1497,8 +1497,8 @@ function getStatusBadgeClass(status) {
 function getDiasAtrasoHtml(status, dataVencimento) {
   if (status !== 'atrasado' && status !== 'parcial_atrasado') return '';
   if (!dataVencimento) return '';
-  const hoje = new Date(`${todayFortaleza()}T00:00:00`);
-  const venc = new Date(`${dataVencimento}T00:00:00`);
+  const hoje = new Date(`${todayFortaleza()}T12:00:00`);
+  const venc = new Date(`${dataVencimento}T12:00:00`);
   if (isNaN(venc.getTime())) return '';
   const dias = Math.round((hoje.getTime() - venc.getTime()) / 86400000);
   if (dias <= 0) return '';
@@ -1508,9 +1508,9 @@ function getDiasAtrasoHtml(status, dataVencimento) {
 function getVencimentoInfo(dataVencimento) {
   if (!dataVencimento) return 'Sem vencimento';
 
-  const hoje = new Date(`${todayFortaleza()}T00:00:00`);
+  const hoje = new Date(`${todayFortaleza()}T12:00:00`);
 
-  const vencimento = new Date(`${dataVencimento}T00:00:00`);
+  const vencimento = new Date(`${dataVencimento}T12:00:00`);
 
   if (Number.isNaN(vencimento.getTime())) {
     return 'Vencimento informado';
@@ -1536,7 +1536,7 @@ function formatCurrency(value) {
 function formatDate(value) {
   if (!value) return '-';
 
-  const date = new Date(`${value}T00:00:00`);
+  const date = new Date(`${value}T12:00:00`);
 
   if (Number.isNaN(date.getTime())) {
     return String(value);

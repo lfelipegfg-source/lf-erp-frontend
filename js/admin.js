@@ -409,7 +409,7 @@
     if (!planosCache.length) planosCache = await api('/admin/planos').catch(() => []);
     const sel = document.getElementById('empresaPlano');
     sel.innerHTML = '<option value="">Sem plano</option>' +
-      planosCache.map(p => `<option value="${p.id}">${p.nome} (${p.codigo})</option>`).join('');
+      planosCache.map(p => `<option value="${esc(p.id)}">${esc(p.nome)} (${esc(p.codigo)})</option>`).join('');
   }
 
   function limiteStr(v) {

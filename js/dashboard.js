@@ -1,4 +1,4 @@
-import api from './api.js';
+﻿import api from './api.js';
 import { showToast } from './feedback.js';
 import { buildFriendlyError, escapeHtml } from './utils.js';
 
@@ -665,7 +665,7 @@ function destroyCharts() {
 
 function formatDia(isoDate) {
   if (!isoDate) return '';
-  const d = new Date(isoDate + 'T00:00:00');
+  const d = new Date(isoDate + 'T12:00:00');
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
