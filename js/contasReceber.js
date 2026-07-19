@@ -214,6 +214,8 @@ function render() {
             <option value="pendente" ${state.filtros.status === 'pendente' ? 'selected' : ''}>Pendentes</option>
             <option value="atrasado" ${state.filtros.status === 'atrasado' ? 'selected' : ''}>Atrasados</option>
             <option value="pago" ${state.filtros.status === 'pago' ? 'selected' : ''}>Recebidos</option>
+            <option value="parcial" ${state.filtros.status === 'parcial' ? 'selected' : ''}>Parciais</option>
+            <option value="parcial_atrasado" ${state.filtros.status === 'parcial_atrasado' ? 'selected' : ''}>Parcial em atraso</option>
           </select>
         </div>
 
@@ -894,6 +896,21 @@ function abrirModalBaixaConta(conta) {
             />
             <small>Formato correto: dia/mês/ano no calendário.</small>
           </div>
+
+          <div class="form-group">
+            <label>Forma de pagamento</label>
+            <select id="crBaixaForma" class="input">
+              <option value="">Não informado</option>
+              <option value="dinheiro">Dinheiro</option>
+              <option value="pix">PIX</option>
+              <option value="cartao_credito">Cartão de Crédito</option>
+              <option value="cartao_debito">Cartão de Débito</option>
+              <option value="boleto">Boleto</option>
+              <option value="transferencia">Transferência</option>
+              <option value="cheque">Cheque</option>
+              <option value="crediario">Crediário</option>
+            </select>
+          </div>
         </div>
 
         <section class="cr-detail-note">
@@ -929,6 +946,7 @@ function abrirModalBaixaConta(conta) {
 
     const valorPago = document.getElementById('crBaixaValor')?.value || '';
     const dataPagamento = document.getElementById('crBaixaData')?.value || '';
+    const formaPagamento = document.getElementById('crBaixaForma')?.value || '';
 
     const _numVP = Number(valorPago);
     if (!valorPago || !Number.isFinite(_numVP) || _numVP <= 0) {
@@ -951,7 +969,8 @@ function abrirModalBaixaConta(conta) {
     try {
       await api.baixarContaReceber(conta.id, {
         valor_pago: Number(valorPago),
-        data_pagamento: dataPagamento
+        data_pagamento: dataPagamento,
+        ...(formaPagamento ? { forma_pagamento: formaPagamento } : {})
       });
 
       showMessage('Recebimento registrado com sucesso.', 'success');

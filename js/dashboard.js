@@ -121,7 +121,7 @@ function setTrend(id, atual, anterior) {
 }
 
 function renderKpis(payload, financeiro, filters = {}) {
-  setText('kpiFaturamento', toCurrency(financeiro.fluxoEntradas || payload.faturamento));
+  setText('kpiFaturamento', toCurrency(financeiro.fluxoEntradas ?? payload.faturamento ?? 0));
   setText('kpiVendas', String(payload.vendas));
   setText('kpiReceber', toCurrency(financeiro.contasReceberPendente));
   setText('kpiPagar', toCurrency(financeiro.contasPagarPendente));
@@ -310,17 +310,22 @@ function renderResumoExecutivo(payload, financeiro, state = {}, empresaStatus = 
   </div>
 
   <div class="dashboard-abc-bars">
-    <div class="dashboard-abc-bar dashboard-abc-bar--a" style="width:${Math.max(8, payload.classeA * 12)}%">
+    ${(() => {
+      const maxCls = Math.max(1, payload.classeA, payload.classeB, payload.classeC);
+      const w = v => Math.min(100, Math.max(8, (v / maxCls) * 100)).toFixed(1);
+      return `
+    <div class="dashboard-abc-bar dashboard-abc-bar--a" style="width:${w(payload.classeA)}%">
       A ${payload.classeA}
     </div>
 
-    <div class="dashboard-abc-bar dashboard-abc-bar--b" style="width:${Math.max(8, payload.classeB * 12)}%">
+    <div class="dashboard-abc-bar dashboard-abc-bar--b" style="width:${w(payload.classeB)}%">
       B ${payload.classeB}
     </div>
 
-    <div class="dashboard-abc-bar dashboard-abc-bar--c" style="width:${Math.max(8, payload.classeC * 12)}%">
+    <div class="dashboard-abc-bar dashboard-abc-bar--c" style="width:${w(payload.classeC)}%">
       C ${payload.classeC}
-    </div>
+    </div>`;
+    })()}
   </div>
 </div>
 

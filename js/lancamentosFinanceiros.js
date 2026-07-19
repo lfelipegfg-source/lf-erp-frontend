@@ -595,9 +595,32 @@ async function pagar(id) {
   if (state.paying) return;
   state.paying = true;
   try {
-    const ok = await confirmarAcao('Confirmar pagamento deste lançamento?', 'Confirmar pagamento', 'primary');
-    if (!ok) return;
-    await api.pagarLancamentoFinanceiro(id);
+    const dataPagamento = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+      const hoje = typeof todayFortaleza === 'function' ? todayFortaleza() : new Date().toISOString().slice(0, 10);
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:340px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+          <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar pagamento</h3>
+          <div style="margin-bottom:20px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Data do pagamento</label>
+            <input id="_lfPagarDataInput" type="date" value="${hoje}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button id="_lfPagarCancelarBtn" class="btn-cancel">Cancelar</button>
+            <button id="_lfPagarConfirmarBtn" class="btn-confirm btn-confirm--success">Confirmar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_lfPagarCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_lfPagarConfirmarBtn').onclick = () => {
+        const data = overlay.querySelector('#_lfPagarDataInput').value;
+        document.body.removeChild(overlay);
+        resolve(data || null);
+      };
+    });
+    if (!dataPagamento) return;
+    await api.pagarLancamentoFinanceiro(id, { pagamento_data: dataPagamento });
     showMsg('Lançamento marcado como pago.', 'success');
     await carregarLancamentos();
     render();

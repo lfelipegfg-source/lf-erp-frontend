@@ -220,6 +220,8 @@ function render() {
             <option value="pendente" ${state.filtros.status === 'pendente' ? 'selected' : ''}>Pendentes</option>
             <option value="atrasado" ${state.filtros.status === 'atrasado' ? 'selected' : ''}>Atrasadas</option>
             <option value="pago" ${state.filtros.status === 'pago' ? 'selected' : ''}>Pagas</option>
+            <option value="parcial" ${state.filtros.status === 'parcial' ? 'selected' : ''}>Parciais</option>
+            <option value="parcial_atrasado" ${state.filtros.status === 'parcial_atrasado' ? 'selected' : ''}>Parcial em atraso</option>
           </select>
         </div>
 
@@ -532,12 +534,14 @@ async function pagarConta(id) {
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
 
     const hoje = todayFortaleza();
+    const contaRef = state.contas.find(c => String(c.id) === String(id));
+    const valorMax = contaRef ? Number(contaRef.valor_atualizado || contaRef.valor || 0) : 0;
     overlay.innerHTML = `
       <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
         <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar pagamento</h3>
         <div style="margin-bottom:16px">
           <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Valor pago (R$)</label>
-          <input id="_pagarValorInput" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Deixe em branco para pagar total" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+          <input id="_pagarValorInput" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Deixe em branco para pagar total" ${valorMax > 0 ? `max="${valorMax}"` : ''} style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
         </div>
         <div style="margin-bottom:16px">
           <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:5px">Data do pagamento</label>
@@ -569,6 +573,12 @@ async function pagarConta(id) {
         btn.disabled = false;
         btn.innerHTML = 'Confirmar pagamento';
         showMessage('Valor pago deve ser maior que zero.', 'error');
+        return;
+      }
+      if (valor_pago !== undefined && valorMax > 0 && valor_pago > valorMax) {
+        btn.disabled = false;
+        btn.innerHTML = 'Confirmar pagamento';
+        showMessage(`Valor pago não pode ser maior que o saldo da conta (R$ ${valorMax.toFixed(2).replace('.', ',')}).`, 'error');
         return;
       }
       try {
