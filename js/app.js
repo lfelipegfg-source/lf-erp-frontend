@@ -1194,8 +1194,14 @@ function renderAuthenticatedUser() {
 function aplicarLogoSidebar(url) {
   const el = document.getElementById('sidebarBrandIcon');
   if (!el) return;
-  if (url) {
-    el.innerHTML = `<img src="${url}" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">`;
+  const urlSafe = typeof url === 'string' && (url.startsWith('https://') || url.startsWith('data:image/'));
+  if (urlSafe) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'Logo';
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:8px';
+    el.innerHTML = '';
+    el.appendChild(img);
   } else {
     el.innerHTML = '<i class="fa-solid fa-layer-group"></i>';
   }

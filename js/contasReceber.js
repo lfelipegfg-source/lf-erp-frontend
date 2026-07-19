@@ -1248,7 +1248,7 @@ async function gerarBoleto(contaReceberID) {
     const empresa = window.LfErpApi?.getEmpresaNome?.() || '';
     const resp = await api.request('/pagamentos/boleto/gerar', {
       method: 'POST',
-      body:   { conta_receber_id: contaReceberID, empresa }
+      body:   { conta_receber_id: contaReceberID, empresa, empresa_id: api.getEmpresaId() }
     });
 
     const boleto  = resp.boleto || resp;

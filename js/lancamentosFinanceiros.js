@@ -554,11 +554,20 @@ async function salvar() {
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
 
+  const valorRaw = Number(document.getElementById('lfValor').value);
+  if (!valorRaw || valorRaw <= 0) {
+    showMsg('O valor do lançamento deve ser maior que zero.', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar';
+    state.saving = false;
+    return;
+  }
+
   const payload = {
     tipo:            document.getElementById('lfTipoInput').value,
     descricao:       document.getElementById('lfDescricao').value.trim(),
     categoria:       document.getElementById('lfCategoria').value.trim(),
-    valor:           Number(document.getElementById('lfValor').value) || 0,
+    valor:           valorRaw,
     vencimento:      document.getElementById('lfVencimento').value || null,
     forma_pagamento: document.getElementById('lfFormaPagamento').value,
     observacao:      document.getElementById('lfObservacao').value.trim()
