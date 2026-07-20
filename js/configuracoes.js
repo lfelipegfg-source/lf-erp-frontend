@@ -231,9 +231,14 @@ const ConfigModule = {
   _aplicarLogoPreview(url) {
     const preview = document.getElementById('cfgLogoPreview');
     if (!preview) return;
-    preview.innerHTML = url
-      ? `<img src="${url}" style="width:100%;height:100%;object-fit:contain;border-radius:12px">`
-      : '<i class="fa-solid fa-layer-group" style="font-size:28px;color:var(--text-muted)"></i>';
+    if (url) {
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:12px';
+      preview.replaceChildren(img);
+    } else {
+      preview.innerHTML = '<i class="fa-solid fa-layer-group" style="font-size:28px;color:var(--text-muted)"></i>';
+    }
   },
 
   async salvarCor(cor) {
@@ -624,6 +629,7 @@ const ConfigModule = {
       </section>
     `;
 
+    this.state.eventsBound = false;
     if (!this.state.eventsBound) {
       this.state.eventsBound = true;
       setTimeout(() => {

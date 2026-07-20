@@ -1,6 +1,6 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
-import { escapeHtml, buildFriendlyError, calcPeriodoLocal } from './utils.js';
+import { escapeHtml, buildFriendlyError, calcPeriodoLocal, todayFortaleza } from './utils.js';
 
 const state = {
   itens:   [],

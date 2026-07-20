@@ -489,8 +489,10 @@ function bindEventos() {
 
   document.querySelectorAll("[data-action='pagar-cp']").forEach((button) => {
     button.addEventListener('click', async () => {
-      if (state.loading) return;
-      await pagarConta(button.dataset.id);
+      if (button.disabled || state.loading) return;
+      button.disabled = true;
+      try { await pagarConta(button.dataset.id); }
+      finally { button.disabled = false; }
     });
   });
 

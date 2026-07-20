@@ -799,14 +799,14 @@ async function getContasReceberClientes() {
 async function baixarContaReceber(id, payload = {}) {
   return request(`/contas-receber/pagar/${id}`, {
     method: 'POST',
-    body: payload
+    body: { empresa: getEmpresaNome(), empresa_id: getEmpresaId(), ...payload }
   });
 }
 
 async function estornarContaReceber(id, payload = {}) {
   return request(`/contas-receber/estornar/${id}`, {
     method: 'POST',
-    body: payload
+    body: { empresa: getEmpresaNome(), empresa_id: getEmpresaId(), ...payload }
   });
 }
 
@@ -844,7 +844,7 @@ async function getContasPagarFornecedores() {
 async function pagarContaPagar(id, payload = {}) {
   return request(`/contas-pagar/pagar/${id}`, {
     method: 'POST',
-    body: payload
+    body: { empresa: getEmpresaNome(), empresa_id: getEmpresaId(), ...payload }
   });
 }
 
@@ -953,15 +953,15 @@ async function getConciliacaoItens(id, params = {}) {
 }
 
 async function ignorarConciliacaoItem(id) {
-  return request(`/conciliacao/itens/${id}/ignorar`, { method: 'POST', body: {} });
+  return request(`/conciliacao/itens/${id}/ignorar`, { method: 'POST', body: { empresa: getEmpresaNome(), empresa_id: getEmpresaId() } });
 }
 
 async function criarLancamentoConciliacao(id, payload = {}) {
-  return request(`/conciliacao/itens/${id}/criar-lancamento`, { method: 'POST', body: payload });
+  return request(`/conciliacao/itens/${id}/criar-lancamento`, { method: 'POST', body: { empresa: getEmpresaNome(), empresa_id: getEmpresaId(), ...payload } });
 }
 
 async function deleteConciliacao(id) {
-  return request(`/conciliacao/${id}`, { method: 'DELETE' });
+  return request(`/conciliacao/${id}`, { method: 'DELETE', body: { empresa_id: getEmpresaId() } });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1009,13 +1009,14 @@ async function updateLancamentoFinanceiro(id, payload) {
 async function pagarLancamentoFinanceiro(id, payload = {}) {
   return request(`/financeiro/lancamentos/pagar/${id}`, {
     method: 'POST',
-    body: payload
+    body: { empresa: getEmpresaNome(), empresa_id: getEmpresaId(), ...payload }
   });
 }
 
 async function deleteLancamentoFinanceiro(id) {
   return request(`/financeiro/lancamentos/${id}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    body: { empresa_id: getEmpresaId() }
   });
 }
 
