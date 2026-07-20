@@ -155,6 +155,7 @@ const ConfigModule = {
         method: 'PUT',
         body: {
           empresa:        this.state.empresa,
+          empresa_id:     this.state.dados?.empresa_id || null,
           asaas_api_key:  document.getElementById('cfgAsaasApiKey')?.value?.trim()  || null,
           asaas_sandbox:  document.getElementById('cfgAsaasSandbox')?.checked ?? true
         }
@@ -202,6 +203,7 @@ const ConfigModule = {
 
       await api.fetchAPI(`/configuracoes`, 'PUT', {
         empresa: this.state.empresa,
+        empresa_id: this.state.dados?.empresa_id || null,
         nome_empresa: nome,
         cor_primaria: cor
       });
@@ -243,7 +245,7 @@ const ConfigModule = {
 
   async salvarCor(cor) {
     try {
-      await api.fetchAPI('/configuracoes', 'PUT', { empresa: this.state.empresa, cor_primaria: cor || null });
+      await api.fetchAPI('/configuracoes', 'PUT', { empresa: this.state.empresa, empresa_id: this.state.dados?.empresa_id || null, cor_primaria: cor || null });
       if (this.state.dados) this.state.dados.cor_primaria = cor || null;
       const chave = `lf_cor_${this.state.dados?.empresa_id || this.state.dados?.empresa || this.state.empresa || ''}`;
       try { cor ? localStorage.setItem(chave, cor) : localStorage.removeItem(chave); } catch(_) {}

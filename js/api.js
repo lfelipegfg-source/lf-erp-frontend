@@ -661,7 +661,8 @@ async function getVendas(params = {}) {
 
 async function getVendaDetalhe(id) {
   return request(`/vendas/detalhe/${id}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -720,7 +721,8 @@ async function getCompras(params = {}) {
 
 async function getCompraDetalhe(id) {
   return request(`/compras-detalhe/${id}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -778,13 +780,15 @@ async function getContasReceber(params = {}) {
 
 async function getHistoricoFinanceiroCliente(clienteId) {
   return request(`/contas-receber/cliente-historico/${clienteId}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
 async function getContaReceberDetalhe(id) {
   return request(`/contas-receber/detalhe/${id}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -812,7 +816,8 @@ async function estornarContaReceber(id, payload = {}) {
 
 async function getOrigemVendaContaReceber(id) {
   return request(`/contas-receber/origem-venda/${id}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -829,7 +834,8 @@ async function getContasPagar(params = {}) {
 
 async function getContaPagarDetalhe(id) {
   return request(`/contas-pagar/detalhe/${id}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -850,7 +856,8 @@ async function pagarContaPagar(id, payload = {}) {
 
 async function getOrigemCompraContaPagar(id) {
   return request(`/contas-pagar/origem-compra/${id}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -920,7 +927,7 @@ async function gerarPIX(payload) {
 
 async function verificarStatusPIX(txid) {
   const empresa = getEmpresaNome();
-  return request(`/pagamentos/pix/status/${txid}`, { method: 'GET', query: { empresa } });
+  return request(`/pagamentos/pix/status/${txid}`, { method: 'GET', query: { empresa, empresa_id: getEmpresaId() } });
 }
 
 // ── Conciliação Bancária ──────────────────────────────────────────────────────
@@ -979,7 +986,8 @@ async function getLancamentosFinanceiros(params = {}) {
 
 async function getLancamentoFinanceiroDetalhe(id) {
   return request(`/financeiro/lancamentos-detalhe/${id}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -1141,11 +1149,11 @@ async function downloadNfeXml(ref) {
 // ── ORÇAMENTOS ───────────────────────────────────────────────────────────────
 
 async function getOrcamentos(params = {}) {
-  return request('/orcamentos', { method: 'GET', query: params });
+  return request('/orcamentos', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
 async function getOrcamento(id) {
-  return request(`/orcamentos/${id}`, { method: 'GET' });
+  return request(`/orcamentos/${id}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function createOrcamento(payload) {
@@ -1187,11 +1195,11 @@ async function togglePortalCliente(clienteId) {
 // ── PEDIDOS ──────────────────────────────────────────────────────────────────
 
 async function getPedidos(params = {}) {
-  return request('/pedidos', { method: 'GET', query: params });
+  return request('/pedidos', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
 async function getPedido(id) {
-  return request(`/pedidos/${id}`, { method: 'GET' });
+  return request(`/pedidos/${id}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function confirmarPedido(id) {

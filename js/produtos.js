@@ -1411,7 +1411,7 @@ const ProdutosModule = {
                   <strong style="text-transform:capitalize">${plat.replace('mercadolivre','Mercado Livre')}</strong>
                   ${statusBadge(cfg?.status_conexao || 'desconectado')}
                 </div>
-                ${cfg?.seller_id ? `<div style="font-size:.8rem;color:var(--text-muted)">Seller ID: ${cfg.seller_id}</div>` : ''}
+                ${cfg?.seller_id ? `<div style="font-size:.8rem;color:var(--text-muted)">Seller ID: ${escapeHtml(String(cfg.seller_id))}</div>` : ''}
                 <div style="margin-top:10px;display:flex;gap:8px">
                   <button class="btn btn-light btn-sm" onclick="ProdutosModule._configurarMkt('${plat}')">
                     <i class="fa-solid fa-gear"></i> Config
@@ -1447,7 +1447,7 @@ const ProdutosModule = {
                      <td class="text-right">${p.estoque_lferp}</td>
                      <td class="text-right">${p.estoque_publicado}</td>
                      <td class="text-right">
-                       <button class="btn-inline" onclick="ProdutosModule._syncEstoque(${p.produto_id},'${p.plataforma}')">
+                       <button class="btn-inline" onclick="ProdutosModule._syncEstoque(${Number(p.produto_id)},${JSON.stringify(p.plataforma)})">
                          <i class="fa-solid fa-sync"></i> Sync
                        </button>
                        <button class="btn-inline btn-inline--danger" onclick="ProdutosModule._desvincular(${p.id})">

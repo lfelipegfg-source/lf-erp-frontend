@@ -2376,15 +2376,44 @@ const VendasModule = {
 
   async criarMeta() {
     const periodo = document.getElementById('metasPeriodoInput')?.value || new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Fortaleza' }).format(new Date()).slice(0, 7);
-    const valor = prompt(`Meta de vendas para o período ${periodo} (R$):`);
-    if (!valor || isNaN(Number(valor))) return;
 
-    const descricao = prompt('Descrição (opcional):') || '';
+    const resultado = await new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
+      const div = document.createElement('div');
+      div.style.cssText = 'background:var(--surface);border-radius:16px;padding:24px;max-width:340px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)';
+      div.innerHTML = `
+        <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Meta — ${escapeHtml(periodo)}</h3>
+        <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:4px">Valor (R$)</label>
+        <input id="_metaValorInput" type="number" min="0" step="0.01" placeholder="0,00" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:12px" />
+        <label style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:4px">Descrição (opcional)</label>
+        <input id="_metaDescInput" type="text" placeholder="Ex: Meta mensal" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:20px" />
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button id="_metaCancelarBtn" class="btn-cancel">Cancelar</button>
+          <button id="_metaConfirmarBtn" class="btn-confirm btn-confirm--success">Criar meta</button>
+        </div>`;
+      overlay.appendChild(div);
+      document.body.appendChild(overlay);
+      overlay.querySelector('#_metaCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_metaConfirmarBtn').onclick = (e) => {
+        const valor = overlay.querySelector('#_metaValorInput').value.trim();
+        if (!valor || isNaN(Number(valor)) || Number(valor) <= 0) {
+          overlay.querySelector('#_metaValorInput').focus(); return;
+        }
+        e.currentTarget.disabled = true;
+        const descricao = overlay.querySelector('#_metaDescInput').value.trim();
+        document.body.removeChild(overlay);
+        resolve({ valor: Number(valor), descricao });
+      };
+      setTimeout(() => overlay.querySelector('#_metaValorInput')?.focus(), 50);
+    });
+
+    if (!resultado) return;
 
     try {
       await api.request('/metas-vendas', {
         method: 'POST',
-        body: { periodo, valor_meta: Number(valor), descricao: descricao || null }
+        body: { periodo, valor_meta: resultado.valor, descricao: resultado.descricao || null }
       });
       showToast('Meta criada!', 'success');
       await this._carregarMetas(periodo);

@@ -242,8 +242,11 @@ function render() {
         </select>
         <select id="lfStatus" class="input">
           <option value="">Todos os status</option>
-          <option value="pendente" ${state.filtros.status === 'pendente' ? 'selected' : ''}>Pendentes</option>
-          <option value="pago"     ${state.filtros.status === 'pago'     ? 'selected' : ''}>Pagos</option>
+          <option value="pendente"         ${state.filtros.status === 'pendente'         ? 'selected' : ''}>Pendentes</option>
+          <option value="pago"             ${state.filtros.status === 'pago'             ? 'selected' : ''}>Pagos</option>
+          <option value="atrasado"         ${state.filtros.status === 'atrasado'         ? 'selected' : ''}>Atrasados</option>
+          <option value="parcial"          ${state.filtros.status === 'parcial'          ? 'selected' : ''}>Parciais</option>
+          <option value="parcial_atrasado" ${state.filtros.status === 'parcial_atrasado' ? 'selected' : ''}>Parcial em atraso</option>
         </select>
         <div style="display:flex;gap:8px">
           <button class="btn btn-primary" id="lfBtnFiltrar" type="button">
@@ -622,7 +625,8 @@ async function pagar(id) {
         </div>`;
       document.body.appendChild(overlay);
       overlay.querySelector('#_lfPagarCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(null); };
-      overlay.querySelector('#_lfPagarConfirmarBtn').onclick = () => {
+      overlay.querySelector('#_lfPagarConfirmarBtn').onclick = (e) => {
+        e.currentTarget.disabled = true;
         const data = overlay.querySelector('#_lfPagarDataInput').value;
         document.body.removeChild(overlay);
         resolve(data || null);
