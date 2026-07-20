@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast, confirmarAcao } from './feedback.js';
+import { showToast, confirmarAcao, pedirInput } from './feedback.js';
 
 function esc(v) {
   return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -104,7 +104,7 @@ const ApiPublicaModule = {
   },
 
   async criarChave() {
-    const nome = prompt('Nome da chave (ex: Integração Site, App Mobile):');
+    const nome = await pedirInput('Nome da chave (ex: Integração Site, App Mobile):');
     if (!nome?.trim()) return;
     try {
       const data = await api.fetchAPI('/webhooks/api-keys', 'POST', { nome });

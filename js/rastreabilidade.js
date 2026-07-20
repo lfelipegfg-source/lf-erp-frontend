@@ -1,5 +1,5 @@
 import api from './api.js';
-import { showToast, confirmarAcao } from './feedback.js';
+import { showToast, confirmarAcao, pedirInput } from './feedback.js';
 
 function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function dataBR(d) { if (!d) return '—'; const [y,m,dia] = String(d).substring(0,10).split('-'); return `${dia}/${m}/${y}`; }
@@ -255,7 +255,7 @@ const RastreabilidadeModule = {
   },
 
   async registrarSaida(loteId) {
-    const qtd = prompt('Quantidade a baixar:');
+    const qtd = await pedirInput('Quantidade a baixar:', '0', 'number');
     if (!qtd || isNaN(Number(qtd)) || Number(qtd) <= 0) return;
     try {
       const data = await api.fetchAPI(`/rastreabilidade/lotes/${loteId}/saida`, 'POST', { quantidade: Number(qtd) });

@@ -96,3 +96,45 @@ export function confirmarAcao(mensagem, labelConfirmar = 'Confirmar', tipo = 'da
     overlay.querySelector('._cf-cancelar').focus();
   });
 }
+
+export function pedirInput(label, placeholder = '', tipo = 'text') {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML = `
+      <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:380px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
+        <p style="font-size:14px;margin:0 0 12px;color:var(--text)">${escapeHtml(label)}</p>
+        <input class="_pi-input" type="${escapeHtml(tipo)}" placeholder="${escapeHtml(placeholder)}"
+          style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;box-sizing:border-box" />
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+          <button class="_pi-cancelar" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface-3);font-size:13px;cursor:pointer">Cancelar</button>
+          <button class="_pi-confirmar" style="padding:8px 16px;border-radius:8px;border:none;background:var(--primary);color:#fff;font-size:13px;font-weight:600;cursor:pointer">OK</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    const input = overlay.querySelector('._pi-input');
+    let resolvido = false;
+
+    function fechar(valor) {
+      if (resolvido) return;
+      resolvido = true;
+      document.removeEventListener('keydown', onKeydown);
+      overlay.remove();
+      resolve(valor);
+    }
+
+    function onKeydown(e) {
+      if (e.key === 'Escape') fechar(null);
+      if (e.key === 'Enter') fechar(input.value?.trim() || null);
+    }
+
+    document.addEventListener('keydown', onKeydown);
+    overlay.querySelector('._pi-cancelar').addEventListener('click', () => fechar(null));
+    overlay.querySelector('._pi-confirmar').addEventListener('click', () => fechar(input.value?.trim() || null));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) fechar(null); });
+
+    setTimeout(() => input.focus(), 50);
+  });
+}
