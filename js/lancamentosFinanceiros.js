@@ -633,6 +633,7 @@ async function pagar(id) {
       };
     });
     if (!dataPagamento) return;
+    setLoading(true);
     await api.pagarLancamentoFinanceiro(id, { pagamento_data: dataPagamento });
     showMsg('Lançamento marcado como pago.', 'success');
     await carregarLancamentos();
@@ -642,6 +643,7 @@ async function pagar(id) {
     showMsg(buildFriendlyError(error), 'error');
   } finally {
     state.paying = false;
+    setLoading(false);
   }
 }
 

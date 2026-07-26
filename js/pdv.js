@@ -1193,7 +1193,7 @@ const PDVModule = {
       });
     }
 
-    this._recordProdutoAdded(this.state.gradeModalProduto?.id);
+    this._recordProdutoAdded(produto.id);
     this.renderCarrinho();
     this.renderResumo();
     this.setFeedback('', 'info');

@@ -779,7 +779,7 @@ function formatDate(value) {
     return `${dia}/${mes}/${ano}`;
   }
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+  if (Number.isNaN(date.getTime())) return escapeHtml(String(value));
   return date.toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
 }
 
