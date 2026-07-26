@@ -997,6 +997,22 @@ const ProdutosModule = {
       </div>`).join('');
   },
 
+  async _validarMagicBytes(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = (e) => {
+        const arr = new Uint8Array(e.target.result);
+        const isJpeg = arr[0] === 0xFF && arr[1] === 0xD8 && arr[2] === 0xFF;
+        const isPng  = arr[0] === 0x89 && arr[1] === 0x50 && arr[2] === 0x4E && arr[3] === 0x47;
+        const isWebp = arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46
+                    && arr[8] === 0x57 && arr[9] === 0x45 && arr[10] === 0x42 && arr[11] === 0x50;
+        resolve(isJpeg || isPng || isWebp);
+      };
+      reader.onerror = () => resolve(false);
+      reader.readAsArrayBuffer(file.slice(0, 12));
+    });
+  },
+
   async handleImagemUpload(file) {
     if (!file || !this.state.editingId) return;
     if (this.state._uploadingImagem) return;
@@ -1007,6 +1023,11 @@ const ProdutosModule = {
     }
     if (file.size > 5 * 1024 * 1024) {
       showToast('A imagem deve ter no máximo 5 MB.', 'error');
+      return;
+    }
+    const magicOk = await this._validarMagicBytes(file);
+    if (!magicOk) {
+      showToast('Arquivo inválido. Certifique-se de que é uma imagem real (JPG, PNG ou WebP).', 'error');
       return;
     }
     this.state._uploadingImagem = true;

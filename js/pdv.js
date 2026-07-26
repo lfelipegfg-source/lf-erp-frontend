@@ -50,6 +50,7 @@ const PDVModule = {
   resolveEmpresa() {
     const auth = getAuth();
     this.state.empresa = auth?.empresa?.nome || auth?.user?.empresa || 'LF ERP';
+    PdvOffline.setEmpresaId(api.getEmpresaId());
   },
 
   cache() {
@@ -1374,6 +1375,14 @@ const PDVModule = {
         }
         return p;
       });
+    }
+
+    // Valida preços — impede envio de preços negativos ou zerados forçados via console
+    for (const item of this.state.carrinho) {
+      if (Number(item.preco_unitario) < 0) {
+        this.showMessage('Preço inválido no carrinho. Remova o item e adicione novamente.', 'error');
+        return;
+      }
     }
 
     // Valida vencimento para Promissória

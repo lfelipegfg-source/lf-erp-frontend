@@ -62,6 +62,10 @@
 <script>
 const API_BASE = window.LF_ERP_API_URL || 'https://lf-erp-backend.onrender.com';
 
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+
 function moeda(v) {
   return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
@@ -91,8 +95,8 @@ function renderizar(co, token) {
   // Header
   root.innerHTML = `
     <div class="card-header">
-      <div class="empresa-nome"><i class="fa fa-store"></i> ${co.empresa_nome}</div>
-      <div class="checkout-desc">${co.descricao}</div>
+      <div class="empresa-nome"><i class="fa fa-store"></i> ${esc(co.empresa_nome)}</div>
+      <div class="checkout-desc">${esc(co.descricao)}</div>
       <div class="checkout-valor">${moeda(co.valor)}</div>
       ${co.expira_em ? `<div class="expira-aviso"><i class="fa fa-clock"></i> Válido até ${dataBR(co.expira_em)}</div>` : ''}
     </div>
@@ -111,7 +115,7 @@ function renderBody(co, token) {
       <div class="status-pago">
         <i class="fa fa-circle-check"></i>
         <strong>Pagamento confirmado!</strong>
-        <span>Obrigado, ${co.cliente_nome || 'cliente'}!</span>
+        <span>Obrigado, ${esc(co.cliente_nome || 'cliente')}!</span>
         ${co.pago_em ? `<span style="margin-top:6px;display:block;">Registrado em ${dataBR(co.pago_em)}</span>` : ''}
       </div>`;
     return;
@@ -122,7 +126,7 @@ function renderBody(co, token) {
       <div class="error-box">
         <i class="fa fa-circle-xmark"></i>
         <strong>Este link ${co.status === 'expirado' ? 'expirou' : 'foi cancelado'}.</strong>
-        <p style="margin-top:6px;font-size:13px;">Entre em contato com ${co.empresa_nome} para um novo link.</p>
+        <p style="margin-top:6px;font-size:13px;">Entre em contato com ${esc(co.empresa_nome)} para um novo link.</p>
       </div>`;
     return;
   }
@@ -145,7 +149,7 @@ function renderBody(co, token) {
     html += `<div class="pix-section ${temBoleto ? '' : 'active'}" id="abaPixSection">`;
     html += `<div class="qr-wrap"><div id="qrcodeDiv"></div></div>`;
     html += `<p style="font-size:12px;color:#64748b;text-align:center;margin-bottom:8px;">Ou copie a chave PIX:</p>`;
-    html += `<div class="pix-key-box" id="pixKeyBox">${co.pix_copia_cola}</div>`;
+    html += `<div class="pix-key-box" id="pixKeyBox">${esc(co.pix_copia_cola)}</div>`;
     html += `<button class="btn btn-pix" onclick="copiarPix()"><i class="fa fa-copy"></i> Copiar código PIX</button>`;
     html += `<div class="info-row"><i class="fa fa-circle-info"></i><span>Abra o app do seu banco → PIX → Pagar → Copia e Cola. Confirme o valor e a empresa recebedora antes de pagar.</span></div>`;
     html += `</div>`;
@@ -157,8 +161,8 @@ function renderBody(co, token) {
     if (co.boleto_url) {
       html += `<a href="${co.boleto_url}" target="_blank" class="btn btn-boleto"><i class="fa fa-file-lines"></i> Ver boleto</a>`;
       if (co.boleto_linha) {
-        html += `<div class="pix-key-box" style="margin-top:12px;">${co.boleto_linha}</div>`;
-        html += `<button class="btn btn-secondary" onclick="copiarTexto('${co.boleto_linha}','bolLinha')"><i class="fa fa-copy"></i> Copiar linha digitável</button>`;
+        html += `<div class="pix-key-box" id="boletoLinhaBox" style="margin-top:12px;">${esc(co.boleto_linha)}</div>`;
+        html += `<button class="btn btn-secondary" onclick="copiarBoleto()"><i class="fa fa-copy"></i> Copiar linha digitável</button>`;
       }
     } else {
       html += `<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Preencha seu nome para gerar o boleto:</p>`;
@@ -172,7 +176,7 @@ function renderBody(co, token) {
   if (!temPix && !temBoleto) {
     html += `<div class="error-box" style="background:#fff7ed;border-color:#fed7aa;color:#92400e;">
       <i class="fa fa-triangle-exclamation" style="color:#f59e0b;"></i>
-      <p style="font-size:13px;">Nenhuma forma de pagamento configurada para este link. Entre em contato com ${co.empresa_nome}.</p>
+      <p style="font-size:13px;">Nenhuma forma de pagamento configurada para este link. Entre em contato com ${esc(co.empresa_nome)}.</p>
     </div>`;
   }
 
@@ -230,12 +234,12 @@ async function gerarBoleto(token) {
     const data = await resp.json();
     const result = document.getElementById('boletoResult');
 
-    if (!data.sucesso) { if (result) result.innerHTML = `<div class="info-row" style="color:#ef4444;margin-top:8px;"><i class="fa fa-circle-xmark"></i>${data.erro}</div>`; return; }
+    if (!data.sucesso) { if (result) result.innerHTML = `<div class="info-row" style="color:#ef4444;margin-top:8px;"><i class="fa fa-circle-xmark"></i>${esc(data.erro)}</div>`; return; }
 
     if (data.boleto_url) {
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-external-link"></i> Abrir boleto'; btn.onclick = () => window.open(data.boleto_url, '_blank'); }
       if (data.boleto_linha && result) {
-        result.innerHTML = `<div class="pix-key-box" style="margin-top:12px;">${data.boleto_linha}</div>`;
+        result.innerHTML = `<div class="pix-key-box" id="boletoLinhaBox" style="margin-top:12px;">${esc(data.boleto_linha)}</div>`;
       }
     }
   } catch {
@@ -243,10 +247,19 @@ async function gerarBoleto(token) {
   }
 }
 
+function copiarBoleto() {
+  const txt = document.getElementById('boletoLinhaBox')?.textContent;
+  if (!txt) return;
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.querySelector('.btn-secondary');
+    if (btn) { const o = btn.innerHTML; btn.innerHTML = '<i class="fa fa-check"></i> Copiado!'; setTimeout(() => { btn.innerHTML = o; }, 2000); }
+  });
+}
+
 function mostrarErro(msg) {
   document.getElementById('root').innerHTML = `
     <div class="card-body">
-      <div class="error-box"><i class="fa fa-circle-xmark"></i><strong>${msg}</strong></div>
+      <div class="error-box"><i class="fa fa-circle-xmark"></i><strong>${esc(msg)}</strong></div>
     </div>`;
 }
 

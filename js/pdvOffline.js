@@ -1,9 +1,18 @@
-const PDV_DB_NAME = 'lf_pdv_offline';
 const PDV_DB_VERSION = 1;
+
+let _empresaId = null;
+
+export function setEmpresaId(id) {
+  _empresaId = id ? String(id) : null;
+}
+
+function getDbName() {
+  return _empresaId ? `lf_pdv_offline_${_empresaId}` : 'lf_pdv_offline_default';
+}
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(PDV_DB_NAME, PDV_DB_VERSION);
+    const req = indexedDB.open(getDbName(), PDV_DB_VERSION);
 
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
@@ -84,11 +93,14 @@ export async function getClientes() {
 }
 
 export async function salvarVendaPendente(venda) {
+  const idempotency_key = (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   try {
     const db = await openDB();
     const req = db.transaction('vendas_pendentes', 'readwrite')
       .objectStore('vendas_pendentes')
-      .add({ ...venda, _queued_at: new Date().toISOString() });
+      .add({ ...venda, idempotency_key, _queued_at: new Date().toISOString() });
     return new Promise((resolve, reject) => {
       req.onsuccess = () => { db.close(); resolve(req.result); };
       req.onerror = (e) => { db.close(); reject(e.target.error); };

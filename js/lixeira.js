@@ -4,7 +4,7 @@ import { showToast, confirmarAcao } from './feedback.js';
 const state = { dados: null, loading: false };
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function formatDateTime(d) {
   if (!d) return '-';
