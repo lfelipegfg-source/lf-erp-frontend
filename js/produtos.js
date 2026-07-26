@@ -2,7 +2,7 @@ import api from './api.js';
 import { getAuth } from './auth.js';
 import { showToast, confirmarAcao } from './feedback.js';
 import { exportCSV, numCSV } from './exportUtils.js';
-import { escapeHtml, buildFriendlyError } from './utils.js';
+import { escapeHtml, buildFriendlyError, debounce } from './utils.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -116,10 +116,14 @@ const ProdutosModule = {
       document.head.appendChild(s);
     }
 
+    const _debouncedSearchProd = debounce((val) => {
+      this.state.pagina = 1;
+      this.applySearch(val);
+    }, 350);
+
     document.addEventListener('input', (e) => {
       if (e.target?.id === 'produtosSearchInput') {
-        this.state.pagina = 1;
-        this.applySearch(e.target.value);
+        _debouncedSearchProd(e.target.value);
       }
 
       // Preço sugerido: atualiza quando custo muda e o usuário não digitou preço

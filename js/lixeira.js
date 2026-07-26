@@ -1,7 +1,7 @@
 import api from './api.js';
 import { showToast, confirmarAcao } from './feedback.js';
 
-const state = { dados: null, loading: false };
+const state = { dados: null, loading: false, bound: false };
 
 function esc(v) {
   return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -108,6 +108,8 @@ function renderSecao(titulo, _tipo, itens, campos) {
 }
 
 function bind() {
+  if (state.bound) return;
+  state.bound = true;
   document.getElementById('lixeiraContainer')?.addEventListener('click', async (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;

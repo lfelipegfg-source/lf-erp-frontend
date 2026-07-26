@@ -699,10 +699,11 @@ const ClientesModule = {
     const pct = (v) => Number(v||0).toFixed(1) + '%';
 
     const receitaGeral = Number(data.receita_geral || 0);
+    const resumo = data.resumo || {};
 
-    const pctA = receitaGeral > 0 ? ((data.resumo.A.receita / receitaGeral) * 100) : 0;
-    const pctB = receitaGeral > 0 ? ((data.resumo.B.receita / receitaGeral) * 100) : 0;
-    const pctC = receitaGeral > 0 ? ((data.resumo.C.receita / receitaGeral) * 100) : 0;
+    const pctA = receitaGeral > 0 && resumo.A ? ((resumo.A.receita / receitaGeral) * 100) : 0;
+    const pctB = receitaGeral > 0 && resumo.B ? ((resumo.B.receita / receitaGeral) * 100) : 0;
+    const pctC = receitaGeral > 0 && resumo.C ? ((resumo.C.receita / receitaGeral) * 100) : 0;
 
     const badgeCls = { A: 'badge--success', B: 'badge--warning', C: 'badge--danger' };
 
@@ -719,7 +720,7 @@ const ClientesModule = {
         <!-- Cards de resumo -->
         <div class="abc-resumo-grid">
           ${['A','B','C'].map(cls => {
-            const r = data.resumo[cls];
+            const r = resumo[cls] || { receita: 0, clientes: 0 };
             const p = receitaGeral > 0 ? ((r.receita / receitaGeral) * 100).toFixed(1) : '0.0';
             const desc = cls === 'A' ? 'Clientes estratégicos — prioridade máxima'
                        : cls === 'B' ? 'Clientes importantes — fidelização ativa'

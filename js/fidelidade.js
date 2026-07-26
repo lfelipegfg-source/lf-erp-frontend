@@ -207,6 +207,8 @@ const FidelidadeModule = {
   },
 
   async salvarConfig() {
+    const submitBtn = document.querySelector('#fidCfgForm button[type="submit"]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Salvando...'; }
     const payload = {
       ativo:           document.getElementById('fidAtivo').checked,
       nome_programa:   document.getElementById('fidNome').value.trim(),
@@ -220,6 +222,9 @@ const FidelidadeModule = {
       showToast('Configuração salva!', 'success');
       this.state.cfg = { ...this.state.cfg, ...payload };
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
+    finally {
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa fa-save"></i> Salvar configuração'; }
+    }
   },
 
   // ── Clientes ──────────────────────────────────────────────────────────────
@@ -343,8 +348,8 @@ const FidelidadeModule = {
     document.getElementById('fidExtratoBody').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">Carregando...</div>';
     try {
       const data = await api.fetchAPI(`/fidelidade/clientes/${clienteId}/extrato`);
-      const c = data.cliente;
-      document.getElementById('fidExtratoTitle').textContent = `Extrato — ${c.nome}`;
+      const c = data.cliente || {};
+      document.getElementById('fidExtratoTitle').textContent = `Extrato — ${c.nome || 'Cliente'}`;
 
       const movs = data.movimentos;
       document.getElementById('fidExtratoBody').innerHTML = `
@@ -437,6 +442,7 @@ const FidelidadeModule = {
 
     document.getElementById('fidResgateForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
       const clienteId = document.getElementById('fidResCli').value;
       const pontos    = parseInt(document.getElementById('fidResPts').value);
       if (!clienteId || !pontos) return;
@@ -444,6 +450,7 @@ const FidelidadeModule = {
       const ok = await confirmarAcao(`Resgatar ${pontos} pontos para desconto de ${moeda(pontos * Number(this.state.cfg?.reais_por_ponto || 0.05))}?`);
       if (!ok) return;
 
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Processando...'; }
       try {
         const data = await api.fetchAPI('/fidelidade/resgatar', 'POST', { cliente_id: clienteId, pontos });
         document.getElementById('fidResResult').innerHTML = `
@@ -456,6 +463,9 @@ const FidelidadeModule = {
           </div>`;
         showToast(data.mensagem, 'success');
       } catch (err) { showToast(err.message || 'Erro', 'error'); }
+      finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa fa-check"></i> Confirmar resgate'; }
+      }
     });
   },
 
