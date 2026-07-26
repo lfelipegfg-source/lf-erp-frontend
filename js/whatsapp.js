@@ -303,6 +303,11 @@ const WhatsappModule = {
     `;
 
     document.getElementById('wppProcessarBtn')?.addEventListener('click', async () => {
+      const ok = await confirmarAcao(
+        'Processar cobranças agora enviará mensagens WhatsApp para TODOS os clientes elegíveis. Deseja continuar?'
+      );
+      if (!ok) return;
+
       const btn = document.getElementById('wppProcessarBtn');
       const result = document.getElementById('wppProcessarResult');
       const diasAviso  = parseInt(document.getElementById('wppDiasAviso').value) || 3;

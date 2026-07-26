@@ -63,8 +63,8 @@ const CrmModule = {
       if (this.state.filtroBusca)   params.busca   = this.state.filtroBusca;
 
       const [dashData, opData] = await Promise.all([
-        api.fetchAPI('/crm/dashboard'),
-        api.fetchAPI('/crm/oportunidades', 'GET', null, params)
+        api.fetchAPI('/crm/dashboard', 'GET', null, { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() }),
+        api.fetchAPI('/crm/oportunidades', 'GET', null, { ...params, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() })
       ]);
 
       this.state.dashboard     = dashData;
@@ -437,10 +437,10 @@ const CrmModule = {
     try {
       btn.disabled = true; btn.textContent = 'Salvando...';
       if (id) {
-        await api.fetchAPI(`/crm/oportunidades/${id}`, 'PUT', payload);
+        await api.fetchAPI(`/crm/oportunidades/${id}`, 'PUT', { ...payload, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
         showToast('Oportunidade atualizada', 'success');
       } else {
-        await api.fetchAPI('/crm/oportunidades', 'POST', payload);
+        await api.fetchAPI('/crm/oportunidades', 'POST', { ...payload, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
         showToast('Oportunidade criada', 'success');
       }
       this.fecharModal();
@@ -456,7 +456,7 @@ const CrmModule = {
     const ok = await confirmarAcao('Excluir esta oportunidade? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
     if (!ok) return;
     try {
-      await api.fetchAPI(`/crm/oportunidades/${id}`, 'DELETE');
+      await api.fetchAPI(`/crm/oportunidades/${id}`, 'DELETE', { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       showToast('Oportunidade excluída', 'success');
       await this.load();
     } catch (err) {
@@ -466,7 +466,7 @@ const CrmModule = {
 
   async moverEstagio(id, estagio) {
     try {
-      await api.fetchAPI(`/crm/oportunidades/${id}/estagio`, 'PATCH', { estagio });
+      await api.fetchAPI(`/crm/oportunidades/${id}/estagio`, 'PATCH', { estagio, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       const op = this.state.oportunidades.find((o) => o.id === id);
       if (op) op.estagio = estagio;
       this.renderView();
@@ -484,7 +484,7 @@ const CrmModule = {
     document.getElementById('crmDetalheBody').innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-muted);">Carregando...</div>`;
 
     try {
-      const data = await api.fetchAPI(`/crm/oportunidades/${id}`);
+      const data = await api.fetchAPI(`/crm/oportunidades/${id}`, 'GET', null, { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       this.renderDetalhe(data.oportunidade, data.atividades || []);
     } catch (err) {
       document.getElementById('crmDetalheBody').innerHTML = `<div style="padding:20px;color:var(--danger);">${esc(err.message)}</div>`;
@@ -577,7 +577,7 @@ const CrmModule = {
     const ok = await confirmarAcao('Criar um orçamento a partir desta oportunidade?', 'Confirmar', 'primary');
     if (!ok) return;
     try {
-      const data = await api.fetchAPI(`/crm/oportunidades/${id}/converter`, 'POST');
+      const data = await api.fetchAPI(`/crm/oportunidades/${id}/converter`, 'POST', { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       showToast(`Orçamento #${data.orcamento_id} criado com sucesso!`, 'success');
       this.fecharDetalhe();
       await this.load();
@@ -597,7 +597,7 @@ const CrmModule = {
     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Registrando...'; }
 
     try {
-      await api.fetchAPI(`/crm/oportunidades/${opId}/atividades`, 'POST', { tipo, descricao, data });
+      await api.fetchAPI(`/crm/oportunidades/${opId}/atividades`, 'POST', { tipo, descricao, data, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       await this.abrirDetalhe(opId);
     } catch (err) {
       showToast(err.message || 'Erro ao registrar atividade', 'error');
@@ -609,7 +609,7 @@ const CrmModule = {
     const ok = await confirmarAcao('Remover esta atividade? Esta ação não pode ser desfeita.', 'Remover', 'danger');
     if (!ok) return;
     try {
-      await api.fetchAPI(`/crm/oportunidades/${opId}/atividades/${atId}`, 'DELETE');
+      await api.fetchAPI(`/crm/oportunidades/${opId}/atividades/${atId}`, 'DELETE', { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       await this.abrirDetalhe(opId);
     } catch (err) {
       showToast(err.message || 'Erro ao remover', 'error');

@@ -226,8 +226,12 @@ const FidelidadeModule = {
 
   async loadClientes() {
     try {
-      const data = await api.fetchAPI('/fidelidade/clientes');
+      const [data, cfgData] = await Promise.all([
+        api.fetchAPI('/fidelidade/clientes'),
+        api.fetchAPI('/fidelidade/config')
+      ]);
       this.state.clientes = data.clientes || [];
+      this.state.cfg = cfgData.config;
       this.renderClientes();
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
   },
@@ -301,11 +305,15 @@ const FidelidadeModule = {
       </div>
     `;
 
-    document.getElementById('fidBuscaCliente')?.addEventListener('input', async (e) => {
+    let _fidBuscaTimer = null;
+    document.getElementById('fidBuscaCliente')?.addEventListener('input', (e) => {
+      clearTimeout(_fidBuscaTimer);
       const q = e.target.value;
-      const data = await api.fetchAPI('/fidelidade/clientes', 'GET', null, q ? { busca: q } : {}).catch(() => ({ clientes: [] }));
-      this.state.clientes = data.clientes || [];
-      this.renderClientes();
+      _fidBuscaTimer = setTimeout(async () => {
+        const data = await api.fetchAPI('/fidelidade/clientes', 'GET', null, q ? { busca: q } : {}).catch(() => ({ clientes: [] }));
+        this.state.clientes = data.clientes || [];
+        this.renderClientes();
+      }, 350);
     });
 
     el.querySelectorAll('[data-extrato]').forEach((btn) => {

@@ -328,13 +328,23 @@
 
     try {
       if (id) {
+        const vaBloqueada = document.getElementById('empresaBloqueada').value === 'true';
+        if (vaBloqueada) {
+          const nomeEmpresa = document.getElementById('empresaNome').value.trim() || `empresa #${id}`;
+          const ok = window.confirm(
+            `Você está prestes a BLOQUEAR "${nomeEmpresa}".\n` +
+            'Todos os usuários perderão acesso imediatamente.\n\n' +
+            'Confirmar bloqueio?'
+          );
+          if (!ok) return;
+        }
         await api(`/admin/empresas/${id}/status`, {
           method: 'PUT',
           body: {
             plano_id: document.getElementById('empresaPlano').value || null,
             assinatura_status: document.getElementById('empresaStatus').value,
             trial_fim: document.getElementById('empresaTrialFim').value || null,
-            bloqueada: document.getElementById('empresaBloqueada').value === 'true',
+            bloqueada: vaBloqueada,
             motivo_bloqueio: document.getElementById('empresaMotivoBloqueio').value || null
           }
         });

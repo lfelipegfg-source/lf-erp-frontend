@@ -32,14 +32,14 @@ const RastreabilidadeModule = {
 
   async loadDashboard() {
     try {
-      const data = await api.fetchAPI('/rastreabilidade/dashboard');
+      const data = await api.fetchAPI('/rastreabilidade/dashboard', 'GET', null, { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       this.renderKpis(data);
     } catch { /* ignora se vazio */ }
   },
 
   async loadProdutos() {
     try {
-      const data = await api.fetchAPI('/rastreabilidade/produtos');
+      const data = await api.fetchAPI('/rastreabilidade/produtos', 'GET', null, { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       this.state.produtos = data.produtos || [];
     } catch { this.state.produtos = []; }
   },
@@ -78,7 +78,7 @@ const RastreabilidadeModule = {
     const params = {};
     if (this.state.filtroLoteProd) params.produto_id = this.state.filtroLoteProd;
     try {
-      const data = await api.fetchAPI('/rastreabilidade/lotes', 'GET', null, params);
+      const data = await api.fetchAPI('/rastreabilidade/lotes', 'GET', null, { ...params, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       this.state.lotes = data.lotes || [];
       this.renderLotes();
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
@@ -211,7 +211,7 @@ const RastreabilidadeModule = {
     };
     if (!payload.produto_id || !payload.numero) { showToast('Produto e número são obrigatórios', 'error'); return; }
     try {
-      await api.fetchAPI('/rastreabilidade/lotes', 'POST', payload);
+      await api.fetchAPI('/rastreabilidade/lotes', 'POST', { ...payload, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       showToast('Lote registrado!', 'success');
       document.getElementById('rastModal').style.display = 'none';
       await this.loadLotes();
@@ -221,7 +221,7 @@ const RastreabilidadeModule = {
 
   async verDetalheLote(id) {
     try {
-      const data = await api.fetchAPI(`/rastreabilidade/lotes/${id}`);
+      const data = await api.fetchAPI(`/rastreabilidade/lotes/${id}`, 'GET', null, { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       const l = data.lote;
       const movs = data.movimentos;
       const modal = document.getElementById('rastModal');
@@ -258,7 +258,7 @@ const RastreabilidadeModule = {
     const qtd = await pedirInput('Quantidade a baixar:', '0', 'number');
     if (!qtd || isNaN(Number(qtd)) || Number(qtd) <= 0) return;
     try {
-      const data = await api.fetchAPI(`/rastreabilidade/lotes/${loteId}/saida`, 'POST', { quantidade: Number(qtd) });
+      const data = await api.fetchAPI(`/rastreabilidade/lotes/${loteId}/saida`, 'POST', { quantidade: Number(qtd), empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       showToast(data.mensagem || 'Saída registrada', 'success');
       await this.loadLotes();
       await this.loadDashboard();
@@ -272,7 +272,7 @@ const RastreabilidadeModule = {
     if (this.state.filtroSerieProd)   params.produto_id = this.state.filtroSerieProd;
     if (this.state.filtroSerieStatus) params.status     = this.state.filtroSerieStatus;
     try {
-      const data = await api.fetchAPI('/rastreabilidade/series', 'GET', null, params);
+      const data = await api.fetchAPI('/rastreabilidade/series', 'GET', null, { ...params, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       this.state.series = data.series || [];
       this.renderSeries();
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
@@ -333,7 +333,7 @@ const RastreabilidadeModule = {
 
   async atualizarStatusSerie(id, status) {
     try {
-      await api.fetchAPI(`/rastreabilidade/series/${id}/status`, 'PATCH', { status });
+      await api.fetchAPI(`/rastreabilidade/series/${id}/status`, 'PATCH', { status, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       showToast('Status atualizado', 'success');
       await this.loadSeries();
       await this.loadDashboard();
@@ -375,7 +375,7 @@ const RastreabilidadeModule = {
       const numeros   = texto.split('\n').map((n) => n.trim()).filter(Boolean);
       if (!produtoId || numeros.length === 0) { showToast('Preencha todos os campos', 'error'); return; }
       try {
-        const data = await api.fetchAPI('/rastreabilidade/series', 'POST', { produto_id: produtoId, numeros, compra_id: compraId });
+        const data = await api.fetchAPI('/rastreabilidade/series', 'POST', { produto_id: produtoId, numeros, compra_id: compraId, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
         showToast(`${data.inseridos} série(s) importada(s). ${data.duplicados} duplicada(s) ignorada(s).`, 'success');
         modal.style.display = 'none';
         await this.loadSeries();
@@ -409,7 +409,7 @@ const RastreabilidadeModule = {
     const result = document.getElementById('rastResultado');
     result.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);">Buscando...</div>';
     try {
-      const data = await api.fetchAPI('/rastreabilidade/rastrear', 'GET', null, { q });
+      const data = await api.fetchAPI('/rastreabilidade/rastrear', 'GET', null, { q, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       const total = data.lotes.length + data.series.length;
       if (total === 0) { result.innerHTML = `<div class="rast-empty">Nenhum resultado para "<strong>${esc(q)}</strong>"</div>`; return; }
 
@@ -470,7 +470,7 @@ const RastreabilidadeModule = {
 
   async carregarTodosProdutos() {
     try {
-      const data = await api.fetchAPI('/produtos?limit=500');
+      const data = await api.fetchAPI('/produtos', 'GET', null, { limit: 500, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       const todos = data.produtos || data.items || [];
       const el = document.getElementById('rastProdConfigList');
       if (!el) return;
@@ -503,7 +503,7 @@ const RastreabilidadeModule = {
 
   async configurarProduto(id, modo) {
     try {
-      await api.fetchAPI(`/rastreabilidade/produtos/${id}/config`, 'PUT', { controla_rastreabilidade: modo });
+      await api.fetchAPI(`/rastreabilidade/produtos/${id}/config`, 'PUT', { controla_rastreabilidade: modo, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       showToast(`Rastreabilidade atualizada`, 'success');
       await this.loadProdutos();
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
