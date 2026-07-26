@@ -730,15 +730,15 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:640px">
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">HOST SMTP</label>
-            <input id="smtpHost" class="form-input" placeholder="smtp.gmail.com" value="${cfg.smtp_host || ''}" />
+            <input id="smtpHost" class="form-input" placeholder="smtp.gmail.com" value="${esc(cfg.smtp_host || '')}" />
           </div>
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">PORTA</label>
-            <input id="smtpPort" class="form-input" type="number" placeholder="587" value="${cfg.smtp_port || 587}" />
+            <input id="smtpPort" class="form-input" type="number" placeholder="587" value="${Number(cfg.smtp_port || 587)}" />
           </div>
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">USUÁRIO</label>
-            <input id="smtpUser" class="form-input" placeholder="seu@email.com" value="${cfg.smtp_user || ''}" />
+            <input id="smtpUser" class="form-input" placeholder="seu@email.com" value="${esc(cfg.smtp_user || '')}" />
           </div>
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">SENHA / APP PASSWORD</label>
@@ -746,11 +746,11 @@
           </div>
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">REMETENTE (FROM)</label>
-            <input id="smtpFrom" class="form-input" placeholder="LF ERP &lt;noreply@lferp.com&gt;" value="${cfg.smtp_from || ''}" />
+            <input id="smtpFrom" class="form-input" placeholder="LF ERP &lt;noreply@lferp.com&gt;" value="${esc(cfg.smtp_from || '')}" />
           </div>
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">URL DO SISTEMA (para links nos emails)</label>
-            <input id="smtpAppUrl" class="form-input" placeholder="https://app.lferp.com" value="${cfg.app_url || ''}" />
+            <input id="smtpAppUrl" class="form-input" placeholder="https://app.lferp.com" value="${esc(cfg.app_url || '')}" />
           </div>
         </div>
         <div style="margin-top:16px;display:flex;gap:10px">

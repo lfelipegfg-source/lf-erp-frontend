@@ -560,11 +560,12 @@ function renderTabelaGrade() {
 }
 
 function renderResumo() {
-  const r = state.resumo || {
-    contas_receber: { pago: 0, pendente: 0, atrasado: 0 },
-    contas_pagar: { pago: 0, pendente: 0, atrasado: 0 },
-    lancamentos: { receitas: 0, despesas: 0, receitas_pagas: 0, despesas_pagas: 0 },
-    fluxo: { entradas: 0, saidas: 0, saldo: 0 }
+  const raw = state.resumo || {};
+  const r = {
+    contas_receber: raw.contas_receber || { pago: 0, pendente: 0, atrasado: 0 },
+    contas_pagar:   raw.contas_pagar   || { pago: 0, pendente: 0, atrasado: 0 },
+    lancamentos:    raw.lancamentos    || { receitas: 0, despesas: 0, receitas_pagas: 0, despesas_pagas: 0 },
+    fluxo:          raw.fluxo          || { entradas: 0, saidas: 0, saldo: 0 }
   };
 
   return `
@@ -980,7 +981,9 @@ function exportarAbaAtual() {
 function bindEventos() {
   document
     .getElementById('btnExportarRelatorios')
-    ?.addEventListener('click', () => { exportarAbaAtual(); });
+    ?.addEventListener('click', () => {
+      try { exportarAbaAtual(); } catch (e) { showToast('Erro ao exportar relatório.', 'error'); }
+    });
 
   document
     .getElementById('btnAtualizarRelatoriosFinanceiros')

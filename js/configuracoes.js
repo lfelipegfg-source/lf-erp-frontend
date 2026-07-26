@@ -490,7 +490,7 @@ const ConfigModule = {
           </div>
           <div class="form-field">
             <label>Nova senha</label>
-            <input id="cfgSenhaNova" type="password" placeholder="Mínimo 6 caracteres" />
+            <input id="cfgSenhaNova" type="password" placeholder="Mínimo 8 caracteres" />
           </div>
           <div class="form-field">
             <label>Confirmar nova senha</label>

@@ -406,6 +406,10 @@ const UsuariosModule = {
   },
 
   renderPermissoesGrid(container, permissoes, tipo) {
+    if (!permissoes || typeof permissoes !== 'object') {
+      container.innerHTML = '<div style="font-size:.8rem;color:var(--text-muted)">Nenhuma permissão disponível.</div>';
+      return;
+    }
     const LABELS = {
       produtos: 'Produtos', clientes: 'Clientes', fornecedores: 'Fornecedores',
       compras: 'Compras', vendas: 'Vendas', estoque: 'Estoque',

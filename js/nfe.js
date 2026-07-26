@@ -280,11 +280,11 @@ const NfeModule = {
         if (feedback) {
           feedback.className = `module-feedback module-feedback--${result.status === 'autorizado' ? 'success' : result.status === 'erro' ? 'error' : 'info'}`;
           feedback.innerHTML = `
-            <strong>Status:</strong> <span class="badge ${statusBadge}">${result.status}</span><br>
+            <strong>Status:</strong> <span class="badge ${statusBadge}">${this.esc(result.status)}</span><br>
             ${result.chave_nfe ? `<strong>Chave:</strong> <small>${this.esc(result.chave_nfe)}</small><br>` : ''}
-            ${result.numero ? `<strong>Número:</strong> ${result.serie}/${result.numero}<br>` : ''}
+            ${result.numero ? `<strong>Número:</strong> ${this.esc(String(result.serie || ''))}/${this.esc(String(result.numero))}<br>` : ''}
             ${result.mensagem ? `<strong>SEFAZ:</strong> ${this.esc(result.mensagem)}<br>` : ''}
-            <strong>Ambiente:</strong> ${result.ambiente}
+            <strong>Ambiente:</strong> ${this.esc(String(result.ambiente ?? ''))}
           `;
         }
         if (result.status === 'autorizado') {
@@ -633,7 +633,7 @@ const NfeModule = {
                        <td>
                          <div style="display:flex;gap:6px;flex-wrap:wrap">
                            ${n.status === 'autorizado' ? `
-                             <a href="${api.config.baseURL}/nfce/pdf/${encodeURIComponent(n.ref)}"
+                             <a href="${api.getApiBaseUrl()}/nfce/pdf/${encodeURIComponent(n.ref)}"
                                 target="_blank" class="btn-inline" style="font-size:11px">
                                <i class="fa-solid fa-print"></i> DANFCE
                              </a>` : ''}
