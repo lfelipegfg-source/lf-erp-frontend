@@ -181,7 +181,7 @@ const AlertasModule = {
                     <strong style="font-size:13px">${this.esc(l.cliente_nome || '-')}</strong>
                     <div style="font-size:11px;color:var(--text-muted)">${this.esc(l.telefone || '')} · ${this.fmtCur(l.valor_total)}</div>
                   </div>
-                  <a href="${this.esc(l.link)}" target="_blank" rel="noopener"
+                  <a href="${this.esc(this.safeUrl(l.link))}" target="_blank" rel="noopener"
                      style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#25d366;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap">
                     <i class="fa-brands fa-whatsapp"></i> Enviar
                   </a>
@@ -436,6 +436,10 @@ const AlertasModule = {
 
   fmtCur(v) {
     return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  },
+
+  safeUrl(url) {
+    return /^https?:\/\//i.test(url) ? url : '#';
   },
 
   esc(v) {
