@@ -508,9 +508,17 @@ function bindDetalhe() {
   // Filtro de status
   document.querySelectorAll('.cb-filtro-btn').forEach(btn => {
     btn.onclick = async () => {
+      if (state.loading) return;
+      state.loading = true;
       state.filtroStatus = btn.dataset.status;
-      await carregarItens();
-      renderDetalhe();
+      try {
+        await carregarItens();
+        renderDetalhe();
+      } catch (e) {
+        showMsg(buildFriendlyError(e), 'error');
+      } finally {
+        state.loading = false;
+      }
     };
   });
 

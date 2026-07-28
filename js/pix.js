@@ -93,7 +93,7 @@ function renderPIXModal(data, valor, clienteNome, onPago) {
   const expMs = !isNaN(_expTs) ? _expTs : Date.now() + 30 * 60 * 1000;
 
   const qrHtml = data.qr_image
-    ? `<img src="${data.qr_image}" alt="QR Code PIX" class="pix-qr"/>`
+    ? `<img src="${esc(data.qr_image)}" alt="QR Code PIX" class="pix-qr"/>`
     : `<div class="pix-qr pix-qr--svg">${sandboxQRSVG()}</div>`;
 
   body.innerHTML = `

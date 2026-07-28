@@ -550,7 +550,7 @@ function renderCashflowFuturo() {
   }
 
   const linhas = (cf.projecao || []).map((p) => {
-    const saldoColor = p.saldo_acumulado >= 0 ? 'var(--success,#38a169)' : 'var(--danger,#e53e3e)';
+    const saldoColor = (p.saldo_acumulado ?? 0) >= 0 ? 'var(--success,#38a169)' : 'var(--danger,#e53e3e)';
     return `<tr>
       <td>${dt(p.data)}</td>
       <td class="text-right" style="color:var(--success,#38a169)">${p.entrada > 0 ? cur(p.entrada) : '-'}</td>
@@ -559,7 +559,7 @@ function renderCashflowFuturo() {
     </tr>`;
   }).join('');
 
-  const saldoFinalColor = cf.saldo_projetado >= 0 ? 'var(--success,#38a169)' : 'var(--danger,#e53e3e)';
+  const saldoFinalColor = (cf.saldo_projetado ?? 0) >= 0 ? 'var(--success,#38a169)' : 'var(--danger,#e53e3e)';
 
   section.innerHTML = `
     <div class="module-card__header">
