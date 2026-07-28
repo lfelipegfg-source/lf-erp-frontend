@@ -235,6 +235,8 @@ const CheckoutLinksModule = {
 
     if (!payload.descricao || !payload.valor) { showToast('Preencha descrição e valor', 'error'); return; }
 
+    const submitBtn = document.querySelector('#chkCriarForm [type=submit]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Gerando...'; }
     try {
       const data = await api.fetchAPI('/checkout', 'POST', payload);
       const url  = `${FRONTEND_BASE}/checkout.html#${data.link.token}`;
@@ -264,7 +266,10 @@ const CheckoutLinksModule = {
       document.getElementById('chkAbrirBtn')?.addEventListener('click', () => window.open(url, '_blank'));
 
       showToast('Link gerado! Compartilhe com o cliente.', 'success');
-    } catch (err) { showToast(err.message || 'Erro ao criar link', 'error'); }
+    } catch (err) {
+      showToast(err.message || 'Erro ao criar link', 'error');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa fa-link"></i> Gerar link'; }
+    }
   },
 
   // ── Estrutura ─────────────────────────────────────────────────────────────

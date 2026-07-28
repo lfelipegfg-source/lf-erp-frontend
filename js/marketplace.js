@@ -23,6 +23,7 @@ const MarketplaceModule = {
   },
 
   async load() {
+    if (this.state.loading) return;
     this.state.loading = true;
     try {
       const [cfgData, prodData] = await Promise.all([
@@ -308,13 +309,16 @@ const MarketplaceModule = {
 
       showToast('Aguardando autorização... Feche o popup após concluir.', 'info');
 
+      if (this._oauthCheck) clearInterval(this._oauthCheck);
       const check = setInterval(async () => {
         if (popup.closed) {
           clearInterval(check);
+          this._oauthCheck = null;
           await this.load();
           showToast('Status de conexão atualizado', 'success');
         }
       }, 1000);
+      this._oauthCheck = check;
     } catch (err) {
       showToast(err.message || 'Erro ao iniciar OAuth', 'error');
     }
@@ -347,13 +351,17 @@ const MarketplaceModule = {
       return;
     }
 
+    const btn = document.querySelector('#mktVincularForm button[type="submit"]');
     try {
+      if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
       await api.fetchAPI('/marketplace/vincular', 'POST', { produto_id, plataforma, listing_id, titulo: titulo || null });
       showToast('Produto vinculado com sucesso!', 'success');
       this.fecharModais();
       await this.load();
     } catch (err) {
       showToast(err.message || 'Erro ao vincular produto', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Salvar vínculo'; }
     }
   },
 

@@ -50,6 +50,8 @@
   // ── State ────────────────────────────────────────────
   let planosCache = [];
   let _empresasNomeMap = new Map();
+  let _savingEmpresa = false;
+  let _savingPlano = false;
 
   // ── Toast ────────────────────────────────────────────
   function showToast(msg, type = '') {
@@ -321,11 +323,13 @@
   };
 
   window.salvarEmpresa = async function () {
+    if (_savingEmpresa) return;
     const id = document.getElementById('empresaEditId').value;
     const nome = document.getElementById('empresaNome').value.trim();
 
     if (!id && !nome) return showToast('Nome é obrigatório', 'error');
 
+    _savingEmpresa = true;
     try {
       if (id) {
         const vaBloqueada = document.getElementById('empresaBloqueada').value === 'true';
@@ -336,7 +340,7 @@
             'Todos os usuários perderão acesso imediatamente.\n\n' +
             'Confirmar bloqueio?'
           );
-          if (!ok) return;
+          if (!ok) { _savingEmpresa = false; return; }
         }
         await api(`/admin/empresas/${id}/status`, {
           method: 'PUT',
@@ -367,6 +371,8 @@
       carregarEmpresas();
     } catch (err) {
       showToast('Erro: ' + err.message, 'error');
+    } finally {
+      _savingEmpresa = false;
     }
   };
 
@@ -388,13 +394,13 @@
       const cd = res.headers.get('content-disposition') || '';
       const match = cd.match(/filename="(.+?)"/);
       const filename = match ? match[1] : `lferp-backup-${nome.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.json`;
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(a.href);
+      const anchor = document.createElement('a');
+      anchor.href = URL.createObjectURL(blob);
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(anchor.href);
       showToast('Backup exportado com sucesso!', 'success');
     } catch (err) {
       showToast('Erro ao exportar: ' + err.message, 'error');
@@ -478,6 +484,7 @@
   };
 
   window.salvarPlano = async function () {
+    if (_savingPlano) return;
     const id = document.getElementById('planoEditId').value;
     const codigo = document.getElementById('planoCodigo').value.trim();
     const nome = document.getElementById('planoNome').value.trim();
@@ -492,6 +499,7 @@
       limite_vendas_mes: document.getElementById('planoLimVendas').value || 0
     };
 
+    _savingPlano = true;
     try {
       if (id) {
         await api(`/admin/planos/${id}`, { method: 'PUT', body });
@@ -504,6 +512,8 @@
       carregarPlanos();
     } catch (err) {
       showToast('Erro: ' + err.message, 'error');
+    } finally {
+      _savingPlano = false;
     }
   };
 

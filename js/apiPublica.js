@@ -254,12 +254,15 @@ const ApiPublicaModule = {
     if (!nome || !url)          { showToast('Nome e URL são obrigatórios', 'error'); return; }
     if (eventos.length === 0)   { showToast('Selecione ao menos um evento', 'error'); return; }
 
+    const btn = document.getElementById('salvarEpBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Salvando...'; }
     try {
       await api.fetchAPI('/webhooks/endpoints', 'POST', { nome, url, eventos, secret: secret || null });
       showToast('Endpoint criado!', 'success');
       await this.loadEndpoints();
     } catch (err) {
       showToast(err.message || 'Erro ao criar endpoint', 'error');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-save"></i> Salvar endpoint'; }
     }
   },
 

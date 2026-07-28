@@ -485,6 +485,7 @@ const CrmModule = {
 
     try {
       const data = await api.fetchAPI(`/crm/oportunidades/${id}`, 'GET', null, { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
+      if (!data.oportunidade) throw new Error('Oportunidade não encontrada');
       this.renderDetalhe(data.oportunidade, data.atividades || []);
     } catch (err) {
       document.getElementById('crmDetalheBody').innerHTML = `<div style="padding:20px;color:var(--danger);">${esc(err.message)}</div>`;

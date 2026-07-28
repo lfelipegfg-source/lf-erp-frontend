@@ -62,6 +62,7 @@ function renderSkeleton() {
 }
 
 async function carregarLogs() {
+  if (state.loading) return;
   const container = document.getElementById('auditoriaFinanceiraContainer');
   if (!container) return;
 

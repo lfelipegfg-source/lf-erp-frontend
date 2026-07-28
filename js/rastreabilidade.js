@@ -210,13 +210,16 @@ const RastreabilidadeModule = {
       observacoes:     document.getElementById('rlObs').value.trim() || null
     };
     if (!payload.produto_id || !payload.numero) { showToast('Produto e número são obrigatórios', 'error'); return; }
+    const btn = document.querySelector('#rastLoteForm button[type="submit"]');
     try {
+      if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
       await api.fetchAPI('/rastreabilidade/lotes', 'POST', { ...payload, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       showToast('Lote registrado!', 'success');
       document.getElementById('rastModal').style.display = 'none';
       await this.loadLotes();
       await this.loadDashboard();
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = 'Salvar lote'; } }
   },
 
   async verDetalheLote(id) {
@@ -374,13 +377,16 @@ const RastreabilidadeModule = {
       const compraId  = parseInt(document.getElementById('rseCompra').value) || null;
       const numeros   = texto.split('\n').map((n) => n.trim()).filter(Boolean);
       if (!produtoId || numeros.length === 0) { showToast('Preencha todos os campos', 'error'); return; }
+      const btn = e.submitter || document.querySelector('#rastSeriesForm button[type="submit"]');
       try {
+        if (btn) { btn.disabled = true; btn.textContent = 'Importando...'; }
         const data = await api.fetchAPI('/rastreabilidade/series', 'POST', { produto_id: produtoId, numeros, compra_id: compraId, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
         showToast(`${data.inseridos} série(s) importada(s). ${data.duplicados} duplicada(s) ignorada(s).`, 'success');
         modal.style.display = 'none';
         await this.loadSeries();
         await this.loadDashboard();
       } catch (err) { showToast(err.message || 'Erro', 'error'); }
+      finally { if (btn) { btn.disabled = false; btn.textContent = 'Importar'; } }
     });
     document.getElementById('rastModalCancelBtn').addEventListener('click', () => { modal.style.display = 'none'; });
   },

@@ -129,11 +129,14 @@ const WhatsappModule = {
       wpp_ativo:      document.getElementById('wppAtivo').checked,
       wpp_cooldown_h: parseInt(document.getElementById('wppCooldown').value) || 24
     };
+    const btn = document.querySelector('#wppCfgForm button[type="submit"]');
     try {
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Salvando...'; }
       await api.fetchAPI('/whatsapp/config', 'PUT', payload);
       showToast('Configuração salva!', 'success');
       await this.loadConfig();
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-save"></i> Salvar configuração'; } }
   },
 
   async testar() {
@@ -143,7 +146,7 @@ const WhatsappModule = {
       const data = await api.fetchAPI('/whatsapp/testar', 'POST');
       if (data.link) {
         showToast('Sem API configurada. Abrindo link manualmente...', 'info');
-        window.open(data.link, '_blank');
+        window.open(data.link, '_blank', 'noopener,noreferrer');
       } else {
         showToast(data.mensagem || 'Teste enviado!', 'success');
       }
@@ -253,7 +256,7 @@ const WhatsappModule = {
         const data = await api.fetchAPI('/whatsapp/enviar', 'POST', { telefone: tel, mensagem: msg, cliente_nome: nome || null });
         if (data.status === 'link') {
           showToast('Sem API configurada. Abrindo link...', 'info');
-          window.open(data.link, '_blank');
+          window.open(data.link, '_blank', 'noopener,noreferrer');
         } else if (data.sucesso) {
           showToast('Mensagem enviada!', 'success');
           document.getElementById('wppEnviarForm').reset();
@@ -364,7 +367,7 @@ const WhatsappModule = {
                 <td><code style="font-size:11px;">${esc(h.evento)}</code></td>
                 <td style="font-size:12px;">${esc(h.cliente_nome || '—')}</td>
                 <td style="font-size:12px;">${esc(h.telefone)}</td>
-                <td><span style="background:${st.bg};color:${st.cor};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">${st.label}</span></td>
+                <td><span style="background:${st.bg};color:${st.cor};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">${esc(st.label)}</span></td>
                 <td style="font-size:11px;color:var(--text-muted);">${new Date(h.criado_em).toLocaleString('pt-BR')}</td>
                 <td style="font-size:11px;color:var(--danger);">${esc(h.erro_msg || '')}</td>
               </tr>`;
