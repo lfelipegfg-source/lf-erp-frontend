@@ -236,6 +236,7 @@ const ConfigModule = {
     if (url) {
       const img = document.createElement('img');
       img.src = url;
+      img.alt = 'Logo da empresa';
       img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:12px';
       preview.replaceChildren(img);
     } else {
@@ -394,7 +395,7 @@ const ConfigModule = {
           <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
             <div id="cfgLogoPreview" style="width:88px;height:88px;border-radius:14px;border:2px dashed var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" title="Clique para trocar o logo">
               ${logoAtual
-                ? `<img src="${esc(logoAtual)}" style="width:100%;height:100%;object-fit:contain;border-radius:12px">`
+                ? `<img src="${esc(logoAtual)}" alt="Logo da empresa" style="width:100%;height:100%;object-fit:contain;border-radius:12px">`
                 : '<i class="fa-solid fa-layer-group" style="font-size:28px;color:var(--text-muted)"></i>'}
             </div>
             <input type="file" id="cfgLogoInput" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="display:none">

@@ -1308,7 +1308,7 @@ async function gerarBoleto(contaReceberID) {
 
   } catch (err) {
     if (sub) sub.textContent = 'Erro ao gerar boleto';
-    if (corpo) corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message || 'Erro desconhecido')}</div>`;
+    if (corpo) corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(buildFriendlyError(err))}</div>`;
   }
 }
 

@@ -892,8 +892,8 @@ const NfeModule = {
               <div class="form-field">
                 <label>Ambiente</label>
                 <select class="form-control" name="ambiente">
-                  <option value="2" ${cfg.ambiente == 2 ? 'selected' : ''}>Homologação</option>
-                  <option value="1" ${cfg.ambiente == 1 ? 'selected' : ''}>Produção</option>
+                  <option value="2" ${Number(cfg.ambiente) !== 1 ? 'selected' : ''}>Homologação</option>
+                  <option value="1" ${Number(cfg.ambiente) === 1 ? 'selected' : ''}>Produção</option>
                 </select>
               </div>
               <div class="form-field">
