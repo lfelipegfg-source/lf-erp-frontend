@@ -656,7 +656,8 @@ const NfeModule = {
           btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
           try {
             const r = await api.consultarNfce(ref);
-            showToast(`Status: ${r.status}${r.chave_nfe ? ' — Autorizada!' : ''}`, r.status === 'autorizado' ? 'success' : 'info');
+            const rStatus = r?.status || 'desconhecido';
+            showToast(`Status: ${rStatus}${r?.chave_nfe ? ' — Autorizada!' : ''}`, rStatus === 'autorizado' ? 'success' : 'info');
             await this.renderNfce(container);
           } catch (e) {
             showToast(e.message || 'Erro ao consultar', 'error');
@@ -751,7 +752,7 @@ const NfeModule = {
                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this.esc(e.discriminacao || '-')}</td>
                 <td class="text-right">${cur(e.valor_servico)}</td>
                 <td>${this.esc(e.numero_nfse || e.rps_numero || '-')}</td>
-                <td><span class="badge ${statusColor[e.status] || ''}">${e.status || 'pendente'}</span></td>
+                <td><span class="badge ${statusColor[e.status] || ''}">${this.esc(e.status || 'pendente')}</span></td>
                 <td class="text-right">
                   <div class="table-actions">
                     <button class="btn-inline" data-nfse-consultar="${this.esc(e.ref)}">
@@ -921,6 +922,8 @@ const NfeModule = {
 
       document.getElementById('nfseConfigForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submitBtn = e.target.querySelector('[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
         const fd = new FormData(e.target);
         const body = Object.fromEntries(fd.entries());
         try {
@@ -929,6 +932,8 @@ const NfeModule = {
           overlay.remove();
         } catch (err) {
           showToast(err.message || 'Erro ao salvar', 'error');
+        } finally {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar'; }
         }
       });
     } catch (err) {

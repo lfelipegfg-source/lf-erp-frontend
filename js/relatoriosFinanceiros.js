@@ -27,7 +27,7 @@ function statusBadge(status) {
     parcial:          ['badge--info',    'Parcial'],
     parcial_atrasado: ['badge--danger', 'Parcial em atraso']
   };
-  const [cls, label] = map[s] || ['badge--info', status || '-'];
+  const [cls, label] = map[s] || ['badge--info', escapeHtml(String(status || '-'))];
   return `<span class="badge ${cls}">${label}</span>`;
 }
 

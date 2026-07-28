@@ -425,7 +425,7 @@ const UsuariosModule = {
         const val = p[`pode_${acao}`] ? 'checked' : '';
         return `<td style="text-align:center">
           <input type="checkbox" ${val}
-            data-perm-modulo="${modulo}" data-perm-acao="${acao}"
+            data-perm-modulo="${escapeHtml(modulo)}" data-perm-acao="${acao}"
             style="width:15px;height:15px;cursor:pointer">
         </td>`;
       }).join('');
