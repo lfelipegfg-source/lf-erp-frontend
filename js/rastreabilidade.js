@@ -93,7 +93,7 @@ const RastreabilidadeModule = {
         <select id="rastFiltroLoteProd" class="filter-input" style="min-width:180px;">
           <option value="">Todos os produtos</option>
           ${this.state.produtos.filter((p) => p.controla_rastreabilidade === 'lote').map((p) =>
-            `<option value="${p.id}" ${this.state.filtroLoteProd == p.id ? 'selected' : ''}>${esc(p.nome)}</option>`
+            `<option value="${p.id}" ${String(this.state.filtroLoteProd) === String(p.id) ? 'selected' : ''}>${esc(p.nome)}</option>`
           ).join('')}
         </select>
         <button class="btn btn-primary btn-sm" id="novoLoteBtn"><i class="fa fa-plus"></i> Novo lote</button>
@@ -291,7 +291,7 @@ const RastreabilidadeModule = {
           <select id="rastFiltroSerieProd" class="filter-input">
             <option value="">Todos os produtos</option>
             ${this.state.produtos.filter((p) => p.controla_rastreabilidade === 'serie').map((p) =>
-              `<option value="${p.id}" ${this.state.filtroSerieProd == p.id ? 'selected' : ''}>${esc(p.nome)}</option>`
+              `<option value="${p.id}" ${String(this.state.filtroSerieProd) === String(p.id) ? 'selected' : ''}>${esc(p.nome)}</option>`
             ).join('')}
           </select>
           <select id="rastFiltroSerieStatus" class="filter-input">
@@ -534,7 +534,7 @@ const RastreabilidadeModule = {
         <div class="rast-modal-card">
           <div class="rast-modal-header">
             <h3 id="rastModalTitle">—</h3>
-            <button class="btn-icon" id="rastModalGlobalClose"><i class="fa fa-xmark"></i></button>
+            <button class="btn-icon" id="rastModalGlobalClose" aria-label="Fechar"><i class="fa fa-xmark"></i></button>
           </div>
           <div id="rastModalBody" style="padding:16px 24px 24px;overflow-y:auto;max-height:65vh;"></div>
         </div>

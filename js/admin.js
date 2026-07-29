@@ -232,9 +232,9 @@
         <td style="text-align:center">${Number(e.total_usuarios)}</td>
         <td style="text-align:center">${Number(e.total_vendas)}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="verDetalheEmpresa(${Number(e.id)})"><i class="fa fa-eye"></i></button>
+          <button class="btn btn-secondary btn-sm" onclick="verDetalheEmpresa(${Number(e.id)})" aria-label="Ver detalhes"><i class="fa fa-eye"></i></button>
           <button class="btn btn-secondary btn-sm" onclick="editarEmpresa(${Number(e.id)})"><i class="fa fa-pencil"></i> Editar</button>
-          <button class="btn btn-secondary btn-sm" onclick="exportarEmpresa(${Number(e.id)})"><i class="fa fa-download"></i></button>
+          <button class="btn btn-secondary btn-sm" onclick="exportarEmpresa(${Number(e.id)})" aria-label="Exportar backup"><i class="fa fa-download"></i></button>
         </td>
       </tr>
     `).join('');
