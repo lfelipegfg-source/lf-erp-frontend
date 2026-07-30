@@ -20,7 +20,8 @@ const PDVModule = {
     pagamentos: [{ forma: 'Dinheiro', valor: 0, parcelas: 1, vencimento: '' }],
     activeTab: 'produtos',
     gradeModalProduto: null,
-    gradesDisponiveis: []
+    gradesDisponiveis: [],
+    _gradeReqId: 0
   },
 
   init() {
@@ -435,7 +436,6 @@ const PDVModule = {
       this.filterProdutos('');
       this.renderCarrinho();
       this.renderResumo();
-      this.togglePrimeiroVencimentoField();
 
       if (!isOnline) {
         const pendentes = await PdvOffline.contarVendasPendentes();
@@ -951,6 +951,7 @@ const PDVModule = {
                 ${[1,2,3,4,5,6,8,10,12].map((n) => `<option value="${n}" ${p.parcelas === n ? 'selected' : ''}>${n}x</option>`).join('')}
               </select>
               <input type="date" class="pdv-split-vencimento form-control" data-idx="${i}"
+                min="${new Date().toISOString().split('T')[0]}"
                 value="${p.vencimento || ''}" placeholder="1Âº vencimento" />
             </div>` : ''}
           ${this.state.pagamentos.length > 1
@@ -1005,19 +1006,6 @@ const PDVModule = {
     }
 
     this.el.clienteNomeInfo.textContent = `Cliente selecionado: ${this.state.clienteNome}`;
-  },
-
-  togglePrimeiroVencimentoField() {
-    const field = document.getElementById('pdvPrimeiroVencimentoField');
-    if (!field) return;
-
-    const exibir = this.state.pagamento === 'Promissória';
-    field.style.display = exibir ? 'block' : 'none';
-
-    if (!exibir) {
-      this.state.primeiroVencimento = '';
-      if (this.el.primeiroVencimento) this.el.primeiroVencimento.value = '';
-    }
   },
 
   // ── Contador de frequência de uso (localStorage) ─────────────────────────
@@ -1139,10 +1127,14 @@ const PDVModule = {
     const grid = document.getElementById('pdvGradeGrid');
     if (grid) grid.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">Carregando variações...</div>';
 
+    const reqId = ++(this.state._gradeReqId);
+
     try {
       const result = await api.getGradesProduto(produto.id);
+      if (reqId !== this.state._gradeReqId) return; // request obsoleto
       this.state.gradesDisponiveis = result?.grades || (Array.isArray(result) ? result : []);
     } catch {
+      if (reqId !== this.state._gradeReqId) return; // request obsoleto
       this.state.gradesDisponiveis = [];
     }
 
@@ -1211,7 +1203,7 @@ const PDVModule = {
     if (!grid) return;
 
     const produto = this.state.gradeModalProduto;
-    if (title) title.textContent = this.escapeHtml(produto?.nome || 'Selecionar variação');
+    if (title) title.textContent = produto?.nome || 'Selecionar variação';
     if (sub)   sub.textContent   = 'Escolha o tamanho/cor disponível.';
 
     const grades = this.state.gradesDisponiveis;
@@ -1356,6 +1348,9 @@ const PDVModule = {
       this.showMessage(`Faltam ${this.toCurrency(restante)} para cobrir o total.`, 'error');
       return;
     }
+    // Snapshot antes de qualquer mutação em pagamentos para rollback em caso de erro
+    const pagamentosSnapshot = JSON.parse(JSON.stringify(this.state.pagamentos));
+
     const troco = restante < -0.01 ? Math.abs(restante) : 0;
     if (troco > 0) {
       const todosDinheiro = this.state.pagamentos.every((p) => p.forma === 'Dinheiro');
@@ -1383,6 +1378,11 @@ const PDVModule = {
         this.showMessage('Preço inválido no carrinho. Remova o item e adicione novamente.', 'error');
         return;
       }
+      const precoFinalCalculado = Number(item.preco_unitario) * (1 - (Number(item.desconto_pct) || 0) / 100);
+      if (precoFinalCalculado < 0) {
+        this.showMessage('Desconto inválido no carrinho. Revise os itens.', 'error');
+        return;
+      }
     }
 
     // Valida vencimento para Promissória
@@ -1394,7 +1394,12 @@ const PDVModule = {
 
     const pagamentoPrincipal = this.state.pagamentos[0]?.forma || 'Dinheiro';
     const temPromissoria = !!promissoriaEntry;
-    const status_pagamento = temPromissoria ? 'pendente' : 'pago';
+    const outrosPagamentos = this.state.pagamentos
+      .filter((p) => p.forma !== 'Promissória')
+      .reduce((acc, p) => acc + Number(p.valor || 0), 0);
+    const status_pagamento = temPromissoria
+      ? (outrosPagamentos > 0 ? 'parcial' : 'pendente')
+      : 'pago';
 
     const payload = {
       empresa: this.state.empresa,
@@ -1493,6 +1498,8 @@ const PDVModule = {
       this.resetVenda();
       await this.load();
     } catch (error) {
+      // Restaura pagamentos ao estado pré-mutação para permitir retry correto
+      if (pagamentosSnapshot) this.state.pagamentos = pagamentosSnapshot;
       console.error('Erro ao finalizar venda:', error);
       const message = this.buildFriendlyError(error);
       this.setFeedback(message, 'error');
@@ -1646,7 +1653,12 @@ const PDVModule = {
       // Gera o QR Code
       (async () => {
         try {
-          const dados = await api.gerarPIX({ valor: Number(valor), cliente_nome: clienteNome || '' });
+          const dados = await api.gerarPIX({
+            valor: Number(valor),
+            cliente_nome: clienteNome || '',
+            empresa: this.state.empresa,
+            empresa_id: api.getEmpresaId() || null,
+          });
 
           txid = dados?.txid || null;
 
