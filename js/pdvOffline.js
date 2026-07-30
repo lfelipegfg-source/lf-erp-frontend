@@ -7,6 +7,9 @@ export function setEmpresaId(id) {
 }
 
 function getDbName() {
+  if (!_empresaId) {
+    console.warn('[PDV Offline] _empresaId não definido — usando DB compartilhado lf_pdv_offline_default.');
+  }
   return _empresaId ? `lf_pdv_offline_${_empresaId}` : 'lf_pdv_offline_default';
 }
 
@@ -93,6 +96,9 @@ export async function getClientes() {
 }
 
 export async function salvarVendaPendente(venda) {
+  if (!_empresaId) {
+    console.error('[PDV Offline] setEmpresaId() não foi chamado antes de salvarVendaPendente(). Dados serão salvos no DB padrão compartilhado.');
+  }
   const idempotency_key = (typeof crypto !== 'undefined' && crypto.randomUUID)
     ? crypto.randomUUID()
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
@@ -107,14 +113,17 @@ export async function salvarVendaPendente(venda) {
     });
   } catch (err) {
     console.warn('[PDV Offline] salvarVendaPendente:', err);
+    if (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+      alert('Armazenamento do dispositivo cheio. A venda offline não pôde ser salva. Conecte-se à internet e tente novamente.');
+    }
     return null;
   }
 }
 
-export async function getVendasPendentes() {
+export async function getVendasPendentes(limit = 100) {
   try {
     const db = await openDB();
-    const req = db.transaction('vendas_pendentes', 'readonly').objectStore('vendas_pendentes').getAll();
+    const req = db.transaction('vendas_pendentes', 'readonly').objectStore('vendas_pendentes').getAll(null, limit);
     return new Promise((resolve, reject) => {
       req.onsuccess = () => { db.close(); resolve(req.result || []); };
       req.onerror = (e) => { db.close(); reject(e.target.error); };
@@ -151,3 +160,31 @@ export async function removerVendaPendente(id) {
     console.warn('[PDV Offline] removerVendaPendente:', err);
   }
 }
+
+let _syncing = false;
+
+export async function sincronizarVendas(postVendaFn) {
+  if (_syncing) return { enviadas: 0, erros: 0 };
+  _syncing = true;
+  let enviadas = 0;
+  let erros = 0;
+  try {
+    const pendentes = await getVendasPendentes(50);
+    for (const venda of pendentes) {
+      try {
+        const { id: localId, _queued_at, ...payload } = venda;
+        await postVendaFn(payload);
+        await removerVendaPendente(localId);
+        enviadas++;
+      } catch (err) {
+        console.error('[PDV Offline] sincronizarVendas: erro ao sincronizar venda:', err);
+        erros++;
+      }
+    }
+  } finally {
+    _syncing = false;
+  }
+  return { enviadas, erros };
+}
+
+export { getVendasPendentes as listarVendasPendentes };

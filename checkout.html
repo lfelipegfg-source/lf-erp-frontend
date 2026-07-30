@@ -159,7 +159,7 @@ function renderBody(co, token) {
   if (temBoleto) {
     html += `<div class="boleto-section ${temPix ? '' : 'active'}" id="abaBoletoSection">`;
     if (co.boleto_url) {
-      html += `<a href="${co.boleto_url}" target="_blank" class="btn btn-boleto"><i class="fa fa-file-lines"></i> Ver boleto</a>`;
+      html += `<a href="${esc(co.boleto_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-boleto"><i class="fa fa-file-lines"></i> Ver boleto</a>`;
       if (co.boleto_linha) {
         html += `<div class="pix-key-box" id="boletoLinhaBox" style="margin-top:12px;">${esc(co.boleto_linha)}</div>`;
         html += `<button class="btn btn-secondary" onclick="copiarBoleto()"><i class="fa fa-copy"></i> Copiar linha digitável</button>`;
@@ -167,7 +167,7 @@ function renderBody(co, token) {
     } else {
       html += `<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Preencha seu nome para gerar o boleto:</p>`;
       html += `<input id="boletoNome" placeholder="Seu nome completo" style="width:100%;padding:11px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;margin-bottom:10px;font-family:Inter,sans-serif;">`;
-      html += `<button class="btn btn-boleto" onclick="gerarBoleto('${token}')"><i class="fa fa-barcode"></i> Gerar boleto</button>`;
+      html += `<button class="btn btn-boleto" id="btnGerarBoleto"><i class="fa fa-barcode"></i> Gerar boleto</button>`;
       html += `<div id="boletoResult"></div>`;
     }
     html += `</div>`;
@@ -181,6 +181,9 @@ function renderBody(co, token) {
   }
 
   body.innerHTML = html;
+
+  // Listener para botão gerar boleto (evita onclick inline com token)
+  document.getElementById('btnGerarBoleto')?.addEventListener('click', () => gerarBoleto(token));
 
   // Gera QR Code
   if (temPix && co.pix_copia_cola) {
@@ -237,7 +240,7 @@ async function gerarBoleto(token) {
     if (!data.sucesso) { if (result) result.innerHTML = `<div class="info-row" style="color:#ef4444;margin-top:8px;"><i class="fa fa-circle-xmark"></i>${esc(data.erro)}</div>`; return; }
 
     if (data.boleto_url) {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-external-link"></i> Abrir boleto'; btn.onclick = () => window.open(data.boleto_url, '_blank'); }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-external-link"></i> Abrir boleto'; btn.onclick = () => { const safeUrl = /^https:\/\//i.test(data.boleto_url) ? data.boleto_url : null; if (safeUrl) { window.open(safeUrl, '_blank', 'noopener,noreferrer'); } else { console.warn('[Checkout] boleto_url com esquema inválido:', data.boleto_url); } }; }
       if (data.boleto_linha && result) {
         result.innerHTML = `<div class="pix-key-box" id="boletoLinhaBox" style="margin-top:12px;">${esc(data.boleto_linha)}</div>`;
       }
