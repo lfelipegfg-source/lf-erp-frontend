@@ -425,10 +425,11 @@ async function getTabelaPrecosDashboard() {
   return request('/tabelas-preco/dashboard', { method: 'GET' });
 }
 
-async function resolverPrecoTabela({ produtoId, clienteId = null, gradeId = null, quantidade = 1 }) {
+async function resolverPrecoTabela({ produtoId, clienteId = null, gradeId = null, quantidade = 1, empresa_id = null }) {
   const q = { produto_id: produtoId, quantidade };
   if (clienteId) q.cliente_id = clienteId;
   if (gradeId) q.grade_id = gradeId;
+  if (empresa_id) q.empresa_id = empresa_id;
   return request('/tabelas-preco/resolver', { method: 'GET', query: q });
 }
 

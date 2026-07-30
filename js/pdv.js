@@ -21,7 +21,9 @@ const PDVModule = {
     activeTab: 'produtos',
     gradeModalProduto: null,
     gradesDisponiveis: [],
-    _gradeReqId: 0
+    _gradeReqId: 0,
+    _pixCleanup: null,
+    _salOrc: false
   },
 
   init() {
@@ -1010,7 +1012,7 @@ const PDVModule = {
 
   // ── Contador de frequência de uso (localStorage) ─────────────────────────
   _topKey() {
-    return `pdv_top_${this.state.empresaId || this.state.empresa || 'default'}`;
+    return `pdv_top_${api.getEmpresaId() || this.state.empresa || 'default'}`;
   },
 
   _getFreqMap() {
@@ -1247,7 +1249,8 @@ const PDVModule = {
         produtoId,
         gradeId: gradeId || null,
         clienteId,
-        quantidade: quantidade || 1
+        quantidade: quantidade || 1,
+        empresa_id: api.getEmpresaId() || null
       });
       return result?.preco != null ? Number(result.preco) : null;
     } catch {
@@ -1342,6 +1345,11 @@ const PDVModule = {
       return;
     }
 
+    if (desconto > 0 && subtotal > 0 && desconto > subtotal * 0.5) {
+      const pct = Math.round((desconto / subtotal) * 100);
+      if (!confirm(`Desconto de ${this.toCurrency(desconto)} (${pct}% do subtotal). Confirmar?`)) return;
+    }
+
     // ValidaÃ§Ã£o do split
     const restante = this.getPagamentoRestante();
     if (restante > 0.01) {
@@ -1421,6 +1429,7 @@ const PDVModule = {
       desconto,
       acrescimo,
       total,
+      troco,
       pagamento: pagamentoPrincipal,
       pagamentos: this.state.pagamentos.map((p) => ({
         forma: p.forma,
@@ -1523,6 +1532,7 @@ const PDVModule = {
   },
 
   resetVenda() {
+    if (this.state._pixCleanup) { this.state._pixCleanup(); this.state._pixCleanup = null; }
     this.closeGradeSelector();
     this.state.carrinho = [];
     this.state.clienteId = '';
@@ -1609,9 +1619,11 @@ const PDVModule = {
         _pixFechado = true;
         clearInterval(pollInterval);
         clearInterval(timerInterval);
+        this.state._pixCleanup = null;
         if (overlay.parentNode) document.body.removeChild(overlay);
         resolve();
       };
+      this.state._pixCleanup = fechar;
 
       overlay.querySelector('#_pixFechar').onclick = fechar;
       overlay.addEventListener('click', (e) => { if (e.target === overlay) fechar(); });
@@ -1670,7 +1682,12 @@ const PDVModule = {
           if (st) st.style.display = 'none';
 
           if (dados?.qr_image) {
-            qrImg.innerHTML = `<img src="data:image/png;base64,${dados.qr_image}" style="width:100%;height:100%;object-fit:contain" alt="QR Code PIX" />`;
+            const pixImg = document.createElement('img');
+            pixImg.src = `data:image/png;base64,${dados.qr_image}`;
+            pixImg.style.cssText = 'width:100%;height:100%;object-fit:contain';
+            pixImg.alt = 'QR Code PIX';
+            qrImg.innerHTML = '';
+            qrImg.appendChild(pixImg);
           } else {
             qrImg.innerHTML = `<div style="padding:16px;font-size:11px;color:var(--text-muted);line-height:1.5"><i class="fa-solid fa-qrcode" style="font-size:32px;display:block;margin-bottom:8px"></i>QR Code disponível<br>em produção</div>`;
           }
@@ -1705,11 +1722,13 @@ const PDVModule = {
   },
 
   async salvarOrcamento() {
+    if (this.state._salOrc) return;
     if (!this.state.carrinho.length) {
       this.showMessage('Adicione ao menos um produto ao carrinho.', 'error');
       return;
     }
 
+    this.state._salOrc = true;
     const btn = document.getElementById('pdvSalvarOrcamentoBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; }
 
@@ -1737,6 +1756,7 @@ const PDVModule = {
     } catch (err) {
       this.showMessage(err.message || 'Erro ao salvar orçamento.', 'error');
     } finally {
+      this.state._salOrc = false;
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-lines"></i> Salvar orçamento'; }
     }
   },
