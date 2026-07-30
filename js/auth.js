@@ -31,6 +31,8 @@ export function saveAuth(data, remember = false) {
   };
 
   if (remember) {
+    // TTL de 30 dias — limita a janela de exposição em localStorage
+    payload._expires_at = Date.now() + 30 * 24 * 60 * 60 * 1000;
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(payload));
     sessionStorage.removeItem(AUTH_STORAGE_KEY);
   } else {
@@ -41,13 +43,17 @@ export function saveAuth(data, remember = false) {
 
 export function getAuth() {
   try {
-    const local = localStorage.getItem(AUTH_STORAGE_KEY);
-    const session = sessionStorage.getItem(AUTH_STORAGE_KEY);
-    const raw = local || session;
-
-    if (!raw) return null;
-
-    return JSON.parse(raw);
+    const localRaw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (localRaw) {
+      const parsed = JSON.parse(localRaw);
+      if (parsed._expires_at && Date.now() > parsed._expires_at) {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      } else {
+        return parsed;
+      }
+    }
+    const sessionRaw = sessionStorage.getItem(AUTH_STORAGE_KEY);
+    return sessionRaw ? JSON.parse(sessionRaw) : null;
   } catch (error) {
     console.warn('Erro ao recuperar sessão', error);
     return null;
