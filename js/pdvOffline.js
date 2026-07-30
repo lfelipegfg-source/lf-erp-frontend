@@ -101,12 +101,12 @@ export async function salvarVendaPendente(venda) {
   }
   const idempotency_key = (typeof crypto !== 'undefined' && crypto.randomUUID)
     ? crypto.randomUUID()
-    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+    : `${Date.now().toString(36)}-${(performance.now() * 1e6 | 0).toString(36)}-${Math.random().toString(36).slice(2)}`;
   try {
     const db = await openDB();
     const req = db.transaction('vendas_pendentes', 'readwrite')
       .objectStore('vendas_pendentes')
-      .add({ ...venda, idempotency_key, _queued_at: new Date().toISOString() });
+      .add({ ...venda, idempotency_key, _queued_at: new Date().toLocaleString('sv-SE', { timeZone: 'America/Fortaleza' }).replace(' ', 'T') });
     return new Promise((resolve, reject) => {
       req.onsuccess = () => { db.close(); resolve(req.result); };
       req.onerror = (e) => { db.close(); reject(e.target.error); };

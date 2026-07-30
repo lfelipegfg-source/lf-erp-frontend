@@ -1829,7 +1829,7 @@ const PDVModule = {
         await PdvOffline.removerVendaPendente(localId);
         sincronizadas++;
       } catch (err) {
-        console.error('[PDV Sync] Erro ao sincronizar venda pendente:', err);
+        console.error('[PDV Sync] Erro ao sincronizar venda pendente:', err.message || err);
         erros++;
       }
     }
