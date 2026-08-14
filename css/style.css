@@ -178,10 +178,11 @@ button {
   cursor: pointer;
 }
 
-input,
-select,
-textarea {
-  outline: none;
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary, #2563eb);
+  outline-offset: 2px;
 }
 
 img {

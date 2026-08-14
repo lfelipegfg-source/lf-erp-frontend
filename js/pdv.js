@@ -953,7 +953,7 @@ const PDVModule = {
                 ${[1,2,3,4,5,6,8,10,12].map((n) => `<option value="${n}" ${p.parcelas === n ? 'selected' : ''}>${n}x</option>`).join('')}
               </select>
               <input type="date" class="pdv-split-vencimento form-control" data-idx="${i}"
-                min="${new Date().toISOString().split('T')[0]}"
+                min="${new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Fortaleza' })}"
                 value="${p.vencimento || ''}" placeholder="1Âº vencimento" />
             </div>` : ''}
           ${this.state.pagamentos.length > 1
@@ -1620,10 +1620,12 @@ const PDVModule = {
         clearInterval(pollInterval);
         clearInterval(timerInterval);
         this.state._pixCleanup = null;
+        window._lf_pixCleanup = null;
         if (overlay.parentNode) document.body.removeChild(overlay);
         resolve();
       };
       this.state._pixCleanup = fechar;
+      window._lf_pixCleanup = fechar;
 
       overlay.querySelector('#_pixFechar').onclick = fechar;
       overlay.addEventListener('click', (e) => { if (e.target === overlay) fechar(); });

@@ -1472,7 +1472,7 @@ const ProdutosModule = {
                      <td class="text-right">${p.estoque_lferp}</td>
                      <td class="text-right">${p.estoque_publicado}</td>
                      <td class="text-right">
-                       <button class="btn-inline" onclick="ProdutosModule._syncEstoque(${Number(p.produto_id)},${JSON.stringify(p.plataforma)})">
+                       <button class="btn-inline" onclick="ProdutosModule._syncEstoque(${Number(p.produto_id)},'${escapeHtml(p.plataforma)}')">
                          <i class="fa-solid fa-sync"></i> Sync
                        </button>
                        <button class="btn-inline btn-inline--danger" onclick="ProdutosModule._desvincular(${p.id})">
@@ -1738,6 +1738,7 @@ const ProdutosModule = {
 };
 
 export async function initProdutosModule() {
+  window.ProdutosModule = ProdutosModule;
   ProdutosModule.init();
   await ProdutosModule.load();
 }

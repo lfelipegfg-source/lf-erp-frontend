@@ -391,6 +391,26 @@ const UsuariosModule = {
     if (this.el.senha) this.el.senha.value = '';
     if (this.el.tipo) this.el.tipo.value = usuario.tipo || 'funcionario';
 
+    if (!document.getElementById('permissoesGrid') && this.el.form) {
+      const footer = this.el.form.querySelector('.modal-card__footer');
+      const section = document.createElement('div');
+      section.className = 'form-field form-field--span-2';
+      section.innerHTML = `
+        <details id="permissoesSection">
+          <summary style="cursor:pointer;font-weight:600;font-size:.88rem;color:var(--text-muted);padding:4px 0;user-select:none">
+            <i class="fa-solid fa-shield-halved" style="margin-right:6px"></i>Permissões avançadas
+          </summary>
+          <div id="permissoesGrid" style="margin-top:12px">
+            <div style="font-size:.8rem;color:var(--text-muted);padding:8px 0">Carregando…</div>
+          </div>
+        </details>`;
+      if (footer) {
+        this.el.form.insertBefore(section, footer);
+      } else {
+        this.el.form.appendChild(section);
+      }
+    }
+
     this.carregarPermissoes(Number(id));
   },
 
