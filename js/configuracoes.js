@@ -260,8 +260,9 @@ const ConfigModule = {
   async salvarLogo(logoUrl) {
     try {
       await api.fetchAPI('/configuracoes', 'PUT', {
-        empresa: this.state.empresa,
-        logo_url: logoUrl
+        empresa:    this.state.empresa,
+        empresa_id: this.state.dados?.empresa_id || null,
+        logo_url:   logoUrl
       });
       if (this.state.dados) this.state.dados.logo_url = logoUrl;
       this._aplicarLogoPreview(logoUrl);

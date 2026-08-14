@@ -2,6 +2,7 @@
 import { showToast } from './feedback.js';
 import { buildFriendlyError, escapeHtml } from './utils.js';
 
+let _dashReqId = 0;
 let lastDashboardContext = {
   filters: {},
   state: {}
@@ -670,8 +671,9 @@ function destroyCharts() {
 
 function formatDia(isoDate) {
   if (!isoDate) return '';
-  const d = new Date(isoDate + 'T12:00:00');
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  return new Date(isoDate + 'T12:00:00').toLocaleDateString('pt-BR', {
+    day: '2-digit', month: '2-digit', timeZone: 'America/Fortaleza'
+  });
 }
 
 function renderChartVendas(vendasPorDia = []) {
@@ -1018,6 +1020,7 @@ export function bindDashboardConfig() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function loadDashboard({ filters = {}, state = {} } = {}) {
+  const reqId = ++_dashReqId;
   try {
     lastDashboardContext = {
       filters: { ...filters },
@@ -1039,6 +1042,8 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
       api.getAlertas().catch(() => ({ alertas: [] })),
       api.getTabelaPrecosDashboard().catch(() => null)
     ]);
+
+    if (reqId !== _dashReqId) return;
 
     const payload = normalizeDashboardPayload(rawDashboard);
     const financeiro = normalizeResumoFinanceiro(rawResumoFinanceiro);

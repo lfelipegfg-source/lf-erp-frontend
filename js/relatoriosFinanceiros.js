@@ -90,10 +90,14 @@ async function carregarDados() {
 }
 
 function getFiltrosGlobais() {
+  const tz = 'America/Fortaleza';
+  const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: tz });
+  const inicio30 = new Date(Date.now() - 29 * 864e5).toLocaleDateString('sv-SE', { timeZone: tz });
   return {
-    data_inicial: document.getElementById('filtroDataInicial')?.value || '',
-    data_final: document.getElementById('filtroDataFinal')?.value || '',
-    busca: document.getElementById('filtroBuscaGlobal')?.value?.trim() || ''
+    empresa_id:   api.getEmpresaId(),
+    data_inicial: document.getElementById('filtroDataInicial')?.value || inicio30,
+    data_final:   document.getElementById('filtroDataFinal')?.value   || hoje,
+    busca:        document.getElementById('filtroBuscaGlobal')?.value?.trim() || ''
   };
 }
 

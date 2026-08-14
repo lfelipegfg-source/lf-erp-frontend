@@ -1667,9 +1667,11 @@ const VendasModule = {
   getStatusBadgeClass(status) {
     const normalized = String(status || '').toLowerCase();
 
-    if (normalized === 'pago') return 'badge badge--success';
-    if (normalized === 'cancelado') return 'badge badge--danger';
-    if (normalized === 'parcial') return 'badge badge--warning';
+    if (normalized === 'pago')              return 'badge badge--success';
+    if (normalized === 'cancelado')          return 'badge badge--danger';
+    if (normalized === 'atrasado')           return 'badge badge--danger';
+    if (normalized === 'parcial')            return 'badge badge--warning';
+    if (normalized === 'parcial_atrasado')   return 'badge badge--warning';
 
     return 'badge badge--info';
   },

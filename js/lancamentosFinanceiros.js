@@ -334,7 +334,7 @@ function renderTabela(itens) {
 }
 
 function renderLinha(item) {
-  const pendente = item.status !== 'pago';
+  const pendente = !['pago', 'estornado'].includes(String(item.status || '').toLowerCase());
   return `
     <tr>
       <td>${badgeTipo(item.tipo)}</td>
@@ -567,6 +567,7 @@ async function salvar() {
   }
 
   const payload = {
+    empresa_id:      api.getEmpresaId(),
     tipo:            document.getElementById('lfTipoInput').value,
     descricao:       document.getElementById('lfDescricao').value.trim(),
     categoria:       document.getElementById('lfCategoria').value.trim(),

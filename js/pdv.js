@@ -22,6 +22,7 @@ const PDVModule = {
     gradeModalProduto: null,
     gradesDisponiveis: [],
     _gradeReqId: 0,
+    _recalcReqId: 0,
     _pixCleanup: null,
     _salOrc: false
   },
@@ -1111,7 +1112,7 @@ const PDVModule = {
 
     // No mobile, ao adicionar o primeiro item troca para a aba do carrinho
     if (this.state.carrinho.length === 1 && window.innerWidth < 768) {
-      this.switchTab('carrinho');
+      this.switchTab('pagamento');
     }
   },
 
@@ -1193,7 +1194,7 @@ const PDVModule = {
     this.setFeedback('', 'info');
 
     if (this.state.carrinho.length === 1 && window.innerWidth < 768) {
-      this.switchTab('carrinho');
+      this.switchTab('pagamento');
     }
   },
 
@@ -1261,6 +1262,9 @@ const PDVModule = {
   async recalcularPrecosCarrinho() {
     if (!this.state.carrinho.length) return;
 
+    this.state._recalcReqId += 1;
+    const reqId = this.state._recalcReqId;
+
     await Promise.all(
       this.state.carrinho.map(async (item, i) => {
         let preco = null;
@@ -1274,15 +1278,17 @@ const PDVModule = {
           );
         }
 
-        // Sem tabela ou sem cliente â†’ preÃ§o padrÃ£o armazenado no item
         if (preco === null) {
           preco = item.preco_padrao ?? item.preco_unitario;
         }
 
-        this.state.carrinho[i].preco_unitario = preco;
+        if (reqId === this.state._recalcReqId) {
+          this.state.carrinho[i].preco_unitario = preco;
+        }
       })
     );
 
+    if (reqId !== this.state._recalcReqId) return;
     this.renderCarrinho();
     this.renderResumo();
   },
@@ -1850,6 +1856,7 @@ const PDVModule = {
     if (this._offlineBound) return;
     this._offlineBound = true;
     window.addEventListener('online', async () => {
+      if (!api.getAuthToken()) return;
       this.updateOfflineIndicator(true);
       showToast('Conexão restaurada. Sincronizando vendas pendentes...', 'success');
       await this.syncPendentesIfOnline().catch(() => {});

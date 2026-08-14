@@ -605,7 +605,7 @@ function formatTipo(tipo) {
     funcionario: 'Funcionário'
   };
 
-  return mapa[tipo] || tipo || '-';
+  return mapa[tipo] || escapeHtml(tipo || '-');
 }
 
 

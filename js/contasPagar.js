@@ -588,13 +588,13 @@ async function pagarConta(id) {
         document.body.removeChild(overlay);
         showMessage('Pagamento registrado com sucesso.', 'success');
         await recarregar();
+        resolve();
       } catch (error) {
         console.error('Erro ao pagar conta:', error);
         btn.disabled = false;
         btn.innerHTML = 'Confirmar pagamento';
         showMessage(buildFriendlyError(error), 'error');
       }
-      resolve();
     };
   });
 }

@@ -63,6 +63,7 @@ function setLoading(value) {
 
 
 export async function initFluxoCaixaModule() {
+  if (state.loading) return;
   try {
     state.loading = true;
     if (!state.periodo.dataInicial) {
@@ -608,8 +609,11 @@ function renderCashflowFuturo() {
   [30, 60, 90].forEach((d) => {
     document.getElementById(`cfFuturo${d}d`)?.addEventListener('click', async () => {
       state.diasProjecao = d;
+      state._cashflowReqId = (state._cashflowReqId || 0) + 1;
+      const reqId = state._cashflowReqId;
       section.innerHTML = `<div class="module-feedback module-feedback--info">Carregando projeção de ${d} dias...</div>`;
       await carregarCashflowFuturo(d);
+      if (reqId !== state._cashflowReqId) return;
       renderCashflowFuturo();
     });
   });

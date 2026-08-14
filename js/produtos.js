@@ -1648,7 +1648,7 @@ const ProdutosModule = {
   async imprimirHoje() {
     try {
       showToast('Buscando produtos de hoje…', 'info');
-      const resp = await api.request(`/produtos/etiquetas-hoje/${this.state.empresa}`);
+      const resp = await api.request(`/produtos/etiquetas-hoje/${encodeURIComponent(this.state.empresa)}`);
       const itens = Array.isArray(resp) ? resp : (resp?.dados || []);
 
       if (!itens.length) {
