@@ -637,7 +637,7 @@ const ComprasModule = {
     this.state.itensCompra = [];
     this.state.editingId = null;
 
-    const titulo = document.querySelector('#compraModal h2, #compraModal .modal-title');
+    const titulo = document.querySelector('#compraModal h3');
     if (titulo) titulo.textContent = 'Nova Compra';
   },
 

@@ -1415,9 +1415,12 @@ const PDVModule = {
       ? (outrosPagamentos > 0 ? 'parcial' : 'pendente')
       : 'pago';
 
+    const idempotencyKey = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
     const payload = {
       empresa: this.state.empresa,
       empresa_id: api.getEmpresaId() || null,
+      idempotency_key: idempotencyKey,
       cliente_id: this.state.clienteId ? Number(this.state.clienteId) : null,
       cliente_nome: this.state.clienteNome || '',
       itens: this.state.carrinho.map((item) => {

@@ -418,7 +418,7 @@ const UsuariosModule = {
     const grid = document.getElementById('permissoesGrid');
     if (!grid) return;
     try {
-      const data = await api.request(`/usuarios/${usuarioId}/permissoes`, { method: 'GET' });
+      const data = await api.request(`/usuarios/${usuarioId}/permissoes`, { method: 'GET', query: { empresa_id: api.getEmpresaId() } });
       this.renderPermissoesGrid(grid, data.permissoes, data.tipo);
     } catch {
       grid.innerHTML = '<div style="font-size:.8rem;color:var(--text-muted)">Não foi possível carregar permissões.</div>';
@@ -551,7 +551,7 @@ const UsuariosModule = {
     try {
       await api.request(`/usuarios/${usuarioId}/permissoes`, {
         method: 'PUT',
-        body: { permissoes }
+        body: { permissoes, empresa_id: api.getEmpresaId() }
       });
     } catch (err) {
       console.warn('[permissoes] Erro ao salvar:', err.message);

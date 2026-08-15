@@ -4,7 +4,6 @@
  */
 
 const API_URL = window.LF_ERP_API_URL
-  || localStorage.getItem('lf_erp_api_url')
   || 'https://lf-erp-backend.onrender.com';
 
 const STORAGE_KEY = 'lf_erp_portal_token';

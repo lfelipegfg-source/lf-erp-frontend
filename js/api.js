@@ -396,23 +396,23 @@ async function deleteProduto(id) {
 // ── GRADES ───────────────────────────────────────────────────────────────────
 
 async function getGradesProduto(produtoId) {
-  return request(`/grades/produto/${produtoId}`);
+  return request(`/grades/produto/${produtoId}`, { query: { empresa_id: getEmpresaId() } });
 }
 
 async function createGrade(produtoId, data) {
-  return request(`/grades/produto/${produtoId}`, { method: 'POST', body: data });
+  return request(`/grades/produto/${produtoId}`, { method: 'POST', body: { ...data, empresa_id: getEmpresaId() } });
 }
 
 async function updateGrade(gradeId, data) {
-  return request(`/grades/${gradeId}`, { method: 'PUT', body: data });
+  return request(`/grades/${gradeId}`, { method: 'PUT', body: { ...data, empresa_id: getEmpresaId() } });
 }
 
 async function deleteGrade(gradeId) {
-  return request(`/grades/${gradeId}`, { method: 'DELETE' });
+  return request(`/grades/${gradeId}`, { method: 'DELETE', query: { empresa_id: getEmpresaId() } });
 }
 
 async function toggleGrade(produtoId) {
-  return request(`/grades/produto/${produtoId}/toggle`, { method: 'PATCH' });
+  return request(`/grades/produto/${produtoId}/toggle`, { method: 'PATCH', body: { empresa_id: getEmpresaId() } });
 }
 
 async function getAtributos() {
@@ -436,33 +436,33 @@ async function resolverPrecoTabela({ produtoId, clienteId = null, gradeId = null
 // ── KITS ─────────────────────────────────────────────────────────────────────
 
 async function getKitComponentes(produtoId) {
-  return request(`/kits/produto/${produtoId}/componentes`);
+  return request(`/kits/produto/${produtoId}/componentes`, { query: { empresa_id: getEmpresaId() } });
 }
 
 async function addKitComponente(produtoId, data) {
-  return request(`/kits/produto/${produtoId}/componentes`, { method: 'POST', body: data });
+  return request(`/kits/produto/${produtoId}/componentes`, { method: 'POST', body: { ...data, empresa_id: getEmpresaId() } });
 }
 
 async function updateKitComponente(produtoId, compId, data) {
-  return request(`/kits/produto/${produtoId}/componentes/${compId}`, { method: 'PUT', body: data });
+  return request(`/kits/produto/${produtoId}/componentes/${compId}`, { method: 'PUT', body: { ...data, empresa_id: getEmpresaId() } });
 }
 
 async function deleteKitComponente(produtoId, compId) {
-  return request(`/kits/produto/${produtoId}/componentes/${compId}`, { method: 'DELETE' });
+  return request(`/kits/produto/${produtoId}/componentes/${compId}`, { method: 'DELETE', query: { empresa_id: getEmpresaId() } });
 }
 
 async function toggleKit(produtoId) {
-  return request(`/kits/produto/${produtoId}/toggle`, { method: 'PATCH' });
+  return request(`/kits/produto/${produtoId}/toggle`, { method: 'PATCH', body: { empresa_id: getEmpresaId() } });
 }
 
 async function getEstoqueKit(produtoId) {
-  return request(`/kits/produto/${produtoId}/estoque`);
+  return request(`/kits/produto/${produtoId}/estoque`, { query: { empresa_id: getEmpresaId() } });
 }
 
 // ── IMAGENS ───────────────────────────────────────────────────────────────────
 
 async function getImagensProduto(produtoId) {
-  return request(`/imagens/produto/${produtoId}`);
+  return request(`/imagens/produto/${produtoId}`, { query: { empresa_id: getEmpresaId() } });
 }
 
 async function uploadImagemProduto(produtoId, file) {
@@ -478,15 +478,15 @@ async function uploadImagemProduto(produtoId, file) {
 }
 
 async function setPrincipalImagem(imagemId) {
-  return request(`/imagens/${imagemId}/principal`, { method: 'PATCH' });
+  return request(`/imagens/${imagemId}/principal`, { method: 'PATCH', body: { empresa_id: getEmpresaId() } });
 }
 
 async function updateOrdemImagem(imagemId, ordem) {
-  return request(`/imagens/${imagemId}/ordem`, { method: 'PUT', body: { ordem } });
+  return request(`/imagens/${imagemId}/ordem`, { method: 'PUT', body: { ordem, empresa_id: getEmpresaId() } });
 }
 
 async function deletarImagem(imagemId) {
-  return request(`/imagens/${imagemId}`, { method: 'DELETE' });
+  return request(`/imagens/${imagemId}`, { method: 'DELETE', query: { empresa_id: getEmpresaId() } });
 }
 
 async function getClientes(params = {}) {
@@ -887,19 +887,19 @@ async function importarXmlNF(conteudo) {
 // ── NFC-e ─────────────────────────────────────────────────────────────────────
 
 async function emitirNfce(vendaId) {
-  return request(`/nfce/emitir/${vendaId}`, { method: 'POST', body: {} });
+  return request(`/nfce/emitir/${vendaId}`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function consultarNfce(ref) {
-  return request(`/nfce/consultar/${ref}`, { method: 'GET' });
+  return request(`/nfce/consultar/${ref}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function cancelarNfce(nfceId, justificativa) {
-  return request(`/nfce/cancelar/${nfceId}`, { method: 'POST', body: { justificativa } });
+  return request(`/nfce/cancelar/${nfceId}`, { method: 'POST', body: { justificativa, empresa_id: getEmpresaId() } });
 }
 
 async function getNfceLista(params = {}) {
-  return request('/nfce/lista', { method: 'GET', query: params });
+  return request('/nfce/lista', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
 async function getNfcePdf(ref) {
@@ -1110,19 +1110,19 @@ async function salvarNfeConfig(payload) {
 }
 
 async function emitirNfe(vendaId) {
-  return request(`/nfe/emitir/${vendaId}`, { method: 'POST', body: {} });
+  return request(`/nfe/emitir/${vendaId}`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function consultarNfe(ref) {
-  return request(`/nfe/consultar/${encodeURIComponent(ref)}`, { method: 'GET' });
+  return request(`/nfe/consultar/${encodeURIComponent(ref)}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function cancelarNfe(nfeId, justificativa) {
-  return request(`/nfe/cancelar/${nfeId}`, { method: 'POST', body: { justificativa } });
+  return request(`/nfe/cancelar/${nfeId}`, { method: 'POST', body: { justificativa, empresa_id: getEmpresaId() } });
 }
 
 async function getNfeLista(params = {}) {
-  return request('/nfe/lista', { method: 'GET', query: params });
+  return request('/nfe/lista', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
 async function downloadNfePdf(ref) {
@@ -1164,23 +1164,23 @@ async function createOrcamento(payload) {
 }
 
 async function enviarOrcamento(id) {
-  return request(`/orcamentos/${id}/enviar`, { method: 'POST', body: {} });
+  return request(`/orcamentos/${id}/enviar`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function aprovarOrcamento(id) {
-  return request(`/orcamentos/${id}/aprovar`, { method: 'POST', body: {} });
+  return request(`/orcamentos/${id}/aprovar`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function recusarOrcamento(id) {
-  return request(`/orcamentos/${id}/recusar`, { method: 'POST', body: {} });
+  return request(`/orcamentos/${id}/recusar`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function converterOrcamentoPedido(id, payload = {}) {
-  return request(`/orcamentos/${id}/converter`, { method: 'POST', body: payload });
+  return request(`/orcamentos/${id}/converter`, { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function deleteOrcamento(id) {
-  return request(`/orcamentos/${id}`, { method: 'DELETE' });
+  return request(`/orcamentos/${id}`, { method: 'DELETE', query: { empresa_id: getEmpresaId() } });
 }
 
 // ── PORTAL DO CLIENTE (admin) ─────────────────────────────────────────────────
@@ -1204,111 +1204,111 @@ async function getPedido(id) {
 }
 
 async function confirmarPedido(id) {
-  return request(`/pedidos/${id}/confirmar`, { method: 'POST', body: {} });
+  return request(`/pedidos/${id}/confirmar`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function separacaoPedido(id) {
-  return request(`/pedidos/${id}/separacao`, { method: 'POST', body: {} });
+  return request(`/pedidos/${id}/separacao`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function cancelarPedido(id) {
-  return request(`/pedidos/${id}/cancelar`, { method: 'POST', body: {} });
+  return request(`/pedidos/${id}/cancelar`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 async function converterPedidoVenda(id, payload = {}) {
-  return request(`/pedidos/${id}/converter-venda`, { method: 'POST', body: payload });
+  return request(`/pedidos/${id}/converter-venda`, { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 // ── COMISSÕES ─────────────────────────────────────────────────────────────────
 
 async function getComissoesConfig() {
-  return request('/comissoes/config', { method: 'GET' });
+  return request('/comissoes/config', { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function salvarComissaoConfig(payload) {
-  return request('/comissoes/config', { method: 'POST', body: payload });
+  return request('/comissoes/config', { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function deleteComissaoConfig(id) {
-  return request(`/comissoes/config/${id}`, { method: 'DELETE' });
+  return request(`/comissoes/config/${id}`, { method: 'DELETE', query: { empresa_id: getEmpresaId() } });
 }
 
 async function getComissoes(params = {}) {
-  return request('/comissoes', { method: 'GET', query: params });
+  return request('/comissoes', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
 async function getComissoesResumo(params = {}) {
-  return request('/comissoes/resumo', { method: 'GET', query: params });
+  return request('/comissoes/resumo', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
 async function pagarComissao(id, payload = {}) {
-  return request(`/comissoes/${id}/pagar`, { method: 'POST', body: payload });
+  return request(`/comissoes/${id}/pagar`, { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function cancelarComissao(id) {
-  return request(`/comissoes/${id}/cancelar`, { method: 'POST', body: {} });
+  return request(`/comissoes/${id}/cancelar`, { method: 'POST', body: { empresa_id: getEmpresaId() } });
 }
 
 // ── CAIXA ─────────────────────────────────────────────────────────────────────
 
 async function getCaixaSessaoAtiva() {
-  return request('/caixa/sessao-ativa', { method: 'GET' });
+  return request('/caixa/sessao-ativa', { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function abrirCaixa(payload) {
-  return request('/caixa/abrir', { method: 'POST', body: payload });
+  return request('/caixa/abrir', { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function sangriaCaixa(payload) {
-  return request('/caixa/sangria', { method: 'POST', body: payload });
+  return request('/caixa/sangria', { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function suprimentoCaixa(payload) {
-  return request('/caixa/suprimento', { method: 'POST', body: payload });
+  return request('/caixa/suprimento', { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function fecharCaixa(payload) {
-  return request('/caixa/fechar', { method: 'POST', body: payload });
+  return request('/caixa/fechar', { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function getCaixaHistorico() {
-  return request('/caixa/historico', { method: 'GET' });
+  return request('/caixa/historico', { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 // ── DEVOLUÇÕES ────────────────────────────────────────────────────────────────
 
 async function getDevolucoes(params = {}) {
-  return request('/devolucoes', { method: 'GET', query: params });
+  return request('/devolucoes', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
 async function registrarDevolucao(payload) {
-  return request('/devolucoes', { method: 'POST', body: payload });
+  return request('/devolucoes', { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function getDevolucoesDaVenda(vendaId) {
-  return request(`/devolucoes/venda/${vendaId}`, { method: 'GET' });
+  return request(`/devolucoes/venda/${vendaId}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function getVendaDetalheParaDevolucao(vendaId) {
-  return request(`/vendas/detalhe/${vendaId}`, { method: 'GET' });
+  return request(`/vendas/detalhe/${vendaId}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 // ── ALERTAS DE COBRANÇA ───────────────────────────────────────────────────────
 
 async function getAlertasConfig() {
-  return request('/alertas/config', { method: 'GET' });
+  return request('/alertas/config', { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function salvarAlertasConfig(payload) {
-  return request('/alertas/config', { method: 'PUT', body: payload });
+  return request('/alertas/config', { method: 'PUT', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function dispararAlertas(payload = {}) {
-  return request('/alertas/disparar', { method: 'POST', body: payload });
+  return request('/alertas/disparar', { method: 'POST', body: { ...payload, empresa_id: getEmpresaId() } });
 }
 
 async function getAlertasHistorico() {
-  return request('/alertas/historico', { method: 'GET' });
+  return request('/alertas/historico', { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 function setApiBaseUrl(url) {

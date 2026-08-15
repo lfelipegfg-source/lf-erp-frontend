@@ -321,7 +321,7 @@ const ProdutosModule = {
     const checks = document.querySelectorAll('#colPickerDropdown input[data-col]');
     const state = {};
     checks.forEach((chk) => { state[chk.dataset.col] = chk.checked; });
-    localStorage.setItem('lf_cols_produtos', JSON.stringify(state));
+    try { localStorage.setItem('lf_cols_produtos', JSON.stringify(state)); } catch (_) {}
   },
 
   _restoreColState() {
@@ -1131,7 +1131,8 @@ const ProdutosModule = {
   },
 
   async handleGradeToggle() {
-    if (!this.state.editingId) return;
+    if (!this.state.editingId || this.state._toggling) return;
+    this.state._toggling = true;
     const toggle = document.getElementById('gradeToggleInput');
     const content = document.getElementById('gradeContent');
     const disabledMsg = document.getElementById('gradeDisabledMsg');
@@ -1159,6 +1160,8 @@ const ProdutosModule = {
       showToast(buildFriendlyError(err), 'error');
       const item2 = this.state.items.find((p) => Number(p.id) === Number(this.state.editingId));
       if (toggle && item2) toggle.checked = Boolean(item2.tem_grade);
+    } finally {
+      this.state._toggling = false;
     }
   },
 
@@ -1308,7 +1311,8 @@ const ProdutosModule = {
   },
 
   async handleKitToggle() {
-    if (!this.state.editingId) return;
+    if (!this.state.editingId || this.state._toggling) return;
+    this.state._toggling = true;
     const toggle = document.getElementById('kitToggleInput');
     const content = document.getElementById('kitContent');
     const disabledMsg = document.getElementById('kitDisabledMsg');
@@ -1332,6 +1336,8 @@ const ProdutosModule = {
       showToast(buildFriendlyError(err), 'error');
       const item2 = this.state.items.find((p) => Number(p.id) === Number(this.state.editingId));
       if (toggle && item2) toggle.checked = Boolean(item2.e_kit);
+    } finally {
+      this.state._toggling = false;
     }
   },
 
