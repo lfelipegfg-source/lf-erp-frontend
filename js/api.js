@@ -1125,15 +1125,19 @@ async function getNfeLista(params = {}) {
   return request('/nfe/lista', { method: 'GET', query: { ...params, empresa_id: getEmpresaId() } });
 }
 
+function _makeBlobUrl(blob) {
+  const blobUrl = URL.createObjectURL(blob);
+  const timerId = setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+  return { url: blobUrl, revoke: () => { clearTimeout(timerId); URL.revokeObjectURL(blobUrl); } };
+}
+
 async function downloadNfePdf(ref) {
   const token = getAuthToken();
   const url = buildUrl(`/nfe/pdf/${encodeURIComponent(ref)}`);
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error('DANFE não disponível');
   const blob = await res.blob();
-  const blobUrl = URL.createObjectURL(blob);
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-  return blobUrl;
+  return _makeBlobUrl(blob).url;
 }
 
 async function downloadNfeXml(ref) {
@@ -1142,9 +1146,7 @@ async function downloadNfeXml(ref) {
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error('XML não disponível');
   const blob = await res.blob();
-  const blobUrl = URL.createObjectURL(blob);
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-  return blobUrl;
+  return _makeBlobUrl(blob).url;
 }
 
 // ── ORÇAMENTOS ───────────────────────────────────────────────────────────────

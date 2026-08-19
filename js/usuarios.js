@@ -145,7 +145,7 @@ const UsuariosModule = {
             </div>
           </div>
           <div class="module-card__actions">
-            <button class="btn btn-primary" id="novoUsuarioBtn">
+            <button class="btn btn-primary" type="button" id="novoUsuarioBtn">
               <i class="fa-solid fa-plus"></i> Novo Usuário
             </button>
           </div>
@@ -478,6 +478,9 @@ const UsuariosModule = {
     if (this.state.loading) return;
     this.state.loading = true;
 
+    const saveBtn = this.el.form?.querySelector('button[type="submit"]');
+    if (saveBtn) saveBtn.disabled = true;
+
     const payload = {
       empresa: this.state.empresa,
       empresa_id: api.getEmpresaId(),
@@ -533,6 +536,7 @@ const UsuariosModule = {
       this.setFeedback(error.message || 'Erro ao salvar usuário.', 'error');
     } finally {
       this.state.loading = false;
+      if (saveBtn) saveBtn.disabled = false;
     }
   },
 

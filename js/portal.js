@@ -11,7 +11,7 @@ const STORAGE_KEY = 'lf_erp_portal_token';
 // ── Autenticação ─────────────────────────────────────────────────────────────
 
 function getToken() {
-  return sessionStorage.getItem(STORAGE_KEY) || localStorage.getItem(STORAGE_KEY) || null;
+  return sessionStorage.getItem(STORAGE_KEY) || null;
 }
 
 function saveToken(token) {
@@ -184,7 +184,7 @@ async function renderTitulos() {
   const rows = titulos.map((t) => `
     <tr>
       <td>${fmtDate(t.data_vencimento)}</td>
-      <td>${t.parcela ? `${t.parcela}/${t.total_parcelas}` : '-'}</td>
+      <td>${t.parcela ? `${esc(String(t.parcela))}/${esc(String(t.total_parcelas))}` : '-'}</td>
       <td>${statusBadge(t.status)}</td>
       <td style="text-align:right"><strong>${fmtCur(t.valor)}</strong></td>
       <td>${t.data_pagamento ? fmtDate(t.data_pagamento) : '-'}</td>

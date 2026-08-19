@@ -11,8 +11,14 @@
     } catch { return null; }
   }
 
+  const _ALLOWED_ADMIN_HOSTS = ['lf-erp-backend.onrender.com', 'localhost', '127.0.0.1'];
+  function _validateAdminUrl(url) {
+    try { const u = new URL(url); return _ALLOWED_ADMIN_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h)); } catch { return false; }
+  }
+
   function buildUrl(path, query) {
-    const base = localStorage.getItem('lf_erp_api_url') || 'https://lf-erp-backend.onrender.com';
+    const stored = localStorage.getItem('lf_erp_api_url');
+    const base = (stored && _validateAdminUrl(stored) ? stored : null) || 'https://lf-erp-backend.onrender.com';
     const url = new URL((base.replace(/\/+$/, '')) + (path.startsWith('/') ? path : '/' + path));
     if (query) {
       Object.entries(query).forEach(([k, v]) => {
@@ -29,6 +35,10 @@
     if (token) h.Authorization = `Bearer ${token}`;
     return h;
   }
+  function esc(v) {
+    return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+  }
+
   // ─────────────────────────────────────────────────────────────
 
   // ── Auth guard — apenas SaaS owner ──────────────────────────
@@ -441,8 +451,8 @@
     }
     tbody.innerHTML = planos.map(p => `
       <tr>
-        <td><code style="background:var(--surface-3);padding:2px 7px;border-radius:5px;font-size:12px">${p.codigo}</code></td>
-        <td><strong>${p.nome}</strong></td>
+        <td><code style="background:var(--surface-3);padding:2px 7px;border-radius:5px;font-size:12px">${esc(p.codigo)}</code></td>
+        <td><strong>${esc(p.nome)}</strong></td>
         <td>R$ ${Number(p.preco_mensal || 0).toFixed(2)}</td>
         <td style="text-align:center">${limiteStr(p.limite_usuarios)}</td>
         <td style="text-align:center">${limiteStr(p.limite_produtos)}</td>

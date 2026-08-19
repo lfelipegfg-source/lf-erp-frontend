@@ -1835,7 +1835,11 @@ const PDVModule = {
 
     for (const venda of pendentes) {
       try {
-        const { id: localId, _queued_at, ...payload } = venda;
+        const { id: localId, _queued_at, ...rest } = venda;
+        const payload = {
+          ...rest,
+          idempotency_key: rest.idempotency_key || `offline-sync-${localId}-${_queued_at || Date.now()}`
+        };
         await this.postVenda(payload);
         await PdvOffline.removerVendaPendente(localId);
         sincronizadas++;

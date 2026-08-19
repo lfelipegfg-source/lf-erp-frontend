@@ -1030,6 +1030,7 @@ export async function loadDashboard({ filters = {}, state = {} } = {}) {
     renderDashboardSkeleton();
 
     const params = {
+      empresa_id: api.getEmpresaId(),
       data_inicial: filters.dataInicial || '',
       data_final: filters.dataFinal || '',
       busca: filters.busca || ''

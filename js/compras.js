@@ -615,6 +615,9 @@ const ComprasModule = {
         if (this.el.data) this.el.data.value = (compra.data || '').slice(0, 10);
         if (this.el.formaPagamento) this.el.formaPagamento.value = compra.pagamento || '';
         if (this.el.parcelas) this.el.parcelas.value = compra.parcelas || 1;
+        if (this.el.primeiroVencimento && compra.primeiro_vencimento) {
+          this.el.primeiroVencimento.value = String(compra.primeiro_vencimento).slice(0, 10);
+        }
         if (this.el.observacao) this.el.observacao.value = compra.observacao || '';
         this.toggleVencimentoField();
         this.renderItensCompra();
@@ -855,6 +858,7 @@ const ComprasModule = {
     const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serão ajustados.', 'Excluir', 'danger');
 
     if (!confirmar) return;
+    if (this.state.loading) return;
 
     this.state.loading = true;
     try {
@@ -1082,12 +1086,12 @@ const ComprasModule = {
   },
 
   getTotalCompras() {
-    return this.state.items.reduce((acc, item) => acc + Number(item.total || 0), 0);
+    return (this.state.filteredItems || this.state.items).reduce((acc, item) => acc + Number(item.total || 0), 0);
   },
 
   getTotalFornecedores() {
     const fornecedores = new Set(
-      this.state.items.map((item) => item.fornecedor_nome || item.fornecedor).filter(Boolean)
+      (this.state.filteredItems || this.state.items).map((item) => item.fornecedor_nome || item.fornecedor).filter(Boolean)
     );
 
     return fornecedores.size;
@@ -1096,6 +1100,15 @@ const ComprasModule = {
   // ── Import XML NF de Fornecedor ────────────────────────────────────────────
 
   async importarXML(file) {
+    const MAX_XML_SIZE = 5 * 1024 * 1024; // 5 MB
+    if (!file || file.size > MAX_XML_SIZE) {
+      showToast('Arquivo XML inválido ou muito grande (máx. 5 MB).', 'error');
+      return;
+    }
+    if (file.type && !['text/xml', 'application/xml'].includes(file.type) && !file.name.endsWith('.xml')) {
+      showToast('Selecione um arquivo XML válido.', 'error');
+      return;
+    }
     const btn = document.getElementById('importarXmlBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; }
 

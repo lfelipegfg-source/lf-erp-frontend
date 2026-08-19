@@ -925,6 +925,7 @@ const ProdutosModule = {
       estoque_minimo: Number(this.el.estoqueMinimo?.value || 0)
     };
     if (!payload.nome) { this.setFormFeedback('Informe o nome do produto.', 'error'); return; }
+    if (payload.preco <= 0) { this.setFormFeedback('O preço de venda deve ser maior que R$0,00.', 'error'); return; }
 
     if (this.el.saveBtn) this.el.saveBtn.disabled = true;
     this.setFormFeedback('Salvando...', 'info');

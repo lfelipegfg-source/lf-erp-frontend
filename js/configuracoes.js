@@ -44,7 +44,7 @@ const ConfigModule = {
     this.state.loadingConfig = true;
     try {
       const [data, meData] = await Promise.all([
-        api.fetchAPI(`/configuracoes/${this.state.empresa}`),
+        api.fetchAPI(`/configuracoes/${encodeURIComponent(this.state.empresa)}`),
         api.validateSession().catch(() => null)
       ]);
 
@@ -633,7 +633,6 @@ const ConfigModule = {
       </section>
     `;
 
-    this.state.eventsBound = false;
     if (!this.state.eventsBound) {
       this.state.eventsBound = true;
       setTimeout(() => {

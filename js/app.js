@@ -98,6 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initializeApp() {
   cacheInitialState();
+  document.querySelectorAll('.view-section[data-view]').forEach((sec) => {
+    const view = sec.getAttribute('data-view');
+    const label = VIEW_CONFIG[view]?.title || view;
+    if (!sec.getAttribute('aria-label')) sec.setAttribute('aria-label', label);
+  });
   bindEvents();
   readFiltersFromURL();
   restoreSavedFilters();
@@ -605,6 +610,7 @@ function bindTopbarEvents() {
     if (!dropdown) return;
     const aberto = !dropdown.classList.contains('hidden');
     dropdown.classList.toggle('hidden');
+    sinoBtn.setAttribute('aria-expanded', String(!aberto));
     if (!aberto && !_notifCarregadas) {
       _notifCarregadas = true;
       carregarNotificacoes();
@@ -1180,6 +1186,7 @@ function renderAuthenticatedUser() {
   const adminLink = document.getElementById('adminNavLink');
   if (adminLink && AppState.user?.is_saas_owner) {
     adminLink.style.display = 'block';
+    adminLink.addEventListener('click', () => location.assign('./admin.html'));
   }
 
   const lixeiraBtn = document.getElementById('lixeiraNavBtn');
@@ -1380,6 +1387,20 @@ function hideGlobalLoader() {
   if (globalLoading) globalLoading.classList.add('hidden');
 }
 
+function _sanitizeModalHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  tmp.querySelectorAll('script,iframe,object,embed,base').forEach(el => el.remove());
+  tmp.querySelectorAll('*').forEach(el => {
+    [...el.attributes].forEach(attr => {
+      if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+      if (attr.name === 'href' && /^javascript:/i.test(attr.value)) el.removeAttribute(attr.name);
+      if (attr.name === 'src' && /^javascript:/i.test(attr.value)) el.removeAttribute(attr.name);
+    });
+  });
+  return tmp.innerHTML;
+}
+
 function openGlobalModal({ title = 'Aviso', body = '', footer = '' } = {}) {
   const modal = document.getElementById('globalModal');
   const modalTitle = document.getElementById('globalModalTitle');
@@ -1389,8 +1410,8 @@ function openGlobalModal({ title = 'Aviso', body = '', footer = '' } = {}) {
   if (!modal || !modalTitle || !modalBody || !modalFooter) return;
 
   modalTitle.textContent = title;
-  modalBody.innerHTML = body;
-  modalFooter.innerHTML = footer;
+  modalBody.innerHTML = _sanitizeModalHtml(body);
+  modalFooter.innerHTML = _sanitizeModalHtml(footer);
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
 }
@@ -1704,6 +1725,12 @@ async function loadEstoqueReal() {
 }
 
 async function loadUsuariosReal() {
+  const userPerfil = (AppState.user?.perfil || '').toLowerCase();
+  if (!['admin', 'administrador', 'gerente', 'manager'].includes(userPerfil)) {
+    renderModuleError('usuariosContainer', 'Usuários', 'Acesso restrito a administradores.');
+    return;
+  }
+
   showGlobalLoader('Carregando usuários...');
 
   try {

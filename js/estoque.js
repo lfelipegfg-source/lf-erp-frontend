@@ -547,7 +547,7 @@ const EstoqueModule = {
             <div class="form-grid">
               <div class="form-field form-field--span-2">
                 <label>Nome <span style="color:var(--danger)">*</span></label>
-                <input id="_dep_nome" type="text" autocomplete="off" placeholder="Ex: Depósito Principal" />
+                <input id="_dep_nome" type="text" autocomplete="off" placeholder="Ex: Depósito Principal" maxlength="100" />
               </div>
               <div class="form-field form-field--span-2">
                 <label>Descrição (opcional)</label>

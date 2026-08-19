@@ -825,7 +825,7 @@ function abrirModalBaixaConta(conta) {
   const modalExistente = document.getElementById('crBaixaModal');
   if (modalExistente) modalExistente.remove();
 
-  const valorAtual = Number(conta?.valor || 0);
+  const valorAtual = Number(conta?.valor_atualizado || conta?.valor || 0);
   const hojeISO = todayFortaleza();
 
   const modal = document.createElement('div');

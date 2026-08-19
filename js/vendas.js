@@ -133,7 +133,7 @@ const VendasModule = {
         venda.itens[index].total =
           Number(novaQuantidade) * Number(venda.itens[index].preco_unitario || 0);
 
-        this.recalcularVendaEmEdicao();
+        if (!this.recalcularVendaEmEdicao()) return;
         this.renderDetalheModal(venda);
 
         showToast('Quantidade atualizada', 'info');
@@ -186,7 +186,7 @@ const VendasModule = {
           });
         }
 
-        this.recalcularVendaEmEdicao();
+        if (!this.recalcularVendaEmEdicao()) return;
 
         document.getElementById('modalAddProduto')?.remove();
         this.renderDetalheModal(venda);
@@ -347,7 +347,7 @@ const VendasModule = {
         }
 
         venda.itens.splice(index, 1);
-        this.recalcularVendaEmEdicao();
+        if (!this.recalcularVendaEmEdicao()) return;
         this.renderDetalheModal(venda);
 
         showToast('Item removido da venda', 'info');
@@ -524,6 +524,8 @@ const VendasModule = {
               <option value="pago" ${this.state.filtros.status === 'pago' ? 'selected' : ''}>Pago</option>
               <option value="pendente" ${this.state.filtros.status === 'pendente' ? 'selected' : ''}>Pendente</option>
               <option value="parcial" ${this.state.filtros.status === 'parcial' ? 'selected' : ''}>Parcial</option>
+              <option value="atrasado" ${this.state.filtros.status === 'atrasado' ? 'selected' : ''}>Atrasado</option>
+              <option value="parcial_atrasado" ${this.state.filtros.status === 'parcial_atrasado' ? 'selected' : ''}>Parcial em atraso</option>
               <option value="cancelado" ${this.state.filtros.status === 'cancelado' ? 'selected' : ''}>Cancelado</option>
             </select>
           </div>

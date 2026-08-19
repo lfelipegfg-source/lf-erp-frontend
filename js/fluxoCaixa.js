@@ -180,10 +180,6 @@ function render() {
   const totalPaginasFluxo = getTotalPaginasFluxo(movimentosFiltrados);
   const movimentosPaginados = getMovimentosPaginados(movimentosFiltrados);
 
-  if (!movimentosFiltrados.length) {
-    showMessage('Nenhuma movimentação encontrada para o período selecionado.', 'info');
-  }
-
   container.innerHTML = `
     <section class="module-card fluxo-module-card">
       <div id="fluxoCaixaFeedback" class="module-feedback"></div>
@@ -344,6 +340,10 @@ function render() {
 
   bindEventos();
   injectFluxoCaixaStyles();
+
+  if (!movimentosFiltrados.length) {
+    showMessage('Nenhuma movimentação encontrada para o período selecionado.', 'info');
+  }
 }
 
 function renderResumoFormasPagamento() {
@@ -782,7 +782,9 @@ function formatDate(value) {
     const [ano, mes, dia] = String(value).split('-');
     return `${dia}/${mes}/${ano}`;
   }
-  const date = new Date(value);
+  let v = String(value);
+  if (/^\d{4}-\d{2}-\d{2}T\d/.test(v) && !/Z$/.test(v) && !/[+-]\d{2}:\d{2}$/.test(v)) v += 'Z';
+  const date = new Date(v);
   if (Number.isNaN(date.getTime())) return escapeHtml(String(value));
   return date.toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
 }

@@ -74,7 +74,7 @@
       </div>
 
       <!-- TELA DE LOGIN -->
-      <section id="loginScreen" class="login-screen">
+      <section id="loginScreen" class="login-screen" aria-label="Login">
         <div class="login-screen__left">
           <div class="login-brand">
             <div class="login-brand__badge">
@@ -201,7 +201,7 @@
       </section>
 
       <!-- TELA DE REGISTRO -->
-      <section id="registroScreen" class="login-screen hidden">
+      <section id="registroScreen" class="login-screen hidden" aria-label="Criar conta">
         <div class="login-screen__left">
           <div class="login-brand">
             <div class="login-brand__badge"><i class="fa-solid fa-layer-group"></i></div>
@@ -483,7 +483,7 @@
               <span class="nav-item__label">Configurações</span>
             </button>
 
-            <button id="adminNavLink" class="nav-item" style="display:none;width:100%" onclick="window.location.href='./admin.html'">
+            <button id="adminNavLink" class="nav-item" style="display:none;width:100%">
               <span class="nav-item__icon"><i class="fa-solid fa-shield-halved"></i></span>
               <span class="nav-item__label">Admin</span>
             </button>
@@ -526,13 +526,13 @@
               <!-- Sino de notificações in-app -->
               <div style="position:relative" id="notifWrapper">
                 <button id="notifSinoBtn" class="btn btn-light" type="button" title="Notificações" aria-label="Notificações"
-                  style="position:relative">
+                  aria-expanded="false" aria-controls="notifDropdown" style="position:relative">
                   <i class="fa-solid fa-bell"></i>
                   <span id="notifBadge" class="nav-badge nav-badge--float hidden">0</span>
                 </button>
-                <div id="notifDropdown" class="hidden" style="
+                <div id="notifDropdown" role="menu" aria-label="Notificações" class="hidden" style="
                   position:absolute;top:calc(100% + 8px);right:0;
-                  width:320px;max-height:400px;overflow-y:auto;
+                  width:min(320px,90vw);max-height:400px;overflow-y:auto;
                   background:var(--surface);border:1px solid var(--border);
                   border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.15);
                   z-index:500;
@@ -1335,10 +1335,10 @@
 
       <!-- DASHBOARD CONFIG MODAL -->
       <div id="dashboardConfigOverlay" class="modal-overlay hidden" style="align-items:center;z-index:300">
-        <div class="modal-card" style="max-width:460px;max-height:80vh;display:flex;flex-direction:column;gap:0">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dashboardConfigTitle" style="max-width:460px;max-height:80vh;display:flex;flex-direction:column;gap:0">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
             <div>
-              <h3 style="font-size:1.05rem;font-weight:700;color:var(--text)">Personalizar Dashboard</h3>
+              <h3 id="dashboardConfigTitle" style="font-size:1.05rem;font-weight:700;color:var(--text)">Personalizar Dashboard</h3>
               <p style="font-size:0.82rem;color:var(--text-muted);margin-top:2px">Ative ou desative os cards exibidos</p>
             </div>
             <button id="dashboardConfigClose" style="width:34px;height:34px;border:1px solid var(--border);border-radius:50%;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">

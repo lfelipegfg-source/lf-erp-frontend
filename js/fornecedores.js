@@ -305,12 +305,15 @@ const FornecedoresModule = {
       const telefone = String(fornecedor.telefone || '').toLowerCase();
       const email = String(fornecedor.email || '').toLowerCase();
       const endereco = String(fornecedor.endereco || '').toLowerCase();
+      const cnpj = String(fornecedor.cnpj || '').replace(/\D/g, '');
+      const normalizedDigits = normalized.replace(/\D/g, '');
 
       return (
         nome.includes(normalized) ||
         telefone.includes(normalized) ||
         email.includes(normalized) ||
-        endereco.includes(normalized)
+        endereco.includes(normalized) ||
+        (normalizedDigits.length >= 3 && cnpj.includes(normalizedDigits))
       );
     });
 

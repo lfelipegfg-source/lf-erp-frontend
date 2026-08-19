@@ -1,3 +1,5 @@
+import { escapeHtml } from './utils.js';
+
 export function showToast(message, type = 'info', duration = 4000) {
   if (!message) return;
 
@@ -43,16 +45,6 @@ function getTituloToast(type) {
   }
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-
-
 export function confirmarAcao(mensagem, labelConfirmar = 'Confirmar', tipo = 'danger') {
   return new Promise((resolve) => {
     const cor = tipo === 'danger' ? 'var(--danger)' : tipo === 'warning' ? 'var(--warning)' : 'var(--primary)';
@@ -97,7 +89,10 @@ export function confirmarAcao(mensagem, labelConfirmar = 'Confirmar', tipo = 'da
   });
 }
 
+const _INPUT_TIPOS_PERMITIDOS = ['text', 'number', 'email', 'password', 'date', 'tel', 'url'];
+
 export function pedirInput(label, placeholder = '', tipo = 'text') {
+  if (!_INPUT_TIPOS_PERMITIDOS.includes(tipo)) tipo = 'text';
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px';

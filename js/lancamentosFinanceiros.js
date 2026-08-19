@@ -507,7 +507,8 @@ function bindEventos() {
 
   // Ações da tabela (pagar, editar, excluir)
   const lfContainer = document.getElementById('lancamentosContainer');
-  (lfContainer || document).querySelectorAll('[data-action]').forEach((btn) => {
+  if (!lfContainer) return;
+  lfContainer.querySelectorAll('[data-action]').forEach((btn) => {
     btn.onclick = () => {
       const id = Number(btn.dataset.id);
       if (btn.dataset.action === 'pagar')   pagar(id);
@@ -611,7 +612,7 @@ async function pagar(id) {
     const dataPagamento = await new Promise((resolve) => {
       const overlay = document.createElement('div');
       overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px';
-      const hoje = typeof todayFortaleza === 'function' ? todayFortaleza() : new Date().toISOString().slice(0, 10);
+      const hoje = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Fortaleza' });
       overlay.innerHTML = `
         <div style="background:var(--surface);border-radius:16px;padding:24px;max-width:340px;width:100%;box-shadow:0 24px 50px rgba(0,0,0,.2)">
           <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">Confirmar pagamento</h3>

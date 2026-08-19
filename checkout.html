@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
   <!-- QR Code library -->
@@ -245,8 +245,11 @@ async function gerarBoleto(token) {
         result.innerHTML = `<div class="pix-key-box" id="boletoLinhaBox" style="margin-top:12px;">${esc(data.boleto_linha)}</div>`;
       }
     }
-  } catch {
+  } catch (err) {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-barcode"></i> Gerar boleto'; }
+    const result = document.getElementById('boletoResult');
+    if (result) result.innerHTML = `<div class="info-row" style="color:#ef4444;margin-top:8px;"><i class="fa fa-circle-xmark"></i> Erro ao gerar boleto. Tente novamente.</div>`;
+    console.error('[Checkout] gerarBoleto erro:', err?.message || err);
   }
 }
 

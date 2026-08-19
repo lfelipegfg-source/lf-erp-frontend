@@ -96,8 +96,7 @@ function getFiltrosGlobais() {
   return {
     empresa_id:   api.getEmpresaId(),
     data_inicial: document.getElementById('filtroDataInicial')?.value || inicio30,
-    data_final:   document.getElementById('filtroDataFinal')?.value   || hoje,
-    busca:        document.getElementById('filtroBuscaGlobal')?.value?.trim() || ''
+    data_final:   document.getElementById('filtroDataFinal')?.value   || hoje
   };
 }
 
@@ -652,7 +651,7 @@ function renderResumo() {
             <div class="alert-list__item info">
               O relatório respeita o período global aplicado no topo.
             </div>
-            <div class="alert-list__item ${r.fluxo.saldo >= 0 ? 'warning' : 'danger'}">
+            <div class="alert-list__item ${r.fluxo.saldo >= 0 ? 'success' : 'danger'}">
               ${
                 r.fluxo.saldo >= 0
                   ? 'Resultado financeiro equilibrado ou positivo.'

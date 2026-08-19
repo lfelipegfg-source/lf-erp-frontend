@@ -144,7 +144,7 @@ async function _doRefresh() {
   try {
     const data = await api.refreshToken();
     const newToken = data?.token || data?.authToken;
-    if (!newToken) return;
+    if (!newToken) { scheduleTokenRefresh(); return; }
 
     const auth = getAuth();
     const isLocal = !!localStorage.getItem(AUTH_STORAGE_KEY);
@@ -157,7 +157,7 @@ async function _doRefresh() {
 
     scheduleTokenRefresh();
   } catch {
-    // Refresh falhou silenciosamente; próxima requisição retornará 401
+    scheduleTokenRefresh();
   } finally {
     _refreshInProgress = false;
   }
