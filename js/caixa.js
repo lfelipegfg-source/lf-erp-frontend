@@ -135,7 +135,7 @@ const CaixaModule = {
     const mov = this.state.movimentos;
     const saldo = this.state.saldo_calculado;
     const vendas = this.state.vendas_dinheiro_pix;
-    const abertaEm = new Date(s.aberto_em).toLocaleString('pt-BR');
+    const abertaEm = new Date(s.aberto_em).toLocaleString('pt-BR', { timeZone: 'America/Fortaleza' });
 
     const sangrias    = mov.filter((m) => m.tipo === 'sangria').reduce((a, m) => a + m.valor, 0);
     const suprimentos = mov.filter((m) => m.tipo === 'suprimento').reduce((a, m) => a + m.valor, 0);
@@ -323,13 +323,13 @@ const CaixaModule = {
       const difCls = dif > 0 ? 'text-success' : dif < 0 ? 'text-danger' : '';
       return `
         <tr>
-          <td>${new Date(s.aberto_em).toLocaleDateString('pt-BR')}</td>
+          <td>${new Date(s.aberto_em).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' })}</td>
           <td>${this.esc(s.usuario_nome || '-')}</td>
           <td>${this.fmtCur(s.saldo_abertura)}</td>
           <td>${this.fmtCur(s.saldo_calculado)}</td>
           <td>${this.fmtCur(s.saldo_fechamento)}</td>
           <td class="${difCls}"><strong>${this.fmtCur(dif)}</strong></td>
-          <td>${s.fechado_em ? new Date(s.fechado_em).toLocaleString('pt-BR') : '—'}</td>
+          <td>${s.fechado_em ? new Date(s.fechado_em).toLocaleString('pt-BR', { timeZone: 'America/Fortaleza' }) : '—'}</td>
         </tr>
       `;
     }).join('');

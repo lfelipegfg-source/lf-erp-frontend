@@ -595,7 +595,7 @@ const EstoqueModule = {
     if (!ok) return;
     this._excluindoDeposito = true;
     try {
-      await api.request(`/depositos/${id}`, { method: 'DELETE' });
+      await api.request(`/depositos/${id}`, { method: 'DELETE', body: { empresa_id: api.getEmpresaId() } });
       showToast('Depósito excluído!', 'success');
       await this._renderDepositos();
     } catch (err) {

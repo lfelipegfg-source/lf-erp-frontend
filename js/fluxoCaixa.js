@@ -111,9 +111,10 @@ async function carregarFluxoCaixa() {
 
 function getFiltrosGlobais() {
   return {
+    empresa_id:   api.getEmpresaId(),
     data_inicial: state.periodo.dataInicial,
-    data_final: state.periodo.dataFinal,
-    busca: ''
+    data_final:   state.periodo.dataFinal,
+    busca:        ''
   };
 }
 

@@ -969,7 +969,7 @@ async function criarLancamentoConciliacao(id, payload = {}) {
 }
 
 async function deleteConciliacao(id) {
-  return request(`/conciliacao/${id}`, { method: 'DELETE', body: { empresa_id: getEmpresaId() } });
+  return request(`/conciliacao/${id}`, { method: 'DELETE', query: { empresa_id: getEmpresaId() } });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1025,7 +1025,7 @@ async function pagarLancamentoFinanceiro(id, payload = {}) {
 async function deleteLancamentoFinanceiro(id) {
   return request(`/financeiro/lancamentos/${id}`, {
     method: 'DELETE',
-    body: { empresa_id: getEmpresaId() }
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -1188,11 +1188,17 @@ async function deleteOrcamento(id) {
 // ── PORTAL DO CLIENTE (admin) ─────────────────────────────────────────────────
 
 async function configurarPortalCliente(clienteId, senha) {
-  return request(`/portal/admin/clientes/${clienteId}/senha`, { method: 'POST', body: { senha } });
+  return request(`/portal/admin/clientes/${clienteId}/senha`, {
+    method: 'POST',
+    body: { senha, empresa_id: getEmpresaId() }
+  });
 }
 
 async function togglePortalCliente(clienteId) {
-  return request(`/portal/admin/clientes/${clienteId}/toggle`, { method: 'PATCH' });
+  return request(`/portal/admin/clientes/${clienteId}/toggle`, {
+    method: 'PATCH',
+    body: { empresa_id: getEmpresaId() }
+  });
 }
 
 // ── PEDIDOS ──────────────────────────────────────────────────────────────────

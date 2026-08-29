@@ -134,9 +134,10 @@ async function carregarContas() {
 
 function getFiltrosGlobais() {
   return {
+    empresa_id:   api.getEmpresaId(),
     data_inicial: state.periodo.dataInicial,
-    data_final: state.periodo.dataFinal,
-    busca: state.filtros.busca || ''
+    data_final:   state.periodo.dataFinal,
+    busca:        state.filtros.busca || ''
   };
 }
 
@@ -1001,13 +1002,9 @@ function formatCurrency(value) {
 
 function formatDate(value) {
   if (!value) return '-';
-
-  const date = new Date(`${value}T12:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
+  const dateStr = String(value).slice(0, 10);
+  const date = new Date(`${dateStr}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return String(value);
   return date.toLocaleDateString('pt-BR');
 }
 

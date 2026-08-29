@@ -135,9 +135,10 @@ async function carregarContas() {
 
 function getFiltrosGlobais() {
   return {
+    empresa_id:   api.getEmpresaId(),
     data_inicial: state.periodo.dataInicial,
-    data_final: state.periodo.dataFinal,
-    busca: state.filtros.busca || ''
+    data_final:   state.periodo.dataFinal,
+    busca:        state.filtros.busca || ''
   };
 }
 
@@ -1559,7 +1560,7 @@ function getDiasAtrasoHtml(status, dataVencimento) {
   if (status !== 'atrasado' && status !== 'parcial_atrasado') return '';
   if (!dataVencimento) return '';
   const hoje = new Date(`${todayFortaleza()}T12:00:00`);
-  const venc = new Date(`${dataVencimento}T12:00:00`);
+  const venc = new Date(`${String(dataVencimento).slice(0, 10)}T12:00:00`);
   if (isNaN(venc.getTime())) return '';
   const dias = Math.round((hoje.getTime() - venc.getTime()) / 86400000);
   if (dias <= 0) return '';
@@ -1571,7 +1572,7 @@ function getVencimentoInfo(dataVencimento) {
 
   const hoje = new Date(`${todayFortaleza()}T12:00:00`);
 
-  const vencimento = new Date(`${dataVencimento}T12:00:00`);
+  const vencimento = new Date(`${String(dataVencimento).slice(0, 10)}T12:00:00`);
 
   if (Number.isNaN(vencimento.getTime())) {
     return 'Vencimento informado';

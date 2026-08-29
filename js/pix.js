@@ -2,6 +2,7 @@ import api from './api.js';
 import { showToast } from './feedback.js';
 
 let _pollInterval = null;
+let _timerTick = null;
 
 function esc(v) {
   return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -13,6 +14,7 @@ function toCurrency(v) {
 
 function stopPoll() {
   if (_pollInterval) { clearInterval(_pollInterval); _pollInterval = null; }
+  if (_timerTick)    { clearInterval(_timerTick);    _timerTick = null;    }
 }
 
 function removeModal() {
@@ -156,7 +158,7 @@ function renderPIXModal(data, valor, clienteNome, onPago) {
   }
 
   atualizarTimer();
-  const timerTick = setInterval(atualizarTimer, 1000);
+  _timerTick = setInterval(atualizarTimer, 1000);
 
   // Polling de status (apenas produção)
   if (!isSandbox) {
@@ -165,7 +167,7 @@ function renderPIXModal(data, valor, clienteNome, onPago) {
         const status = await api.verificarStatusPIX(data.txid);
         if (status.status === 'CONCLUIDA') {
           stopPoll();
-          clearInterval(timerTick);
+          clearInterval(_timerTick); _timerTick = null;
           const badge = document.getElementById('_pixStatusBadge');
           if (badge) {
             badge.className = 'pix-status-badge pix-status--pago';

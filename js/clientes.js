@@ -714,7 +714,7 @@ const ClientesModule = {
         <div class="module-card__header">
           <div>
             <h3>Curva ABC — Segmentação de Clientes</h3>
-            <p>${data.total_clientes} cliente(s) com histórico de compras · Total: ${cur(receitaGeral)}</p>
+            <p>${escapeHtml(String(data.total_clientes ?? 0))} cliente(s) com histórico de compras · Total: ${cur(receitaGeral)}</p>
           </div>
           <button class="btn btn-light" id="abcVoltarBtn2"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
         </div>

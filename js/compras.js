@@ -860,7 +860,7 @@ const ComprasModule = {
     const confirmar = await confirmarAcao(`Excluir compra${_labelCmp}? O estoque e as contas vinculadas serão ajustados.`, 'Excluir', 'danger');
 
     if (!confirmar) return;
-    if (this.state.loading) return;
+    if (this.state.loading || this.state.saving) return;
 
     this.state.loading = true;
     try {

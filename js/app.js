@@ -675,7 +675,7 @@ async function handleLoginSubmit(event) {
   if (!usuarioInput || !senhaInput || !loginSubmitBtn) return;
 
   const usuario = usuarioInput.value.trim();
-  const senha = senhaInput.value.trim();
+  const senha = senhaInput.value;
 
   if (!usuario || !senha) {
     setLoginMessage('Informe usuário e senha.', 'error');

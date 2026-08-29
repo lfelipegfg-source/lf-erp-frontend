@@ -497,12 +497,14 @@ const UsuariosModule = {
     if (!payload.nome || !payload.usuario || !payload.tipo) {
       this.setFeedback('Preencha os campos obrigatórios.', 'error');
       this.state.loading = false;
+      if (saveBtn) saveBtn.disabled = false;
       return;
     }
 
     if (!this.state.editingId && !payload.senha) {
       this.setFeedback('Informe a senha para o novo usuário.', 'error');
       this.state.loading = false;
+      if (saveBtn) saveBtn.disabled = false;
       return;
     }
 
@@ -511,6 +513,7 @@ const UsuariosModule = {
       if (s.length < 8 || s.length > 128 || !/[A-Z]/.test(s) || !/[0-9]/.test(s)) {
         this.setFeedback('Senha fraca: use entre 8 e 128 caracteres, 1 maiúscula e 1 número.', 'error');
         this.state.loading = false;
+        if (saveBtn) saveBtn.disabled = false;
         return;
       }
     }

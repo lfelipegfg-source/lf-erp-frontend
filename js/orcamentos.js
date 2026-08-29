@@ -206,7 +206,7 @@ const OrcamentosModule = {
         await api.recusarOrcamento(id);
         showToast('Orçamento recusado.', 'info');
       } else if (acao === 'excluir') {
-        if (!await confirmarAcao('Excluir este orçamento em rascunho?', 'Excluir', 'danger')) return;
+        if (!await confirmarAcao('Excluir este orçamento em rascunho?', 'Excluir', 'danger')) { if (btnEl) btnEl.disabled = false; return; }
         await api.deleteOrcamento(id);
         showToast('Orçamento excluído.', 'success');
       } else if (acao === 'converter') {
@@ -222,6 +222,7 @@ const OrcamentosModule = {
 
   async converterEmPedido(orcId) {
     const forma = await this.promptFormaPagamento('Converter Orçamento em Pedido', 'Informe a forma de pagamento (opcional):');
+    if (forma === undefined) return;
     try {
       const result = await api.converterOrcamentoPedido(orcId, { forma_pagamento: forma || null });
       const num = result?.pedido?.numero ?? result?.numero ?? '?';
@@ -255,7 +256,7 @@ const OrcamentosModule = {
         </div>
       `;
       document.body.appendChild(overlay);
-      overlay.querySelector('#_orcCancelarConv').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_orcCancelarConv').onclick = () => { document.body.removeChild(overlay); resolve(undefined); };
       overlay.querySelector('#_orcConfirmarConv').onclick = () => {
         const val = overlay.querySelector('#_orcFormaSelect').value;
         document.body.removeChild(overlay);

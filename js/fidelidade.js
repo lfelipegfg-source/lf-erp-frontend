@@ -50,9 +50,10 @@ const FidelidadeModule = {
 
   async loadDashboard() {
     try {
+      const _fidQ = { empresa_id: api.getEmpresaId() };
       const [dash, cfg] = await Promise.all([
-        api.fetchAPI('/fidelidade/dashboard'),
-        api.fetchAPI('/fidelidade/config')
+        api.fetchAPI('/fidelidade/dashboard', 'GET', null, _fidQ),
+        api.fetchAPI('/fidelidade/config',    'GET', null, _fidQ)
       ]);
       this.state.cfg = cfg.config;
       this.renderDashboard(dash, cfg.config);
@@ -114,7 +115,7 @@ const FidelidadeModule = {
 
   async loadConfig() {
     try {
-      const data = await api.fetchAPI('/fidelidade/config');
+      const data = await api.fetchAPI('/fidelidade/config', 'GET', null, { empresa_id: api.getEmpresaId() });
       this.state.cfg = data.config;
       this.renderConfig(data.config);
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
@@ -199,7 +200,7 @@ const FidelidadeModule = {
       if (!ok) return;
       btn.disabled = true;
       try {
-        const data = await api.fetchAPI('/fidelidade/expirar', 'POST');
+        const data = await api.fetchAPI('/fidelidade/expirar', 'POST', { empresa_id: api.getEmpresaId() });
         showToast(data.mensagem, 'success');
       } catch (err) { showToast(err.message || 'Erro', 'error'); }
       finally { btn.disabled = false; }
@@ -218,7 +219,7 @@ const FidelidadeModule = {
       validade_dias:   parseInt(document.getElementById('fidValidade').value)
     };
     try {
-      await api.fetchAPI('/fidelidade/config', 'PUT', payload);
+      await api.fetchAPI('/fidelidade/config', 'PUT', { ...payload, empresa_id: api.getEmpresaId() });
       showToast('Configuração salva!', 'success');
       this.state.cfg = { ...this.state.cfg, ...payload };
     } catch (err) { showToast(err.message || 'Erro', 'error'); }
@@ -231,9 +232,10 @@ const FidelidadeModule = {
 
   async loadClientes() {
     try {
+      const _fidQ2 = { empresa_id: api.getEmpresaId() };
       const [data, cfgData] = await Promise.all([
-        api.fetchAPI('/fidelidade/clientes'),
-        api.fetchAPI('/fidelidade/config')
+        api.fetchAPI('/fidelidade/clientes', 'GET', null, _fidQ2),
+        api.fetchAPI('/fidelidade/config',   'GET', null, _fidQ2)
       ]);
       this.state.clientes = data.clientes || [];
       this.state.cfg = cfgData.config;
@@ -315,7 +317,7 @@ const FidelidadeModule = {
       clearTimeout(_fidBuscaTimer);
       const q = e.target.value;
       _fidBuscaTimer = setTimeout(async () => {
-        const data = await api.fetchAPI('/fidelidade/clientes', 'GET', null, q ? { busca: q } : {}).catch(() => ({ clientes: [] }));
+        const data = await api.fetchAPI('/fidelidade/clientes', 'GET', null, { empresa_id: api.getEmpresaId(), ...(q ? { busca: q } : {}) }).catch(() => ({ clientes: [] }));
         this.state.clientes = data.clientes || [];
         this.renderClientes();
       }, 350);
@@ -347,7 +349,7 @@ const FidelidadeModule = {
     document.getElementById('fidExtratoModal').style.display = 'flex';
     document.getElementById('fidExtratoBody').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">Carregando...</div>';
     try {
-      const data = await api.fetchAPI(`/fidelidade/clientes/${clienteId}/extrato`);
+      const data = await api.fetchAPI(`/fidelidade/clientes/${clienteId}/extrato`, 'GET', null, { empresa_id: api.getEmpresaId() });
       const c = data.cliente || {};
       document.getElementById('fidExtratoTitle').textContent = `Extrato — ${c.nome || 'Cliente'}`;
 
@@ -387,7 +389,7 @@ const FidelidadeModule = {
     const descricao = document.getElementById('fidAjusteMot').value.trim();
     if (!clienteId || isNaN(pontos) || pontos === 0) { showToast('Preencha todos os campos', 'error'); return; }
     try {
-      const data = await api.fetchAPI('/fidelidade/ajustar', 'POST', { cliente_id: clienteId, pontos, descricao });
+      const data = await api.fetchAPI('/fidelidade/ajustar', 'POST', { cliente_id: clienteId, pontos, descricao, empresa_id: api.getEmpresaId() });
       showToast(`Ajuste aplicado. Novo saldo: ${data.novo_saldo} pontos`, 'success');
       document.getElementById('fidAjusteModal').style.display = 'none';
       await this.loadClientes();
@@ -400,7 +402,7 @@ const FidelidadeModule = {
     const el = document.getElementById('fidContent');
     if (!el) return;
     // Carrega lista para o select
-    const data = await api.fetchAPI('/fidelidade/clientes').catch(() => ({ clientes: [] }));
+    const data = await api.fetchAPI('/fidelidade/clientes', 'GET', null, { empresa_id: api.getEmpresaId() }).catch(() => ({ clientes: [] }));
 
     el.innerHTML = `
       <div style="max-width:480px;">
@@ -452,7 +454,7 @@ const FidelidadeModule = {
 
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Processando...'; }
       try {
-        const data = await api.fetchAPI('/fidelidade/resgatar', 'POST', { cliente_id: clienteId, pontos });
+        const data = await api.fetchAPI('/fidelidade/resgatar', 'POST', { cliente_id: clienteId, pontos, empresa_id: api.getEmpresaId() });
         document.getElementById('fidResResult').innerHTML = `
           <div class="fid-success-box">
             <i class="fa fa-circle-check"></i>

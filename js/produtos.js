@@ -1482,7 +1482,7 @@ const ProdutosModule = {
                        <button class="btn-inline" onclick="ProdutosModule._syncEstoque(${Number(p.produto_id)},'${escapeHtml(p.plataforma)}')">
                          <i class="fa-solid fa-sync"></i> Sync
                        </button>
-                       <button class="btn-inline btn-inline--danger" onclick="ProdutosModule._desvincular(${p.id})">
+                       <button class="btn-inline btn-inline--danger" onclick="ProdutosModule._desvincular(${Number(p.id)})">
                          <i class="fa-solid fa-unlink"></i>
                        </button>
                      </td>

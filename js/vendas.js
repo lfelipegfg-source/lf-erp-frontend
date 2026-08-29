@@ -1314,6 +1314,8 @@ const VendasModule = {
     if (subtotalEl) subtotalEl.textContent = formatCurrency(venda.subtotal);
     if (totalEl) totalEl.textContent = formatCurrency(venda.total);
     if (resultadoEl) resultadoEl.textContent = formatCurrency(venda.total);
+
+    return true;
   },
 
   async estornarParcelaVenda(id) {
@@ -2324,7 +2326,7 @@ const VendasModule = {
     corpo.innerHTML = `<div class="module-feedback module-feedback--info">Carregando metas...</div>`;
 
     try {
-      const data = await api.request('/metas-vendas', { method: 'GET', query: { periodo } });
+      const data = await api.request('/metas-vendas', { method: 'GET', query: { periodo, empresa_id: api.getEmpresaId() } });
       const metas = data.metas || [];
 
       if (sub) sub.textContent = `Período: ${periodo} · ${metas.length} meta(s) cadastrada(s)`;
@@ -2417,7 +2419,7 @@ const VendasModule = {
     try {
       await api.request('/metas-vendas', {
         method: 'POST',
-        body: { periodo, valor_meta: resultado.valor, descricao: resultado.descricao || null }
+        body: { periodo, valor_meta: resultado.valor, descricao: resultado.descricao || null, empresa_id: api.getEmpresaId() }
       });
       showToast('Meta criada!', 'success');
       await this._carregarMetas(periodo);
@@ -2429,7 +2431,7 @@ const VendasModule = {
   async excluirMeta(id, periodo) {
     if (!await confirmarAcao('Excluir esta meta?', 'Excluir', 'danger')) return;
     try {
-      await api.request(`/metas-vendas/${id}`, { method: 'DELETE' });
+      await api.request(`/metas-vendas/${id}`, { method: 'DELETE', body: { empresa_id: api.getEmpresaId() } });
       showToast('Meta excluída', 'success');
       await this._carregarMetas(periodo);
     } catch (err) {
