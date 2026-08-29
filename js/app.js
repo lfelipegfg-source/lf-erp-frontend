@@ -709,7 +709,7 @@ async function handleLoginSubmit(event) {
     setLoginMessage('', 'info');
     showToast(`Bem-vindo, ${AppState.user?.nome || 'usuário'}!`, 'success');
   } catch (error) {
-    console.error('Erro no login:', error);
+    console.error('Erro no login:', error?.status, error?.message);
     const friendlyMessage = buildFriendlyAuthError(error);
     setLoginMessage(friendlyMessage, 'error');
     showToast(friendlyMessage, 'error');

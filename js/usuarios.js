@@ -457,7 +457,7 @@ const UsuariosModule = {
 
     container.innerHTML = `
       <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:6px">
-        Perfil base: <strong>${tipo}</strong> — marque para sobrescrever individualmente
+        Perfil base: <strong>${escapeHtml(String(tipo || '-'))}</strong> — marque para sobrescrever individualmente
       </div>
       <div style="overflow-x:auto">
         <table style="border-collapse:collapse;width:100%">

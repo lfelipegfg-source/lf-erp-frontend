@@ -999,8 +999,6 @@ function bindEventos() {
     ?.addEventListener('click', () => { window.print(); });
 
   document.querySelectorAll('[data-rel-preset]').forEach((btn) => {
-    if (btn.dataset.rfHandlerBound) return;
-    btn.dataset.rfHandlerBound = '1';
     btn.addEventListener('click', async () => {
       const today = todayFortaleza();
       const [y, m] = today.split('-').map(Number);

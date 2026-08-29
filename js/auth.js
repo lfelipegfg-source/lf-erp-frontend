@@ -148,7 +148,12 @@ async function _doRefresh() {
 
     const auth = getAuth();
     const isLocal = !!localStorage.getItem(AUTH_STORAGE_KEY);
-    const updated = { ...auth, authToken: newToken, token: newToken };
+    const updated = {
+      ...auth,
+      authToken: newToken,
+      token: newToken,
+      ...(isLocal ? { _expires_at: Date.now() + 30 * 24 * 60 * 60 * 1000 } : {})
+    };
     if (isLocal) {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
     } else {

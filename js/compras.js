@@ -782,7 +782,7 @@ const ComprasModule = {
   },
 
   async save() {
-    if (this.state.saving) return;
+    if (this.state.saving || this.state.loading) return;
     this.cache();
 
     const fornecedorId = Number(this.el.fornecedor?.value || 0);
@@ -854,7 +854,7 @@ const ComprasModule = {
   },
 
   async remove(id) {
-    if (this.state.loading) return;
+    if (this.state.loading || this.state.saving) return;
     const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serão ajustados.', 'Excluir', 'danger');
 
     if (!confirmar) return;

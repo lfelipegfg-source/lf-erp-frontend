@@ -1377,9 +1377,9 @@ const PDVModule = {
       this.state.pagamentos = this.state.pagamentos.map((p) => {
         if (p.forma === 'Dinheiro' && trocoRestante > 0) {
           const valorAtual = Number(p.valor || 0);
-          const desconto = Math.min(trocoRestante, valorAtual);
-          trocoRestante -= desconto;
-          const novoValor = Number((valorAtual - desconto).toFixed(2));
+          const deducao = Math.min(trocoRestante, valorAtual);
+          trocoRestante -= deducao;
+          const novoValor = Number((valorAtual - deducao).toFixed(2));
           return { ...p, valor: novoValor };
         }
         return p;
@@ -1768,7 +1768,7 @@ const PDVModule = {
       this.showMessage(err.message || 'Erro ao salvar orçamento.', 'error');
     } finally {
       this.state._salOrc = false;
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-lines"></i> Salvar orçamento'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-file-lines"></i> Orçamento'; }
     }
   },
 
