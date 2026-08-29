@@ -40,6 +40,7 @@ function toInputDate(d) {
 
 function getFiltrosGlobais() {
   return {
+    empresa_id:   api.getEmpresaId(),
     data_inicial: state.periodo.dataInicial,
     data_final:   state.periodo.dataFinal
   };

@@ -3938,6 +3938,7 @@ select {
 .inline-add-form input:focus, .inline-add-form select:focus {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .section-empty {

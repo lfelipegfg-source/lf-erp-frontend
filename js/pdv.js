@@ -887,6 +887,7 @@ const PDVModule = {
       const active = panel.dataset.pdvPanel === tab;
       panel.classList.toggle('pdv-v2__panel--active', active);
       panel.classList.toggle('pdv-panel--active', active);
+      if (active) panel.scrollTop = 0;
     });
 
     document.querySelectorAll('[data-tab]').forEach((btn) => {

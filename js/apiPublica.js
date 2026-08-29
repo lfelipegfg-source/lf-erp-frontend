@@ -21,7 +21,7 @@ const EVENTOS = [
   { key: 'conta_pagar.vencida',label: 'Conta a pagar vencida',  icon: 'fa-calendar-xmark' }
 ];
 
-const API_BASE = window.LF_ERP_API_URL || localStorage.getItem('lf_erp_api_url') || 'https://lf-erp-backend.onrender.com';
+const API_BASE = window.LF_ERP_API_URL || 'https://lf-erp-backend.onrender.com';
 
 const ApiPublicaModule = {
   state: {
