@@ -1094,6 +1094,32 @@ img {
   background: rgba(37, 99, 235, 0.03);
 }
 
+/* ── Colunas ordenáveis ─────────────────────────────────────────────────── */
+.th-sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color .15s;
+}
+.th-sortable::after {
+  content: '↕';
+  margin-left: 5px;
+  opacity: .28;
+  font-size: .72em;
+  font-weight: 400;
+}
+.th-sortable[data-sort-dir="asc"]::after {
+  content: '↑';
+  opacity: .75;
+  color: var(--primary);
+}
+.th-sortable[data-sort-dir="desc"]::after {
+  content: '↓';
+  opacity: .75;
+  color: var(--primary);
+}
+.th-sortable:hover { color: var(--primary); }
+
 /* BADGE */
 .badge {
   padding: 6px 12px;
@@ -5793,19 +5819,27 @@ body.pdv-active #pdvContainer.module-placeholder {
   box-shadow: var(--shadow-sm);
 }
 
-/* ── Impressão — Relatórios Financeiros ─────────────────────────────────── */
+/* ── Impressão — cobertura geral do app ────────────────────────────────── */
 @media print {
-  /* Esconde navegação/chrome do app, mantendo apenas o conteúdo do relatório */
+  /* Oculta chrome do app e controles interativos */
   #sidebar,
   #sidebarOverlay,
   .topbar,
   #trialBanner,
   #globalFiltersBar,
   .section-header,
+  .module-feedback,
+  .periodo-local,
+  .cp-toolbar-grid,
+  .cr-toolbar-grid,
+  .module-toolbar,
+  .module-card__actions,
+  .table-actions,
+  .btn, .btn-inline, .btn-icon,
+  .actions-menu,
+  .rel-periodo-rapido,
   #relatoriosFeedback,
-  #relatoriosContainer .module-card__actions,
-  #relatoriosContainer .rel-periodo-rapido,
-  #relatoriosContainer .table-actions {
+  [data-action] {
     display: none !important;
   }
 
@@ -5819,37 +5853,35 @@ body.pdv-active #pdvContainer.module-placeholder {
     width: 100% !important;
   }
 
-  #relatoriosContainer,
-  #relatoriosContainer .module-card {
+  .module-card, .view-section {
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  #relatoriosContainer .table-wrapper {
+  .table-wrapper {
     overflow: visible !important;
   }
 
-  #relatoriosContainer table {
+  .data-table {
     width: 100% !important;
     font-size: 11px;
+    min-width: unset !important;
   }
 
-  #relatoriosContainer .kpi-grid,
-  #relatoriosContainer .dashboard-grid {
+  .data-table tr {
     break-inside: avoid;
   }
 
-  #relatoriosContainer .panel-card,
-  #relatoriosContainer .kpi-card {
+  .kpi-grid, .dashboard-grid, .cp-alertas-venc, .cr-alertas-venc {
+    break-inside: avoid;
+  }
+
+  .panel-card, .kpi-card {
     break-inside: avoid;
     box-shadow: none !important;
     border: 1px solid #ccc !important;
-  }
-
-  #relatoriosContainer tr {
-    break-inside: avoid;
   }
 }
 

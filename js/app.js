@@ -2,7 +2,7 @@ import api from './api.js';
 import dashboard from './dashboard.js';
 import { showToast } from './feedback.js';
 import { login as authLogin, logout as authLogout, getAuth, validateSession, scheduleTokenRefresh, saveAuth } from './auth.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, makeSortable } from './utils.js';
 
 const AppState = {
   isAuthenticated: false,
@@ -788,6 +788,13 @@ function closeMobileSidebar() {
 }
 
 async function setActiveView(view) {
+  if (view !== AppState.currentView) {
+    const openModal = document.querySelector('.modal-overlay:not(.hidden), [role="dialog"]:not([aria-hidden="true"]):not(.hidden)');
+    if (openModal) {
+      const ok = confirm('Você tem uma janela aberta. Deseja sair e descartar as alterações não salvas?');
+      if (!ok) return;
+    }
+  }
   window._lf_pixCleanup?.();
   AppState.currentView = view;
   saveCurrentViewToStorage();
@@ -1289,6 +1296,21 @@ function renderTrialBanner() {
   banner.style.display = 'none';
 }
 
+let _sortObserver = null;
+function _initSortObserver() {
+  if (_sortObserver) return;
+  _sortObserver = new MutationObserver((muts) => {
+    for (const mut of muts) {
+      for (const node of mut.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        if (node.classList?.contains('data-table')) makeSortable(node);
+        node.querySelectorAll?.('.data-table').forEach(makeSortable);
+      }
+    }
+  });
+  _sortObserver.observe(document.body, { childList: true, subtree: true });
+}
+
 function showMainScreen() {
   const loginScreen = document.getElementById('loginScreen');
   const mainScreen = document.getElementById('mainScreen');
@@ -1296,6 +1318,7 @@ function showMainScreen() {
   if (loginScreen) loginScreen.classList.add('hidden');
   if (mainScreen) mainScreen.classList.remove('hidden');
 
+  _initSortObserver();
   restoreNavGroupState();
 
   // Conecta SSE para notificações em tempo real (sem polling)

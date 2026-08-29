@@ -165,6 +165,42 @@ function renderSkeleton() {
     </section>`;
 }
 
+function calcAlertasVencCR() {
+  const today = todayFortaleza();
+  const d7 = new Date(`${today}T00:00:00`); d7.setDate(d7.getDate() + 7);
+  const in7 = d7.toLocaleDateString('sv-SE', { timeZone: 'America/Fortaleza' });
+  let atrasadas = 0, valAtrasadas = 0, hoje = 0, valHoje = 0, prox7 = 0, valProx7 = 0;
+  state.contas.forEach(c => {
+    const st = normalizarStatus(c.status);
+    if (st === 'pago') return;
+    const venc = (c.data_vencimento || '').split('T')[0];
+    if (!venc) return;
+    const val = parseFloat(c.valor || 0);
+    if (st === 'atrasado' || st === 'parcial_atrasado' || venc < today) {
+      atrasadas++; valAtrasadas += val;
+    } else if (venc === today) {
+      hoje++; valHoje += val;
+    } else if (venc > today && venc <= in7) {
+      prox7++; valProx7 += val;
+    }
+  });
+  return { atrasadas, valAtrasadas, hoje, valHoje, prox7, valProx7 };
+}
+
+function renderAlertasVencCR() {
+  const { atrasadas, valAtrasadas, hoje, valHoje, prox7, valProx7 } = calcAlertasVencCR();
+  if (!atrasadas && !hoje && !prox7) return '';
+  const fmtC = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const chip = (label, qtd, val, cls) =>
+    qtd ? `<div class="cp-alerta-chip cp-alerta-chip--${cls}"><span class="cp-alerta-chip__num">${qtd}</span><span class="cp-alerta-chip__label">${label}</span><span class="cp-alerta-chip__val">${fmtC(val)}</span></div>` : '';
+  return `
+    <div class="cr-alertas-venc cp-alertas-venc">
+      ${chip('Em atraso', atrasadas, valAtrasadas, 'danger')}
+      ${chip('Vencem hoje', hoje, valHoje, 'warning')}
+      ${chip('Próx. 7 dias', prox7, valProx7, 'info')}
+    </div>`;
+}
+
 function render() {
   const container = document.getElementById('contasReceberContainer');
   if (!container) return;
@@ -179,6 +215,8 @@ function render() {
           <span>Esta tela mostra títulos. Valores recebidos só entram no Fluxo de Caixa após baixa/pagamento.</span>
         </div>
       </div>
+
+      ${renderAlertasVencCR()}
 
       <div class="periodo-local">
         <span class="periodo-local__label">Período:</span>
@@ -2137,6 +2175,9 @@ function injectContasReceberStyles() {
   font-weight: 600;
   font-size: 0.8rem;
 }
+    .cr-alertas-venc.cp-alertas-venc {
+      margin-bottom: 16px;
+    }
   `;
 
   document.head.appendChild(style);

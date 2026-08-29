@@ -79,3 +79,44 @@ export function debounce(fn, delay = 300) {
     timer = setTimeout(() => fn.apply(this, args), delay);
   };
 }
+
+export function makeSortable(table) {
+  if (!table || table._sortInited) return;
+  table._sortInited = true;
+  const ths = [...table.querySelectorAll('thead th')];
+  if (!ths.length) return;
+  let sortCol = -1, sortAsc = true;
+  ths.forEach((th, i) => {
+    if (!th.textContent.trim() || th.classList.contains('no-sort')) return;
+    th.classList.add('th-sortable');
+    th.addEventListener('click', () => {
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return;
+      if (sortCol === i) { sortAsc = !sortAsc; } else { sortCol = i; sortAsc = true; }
+      ths.forEach(h => h.removeAttribute('data-sort-dir'));
+      th.setAttribute('data-sort-dir', sortAsc ? 'asc' : 'desc');
+      const rows = [...tbody.querySelectorAll('tr')].filter(r => r.cells.length > 1);
+      rows.sort((a, b) => {
+        const av = a.cells[i]?.textContent.trim() ?? '';
+        const bv = b.cells[i]?.textContent.trim() ?? '';
+        const parseBRL = s => parseFloat(s.replace(/[^\d,]/g, '').replace(',', '.'));
+        const an = parseBRL(av), bn = parseBRL(bv);
+        let cmp;
+        if (!isNaN(an) && !isNaN(bn)) {
+          cmp = an - bn;
+        } else {
+          const dm = /^(\d{2})\/(\d{2})\/(\d{4})/;
+          const am = av.match(dm), bm = bv.match(dm);
+          if (am && bm) {
+            const ad = `${am[3]}${am[2]}${am[1]}`, bd = `${bm[3]}${bm[2]}${bm[1]}`;
+            cmp = ad < bd ? -1 : ad > bd ? 1 : 0;
+          } else {
+            cmp = av.localeCompare(bv, 'pt-BR', { sensitivity: 'base' });
+          }
+        }
+        return sortAsc ? cmp : -cmp;
+      });
+      rows.forEach(r => tbody.appendChild(r));
+    });
+  });
+}

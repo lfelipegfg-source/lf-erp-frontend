@@ -171,6 +171,42 @@ function renderSkeleton() {
     </section>`;
 }
 
+function calcAlertasVencCP() {
+  const today = todayFortaleza();
+  const d7 = new Date(`${today}T00:00:00`); d7.setDate(d7.getDate() + 7);
+  const in7 = d7.toLocaleDateString('sv-SE', { timeZone: 'America/Fortaleza' });
+  let atrasadas = 0, valAtrasadas = 0, hoje = 0, valHoje = 0, prox7 = 0, valProx7 = 0;
+  state.contas.forEach(c => {
+    const st = normalizarStatus(c.status);
+    if (st === 'pago') return;
+    const venc = (c.data_vencimento || '').split('T')[0];
+    if (!venc) return;
+    const val = parseFloat(c.valor || 0);
+    if (st === 'atrasado' || st === 'parcial_atrasado' || venc < today) {
+      atrasadas++; valAtrasadas += val;
+    } else if (venc === today) {
+      hoje++; valHoje += val;
+    } else if (venc > today && venc <= in7) {
+      prox7++; valProx7 += val;
+    }
+  });
+  return { atrasadas, valAtrasadas, hoje, valHoje, prox7, valProx7 };
+}
+
+function renderAlertasVencCP() {
+  const { atrasadas, valAtrasadas, hoje, valHoje, prox7, valProx7 } = calcAlertasVencCP();
+  if (!atrasadas && !hoje && !prox7) return '';
+  const fmtC = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const chip = (label, qtd, val, cls) =>
+    qtd ? `<div class="cp-alerta-chip cp-alerta-chip--${cls}"><span class="cp-alerta-chip__num">${qtd}</span><span class="cp-alerta-chip__label">${label}</span><span class="cp-alerta-chip__val">${fmtC(val)}</span></div>` : '';
+  return `
+    <div class="cp-alertas-venc">
+      ${chip('Em atraso', atrasadas, valAtrasadas, 'danger')}
+      ${chip('Vencem hoje', hoje, valHoje, 'warning')}
+      ${chip('Próx. 7 dias', prox7, valProx7, 'info')}
+    </div>`;
+}
+
 function render() {
   const container = document.getElementById('contasPagarContainer');
   if (!container) return;
@@ -185,6 +221,8 @@ function render() {
           <span>Esta tela mostra títulos a pagar. Valores pagos só saem do Fluxo de Caixa após baixa/pagamento.</span>
         </div>
       </div>
+
+      ${renderAlertasVencCP()}
 
       <div class="periodo-local">
         <span class="periodo-local__label">Período:</span>
@@ -1371,6 +1409,47 @@ function injectContasPagarStyles() {
     .lf-pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .lf-pagination__info { font-size: 0.88rem; font-weight: 700; color: var(--text-muted); }
     .lf-pagination__info small { font-weight: 600; font-size: 0.8rem; }
+
+    .cp-alertas-venc {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .cp-alerta-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .cp-alerta-chip--danger {
+      background: var(--danger-soft, rgba(220,38,38,.08));
+      border-color: rgba(220,38,38,.18);
+      color: #b91c1c;
+    }
+    .cp-alerta-chip--warning {
+      background: var(--warning-soft, rgba(217,119,6,.08));
+      border-color: rgba(217,119,6,.18);
+      color: #92400e;
+    }
+    .cp-alerta-chip--info {
+      background: var(--info-soft, rgba(8,145,178,.08));
+      border-color: rgba(8,145,178,.18);
+      color: #0e7490;
+    }
+    .cp-alerta-chip__num {
+      font-size: 1.1em;
+      font-weight: 900;
+    }
+    .cp-alerta-chip__label { opacity: .85; }
+    .cp-alerta-chip__val {
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+    }
   `;
 
   document.head.appendChild(style);
