@@ -524,7 +524,9 @@ const ClientesModule = {
 
   async delete(id) {
     if (this.state.loading) return;
-    const ok = await confirmarAcao('Excluir este cliente? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
+    const _cli = this.state.items.find(c => String(c.id) === String(id));
+    const _nomeCli = _cli?.nome ? `"${_cli.nome}"` : 'este cliente';
+    const ok = await confirmarAcao(`Excluir ${_nomeCli}? Esta ação não pode ser desfeita.`, 'Excluir', 'danger');
     if (!ok) return;
 
     this.state.loading = true;

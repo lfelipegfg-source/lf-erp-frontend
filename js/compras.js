@@ -855,7 +855,9 @@ const ComprasModule = {
 
   async remove(id) {
     if (this.state.loading || this.state.saving) return;
-    const confirmar = await confirmarAcao('Excluir esta compra? O estoque e as contas vinculadas serão ajustados.', 'Excluir', 'danger');
+    const _cmp = this.state.items.find(c => String(c.id) === String(id));
+    const _labelCmp = _cmp ? ` de "${_cmp.fornecedor_nome || _cmp.fornecedor || 'fornecedor'}"` : '';
+    const confirmar = await confirmarAcao(`Excluir compra${_labelCmp}? O estoque e as contas vinculadas serão ajustados.`, 'Excluir', 'danger');
 
     if (!confirmar) return;
     if (this.state.loading) return;

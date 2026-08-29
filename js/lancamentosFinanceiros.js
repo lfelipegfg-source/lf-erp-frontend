@@ -654,7 +654,10 @@ async function excluir(id) {
   if (state.deleting) return;
   state.deleting = true;
   try {
-    const ok = await confirmarAcao('Excluir este lançamento? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
+    const _lan = state.itens.find(i => String(i.id) === String(id));
+    const _descLan = _lan?.descricao ? `"${_lan.descricao}"` : 'este lançamento';
+    const _valLan = _lan ? ` (${toCurrency(_lan.valor)})` : '';
+    const ok = await confirmarAcao(`Excluir ${_descLan}${_valLan}? Esta ação não pode ser desfeita.`, 'Excluir', 'danger');
     if (!ok) return;
     await api.deleteLancamentoFinanceiro(id);
     showMsg('Lançamento excluído.', 'success');

@@ -563,7 +563,9 @@ const UsuariosModule = {
   },
 
   async delete(id) {
-    const ok = await confirmarAcao('Deseja realmente excluir este usuário?', 'Excluir');
+    const _usu = this.state.items.find(u => String(u.id) === String(id));
+    const _nomeUsu = _usu?.nome ? `o usuário "${_usu.nome}"` : 'este usuário';
+    const ok = await confirmarAcao(`Deseja realmente excluir ${_nomeUsu}?`, 'Excluir');
     if (!ok) return;
 
     try {

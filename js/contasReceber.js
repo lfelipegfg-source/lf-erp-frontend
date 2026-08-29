@@ -711,7 +711,11 @@ async function baixarConta(id) {
 }
 
 async function excluirConta(id) {
-  const confirmar = await confirmarAcao('Excluir esta conta manual? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
+  const _cr = state.contas.find(c => String(c.id) === String(id));
+  const _devedor = _cr?.nome_devedor || _cr?.cliente_nome || null;
+  const _val = _cr ? ` (${Number(_cr.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})` : '';
+  const _msgCr = _devedor ? `Excluir conta de "${_devedor}"${_val}? Esta ação não pode ser desfeita.` : 'Excluir esta conta manual? Esta ação não pode ser desfeita.';
+  const confirmar = await confirmarAcao(_msgCr, 'Excluir', 'danger');
 
   if (!confirmar) return;
 

@@ -429,7 +429,9 @@ const FornecedoresModule = {
 
   async delete(id) {
     if (this.state.loading) return;
-    const ok = await confirmarAcao('Excluir este fornecedor? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
+    const _forn = this.state.items.find(f => String(f.id) === String(id));
+    const _nomeForn = _forn?.nome ? `"${_forn.nome}"` : 'este fornecedor';
+    const ok = await confirmarAcao(`Excluir ${_nomeForn}? Esta ação não pode ser desfeita.`, 'Excluir', 'danger');
     if (!ok) return;
 
     this.state.loading = true;
