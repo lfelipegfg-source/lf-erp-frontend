@@ -103,6 +103,9 @@ async function initializeApp() {
     const label = VIEW_CONFIG[view]?.title || view;
     if (!sec.getAttribute('aria-label')) sec.setAttribute('aria-label', label);
   });
+  document.querySelectorAll('i.fa-solid, i.fa-regular, i.fa-brands').forEach((icon) => {
+    if (!icon.hasAttribute('aria-hidden')) icon.setAttribute('aria-hidden', 'true');
+  });
   bindEvents();
   readFiltersFromURL();
   restoreSavedFilters();
