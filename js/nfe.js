@@ -198,7 +198,8 @@ const NfeModule = {
 
   bindListaEvents() {
     const c = document.getElementById('nfeConteudo');
-    if (!c) return;
+    if (!c || c._nfeListaBound) return;
+    c._nfeListaBound = true;
 
     c.addEventListener('click', async (e) => {
       const btn = e.target.closest('button[data-nfe-filtro]');

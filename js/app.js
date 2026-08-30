@@ -1429,7 +1429,7 @@ function hideGlobalLoader() {
 function _sanitizeModalHtml(html) {
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
-  tmp.querySelectorAll('script,iframe,object,embed,base').forEach(el => el.remove());
+  tmp.querySelectorAll('script,iframe,object,embed,base,link,style').forEach(el => el.remove());
   tmp.querySelectorAll('*').forEach(el => {
     [...el.attributes].forEach(attr => {
       if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);

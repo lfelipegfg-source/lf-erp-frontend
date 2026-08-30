@@ -1291,13 +1291,13 @@ function formatCurrency(value) {
 function formatDate(value) {
   if (!value) return '-';
 
-  const date = new Date(`${value}T12:00:00`);
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
 
   if (Number.isNaN(date.getTime())) {
-    return String(value);
+    return escapeHtml(String(value));
   }
 
-  return date.toLocaleDateString('pt-BR');
+  return date.toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
 }
 
 function getTodayDate() {

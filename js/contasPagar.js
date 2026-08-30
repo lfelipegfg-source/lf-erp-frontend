@@ -977,7 +977,7 @@ function getVencimentoInfo(dataVencimento) {
 
   const hoje = new Date(`${todayFortaleza()}T12:00:00`);
 
-  const vencimento = new Date(`${dataVencimento}T12:00:00`);
+  const vencimento = new Date(`${String(dataVencimento).slice(0, 10)}T12:00:00`);
 
   if (Number.isNaN(vencimento.getTime())) {
     return 'Vencimento informado';

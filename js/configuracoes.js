@@ -363,7 +363,7 @@ const ConfigModule = {
           <tbody>
             ${dados.map(l => `
               <tr>
-                <td>${new Date(l.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                <td>${new Date(l.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Fortaleza' })}</td>
                 <td>${acaoBadge(l.acao)}</td>
                 <td class="text-muted">${esc(l.ip || '—')}</td>
               </tr>`).join('')}
@@ -469,7 +469,7 @@ const ConfigModule = {
             </div>
             <div class="form-field">
               <label>Nascimento</label>
-              <input id="cfgNascimento" type="date" value="${this.state.user?.nascimento || ''}" />
+              <input id="cfgNascimento" type="date" value="${esc(this.state.user?.nascimento || '')}" />
             </div>
           </div>
           <div>

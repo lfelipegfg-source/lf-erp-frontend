@@ -281,7 +281,7 @@ const ComissoesModule = {
           <td>${this.fmtCur(c.valor_venda)}</td>
           <td>${Number(c.percentual || 0).toFixed(1)}%</td>
           <td class="text-right"><strong>${this.fmtCur(c.valor_comissao)}</strong></td>
-          <td><span class="badge ${badgeClass}">${c.status}</span></td>
+          <td><span class="badge ${badgeClass}">${this.esc(c.status)}</span></td>
           <td class="text-right">
             <div style="display:flex;gap:6px;justify-content:flex-end">
               ${c.status === 'pendente' ? `
@@ -545,7 +545,7 @@ const ComissoesModule = {
       const [ano, mes, dia] = String(v).slice(0, 10).split('-');
       return `${dia}/${mes}/${ano}`;
     }
-    return new Date(v).toLocaleDateString('pt-BR');
+    return new Date(v).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
   },
 
   esc(v) {

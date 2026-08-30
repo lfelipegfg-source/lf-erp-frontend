@@ -465,6 +465,8 @@ const CrmModule = {
   },
 
   async moverEstagio(id, estagio) {
+    if (this.state._movingEstagio) return;
+    this.state._movingEstagio = true;
     try {
       await api.fetchAPI(`/crm/oportunidades/${id}/estagio`, 'PATCH', { estagio, empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
       const op = this.state.oportunidades.find((o) => o.id === id);
@@ -473,6 +475,8 @@ const CrmModule = {
       await this.load();
     } catch (err) {
       showToast(err.message || 'Erro ao mover oportunidade', 'error');
+    } finally {
+      this.state._movingEstagio = false;
     }
   },
 

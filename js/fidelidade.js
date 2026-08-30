@@ -365,7 +365,7 @@ const FidelidadeModule = {
               <thead><tr><th>Tipo</th><th>Pontos</th><th>Saldo</th><th>Descrição</th><th>Data</th></tr></thead>
               <tbody>
                 ${movs.map((m) => {
-                  const t = TIPO_MOV[m.tipo] || { label: m.tipo, cor: '#666', bg: '#eee', sinal: '' };
+                  const t = TIPO_MOV[m.tipo] || { label: esc(m.tipo), cor: '#666', bg: '#eee', sinal: '' };
                   return `<tr>
                     <td><span style="background:${t.bg};color:${t.cor};padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;">${t.label}</span></td>
                     <td style="text-align:right;font-weight:600;color:${t.cor};">${t.sinal}${Math.abs(m.pontos)}</td>

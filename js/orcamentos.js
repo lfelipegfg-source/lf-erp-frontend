@@ -143,7 +143,7 @@ const OrcamentosModule = {
       <tr>
         <td><strong>#${o.numero}</strong></td>
         <td>${this.esc(o.cliente_nome || 'Sem cliente')}</td>
-        <td><span class="badge ${badge}">${STATUS_LABEL[o.status] || o.status}</span></td>
+        <td><span class="badge ${badge}">${STATUS_LABEL[o.status] || this.esc(o.status)}</span></td>
         <td>${valid}</td>
         <td>${Number(o.total_itens || 0)}</td>
         <td class="text-right"><strong>${this.fmtCur(o.total)}</strong></td>

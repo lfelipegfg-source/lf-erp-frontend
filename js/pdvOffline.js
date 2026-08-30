@@ -47,7 +47,8 @@ export async function salvarProdutos(produtos) {
       tx.onerror = (e) => { db.close(); reject(e.target.error); };
     });
   } catch (err) {
-    console.warn('[PDV Offline] salvarProdutos:', err);
+    console.error('[PDV Offline] salvarProdutos:', err);
+    throw err;
   }
 }
 
@@ -77,7 +78,8 @@ export async function salvarClientes(clientes) {
       tx.onerror = (e) => { db.close(); reject(e.target.error); };
     });
   } catch (err) {
-    console.warn('[PDV Offline] salvarClientes:', err);
+    console.error('[PDV Offline] salvarClientes:', err);
+    throw err;
   }
 }
 

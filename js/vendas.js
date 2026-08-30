@@ -2540,10 +2540,10 @@ function formatDate(value) {
   const date = new Date(`${normalized}T12:00:00`);
 
   if (Number.isNaN(date.getTime())) {
-    return String(value);
+    return escapeHtml(String(value));
   }
 
-  return date.toLocaleDateString('pt-BR');
+  return date.toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
 }
 
 
