@@ -87,9 +87,14 @@
   // ── Tabs ─────────────────────────────────────────────
   window.switchTab = function (tab) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(`tab-${tab}`).classList.add('active');
-    event.currentTarget.classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    const panel = document.getElementById(`tab-${tab}`);
+    const btn   = document.getElementById(`tbtn-${tab}`);
+    if (panel) panel.classList.add('active');
+    if (btn)   { btn.classList.add('active'); btn.setAttribute('aria-selected', 'true'); }
 
     if (tab === 'dashboard') carregarOwnerDashboard();
     if (tab === 'empresas')  carregarEmpresas();
