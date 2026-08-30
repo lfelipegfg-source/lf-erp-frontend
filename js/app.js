@@ -982,41 +982,53 @@ function updateGlobalFilterContextNote() {
 
 
 function applyDefaultPeriodDates() {
-  const nowBR = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Fortaleza' }));
-  const today = nowBR;
-  let start = new Date(today);
-  let end = new Date(today);
+  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Fortaleza' });
+
+  function shiftDays(dateStr, n) {
+    const d = new Date(`${dateStr}T12:00:00`);
+    d.setDate(d.getDate() + n);
+    return d.toLocaleDateString('sv-SE', { timeZone: 'America/Fortaleza' });
+  }
+
+  let start = todayStr;
+  let end   = todayStr;
 
   switch (AppState.filters.periodo) {
     case 'hoje':
       break;
     case 'ontem':
-      start.setDate(today.getDate() - 1);
-      end.setDate(today.getDate() - 1);
+      start = shiftDays(todayStr, -1);
+      end   = shiftDays(todayStr, -1);
       break;
     case '7dias':
-      start.setDate(today.getDate() - 6);
+      start = shiftDays(todayStr, -6);
       break;
     case '30dias':
-      start.setDate(today.getDate() - 29);
+      start = shiftDays(todayStr, -29);
       break;
-    case 'mesAtual':
-      start = new Date(today.getFullYear(), today.getMonth(), 1);
+    case 'mesAtual': {
+      const [y, m] = todayStr.split('-').map(Number);
+      start = `${y}-${String(m).padStart(2, '0')}-01`;
       break;
-    case 'mesAnterior':
-      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      end = new Date(today.getFullYear(), today.getMonth(), 0);
+    }
+    case 'mesAnterior': {
+      const [y, m] = todayStr.split('-').map(Number);
+      const lastOfPrev = shiftDays(`${y}-${String(m).padStart(2, '0')}-01`, -1);
+      const [py, pm]   = lastOfPrev.split('-').map(Number);
+      start = `${py}-${String(pm).padStart(2, '0')}-01`;
+      end   = lastOfPrev;
       break;
+    }
     case 'personalizado':
       saveFiltersToStorage();
       return;
     default:
-      start.setDate(today.getDate() - 6);
+      start = shiftDays(todayStr, -6);
       break;
   }
 
-  AppState.filters.dataInicial = formatDateInput(start);
-  AppState.filters.dataFinal = formatDateInput(end);
+  AppState.filters.dataInicial = start;
+  AppState.filters.dataFinal   = end;
   saveFiltersToStorage();
 }
 
@@ -2099,14 +2111,6 @@ async function simulateRefresh() {
 
   await loadCurrentView(AppState.currentView);
   showToast('Dados atualizados.', 'success');
-}
-
-function formatDateInput(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
 }
 
 function getPeriodLabel() {
