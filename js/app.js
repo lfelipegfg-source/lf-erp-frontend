@@ -881,7 +881,7 @@ function updateNavigationState(view) {
   const navGroups = document.querySelectorAll('.nav-group');
   const navGroupToggles = document.querySelectorAll('.nav-group__toggle');
 
-  navItems.forEach((item) => item.classList.remove('active'));
+  navItems.forEach((item) => { item.classList.remove('active'); item.removeAttribute('aria-current'); });
   navGroups.forEach((group) => group.classList.remove('active'));
   navGroupToggles.forEach((toggle) => toggle.classList.remove('active'));
 
@@ -891,6 +891,7 @@ function updateNavigationState(view) {
   if (!activeItem) return;
 
   activeItem.classList.add('active');
+  activeItem.setAttribute('aria-current', 'page');
 
   const parentGroup = activeItem.closest('.nav-group');
   if (parentGroup) {
