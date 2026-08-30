@@ -19,6 +19,7 @@ function stopPoll() {
 
 function removeModal() {
   stopPoll();
+  window._lf_pixCleanup = null;
   const m = document.getElementById('_pixModal');
   if (m) m.remove();
 }
@@ -46,6 +47,7 @@ function sandboxQRSVG() {
 
 export async function gerarPIX({ contaReceberID, valor, clienteNome, onPago } = {}) {
   removeModal();
+  window._lf_pixCleanup = removeModal;
 
   // Render do modal de carregamento
   const overlay = document.createElement('div');
