@@ -2335,6 +2335,10 @@ function bindCommandPaletteShortcut() {
   document.getElementById('shortcutsModal')?.addEventListener('click', (e) => {
     if (e.target === document.getElementById('shortcutsModal')) closeShortcutsModal();
   });
+  document.getElementById('verTutorialBtn')?.addEventListener('click', () => {
+    closeShortcutsModal();
+    reiniciarWizard();
+  });
 }
 
 function openShortcutsModal() {
