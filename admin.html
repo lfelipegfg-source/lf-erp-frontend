@@ -133,17 +133,17 @@
       </div>
       <div class="admin-header__user">
         <span id="adminUserName"></span>
-        <button class="btn-logout" onclick="adminLogout()"><i class="fa fa-sign-out-alt"></i> Sair</button>
+        <button class="btn-logout" data-action="adminLogout"><i class="fa fa-sign-out-alt"></i> Sair</button>
       </div>
     </header>
 
     <nav class="admin-tabs">
-      <button class="tab-btn active" onclick="switchTab('dashboard')"><i class="fa fa-chart-line"></i> Dashboard</button>
-      <button class="tab-btn" onclick="switchTab('empresas')"><i class="fa fa-building"></i> Empresas</button>
-      <button class="tab-btn" onclick="switchTab('planos')"><i class="fa fa-tags"></i> Planos</button>
-      <button class="tab-btn" onclick="switchTab('billing')"><i class="fa fa-barcode"></i> Billing</button>
-      <button class="tab-btn" onclick="switchTab('smtp')"><i class="fa fa-envelope"></i> E-mail</button>
-      <button class="tab-btn" onclick="switchTab('logs')"><i class="fa fa-list-alt"></i> Logs</button>
+      <button class="tab-btn active" data-action="switchTab" data-tab="dashboard"><i class="fa fa-chart-line"></i> Dashboard</button>
+      <button class="tab-btn" data-action="switchTab" data-tab="empresas"><i class="fa fa-building"></i> Empresas</button>
+      <button class="tab-btn" data-action="switchTab" data-tab="planos"><i class="fa fa-tags"></i> Planos</button>
+      <button class="tab-btn" data-action="switchTab" data-tab="billing"><i class="fa fa-barcode"></i> Billing</button>
+      <button class="tab-btn" data-action="switchTab" data-tab="smtp"><i class="fa fa-envelope"></i> E-mail</button>
+      <button class="tab-btn" data-action="switchTab" data-tab="logs"><i class="fa fa-list-alt"></i> Logs</button>
     </nav>
 
     <main class="admin-content">
@@ -162,7 +162,7 @@
         <div class="stat-grid" id="statsGrid"></div>
         <div class="section-header">
           <span class="section-title">Empresas</span>
-          <button class="btn btn-primary" onclick="openModalEmpresa()"><i class="fa fa-plus"></i> Nova Empresa</button>
+          <button class="btn btn-primary" data-action="openModalEmpresa"><i class="fa fa-plus"></i> Nova Empresa</button>
         </div>
         <div class="card">
           <table>
@@ -188,7 +188,7 @@
       <div id="tab-planos" class="tab-panel">
         <div class="section-header">
           <span class="section-title">Planos</span>
-          <button class="btn btn-primary" onclick="openModalPlano()"><i class="fa fa-plus"></i> Novo Plano</button>
+          <button class="btn btn-primary" data-action="openModalPlano"><i class="fa fa-plus"></i> Novo Plano</button>
         </div>
         <div class="card">
           <table>
@@ -216,13 +216,13 @@
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalDetalheTitulo" style="max-width:680px">
         <div class="modal-header">
           <span class="modal-title" id="modalDetalheTitulo">Detalhe da Empresa</span>
-          <button class="modal-close" onclick="closeModal('modalDetalheEmpresa')" aria-label="Fechar">&times;</button>
+          <button class="modal-close" data-action="closeModal" data-modal="modalDetalheEmpresa" aria-label="Fechar">&times;</button>
         </div>
         <div class="modal-body" id="modalDetalheConteudo" style="max-height:70vh;overflow-y:auto">
           <div style="text-align:center;padding:24px;color:var(--text-muted)"><i class="fa fa-spinner fa-spin"></i> Carregando...</div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" onclick="closeModal('modalDetalheEmpresa')">Fechar</button>
+          <button class="btn btn-secondary" data-action="closeModal" data-modal="modalDetalheEmpresa">Fechar</button>
         </div>
       </div>
     </div>
@@ -249,7 +249,7 @@
       <div id="tab-logs" class="tab-panel">
         <div class="section-header">
           <span class="section-title">Logs de Auditoria</span>
-          <button class="btn btn-secondary" onclick="carregarLogs()"><i class="fa fa-refresh"></i> Atualizar</button>
+          <button class="btn btn-secondary" data-action="carregarLogs"><i class="fa fa-refresh"></i> Atualizar</button>
         </div>
         <div class="filters">
           <input class="filter-input" id="logEmpresa" placeholder="Empresa..." />
@@ -273,7 +273,7 @@
           </select>
           <input class="filter-input" id="logDataInicial" type="date" />
           <input class="filter-input" id="logDataFinal" type="date" />
-          <button class="btn btn-primary btn-sm" onclick="carregarLogs()"><i class="fa fa-search"></i> Filtrar</button>
+          <button class="btn btn-primary btn-sm" data-action="carregarLogs"><i class="fa fa-search"></i> Filtrar</button>
         </div>
         <div class="card">
           <table>
@@ -301,7 +301,7 @@
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalEmpresaTitulo">
         <div class="modal-header">
           <span class="modal-title" id="modalEmpresaTitulo">Nova Empresa</span>
-          <button class="modal-close" onclick="closeModal('modalEmpresa')" aria-label="Fechar">&times;</button>
+          <button class="modal-close" data-action="closeModal" data-modal="modalEmpresa" aria-label="Fechar">&times;</button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="empresaEditId" />
@@ -362,8 +362,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" onclick="closeModal('modalEmpresa')">Cancelar</button>
-          <button class="btn btn-primary" onclick="salvarEmpresa()"><i class="fa fa-check"></i> Salvar</button>
+          <button class="btn btn-secondary" data-action="closeModal" data-modal="modalEmpresa">Cancelar</button>
+          <button class="btn btn-primary" data-action="salvarEmpresa"><i class="fa fa-check"></i> Salvar</button>
         </div>
       </div>
     </div>
@@ -373,7 +373,7 @@
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalPlanoTitulo">
         <div class="modal-header">
           <span class="modal-title" id="modalPlanoTitulo">Novo Plano</span>
-          <button class="modal-close" onclick="closeModal('modalPlano')" aria-label="Fechar">&times;</button>
+          <button class="modal-close" data-action="closeModal" data-modal="modalPlano" aria-label="Fechar">&times;</button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="planoEditId" />
@@ -413,8 +413,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" onclick="closeModal('modalPlano')">Cancelar</button>
-          <button class="btn btn-primary" onclick="salvarPlano()"><i class="fa fa-check"></i> Salvar</button>
+          <button class="btn btn-secondary" data-action="closeModal" data-modal="modalPlano">Cancelar</button>
+          <button class="btn btn-primary" data-action="salvarPlano"><i class="fa fa-check"></i> Salvar</button>
         </div>
       </div>
     </div>

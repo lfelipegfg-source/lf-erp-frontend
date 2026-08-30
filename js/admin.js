@@ -816,6 +816,23 @@
     } catch (e) { showToast(`Erro: ${e.message}`, 'error'); }
   };
 
+  // ── Delegação de eventos (substitui onclick inline no HTML) ──
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const tab    = btn.dataset.tab;
+    const modal  = btn.dataset.modal;
+    if (action === 'switchTab'       && tab)   window.switchTab(tab);
+    else if (action === 'closeModal' && modal) window.closeModal(modal);
+    else if (action === 'adminLogout')         window.adminLogout();
+    else if (action === 'openModalEmpresa')    window.openModalEmpresa();
+    else if (action === 'openModalPlano')      window.openModalPlano();
+    else if (action === 'salvarEmpresa')       window.salvarEmpresa();
+    else if (action === 'salvarPlano')         window.salvarPlano();
+    else if (action === 'carregarLogs')        window.carregarLogs();
+  });
+
   // ── Init ─────────────────────────────────────────────
   carregarOwnerDashboard();
   carregarPlanosSelect();
