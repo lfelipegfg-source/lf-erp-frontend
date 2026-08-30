@@ -302,7 +302,7 @@
                 <span>LF ERP</span>
               </div>
             </div>
-            <button id="sidebarToggleBtn" class="sidebar__collapse-btn" title="Recolher menu">
+            <button id="sidebarToggleBtn" class="sidebar__collapse-btn" title="Recolher menu" aria-label="Recolher menu">
               <i class="fa-solid fa-chevron-left"></i>
             </button>
           </div>
@@ -530,7 +530,7 @@
                   <i class="fa-solid fa-bell"></i>
                   <span id="notifBadge" class="nav-badge nav-badge--float hidden">0</span>
                 </button>
-                <div id="notifDropdown" role="menu" aria-label="Notificações" class="hidden" style="
+                <div id="notifDropdown" role="region" aria-label="Notificações" class="hidden" style="
                   position:absolute;top:calc(100% + 8px);right:0;
                   width:min(320px,90vw);max-height:400px;overflow-y:auto;
                   background:var(--surface);border:1px solid var(--border);
@@ -565,7 +565,7 @@
           </header>
 
           <!-- FILTRO GLOBAL COMPACTO -->
-          <section id="globalFiltersBar" class="global-filter-mini">
+          <section id="globalFiltersBar" class="global-filter-mini" aria-label="Filtros de período">
             <button id="toggleFiltersBtn" class="global-filter-mini__button" type="button">
               <i class="fa-solid fa-filter"></i>
               Filtros
