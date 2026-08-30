@@ -523,11 +523,11 @@ const ClientesModule = {
   },
 
   async delete(id) {
-    if (this.state.loading) return;
     const _cli = this.state.items.find(c => String(c.id) === String(id));
     const _nomeCli = _cli?.nome ? `"${_cli.nome}"` : 'este cliente';
     const ok = await confirmarAcao(`Excluir ${_nomeCli}? Esta ação não pode ser desfeita.`, 'Excluir', 'danger');
     if (!ok) return;
+    if (this.state.loading) return;
 
     this.state.loading = true;
     try {
@@ -831,7 +831,7 @@ const ClientesModule = {
     modal.classList.remove('hidden');
 
     try {
-      const data = await api.request(`/clientes/${clienteId}/extrato`, { method: 'GET' });
+      const data = await api.request(`/clientes/${clienteId}/extrato`, { method: 'GET', query: { empresa_id: api.getEmpresaId() } });
       this._extratoAtual = data;
       this._renderExtratoCorpo(data, corpo, subtitulo);
     } catch (err) {

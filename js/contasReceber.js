@@ -739,7 +739,7 @@ async function excluirConta(id) {
 
 async function abrirRecebimentosParciais(id) {
   try {
-    const data = await api.request(`/contas-receber/${id}/recebimentos-parciais`);
+    const data = await api.request(`/contas-receber/${id}/recebimentos-parciais`, { query: { empresa_id: api.getEmpresaId() } });
     const recebimentos = Array.isArray(data?.recebimentos) ? data.recebimentos : [];
 
     const modalExistente = document.getElementById('crRecebimentosParciaisModal');
@@ -1056,7 +1056,8 @@ async function renderDetalheConta(conta) {
   if (['parcial', 'parcial_atrasado'].includes(status)) {
     try {
       const recebimentosResponse = await api.request(
-        `/contas-receber/${conta.id}/recebimentos-parciais`
+        `/contas-receber/${conta.id}/recebimentos-parciais`,
+        { query: { empresa_id: api.getEmpresaId() } }
       );
 
       recebimentosParciais = Array.isArray(recebimentosResponse?.recebimentos)

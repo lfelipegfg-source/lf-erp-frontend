@@ -954,6 +954,8 @@ const ProdutosModule = {
     if (!item) { this.showModuleMessage('Produto não encontrado.', 'error'); return; }
     const ok = await confirmarAcao(`Excluir o produto "${item.nome}"?`, 'Excluir', 'danger');
     if (!ok) return;
+    if (this.state.loading) return;
+    this.state.loading = true;
     this.showModuleMessage('Excluindo...', 'info');
     try {
       await api.deleteProduto(id);
@@ -961,6 +963,8 @@ const ProdutosModule = {
       await this.load();
     } catch (err) {
       this.showModuleMessage(buildFriendlyError(err), 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 
