@@ -797,7 +797,8 @@ async function getContasReceberClientes() {
   const empresa = ensureEmpresa();
 
   return request(`/contas-receber-clientes/${empresa}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -844,7 +845,8 @@ async function getContasPagarFornecedores() {
   const empresa = ensureEmpresa();
 
   return request(`/contas-pagar-fornecedores/${empresa}`, {
-    method: 'GET'
+    method: 'GET',
+    query: { empresa_id: getEmpresaId() }
   });
 }
 
@@ -903,7 +905,7 @@ async function getNfceLista(params = {}) {
 }
 
 async function getNfcePdf(ref) {
-  return request(`/nfce/pdf/${ref}`, { method: 'GET' });
+  return request(`/nfce/pdf/${ref}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 // ── PIX ───────────────────────────────────────────────────────────────────────

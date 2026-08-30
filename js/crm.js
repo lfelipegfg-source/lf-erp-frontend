@@ -456,7 +456,7 @@ const CrmModule = {
     const ok = await confirmarAcao('Excluir esta oportunidade? Esta ação não pode ser desfeita.', 'Excluir', 'danger');
     if (!ok) return;
     try {
-      await api.fetchAPI(`/crm/oportunidades/${id}`, 'DELETE', { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
+      await api.request(`/crm/oportunidades/${id}`, { method: 'DELETE', query: { empresa_id: api.getEmpresaId() } });
       showToast('Oportunidade excluída', 'success');
       await this.load();
     } catch (err) {
@@ -610,7 +610,7 @@ const CrmModule = {
     const ok = await confirmarAcao('Remover esta atividade? Esta ação não pode ser desfeita.', 'Remover', 'danger');
     if (!ok) return;
     try {
-      await api.fetchAPI(`/crm/oportunidades/${opId}/atividades/${atId}`, 'DELETE', { empresa: api.getEmpresaNome(), empresa_id: api.getEmpresaId() });
+      await api.request(`/crm/oportunidades/${opId}/atividades/${atId}`, { method: 'DELETE', query: { empresa_id: api.getEmpresaId() } });
       await this.abrirDetalhe(opId);
     } catch (err) {
       showToast(err.message || 'Erro ao remover', 'error');

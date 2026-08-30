@@ -758,8 +758,8 @@ const NfeModule = {
                     <button class="btn-inline" data-nfse-consultar="${this.esc(e.ref)}">
                       <i class="fa-solid fa-sync"></i>
                     </button>
-                    ${e.link_pdf ? `
-                      <a href="${this.esc(e.link_pdf)}" target="_blank" class="btn-inline">
+                    ${e.link_pdf && /^https?:\/\//i.test(e.link_pdf) ? `
+                      <a href="${this.esc(e.link_pdf)}" target="_blank" rel="noopener noreferrer" class="btn-inline">
                         <i class="fa-solid fa-file-pdf"></i> PDF
                       </a>` : ''}
                     ${e.status === 'autorizada' ? `

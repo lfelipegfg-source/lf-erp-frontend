@@ -2431,7 +2431,7 @@ const VendasModule = {
   async excluirMeta(id, periodo) {
     if (!await confirmarAcao('Excluir esta meta?', 'Excluir', 'danger')) return;
     try {
-      await api.request(`/metas-vendas/${id}`, { method: 'DELETE', body: { empresa_id: api.getEmpresaId() } });
+      await api.request(`/metas-vendas/${id}`, { method: 'DELETE', query: { empresa_id: api.getEmpresaId() } });
       showToast('Meta excluída', 'success');
       await this._carregarMetas(periodo);
     } catch (err) {

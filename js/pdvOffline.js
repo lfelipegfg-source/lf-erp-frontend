@@ -8,9 +8,9 @@ export function setEmpresaId(id) {
 
 function getDbName() {
   if (!_empresaId) {
-    console.warn('[PDV Offline] _empresaId não definido — usando DB compartilhado lf_pdv_offline_default.');
+    throw new Error('[PDV Offline] _empresaId não definido — chame setEmpresaId() antes de usar o módulo.');
   }
-  return _empresaId ? `lf_pdv_offline_${_empresaId}` : 'lf_pdv_offline_default';
+  return `lf_pdv_offline_${_empresaId}`;
 }
 
 function openDB() {
