@@ -138,7 +138,7 @@ const NfeModule = {
         rejeitado: 'badge--danger'
       }[n.status] || 'badge--info';
 
-      const data = n.criado_em ? new Date(n.criado_em).toLocaleDateString('pt-BR') : '-';
+      const data = n.criado_em ? new Date(n.criado_em).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' }) : '-';
       const ambLabel = Number(n.ambiente) === 1 ? 'Produção' : 'Homologação';
 
       const acoes = [];
@@ -630,7 +630,7 @@ const NfeModule = {
                        <td>${n.numero || '—'}</td>
                        <td>${statusBadge(n.status)}</td>
                        <td><span class="badge ${n.ambiente === 1 ? 'badge--success' : ''}">${n.ambiente === 1 ? 'Produção' : 'Homologação'}</span></td>
-                       <td>${new Date(n.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                       <td>${new Date(n.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Fortaleza' })}</td>
                        <td>
                          <div style="display:flex;gap:6px;flex-wrap:wrap">
                            ${n.status === 'autorizado' ? `
