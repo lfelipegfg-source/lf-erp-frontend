@@ -339,7 +339,7 @@ async function getEmpresaStatus() {
 
 async function getAlertas() {
   const empresa = ensureEmpresa();
-  return request(`/alertas/${empresa}`, { method: 'GET' });
+  return request(`/alertas/${empresa}`, { method: 'GET', query: { empresa_id: getEmpresaId() } });
 }
 
 async function updateMePerfil(payload) {

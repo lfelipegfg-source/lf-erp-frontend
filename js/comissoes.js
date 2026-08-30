@@ -66,8 +66,8 @@ const ComissoesModule = {
       return { data_inicial: `${anoAnt}-${String(mesAnt).padStart(2, '0')}-01`, data_final: ultimo };
     }
     if (p === 'trimestre') {
-      const d = new Date();
-      d.setMonth(d.getMonth() - 3);
+      const now = new Date();
+      const d = new Date(now.getFullYear(), now.getMonth() - 3, 1);
       return { data_inicial: fmtISO(d), data_final: hoje };
     }
     if (p === 'ano_atual') {

@@ -618,7 +618,7 @@ const EstoqueModule = {
       <div class="module-feedback module-feedback--info">Carregando estoque...</div>`;
 
     try {
-      const data = await api.request(`/depositos/${id}/estoque`);
+      const data = await api.request(`/depositos/${id}/estoque`, { query: { empresa_id: api.getEmpresaId() } });
       const itens = data.itens || [];
 
       if (!itens.length) {

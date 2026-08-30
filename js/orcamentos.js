@@ -135,7 +135,7 @@ const OrcamentosModule = {
 
   renderLinha(o) {
     const badge = STATUS_BADGE[o.status] || '';
-    const data  = o.criado_em ? new Date(o.criado_em).toLocaleDateString('pt-BR') : '-';
+    const data  = o.criado_em ? new Date(o.criado_em).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' }) : '-';
     const valid = o.validade ? this.fmtDate(o.validade) : '-';
     const acoes = this.renderAcoes(o);
 
@@ -283,7 +283,7 @@ const OrcamentosModule = {
       const [ano, mes, dia] = String(v).slice(0, 10).split('-');
       return `${dia}/${mes}/${ano}`;
     }
-    return new Date(v).toLocaleDateString('pt-BR');
+    return new Date(v).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza' });
   },
 
   esc(v) {

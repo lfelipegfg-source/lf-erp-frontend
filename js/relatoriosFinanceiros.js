@@ -231,10 +231,9 @@ function renderInadimplencia() {
   }
 
   const linhas = d.clientes.map((c) => {
-    const gravidade = c.max_dias_atraso > 90 ? 'badge--danger'
-                    : c.max_dias_atraso > 60 ? 'badge--danger'
+    const gravidade = c.max_dias_atraso > 60 ? 'badge--danger'
                     : c.max_dias_atraso > 30 ? 'badge--warning'
-                    : 'badge--warning';
+                    : 'badge--info';
     return `
       <tr>
         <td><strong>${escapeHtml(c.cliente_nome)}</strong></td>

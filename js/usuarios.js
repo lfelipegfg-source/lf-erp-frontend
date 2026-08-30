@@ -570,8 +570,10 @@ const UsuariosModule = {
     const _nomeUsu = _usu?.nome ? `o usuário "${_usu.nome}"` : 'este usuário';
     const ok = await confirmarAcao(`Deseja realmente excluir ${_nomeUsu}?`, 'Excluir');
     if (!ok) return;
+    if (this.state.loading) return;
 
     try {
+      this.state.loading = true;
       this.setFeedback('Excluindo usuário...', 'info');
 
       await api.deleteUsuario(id);
@@ -581,6 +583,8 @@ const UsuariosModule = {
     } catch (error) {
       console.error('Erro ao excluir usuário:', error);
       this.setFeedback(error.message || 'Erro ao excluir usuário.', 'error');
+    } finally {
+      this.state.loading = false;
     }
   },
 
