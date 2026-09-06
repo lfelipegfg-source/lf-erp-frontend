@@ -70,8 +70,8 @@ export function isAuthenticated() {
   return !!auth?.authToken;
 }
 
-export async function login(usuario, senha, remember = false) {
-  const response = await api.login(usuario, senha);
+export async function login(usuario, senha, remember = false, timeout) {
+  const response = await api.login(usuario, senha, timeout);
 
   if (!response?.authToken && !response?.token) {
     throw new Error('Token não recebido do backend.');
@@ -81,9 +81,9 @@ export async function login(usuario, senha, remember = false) {
   return response;
 }
 
-export async function validateSession() {
+export async function validateSession(timeout) {
   try {
-    return await api.validateSession();
+    return await api.validateSession(timeout);
   } catch (error) {
     // Não encerrar sessão em falha de rede — apenas em resposta 401/403 do servidor
     const status = error?.status;

@@ -196,8 +196,12 @@ async function request(path, options = {}) {
     fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  fetchOptions.signal = controller.signal;
+
   try {
-    const response = await withTimeout(fetch(url, fetchOptions), timeout);
+    const response = await fetch(url, fetchOptions);
     if (response.status === 401 && !API_CONFIG._isRedirecting401) {
       API_CONFIG._isRedirecting401 = true;
       if (typeof window !== 'undefined') {
@@ -206,7 +210,12 @@ async function request(path, options = {}) {
     }
     return parseResponse(response);
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('A requisição demorou demais para responder.');
+    }
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -246,16 +255,17 @@ function normalizeLoginResponse(data) {
   };
 }
 
-async function login(usuario, senha) {
+async function login(usuario, senha, timeout) {
   const response = await request('/login', {
     method: 'POST',
-    body: { usuario, senha }
+    body: { usuario, senha },
+    ...(timeout ? { timeout } : {})
   });
   API_CONFIG._isRedirecting401 = false;
   return normalizeLoginResponse(response);
 }
 
-async function validateSession() {
+async function validateSession(timeout) {
   const token = getAuthToken();
 
   if (!token) {
@@ -263,7 +273,8 @@ async function validateSession() {
   }
 
   return request('/me', {
-    method: 'GET'
+    method: 'GET',
+    ...(timeout ? { timeout } : {})
   });
 }
 

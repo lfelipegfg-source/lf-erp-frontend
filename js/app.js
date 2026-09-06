@@ -115,6 +115,11 @@ async function initializeApp() {
   renderInitialDashboardState();
   showGlobalLoader('Inicializando sistema...');
 
+  // Acorda o servidor imediatamente no page load — paralelo à restauração de sessão.
+  // Se o dyno do Render estiver dormindo (>15 min de inatividade), o servidor começa
+  // a acordar agora, antes de qualquer tentativa de login.
+  api.warmupServer();
+
   try {
     await restoreAuthSession();
   } catch (error) {
@@ -697,8 +702,11 @@ async function handleLoginSubmit(event) {
       // Se foi timeout, o servidor pode estar em cold start — tentamos mais uma vez
       // com uma mensagem clara e timeout mais generoso (60s).
       if (firstError?.message?.includes('demorou demais')) {
-        setLoginMessage('Servidor iniciando (normal na 1ª vez do dia). Tentando novamente...', 'info');
-        loginResult = await authLogin(usuario, senha, AppState.rememberSession);
+        setLoginMessage('Servidor iniciando (normal na 1ª vez do dia). Aguardando...', 'info');
+        // Pausa de 4s antes de tentar novamente — dá tempo ao cold start do Render.
+        // Segunda tentativa usa timeout de 55s (cold start típico: 30–50s).
+        await wait(4000);
+        loginResult = await authLogin(usuario, senha, AppState.rememberSession, 55000);
       } else {
         throw firstError;
       }
@@ -1135,7 +1143,9 @@ async function restoreAuthSession() {
   applyAuthData(auth);
 
   try {
-    const meData = await validateSession();
+    // Timeout curto: se o servidor estiver dormindo, falha rápido e exibe o login
+    // enquanto o warmupServer() (já iniciado) continua acordando o servidor em background.
+    const meData = await validateSession(6000);
     if (meData) {
       AppState.user = { ...AppState.user, ...meData };
       AppState.assinatura = {
