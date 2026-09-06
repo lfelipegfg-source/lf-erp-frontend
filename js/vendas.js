@@ -141,6 +141,11 @@ const VendasModule = {
     });
 
     document.addEventListener('click', async (event) => {
+      if (event.target.closest('#vendasEmptyPdvBtn')) {
+        document.querySelector('.nav-item[data-view=pdv], .nav-subitem[data-view=pdv]')?.click();
+        return;
+      }
+
       const itemProdutoAdd = event.target.closest('.item-produto-add');
 
       if (itemProdutoAdd) {
@@ -582,7 +587,7 @@ const VendasModule = {
           <i class="fa-solid fa-cart-shopping"></i>
           <strong>Nenhuma venda encontrada</strong>
           <p>Tente ajustar os filtros ou registre uma nova venda pelo PDV.</p>
-          <button class="btn btn-primary" onclick="document.querySelector('.nav-item[data-view=pdv], .nav-subitem[data-view=pdv]')?.click()">
+          <button class="btn btn-primary" id="vendasEmptyPdvBtn">
             <i class="fa-solid fa-cash-register"></i> Ir para o PDV
           </button>
         </div>
@@ -1387,16 +1392,16 @@ const VendasModule = {
           </div>
         </div>`;
       document.body.appendChild(overlay);
-      overlay.querySelector('#_bpCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_bpCancelar').addEventListener('click', () => { document.body.removeChild(overlay); resolve(null); });
       let _bpClicado = false;
-      overlay.querySelector('#_bpConfirmar').onclick = () => {
+      overlay.querySelector('#_bpConfirmar').addEventListener('click', () => {
         if (_bpClicado) return;
         _bpClicado = true;
         const val = Number(overlay.querySelector('#_bpValor').value);
         const data = overlay.querySelector('#_bpData').value;
         document.body.removeChild(overlay);
         resolve({ valor: val, data });
-      };
+      });
     });
 
     if (!resultado) return;
@@ -1455,15 +1460,15 @@ const VendasModule = {
           </div>
         </div>`;
       document.body.appendChild(overlay);
-      overlay.querySelector('#_obsCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_obsCancelar').addEventListener('click', () => { document.body.removeChild(overlay); resolve(null); });
       let _obsClicado = false;
-      overlay.querySelector('#_obsSalvar').onclick = () => {
+      overlay.querySelector('#_obsSalvar').addEventListener('click', () => {
         if (_obsClicado) return;
         _obsClicado = true;
         const v = overlay.querySelector('#_obsInput').value;
         document.body.removeChild(overlay);
         resolve(v);
-      };
+      });
     });
 
     if (novaObservacao === null) return;
@@ -1517,15 +1522,15 @@ const VendasModule = {
           </div>
         </div>`;
       document.body.appendChild(overlay);
-      overlay.querySelector('#_seCancelar').onclick = () => { document.body.removeChild(overlay); resolve(null); };
+      overlay.querySelector('#_seCancelar').addEventListener('click', () => { document.body.removeChild(overlay); resolve(null); });
       let _seClicado = false;
-      overlay.querySelector('#_seConfirmar').onclick = () => {
+      overlay.querySelector('#_seConfirmar').addEventListener('click', () => {
         if (_seClicado) return;
         _seClicado = true;
         const v = overlay.querySelector('#_seObs').value;
         document.body.removeChild(overlay);
         resolve(v);
-      };
+      });
     });
 
     if (novoObservacao === null) return;
@@ -2301,7 +2306,7 @@ const VendasModule = {
             <button type="button" class="btn btn-primary btn-sm" id="metasNovaBtn">
               <i class="fa-solid fa-plus"></i> Nova meta
             </button>
-            <button type="button" class="btn btn-light" id="metasFecharFooter" onclick="document.getElementById('metasModal').classList.add('hidden')">Fechar</button>
+            <button type="button" class="btn btn-light" id="metasFecharFooter">Fechar</button>
           </div>
         </div>`;
       document.body.appendChild(el);
@@ -2311,6 +2316,9 @@ const VendasModule = {
       document.getElementById('metasCarregarBtn').addEventListener('click', () => {
         const p = document.getElementById('metasPeriodoInput').value;
         if (p) this._carregarMetas(p);
+      });
+      document.getElementById('metasFecharFooter').addEventListener('click', () => {
+        document.getElementById('metasModal').classList.add('hidden');
       });
     }
 
@@ -2400,8 +2408,8 @@ const VendasModule = {
         </div>`;
       overlay.appendChild(div);
       document.body.appendChild(overlay);
-      overlay.querySelector('#_metaCancelarBtn').onclick = () => { document.body.removeChild(overlay); resolve(null); };
-      overlay.querySelector('#_metaConfirmarBtn').onclick = (e) => {
+      overlay.querySelector('#_metaCancelarBtn').addEventListener('click', () => { document.body.removeChild(overlay); resolve(null); });
+      overlay.querySelector('#_metaConfirmarBtn').addEventListener('click', (e) => {
         const valor = overlay.querySelector('#_metaValorInput').value.trim();
         if (!valor || isNaN(Number(valor)) || Number(valor) <= 0) {
           overlay.querySelector('#_metaValorInput').focus(); return;
@@ -2410,7 +2418,7 @@ const VendasModule = {
         const descricao = overlay.querySelector('#_metaDescInput').value.trim();
         document.body.removeChild(overlay);
         resolve({ valor: Number(valor), descricao });
-      };
+      });
       setTimeout(() => overlay.querySelector('#_metaValorInput')?.focus(), 50);
     });
 

@@ -200,6 +200,9 @@ const ProdutosModule = {
 
       const action = t.dataset.prodAction || t.id;
 
+      // ── empty state
+      if (action === 'produtosEmptyNewBtn') { this.el.toolbarNew?.click(); return; }
+
       // ── toolbar
       if (action === 'produtosExportBtn') {
         const lista = this.state.filteredItems.length
@@ -648,7 +651,7 @@ const ProdutosModule = {
           <i class="fa-solid fa-box-open"></i>
           <strong>Nenhum produto encontrado</strong>
           <p>Tente ajustar os filtros ou cadastre um novo produto.</p>
-          <button class="btn btn-primary" onclick="document.getElementById('produtosNewBtn')?.click()">
+          <button class="btn btn-primary" id="produtosEmptyNewBtn">
             <i class="fa-solid fa-plus"></i> Novo produto
           </button>
         </div>
@@ -1402,16 +1405,18 @@ const ProdutosModule = {
               <h3><i class="fa-solid fa-store" style="margin-right:8px"></i>Marketplace</h3>
               <p style="color:var(--text-muted);font-size:.9rem">Sincronize produtos com Mercado Livre e Shopee</p>
             </div>
-            <button type="button" class="icon-button" onclick="document.getElementById('mktModal').classList.add('hidden')">
+            <button type="button" class="icon-button" id="mktFecharX">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
           <div id="mktCorpo" style="padding:20px 24px;overflow-y:auto;max-height:70vh"></div>
           <div class="modal-card__footer" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
-            <button type="button" class="btn btn-light" onclick="document.getElementById('mktModal').classList.add('hidden')">Fechar</button>
+            <button type="button" class="btn btn-light" id="mktFecharBtn">Fechar</button>
           </div>
         </div>`;
       document.body.appendChild(el);
+      el.querySelector('#mktFecharX').addEventListener('click', () => el.classList.add('hidden'));
+      el.querySelector('#mktFecharBtn').addEventListener('click', () => el.classList.add('hidden'));
     }
     document.getElementById('mktModal').classList.remove('hidden');
     await this._renderMarketplace();
@@ -1449,11 +1454,11 @@ const ProdutosModule = {
                 </div>
                 ${cfg?.seller_id ? `<div style="font-size:.8rem;color:var(--text-muted)">Seller ID: ${escapeHtml(String(cfg.seller_id))}</div>` : ''}
                 <div style="margin-top:10px;display:flex;gap:8px">
-                  <button class="btn btn-light btn-sm" onclick="ProdutosModule._configurarMkt('${plat}')">
+                  <button class="btn btn-light btn-sm" data-action="config-mkt" data-plat="${plat}">
                     <i class="fa-solid fa-gear"></i> Config
                   </button>
                   ${plat === 'mercadolivre' ? `
-                    <button class="btn btn-light btn-sm" onclick="ProdutosModule._autorizarMkt('${plat}')">
+                    <button class="btn btn-light btn-sm" data-action="autorizar-mkt" data-plat="${plat}">
                       <i class="fa-solid fa-link"></i> Autorizar
                     </button>` : ''}
                 </div>
@@ -1483,10 +1488,10 @@ const ProdutosModule = {
                      <td class="text-right">${p.estoque_lferp}</td>
                      <td class="text-right">${p.estoque_publicado}</td>
                      <td class="text-right">
-                       <button class="btn-inline" onclick="ProdutosModule._syncEstoque(${Number(p.produto_id)},'${escapeHtml(p.plataforma)}')">
+                       <button class="btn-inline" data-action="sync-estoque" data-id="${Number(p.produto_id)}" data-plat="${escapeHtml(p.plataforma)}">
                          <i class="fa-solid fa-sync"></i> Sync
                        </button>
-                       <button class="btn-inline btn-inline--danger" onclick="ProdutosModule._desvincular(${Number(p.id)})">
+                       <button class="btn-inline btn-inline--danger" data-action="desvincular" data-id="${Number(p.id)}">
                          <i class="fa-solid fa-unlink"></i>
                        </button>
                      </td>
@@ -1494,6 +1499,19 @@ const ProdutosModule = {
                </tbody>
              </table>
              </div>`}`;
+
+    if (!corpo.dataset.delegated) {
+      corpo.dataset.delegated = '1';
+      corpo.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-action]');
+        if (!btn) return;
+        const act = btn.dataset.action;
+        if (act === 'config-mkt') ProdutosModule._configurarMkt(btn.dataset.plat);
+        else if (act === 'autorizar-mkt') ProdutosModule._autorizarMkt(btn.dataset.plat);
+        else if (act === 'sync-estoque') ProdutosModule._syncEstoque(Number(btn.dataset.id), btn.dataset.plat);
+        else if (act === 'desvincular') ProdutosModule._desvincular(Number(btn.dataset.id));
+      });
+    }
     } catch (err) {
       corpo.innerHTML = `<div class="module-feedback module-feedback--error">${escapeHtml(err.message)}</div>`;
     }
@@ -1612,8 +1630,8 @@ const ProdutosModule = {
       </div>`;
     document.body.appendChild(overlay);
 
-    overlay.querySelector('#_loteCancelar').onclick = () => document.body.removeChild(overlay);
-    overlay.querySelector('#_loteAbrir').onclick = () => {
+    overlay.querySelector('#_loteCancelar').addEventListener('click', () => document.body.removeChild(overlay));
+    overlay.querySelector('#_loteAbrir').addEventListener('click', () => {
       const qtd = Math.max(1, Number(overlay.querySelector('#_loteQtd').value) || 1);
       document.body.removeChild(overlay);
 
@@ -1629,7 +1647,7 @@ const ProdutosModule = {
 
       localStorage.setItem('lf_erp_etiquetas', JSON.stringify(dados));
       window.open('./etiquetas.html', '_blank');
-    };
+    });
   },
 
   imprimirTodas() {
@@ -1711,8 +1729,8 @@ const ProdutosModule = {
     `;
     document.body.appendChild(overlay);
 
-    overlay.querySelector('#_etiqCancelar').onclick = () => document.body.removeChild(overlay);
-    overlay.querySelector('#_etiqAbrir').onclick = () => {
+    overlay.querySelector('#_etiqCancelar').addEventListener('click', () => document.body.removeChild(overlay));
+    overlay.querySelector('#_etiqAbrir').addEventListener('click', () => {
       const qtd = Math.max(1, Number(overlay.querySelector('#_etiqQtd').value) || 1);
       document.body.removeChild(overlay);
 
@@ -1728,7 +1746,7 @@ const ProdutosModule = {
 
       localStorage.setItem('lf_erp_etiquetas', JSON.stringify(dados));
       window.open('./etiquetas.html', '_blank');
-    };
+    });
   },
 
   showModuleMessage(message, type = 'info') {

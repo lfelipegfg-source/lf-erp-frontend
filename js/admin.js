@@ -247,12 +247,24 @@
         <td style="text-align:center">${Number(e.total_usuarios)}</td>
         <td style="text-align:center">${Number(e.total_vendas)}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="verDetalheEmpresa(${Number(e.id)})" aria-label="Ver detalhes"><i class="fa fa-eye"></i></button>
-          <button class="btn btn-secondary btn-sm" onclick="editarEmpresa(${Number(e.id)})"><i class="fa fa-pencil"></i> Editar</button>
-          <button class="btn btn-secondary btn-sm" onclick="exportarEmpresa(${Number(e.id)})" aria-label="Exportar backup"><i class="fa fa-download"></i></button>
+          <button class="btn btn-secondary btn-sm" data-action="ver-empresa" data-id="${Number(e.id)}" aria-label="Ver detalhes"><i class="fa fa-eye"></i></button>
+          <button class="btn btn-secondary btn-sm" data-action="editar-empresa" data-id="${Number(e.id)}"><i class="fa fa-pencil"></i> Editar</button>
+          <button class="btn btn-secondary btn-sm" data-action="exportar-empresa" data-id="${Number(e.id)}" aria-label="Exportar backup"><i class="fa fa-download"></i></button>
         </td>
       </tr>
     `).join('');
+    if (!tbody.dataset.delegated) {
+      tbody.dataset.delegated = '1';
+      tbody.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-action]');
+        if (!btn) return;
+        const id = Number(btn.dataset.id);
+        const act = btn.dataset.action;
+        if (act === 'ver-empresa') verDetalheEmpresa(id);
+        else if (act === 'editar-empresa') editarEmpresa(id);
+        else if (act === 'exportar-empresa') exportarEmpresa(id);
+      });
+    }
   }
 
   window.verDetalheEmpresa = async function (id) {
@@ -463,9 +475,16 @@
         <td style="text-align:center">${limiteStr(p.limite_produtos)}</td>
         <td style="text-align:center">${limiteStr(p.limite_clientes)}</td>
         <td style="text-align:center">${limiteStr(p.limite_vendas_mes)}</td>
-        <td><button class="btn btn-secondary btn-sm" onclick="editarPlano(${p.id})"><i class="fa fa-pencil"></i> Editar</button></td>
+        <td><button class="btn btn-secondary btn-sm" data-action="editar-plano" data-id="${p.id}"><i class="fa fa-pencil"></i> Editar</button></td>
       </tr>
     `).join('');
+    if (!tbody.dataset.delegated) {
+      tbody.dataset.delegated = '1';
+      tbody.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('[data-action="editar-plano"]');
+        if (btn) editarPlano(Number(btn.dataset.id));
+      });
+    }
   }
 
   window.openModalPlano = function () {
@@ -631,7 +650,7 @@
               <input type="checkbox" id="billingAsaasSandbox" ${sandbox ? 'checked' : ''} /> Sandbox
             </label>
           </div>
-          <button onclick="salvarBillingConfig()" class="btn btn-primary btn-sm" style="margin-top:10px">
+          <button id="billingGuardarBtn" class="btn btn-primary btn-sm" style="margin-top:10px">
             <i class="fa fa-save"></i> Salvar configuração
           </button>
         </div>
@@ -687,6 +706,7 @@
           );
         });
       });
+      document.getElementById('billingGuardarBtn')?.addEventListener('click', salvarBillingConfig);
     } catch (e) {
       if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${esc(e.message)}</div>`;
     }
@@ -779,16 +799,18 @@
           </div>
         </div>
         <div style="margin-top:16px;display:flex;gap:10px">
-          <button class="btn btn-primary btn-sm" onclick="salvarSmtpConfig()">
+          <button id="smtpSalvarBtn" class="btn btn-primary btn-sm">
             <i class="fa fa-save"></i> Salvar
           </button>
           <div style="display:flex;gap:8px;align-items:center">
             <input id="smtpTestEmail" class="form-input" style="width:220px" placeholder="email para teste..." />
-            <button class="btn btn-secondary btn-sm" onclick="testarSmtp()">
+            <button id="smtpTestarBtn" class="btn btn-secondary btn-sm">
               <i class="fa fa-paper-plane"></i> Enviar teste
             </button>
           </div>
         </div>`;
+      document.getElementById('smtpSalvarBtn')?.addEventListener('click', salvarSmtpConfig);
+      document.getElementById('smtpTestarBtn')?.addEventListener('click', testarSmtp);
     } catch (e) {
       if (corpo) corpo.innerHTML = `<div class="empty-state">Erro: ${esc(e.message)}</div>`;
     }

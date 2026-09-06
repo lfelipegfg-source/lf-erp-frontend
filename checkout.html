@@ -139,8 +139,8 @@ function renderBody(co, token) {
   if (temPix && temBoleto) {
     html += `
       <div class="tabs">
-        <button class="tab-btn active" onclick="trocarAba('pix',this)"><i class="fa fa-qrcode"></i> PIX</button>
-        <button class="tab-btn" onclick="trocarAba('boleto',this)"><i class="fa fa-barcode"></i> Boleto</button>
+        <button class="tab-btn active" data-action="tab-pix"><i class="fa fa-qrcode"></i> PIX</button>
+        <button class="tab-btn" data-action="tab-boleto"><i class="fa fa-barcode"></i> Boleto</button>
       </div>`;
   }
 
@@ -150,7 +150,7 @@ function renderBody(co, token) {
     html += `<div class="qr-wrap"><div id="qrcodeDiv"></div></div>`;
     html += `<p style="font-size:12px;color:#64748b;text-align:center;margin-bottom:8px;">Ou copie a chave PIX:</p>`;
     html += `<div class="pix-key-box" id="pixKeyBox">${esc(co.pix_copia_cola)}</div>`;
-    html += `<button class="btn btn-pix" onclick="copiarPix()"><i class="fa fa-copy"></i> Copiar código PIX</button>`;
+    html += `<button class="btn btn-pix" data-action="copiar-pix"><i class="fa fa-copy"></i> Copiar código PIX</button>`;
     html += `<div class="info-row"><i class="fa fa-circle-info"></i><span>Abra o app do seu banco → PIX → Pagar → Copia e Cola. Confirme o valor e a empresa recebedora antes de pagar.</span></div>`;
     html += `</div>`;
   }
@@ -162,7 +162,7 @@ function renderBody(co, token) {
       html += `<a href="${esc(co.boleto_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-boleto"><i class="fa fa-file-lines"></i> Ver boleto</a>`;
       if (co.boleto_linha) {
         html += `<div class="pix-key-box" id="boletoLinhaBox" style="margin-top:12px;">${esc(co.boleto_linha)}</div>`;
-        html += `<button class="btn btn-secondary" onclick="copiarBoleto()"><i class="fa fa-copy"></i> Copiar linha digitável</button>`;
+        html += `<button class="btn btn-secondary" data-action="copiar-boleto"><i class="fa fa-copy"></i> Copiar linha digitável</button>`;
       }
     } else {
       html += `<p style="font-size:13px;color:#64748b;margin-bottom:12px;">Preencha seu nome para gerar o boleto:</p>`;
@@ -181,6 +181,17 @@ function renderBody(co, token) {
   }
 
   body.innerHTML = html;
+
+  // Delegação de eventos — substitui onclicks inline (CSP unsafe-inline não permitido)
+  body.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-action]');
+    if (!btn) return;
+    const act = btn.dataset.action;
+    if (act === 'tab-pix') trocarAba('pix', btn);
+    else if (act === 'tab-boleto') trocarAba('boleto', btn);
+    else if (act === 'copiar-pix') copiarPix();
+    else if (act === 'copiar-boleto') copiarBoleto();
+  });
 
   // Listener para botão gerar boleto (evita onclick inline com token)
   document.getElementById('btnGerarBoleto')?.addEventListener('click', () => gerarBoleto(token));
@@ -240,7 +251,14 @@ async function gerarBoleto(token) {
     if (!data.sucesso) { if (result) result.innerHTML = `<div class="info-row" style="color:#ef4444;margin-top:8px;"><i class="fa fa-circle-xmark"></i>${esc(data.erro)}</div>`; return; }
 
     if (data.boleto_url) {
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-external-link"></i> Abrir boleto'; btn.onclick = () => { const safeUrl = /^https:\/\//i.test(data.boleto_url) ? data.boleto_url : null; if (safeUrl) { window.open(safeUrl, '_blank', 'noopener,noreferrer'); } else { console.warn('[Checkout] boleto_url com esquema inválido:', data.boleto_url); } }; }
+      if (btn) {
+        btn.disabled = false; btn.innerHTML = '<i class="fa fa-external-link"></i> Abrir boleto';
+        btn.addEventListener('click', () => {
+          const safeUrl = /^https:\/\//i.test(data.boleto_url) ? data.boleto_url : null;
+          if (safeUrl) { window.open(safeUrl, '_blank', 'noopener,noreferrer'); }
+          else { console.warn('[Checkout] boleto_url com esquema inválido:', data.boleto_url); }
+        }, { once: true });
+      }
       if (data.boleto_linha && result) {
         result.innerHTML = `<div class="pix-key-box" id="boletoLinhaBox" style="margin-top:12px;">${esc(data.boleto_linha)}</div>`;
       }

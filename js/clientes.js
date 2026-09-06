@@ -98,7 +98,7 @@ const ClientesModule = {
         return;
       }
 
-      if (btn.id === 'novoClienteBtn') {
+      if (btn.id === 'novoClienteBtn' || btn.id === 'clientesEmptyNewBtn') {
         this.openModal(false);
       }
 
@@ -293,7 +293,7 @@ const ClientesModule = {
               <i class="fa-solid fa-users"></i>
               <strong>Nenhum cliente encontrado</strong>
               <p>Tente ajustar a busca ou cadastre um novo cliente.</p>
-              <button class="btn btn-primary" onclick="document.getElementById('novoClienteBtn')?.click()">
+              <button class="btn btn-primary" id="clientesEmptyNewBtn">
                 <i class="fa-solid fa-plus"></i> Novo cliente
               </button>
             </div>
@@ -629,8 +629,8 @@ const ClientesModule = {
     `;
     document.body.appendChild(overlay);
 
-    overlay.querySelector('#_portalCancelar').onclick = () => document.body.removeChild(overlay);
-    overlay.querySelector('#_portalSalvar').onclick = async () => {
+    overlay.querySelector('#_portalCancelar').addEventListener('click', () => document.body.removeChild(overlay));
+    overlay.querySelector('#_portalSalvar').addEventListener('click', async () => {
       const senha = overlay.querySelector('#_portalSenha').value;
       const feedback = overlay.querySelector('#_portalFeedback');
       const saveBtn = overlay.querySelector('#_portalSalvar');
@@ -656,7 +656,7 @@ const ClientesModule = {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Salvar senha';
       }
-    };
+    });
   },
 
   // ── Segmentação A/B/C ──────────────────────────────────────────────────────
@@ -681,9 +681,9 @@ const ClientesModule = {
         </div>
       </div>`;
 
-    document.getElementById('abcVoltarBtn').onclick = () => {
+    document.getElementById('abcVoltarBtn').addEventListener('click', () => {
       this.render(); this.cache(); this.renderTable();
-    };
+    });
 
     try {
       const data = await api.getClientesABC();
@@ -691,8 +691,11 @@ const ClientesModule = {
     } catch (err) {
       container.innerHTML = `<div class="module-card">
         <div class="module-feedback module-feedback--error">Erro ao carregar segmentação: ${escapeHtml(err.message || 'Tente novamente.')}</div>
-        <button class="btn btn-light" style="margin:16px" onclick="this.closest('.module-card').remove()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <button class="btn btn-light" style="margin:16px" id="clientesABCVoltarBtn"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
       </div>`;
+      container.querySelector('#clientesABCVoltarBtn')?.addEventListener('click', (e) => {
+        e.target.closest('.module-card')?.remove();
+      });
     }
   },
 
@@ -781,9 +784,9 @@ const ClientesModule = {
         }
       </div>`;
 
-    document.getElementById('abcVoltarBtn2').onclick = () => {
+    document.getElementById('abcVoltarBtn2').addEventListener('click', () => {
       this.render(); this.cache(); this.renderTable();
-    };
+    });
   },
 
   // ── Extrato do cliente ──────────────────────────────────────────────────────

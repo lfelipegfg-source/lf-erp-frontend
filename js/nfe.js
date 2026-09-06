@@ -553,13 +553,13 @@ const NfeModule = {
         </div>
       `;
       document.body.appendChild(overlay);
-      overlay.querySelector('#_nfeCancelarAbort').onclick = () => { document.body.removeChild(overlay); resolve(null); };
-      overlay.querySelector('#_nfeCancelarConfirm').onclick = () => {
+      overlay.querySelector('#_nfeCancelarAbort').addEventListener('click', () => { document.body.removeChild(overlay); resolve(null); });
+      overlay.querySelector('#_nfeCancelarConfirm').addEventListener('click', () => {
         const val = overlay.querySelector('#_nfeJustInput').value.trim();
         if (val.length < 15) { showToast('Justificativa deve ter ao menos 15 caracteres.', 'error'); return; }
         document.body.removeChild(overlay);
         resolve(val);
-      };
+      });
     });
   },
 
@@ -652,7 +652,7 @@ const NfeModule = {
 
       // Bind consultar
       container.querySelectorAll('[data-nfce-consultar]').forEach(btn => {
-        btn.onclick = async () => {
+        btn.addEventListener('click', async () => {
           const ref = btn.dataset.nfceConsultar;
           btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
           try {
@@ -664,7 +664,7 @@ const NfeModule = {
             showToast(e.message || 'Erro ao consultar', 'error');
             btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Consultar';
           }
-        };
+        });
       });
     } catch (err) {
       console.error('[nfe] renderNfce:', err);
@@ -807,7 +807,7 @@ const NfeModule = {
       <div class="modal-card" style="max-width:560px;width:95vw">
         <div class="modal-card__header">
           <div><h3>Emitir NFS-e</h3><p style="color:var(--text-muted);font-size:.9rem">Nota Fiscal de Serviço Eletrônica avulsa</p></div>
-          <button type="button" class="icon-button" onclick="document.getElementById('nfseFormModal').remove()">
+          <button type="button" class="icon-button" id="nfseFormCloseX">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -839,7 +839,7 @@ const NfeModule = {
             </div>
           </div>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
-            <button type="button" class="btn btn-light" onclick="document.getElementById('nfseFormModal').remove()">Cancelar</button>
+            <button type="button" class="btn btn-light" id="nfseFormCancelBtn">Cancelar</button>
             <button type="submit" class="btn btn-primary" id="nfseSubmitBtn">
               <i class="fa-solid fa-paper-plane"></i> Emitir
             </button>
@@ -847,6 +847,8 @@ const NfeModule = {
         </form>
       </div>`;
     document.body.appendChild(overlay);
+    overlay.querySelector('#nfseFormCloseX').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#nfseFormCancelBtn').addEventListener('click', () => overlay.remove());
 
     document.getElementById('nfseForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -879,7 +881,7 @@ const NfeModule = {
         <div class="modal-card" style="max-width:520px;width:95vw">
           <div class="modal-card__header">
             <div><h3>Configuração NFS-e</h3></div>
-            <button type="button" class="icon-button" onclick="this.closest('.modal-overlay').remove()">
+            <button type="button" class="icon-button" id="nfseConfigCloseX">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -914,12 +916,14 @@ const NfeModule = {
               </div>
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end">
-              <button type="button" class="btn btn-light" onclick="this.closest('.modal-overlay').remove()">Cancelar</button>
+              <button type="button" class="btn btn-light" id="nfseConfigCancelBtn">Cancelar</button>
               <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Salvar</button>
             </div>
           </form>
         </div>`;
       document.body.appendChild(overlay);
+      overlay.querySelector('#nfseConfigCloseX').addEventListener('click', () => overlay.remove());
+      overlay.querySelector('#nfseConfigCancelBtn').addEventListener('click', () => overlay.remove());
 
       document.getElementById('nfseConfigForm').addEventListener('submit', async (e) => {
         e.preventDefault();

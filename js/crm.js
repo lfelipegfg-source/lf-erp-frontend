@@ -253,6 +253,7 @@ const CrmModule = {
       btn.addEventListener('click', (e) => { e.stopPropagation(); this.abrirForm(Number(btn.dataset.opEdit)); });
     });
     el.querySelectorAll('[data-op-mover]').forEach((sel) => {
+      sel.addEventListener('click', (e) => e.stopPropagation());
       sel.addEventListener('change', (e) => {
         e.stopPropagation();
         this.moverEstagio(Number(sel.dataset.opMover), sel.value);
@@ -268,7 +269,7 @@ const CrmModule = {
         ${op.valor_estimado > 0 ? `<div class="crm-card-valor">${moeda(op.valor_estimado)}</div>` : ''}
         ${op.data_prev_fechamento ? `<div class="crm-card-sub"><i class="fa fa-calendar"></i> ${dataFmt(op.data_prev_fechamento)}</div>` : ''}
         <div class="crm-card-footer">
-          <select class="crm-estagio-sel" data-op-mover="${op.id}" onclick="event.stopPropagation()">
+          <select class="crm-estagio-sel" data-op-mover="${op.id}">
             ${ESTAGIOS.map((e) => `<option value="${e.key}" ${op.estagio === e.key ? 'selected' : ''}>${e.label}</option>`).join('')}
           </select>
           <button class="btn-icon" data-op-edit="${op.id}" title="Editar"><i class="fa fa-pen"></i></button>

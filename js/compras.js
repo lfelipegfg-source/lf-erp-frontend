@@ -122,7 +122,7 @@ const ComprasModule = {
         return;
       }
 
-      if (btn.id === 'novaCompraBtn') {
+      if (btn.id === 'novaCompraBtn' || btn.id === 'comprasEmptyNewBtn') {
         this.openModal();
         return;
       }
@@ -455,7 +455,7 @@ const ComprasModule = {
               <i class="fa-solid fa-basket-shopping" style="font-size:2rem;opacity:.22;margin-bottom:4px"></i>
               <strong>Nenhuma compra encontrada</strong>
               <span>Cadastre uma nova compra para movimentar estoque e financeiro.</span>
-              <button class="btn btn-primary" onclick="document.getElementById('novaCompraBtn')?.click()" style="margin-top:8px">
+              <button class="btn btn-primary" id="comprasEmptyNewBtn" style="margin-top:8px">
                 <i class="fa-solid fa-plus"></i> Nova compra
               </button>
             </div>
@@ -1230,11 +1230,11 @@ const ComprasModule = {
 
     document.body.appendChild(overlay);
 
-    document.getElementById('_xmlFechar').onclick  = () => overlay.remove();
-    document.getElementById('_xmlCancelar').onclick = () => overlay.remove();
-    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    document.getElementById('_xmlFechar').addEventListener('click', () => overlay.remove());
+    document.getElementById('_xmlCancelar').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 
-    document.getElementById('_xmlConfirmar').onclick = async () => {
+    document.getElementById('_xmlConfirmar').addEventListener('click', async () => {
       const fornecedorId = Number(document.getElementById('_xmlFornecedor').value);
       const dataVal      = document.getElementById('_xmlData').value;
       const formaVal     = document.getElementById('_xmlForma').value;
@@ -1277,7 +1277,7 @@ const ComprasModule = {
         showToast(err?.message || 'Erro ao criar compra', 'error');
         btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-basket-shopping"></i> Criar Compra';
       }
-    };
+    });
   }
 };
 
