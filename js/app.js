@@ -800,7 +800,7 @@ function closeMobileSidebar() {
 
 async function setActiveView(view) {
   if (view !== AppState.currentView) {
-    const openModal = document.querySelector('.modal-overlay:not(.hidden), [role="dialog"]:not([aria-hidden="true"]):not(.hidden)');
+    const openModal = Array.from(document.querySelectorAll('.modal-overlay:not(.hidden), [role="dialog"]:not([aria-hidden="true"]):not(.hidden)')).find(el => !el.closest('.hidden'));
     if (openModal) {
       const ok = confirm('Você tem uma janela aberta. Deseja sair e descartar as alterações não salvas?');
       if (!ok) return;
