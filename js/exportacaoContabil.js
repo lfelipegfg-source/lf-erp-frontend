@@ -3,7 +3,14 @@ import { showToast } from './feedback.js';
 import api from './api.js';
 import { escapeHtml } from './utils.js';
 
-const API_BASE = window.LF_ERP_API_URL || localStorage.getItem('lf_erp_api_url') || 'https://lf-erp-backend.onrender.com';
+const _EXPORT_ALLOWED_HOSTS = ['lf-erp-backend.onrender.com', 'localhost', '127.0.0.1'];
+function _validateExportBase(url) {
+  if (!url) return false;
+  try { const u = new URL(url); return _EXPORT_ALLOWED_HOSTS.some(h => u.hostname === h || u.hostname.endsWith('.' + h)); }
+  catch { return false; }
+}
+const _rawExportUrl = localStorage.getItem('lf_erp_api_url');
+const API_BASE = window.LF_ERP_API_URL || (_validateExportBase(_rawExportUrl) ? _rawExportUrl : null) || 'https://lf-erp-backend.onrender.com';
 
 function getToken() {
   try {

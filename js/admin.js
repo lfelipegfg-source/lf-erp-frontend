@@ -409,7 +409,14 @@
       showToast('Gerando backup...');
       const a = getStoredAuth();
       const token   = a?.authToken || a?.token || '';
-      const baseUrl = localStorage.getItem('lf_erp_api_url') || 'https://lf-erp-backend.onrender.com';
+      const _rawAdminUrl = localStorage.getItem('lf_erp_api_url');
+      const _adminAllowed = ['lf-erp-backend.onrender.com', 'localhost', '127.0.0.1'];
+      let baseUrl;
+      try {
+        const _u = _rawAdminUrl ? new URL(_rawAdminUrl) : null;
+        baseUrl = (_u && _adminAllowed.some(h => _u.hostname === h || _u.hostname.endsWith('.' + h)))
+          ? _rawAdminUrl : 'https://lf-erp-backend.onrender.com';
+      } catch { baseUrl = 'https://lf-erp-backend.onrender.com'; }
       const res = await fetch(`${baseUrl}/admin/empresas/${id}/exportar`, {
         headers: { Authorization: `Bearer ${token}` }
       });
