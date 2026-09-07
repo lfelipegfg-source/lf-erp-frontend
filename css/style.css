@@ -901,7 +901,8 @@ img {
 }
 
 .nav-group.open .nav-group__arrow {
-  transform: rotate(180deg);
+  transform: rotate(90deg);
+  color: var(--white);
 }
 
 .nav-group {
@@ -914,9 +915,10 @@ img {
 
 .nav-group__menu {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 2px);
+  /* aparece à direita da sidebar, sobre a página */
+  left: calc(100% + 22px);
+  top: 0;
+  min-width: 190px;
   z-index: 200;
   display: none;
   grid-template-columns: 1fr;
