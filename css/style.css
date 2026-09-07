@@ -747,6 +747,7 @@ img {
 }
 
 .sidebar__top {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -782,13 +783,18 @@ img {
 }
 
 .sidebar.collapsed .sidebar__collapse-btn {
+  position: absolute;
+  right: -14px;
+  top: 14px;
+  z-index: 50;
   opacity: 1;
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.32);
+  background: #0d1b34;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 .sidebar.collapsed .sidebar__collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: #162848;
 }
 
 .sidebar.collapsed .sidebar__collapse-btn i {
