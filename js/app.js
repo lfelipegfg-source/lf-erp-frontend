@@ -30,45 +30,42 @@ const STORAGE_KEYS = {
 };
 
 const VIEW_CONFIG = {
-  cadastros: { title: 'Cadastros', subtitle: 'Produtos, clientes, fornecedores e usuários' },
-  movimentacoes: { title: 'Movimentações', subtitle: 'Vendas, compras e estoque' },
-  financeiro: { title: 'Financeiro', subtitle: 'Contas, fluxo de caixa e lançamentos' },
-  dashboard: { title: 'Dashboard', subtitle: 'Visão geral do sistema' },
-  pdv: { title: 'PDV', subtitle: 'Ponto de venda rápido e profissional' },
-  produtos: { title: 'Produtos', subtitle: 'Cadastro, edição, estoque e consulta' },
-  clientes: { title: 'Clientes', subtitle: 'Cadastro e relacionamento comercial' },
-  fornecedores: { title: 'Fornecedores', subtitle: 'Base completa de fornecedores e compras' },
-  usuarios: { title: 'Usuários', subtitle: 'Gestão de acessos, perfis e permissões' },
-  vendas: { title: 'Vendas', subtitle: 'Consulta e gestão comercial' },
-  compras: { title: 'Compras', subtitle: 'Lançamentos e histórico de aquisições' },
-  estoque: { title: 'Estoque', subtitle: 'Posição, conferência e movimentações' },
-  'contas-receber': {
-    title: 'Contas a Receber',
-    subtitle: 'Títulos pendentes, vencidos e recebidos'
-  },
-  'contas-pagar': { title: 'Contas a Pagar', subtitle: 'Despesas, vencimentos e quitações' },
-  'fluxo-caixa': { title: 'Fluxo de Caixa', subtitle: 'Entradas, saídas e saldo consolidado' },
-  lancamentos: { title: 'Lançamentos', subtitle: 'Receitas e despesas manuais' },
-  conciliacao: { title: 'Conciliação Bancária', subtitle: 'Reconciliação de extratos OFX e CSV' },
-  relatorios: { title: 'Relatórios', subtitle: 'Relatórios gerenciais e operacionais' },
-  orcamentos: { title: 'Orçamentos', subtitle: 'Cotações emitidas — gerencie aprovações e converta em pedidos' },
-  pedidos: { title: 'Pedidos', subtitle: 'Pedidos em andamento — confirme, separe e converta em venda' },
-  comissoes: { title: 'Comissões', subtitle: 'Comissões de vendedores por venda realizada' },
-  caixa: { title: 'Caixa', subtitle: 'Abertura, movimentações e fechamento do caixa físico' },
-  devolucoes: { title: 'Devoluções', subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
-  alertas: { title: 'Alertas de Cobrança', subtitle: 'Lembretes de pagamento por email e WhatsApp' },
-  nfe: { title: 'NF-e', subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
-  bi: { title: 'BI Executivo', subtitle: 'Relatórios executivos com gráficos avançados e análises temporais' },
-  filiais: { title: 'Multi-filial', subtitle: 'Pontos de venda independentes com comparativo consolidado' },
-  'checkout-links': { title: 'Link de Pagamento', subtitle: 'Gere links de cobrança com PIX e Boleto' },
-  fidelidade: { title: 'Programa de Fidelidade', subtitle: 'Pontos por compra, ranking e resgate' },
-  whatsapp: { title: 'WhatsApp Business', subtitle: 'Cobranças automáticas e mensagens via API' },
-  rastreabilidade: { title: 'Rastreabilidade', subtitle: 'Controle de lotes e números de série' },
-  'api-publica': { title: 'API & Webhooks', subtitle: 'Integração com sistemas externos via API Key e webhooks' },
-  'exportacao-contabil': { title: 'Exportação Contábil', subtitle: 'Arquivos CSV e EFD/SPED para o contador' },
-  crm: { title: 'CRM', subtitle: 'Pipeline de oportunidades de venda' },
-  marketplace: { title: 'Marketplace', subtitle: 'Integração com Mercado Livre e Shopee' },
-  configuracoes: { title: 'Configurações', subtitle: 'Parâmetros e preferências do sistema' }
+  cadastros:            { icon: 'database',               title: 'Cadastros',             subtitle: 'Produtos, clientes, fornecedores e usuários' },
+  movimentacoes:        { icon: 'arrow-right-arrow-left', title: 'Movimentações',         subtitle: 'Vendas, compras e estoque' },
+  financeiro:           { icon: 'wallet',                 title: 'Financeiro',            subtitle: 'Contas, fluxo de caixa e lançamentos' },
+  dashboard:            { icon: 'chart-pie',              title: 'Dashboard',             subtitle: 'Visão geral do sistema' },
+  pdv:                  { icon: 'cash-register',          title: 'PDV',                   subtitle: 'Ponto de venda rápido e profissional' },
+  produtos:             { icon: 'box-open',               title: 'Produtos',              subtitle: 'Cadastro, edição, estoque e consulta' },
+  clientes:             { icon: 'users',                  title: 'Clientes',              subtitle: 'Cadastro e relacionamento comercial' },
+  fornecedores:         { icon: 'truck-field',            title: 'Fornecedores',          subtitle: 'Base completa de fornecedores e compras' },
+  usuarios:             { icon: 'user-shield',            title: 'Usuários',              subtitle: 'Gestão de acessos, perfis e permissões' },
+  vendas:               { icon: 'cart-shopping',          title: 'Vendas',                subtitle: 'Consulta e gestão comercial' },
+  compras:              { icon: 'basket-shopping',        title: 'Compras',               subtitle: 'Lançamentos e histórico de aquisições' },
+  estoque:              { icon: 'warehouse',              title: 'Estoque',               subtitle: 'Posição, conferência e movimentações' },
+  'contas-receber':     { icon: 'money-bill-trend-up',   title: 'Contas a Receber',      subtitle: 'Títulos pendentes, vencidos e recebidos' },
+  'contas-pagar':       { icon: 'money-bill-transfer',   title: 'Contas a Pagar',        subtitle: 'Despesas, vencimentos e quitações' },
+  'fluxo-caixa':        { icon: 'arrow-trend-up',        title: 'Fluxo de Caixa',        subtitle: 'Entradas, saídas e saldo consolidado' },
+  lancamentos:          { icon: 'pen-to-square',         title: 'Lançamentos',           subtitle: 'Receitas e despesas manuais' },
+  conciliacao:          { icon: 'building-columns',      title: 'Conciliação Bancária',  subtitle: 'Reconciliação de extratos OFX e CSV' },
+  relatorios:           { icon: 'file-lines',            title: 'Relatórios',            subtitle: 'Relatórios gerenciais e operacionais' },
+  orcamentos:           { icon: 'file-lines',            title: 'Orçamentos',            subtitle: 'Cotações emitidas — gerencie aprovações e converta em pedidos' },
+  pedidos:              { icon: 'clipboard-list',        title: 'Pedidos',               subtitle: 'Pedidos em andamento — confirme, separe e converta em venda' },
+  comissoes:            { icon: 'percent',               title: 'Comissões',             subtitle: 'Comissões de vendedores por venda realizada' },
+  caixa:                { icon: 'vault',                 title: 'Caixa',                 subtitle: 'Abertura, movimentações e fechamento do caixa físico' },
+  devolucoes:           { icon: 'rotate-left',           title: 'Devoluções',            subtitle: 'Devoluções de vendas — estoque restaurado automaticamente' },
+  alertas:              { icon: 'bell',                  title: 'Alertas de Cobrança',   subtitle: 'Lembretes de pagamento por email e WhatsApp' },
+  nfe:                  { icon: 'file-invoice',          title: 'NF-e',                  subtitle: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas' },
+  bi:                   { icon: 'chart-line',            title: 'BI Executivo',          subtitle: 'Relatórios executivos com gráficos avançados e análises temporais' },
+  filiais:              { icon: 'store',                 title: 'Multi-filial',          subtitle: 'Pontos de venda independentes com comparativo consolidado' },
+  'checkout-links':     { icon: 'link',                  title: 'Link de Pagamento',     subtitle: 'Gere links de cobrança com PIX e Boleto' },
+  fidelidade:           { icon: 'star',                  title: 'Programa de Fidelidade',subtitle: 'Pontos por compra, ranking e resgate' },
+  whatsapp:             { icon: 'comment-dots',          title: 'WhatsApp Business',     subtitle: 'Cobranças automáticas e mensagens via API' },
+  rastreabilidade:      { icon: 'barcode',               title: 'Rastreabilidade',       subtitle: 'Controle de lotes e números de série' },
+  'api-publica':        { icon: 'code',                  title: 'API & Webhooks',        subtitle: 'Integração com sistemas externos via API Key e webhooks' },
+  'exportacao-contabil':{ icon: 'file-export',           title: 'Exportação Contábil',   subtitle: 'Arquivos CSV e EFD/SPED para o contador' },
+  crm:                  { icon: 'chart-gantt',           title: 'CRM',                   subtitle: 'Pipeline de oportunidades de venda' },
+  marketplace:          { icon: 'shop',                  title: 'Marketplace',           subtitle: 'Integração com Mercado Livre e Shopee' },
+  configuracoes:        { icon: 'gear',                  title: 'Configurações',         subtitle: 'Parâmetros e preferências do sistema' }
 };
 
 // ── Tema (dark / light) ────────────────────────────────────────────────────────
@@ -859,6 +856,12 @@ async function setActiveView(view) {
 
   if (pageTitle) pageTitle.textContent = config.title;
   if (pageSubtitle) pageSubtitle.textContent = config.subtitle;
+
+  const mobileBtn = document.getElementById('mobileSidebarBtn');
+  if (mobileBtn) {
+    const iconName = config.icon || 'bars';
+    mobileBtn.innerHTML = `<i class="fa-solid fa-${iconName}" aria-hidden="true"></i>`;
+  }
 
   if (window.innerWidth <= 900) {
     closeMobileSidebar();
