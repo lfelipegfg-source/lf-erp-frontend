@@ -302,6 +302,30 @@ function bindSidebarEvents() {
     logoutBtn.addEventListener('click', handleLogout);
   }
 
+  const topbarUserBtn = document.getElementById('topbarUserBtn');
+  const topbarUserDropdown = document.getElementById('topbarUserDropdown');
+  if (topbarUserBtn && topbarUserDropdown) {
+    topbarUserBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = !topbarUserDropdown.hidden;
+      topbarUserDropdown.hidden = open;
+      topbarUserBtn.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', (e) => {
+      if (!topbarUserBtn.contains(e.target) && !topbarUserDropdown.contains(e.target)) {
+        topbarUserDropdown.hidden = true;
+        topbarUserBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !topbarUserDropdown.hidden) {
+        topbarUserDropdown.hidden = true;
+        topbarUserBtn.setAttribute('aria-expanded', 'false');
+        topbarUserBtn.focus();
+      }
+    });
+  }
+
   navGroupToggles.forEach((button) => {
     button.addEventListener('click', () => {
       const group = button.closest('.nav-group');
@@ -1188,9 +1212,9 @@ function applyAuthData(data) {
 function renderAuthenticatedUser() {
   const sidebarCompanyName = document.getElementById('sidebarCompanyName');
   const topbarCompanyName = document.getElementById('topbarCompanyName');
-  const sidebarUserName = document.getElementById('sidebarUserName');
-  const sidebarUserRole = document.getElementById('sidebarUserRole');
-  const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
+  const topbarUserName = document.getElementById('topbarUserName');
+  const topbarUserRole = document.getElementById('topbarUserRole');
+  const topbarUserAvatar = document.getElementById('topbarUserAvatar');
 
   const companyName = AppState.empresa?.nome || AppState.user?.empresa || 'Empresa Logada';
 
@@ -1202,9 +1226,9 @@ function renderAuthenticatedUser() {
 
   if (sidebarCompanyName) sidebarCompanyName.textContent = companyName;
   if (topbarCompanyName) topbarCompanyName.textContent = companyName;
-  if (sidebarUserName) sidebarUserName.textContent = userName;
-  if (sidebarUserRole) sidebarUserRole.textContent = userRole;
-  if (sidebarUserAvatar) sidebarUserAvatar.textContent = getInitials(userName);
+  if (topbarUserName) topbarUserName.textContent = userName;
+  if (topbarUserRole) topbarUserRole.textContent = userRole;
+  if (topbarUserAvatar) topbarUserAvatar.textContent = getInitials(userName);
 
   try {
     const cachedLogo = localStorage.getItem(`lf_logo_${AppState.empresaId || AppState.empresa?.nome || ''}`);

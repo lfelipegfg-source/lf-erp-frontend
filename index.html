@@ -477,20 +477,6 @@
 
           </nav>
 
-          <div class="sidebar__footer">
-            <div class="sidebar-user">
-              <div class="sidebar-user__avatar" id="sidebarUserAvatar">LF</div>
-              <div class="sidebar-user__info">
-                <strong id="sidebarUserName">Usuário</strong>
-                <span id="sidebarUserRole">Perfil</span>
-              </div>
-            </div>
-
-            <button id="logoutBtn" class="btn btn-danger btn-block" type="button">
-              <i class="fa-solid fa-right-from-bracket"></i>
-              Sair
-            </button>
-          </div>
         </aside>
 
         <div class="main-content">
@@ -548,9 +534,27 @@
                 <i class="fa-solid fa-rotate"></i>
               </button>
 
-              <div class="topbar-company">
-                <span class="topbar-company__label">Empresa</span>
-                <strong id="topbarCompanyName">Carregando...</strong>
+              <div class="topbar-user" id="topbarUserMenu">
+                <button class="topbar-user__btn" id="topbarUserBtn" type="button"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="topbarUserDropdown">
+                  <div class="topbar-user__avatar" id="topbarUserAvatar">LF</div>
+                  <div class="topbar-user__info">
+                    <strong id="topbarUserName">Usuário</strong>
+                    <span id="topbarUserRole">Perfil</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-down topbar-user__chevron" aria-hidden="true"></i>
+                </button>
+                <div class="topbar-user__dropdown" id="topbarUserDropdown" hidden>
+                  <div class="topbar-user__company">
+                    <span class="topbar-user__company-label">Empresa</span>
+                    <strong id="topbarCompanyName">Carregando...</strong>
+                  </div>
+                  <div class="topbar-user__divider"></div>
+                  <button id="logoutBtn" class="topbar-user__logout" type="button">
+                    <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                    Sair
+                  </button>
+                </div>
               </div>
             </div>
           </header>
