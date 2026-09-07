@@ -783,9 +783,6 @@ img {
 
 .sidebar.collapsed .sidebar__collapse-btn {
   opacity: 1;
-  width: 34px;
-  height: 34px;
-  font-size: 13px;
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.32);
 }

@@ -283,9 +283,7 @@ function bindSidebarEvents() {
 
   if (mobileSidebarBtn) {
     mobileSidebarBtn.addEventListener('click', () => {
-      if (window.innerWidth > 1200) {
-        toggleSidebarCollapse();
-      } else {
+      if (window.innerWidth <= 1200) {
         openMobileSidebar();
       }
     });
