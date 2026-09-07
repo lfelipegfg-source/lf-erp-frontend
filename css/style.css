@@ -2937,6 +2937,7 @@ select {
 }
 .nav-advanced-section.open {
   max-height: 500px;
+  overflow: visible;
 }
 .sidebar.collapsed .nav-advanced-toggle {
   display: none;
