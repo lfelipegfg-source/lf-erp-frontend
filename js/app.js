@@ -327,12 +327,18 @@ function bindSidebarEvents() {
   }
 
   navGroupToggles.forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
       const group = button.closest('.nav-group');
       if (!group) return;
-      group.classList.toggle('open');
-      _saveNavGroupState();
+      const isOpen = group.classList.contains('open');
+      document.querySelectorAll('.nav-group.open').forEach((g) => g.classList.remove('open'));
+      if (!isOpen) group.classList.add('open');
     });
+  });
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.nav-group.open').forEach((g) => g.classList.remove('open'));
   });
 
   const advancedToggle = document.getElementById('navAdvancedToggle');
@@ -355,10 +361,6 @@ function _saveNavGroupState() {
 
 function restoreNavGroupState() {
   try {
-    const open = JSON.parse(localStorage.getItem('lf_nav_groups') || '[]');
-    open.forEach((key) => {
-      document.querySelector(`.nav-group[data-group="${key}"]`)?.classList.add('open');
-    });
     const advOpen = localStorage.getItem('lf_nav_advanced') === '1';
     if (advOpen) {
       document.getElementById('navAdvancedToggle')?.classList.add('open');
@@ -380,6 +382,7 @@ function bindNavigationEvents() {
       const view = item.getAttribute('data-view');
       if (!view) return;
 
+      document.querySelectorAll('.nav-group.open').forEach((g) => g.classList.remove('open'));
       await setActiveView(view);
     });
   });

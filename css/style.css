@@ -697,8 +697,19 @@ img {
   transition:
     width var(--transition),
     transform var(--transition);
-  overflow: hidden;
+  overflow: visible;
   z-index: 50;
+}
+
+/* Fade nos labels ao expandir — evita flash de texto durante animação de largura */
+@keyframes _labelFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.sidebar.expanded:not(.collapsed) .nav-item__label,
+.sidebar.expanded:not(.collapsed) .nav-group__arrow,
+.sidebar.expanded:not(.collapsed) .brand__text {
+  animation: _labelFadeIn 0.25s ease both;
 }
 
 .sidebar.expanded {
@@ -835,7 +846,7 @@ img {
 
 .sidebar__nav {
   flex: 1;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .nav-item,
@@ -893,18 +904,32 @@ img {
   transform: rotate(180deg);
 }
 
+.nav-group {
+  position: relative;
+}
+
+.nav-group.open {
+  z-index: 10;
+}
+
 .nav-group__menu {
-  display: grid;
-  gap: 4px;
-  padding: 0 0 0 12px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.25s ease, padding 0.25s ease;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 2px);
+  z-index: 200;
+  display: none;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  padding: 6px;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.28);
 }
 
 .nav-group.open .nav-group__menu {
-  max-height: 600px;
-  padding: 4px 0 10px 12px;
+  display: grid;
 }
 
 /* CONTEÚDO */
@@ -2982,20 +3007,6 @@ select {
 }
 
 /* SUBMENU MAIS PROFISSIONAL */
-.nav-group__menu {
-  display: grid;
-  gap: 4px;
-  padding: 0 0 0 12px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.25s ease, padding 0.25s ease;
-}
-
-.nav-group.open .nav-group__menu {
-  max-height: 600px;
-  padding: 4px 0 10px 12px;
-}
-
 .nav-subitem {
   min-height: 34px;
   padding: 0 14px;
